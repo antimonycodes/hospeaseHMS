@@ -1,28 +1,32 @@
-import { Bell } from "lucide-react";
+import { Bell, Menu } from "lucide-react";
 import hospitalLogo from "../../assets/ribiero.png";
 
-const TopNav = () => {
-  //     border-width: 0px, 0px, 0px, 0px;
+interface TopNavProps {
+  setIsMobileMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
-  // border-style: solid;
-
-  // border-color: rgba(0, 153, 82, 1);
-
+const TopNav: React.FC<TopNavProps> = ({ setIsMobileMenuOpen }) => {
   return (
-    <div className=" w-full py-2 px-4 flex justify-between items-center border-0 border-[#009952]">
+    <div className="w-full py-2 px-4 flex justify-between items-center border-0 border-[#009952]">
+      <button
+        className="md:hidden p-2 bg-white rounded-md shadow-md"
+        onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+      >
+        <Menu size={24} />
+      </button>
       <input
         type="search"
         name=""
         id=""
         placeholder="Type to search"
-        className=" border border-gray-200 py-2 px-4 rounded-[10px] w-[70%] shrink-0"
+        className="border border-gray-200 py-2 px-4 rounded-[10px] w-[70%] shrink-0"
       />
-      <div className=" flex items-center gap-6">
-        <Bell className=" text-gray-700 w-5" />
-        <div className=" size-8 ">
+      <div className="flex items-center gap-6">
+        <Bell className="text-gray-700 w-5" />
+        <div className="size-8">
           <img
             src={hospitalLogo}
-            className=" w-full h-full  border border-primary rounded-full"
+            className="w-full h-full border border-primary rounded-full"
           />
         </div>
       </div>

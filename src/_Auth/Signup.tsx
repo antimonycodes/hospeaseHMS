@@ -17,13 +17,15 @@ const Signup = () => {
       <h1 className=" text-[#009952]  text-2xl md:text-4xl font-bold mb-4">
         Hospease Technologies Ltd
       </h1>
-      <div className=" bg-white py-8 px-7 border border-[#D0D5DD] rounded-[10px] mt-4">
-        <h1 className=" text-center text-[#101928] text-3xl font-semibold mb-2">
-          Log In
-        </h1>
-        <p className=" text-sm md:text-base text-[#667185]">
-          Enter your credentials to access your account
-        </p>
+      <div className=" bg-white py-8 px-7 border border-[#D0D5DD] rounded-[10px] mt-4 flex flex-col items-center">
+        <div>
+          <h1 className=" text-center text-[#101928] text-3xl font-semibold mb-2">
+            Log In
+          </h1>
+          <p className=" text-sm md:text-base items-center text-[#667185]">
+            Enter your credentials to access your account
+          </p>
+        </div>
         {/* form */}
         <form action="" className=" mt-6 space-y-4">
           {/* email input */}

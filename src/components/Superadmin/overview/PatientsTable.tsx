@@ -70,7 +70,13 @@ const PatientsTable = () => {
   ];
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full rounded-lg shadow-md bg-white">
+      <div className=" p-4 flex items-center gap-2">
+        <h1 className=" font-medium text-lg text-[#101828] ">Patients</h1>
+        <span className=" bg-[#F9F5FF] py-1 px-4 rounded-full text-[#6941C6] font-medium">
+          {patients.length}
+        </span>
+      </div>
       <Table
         data={patients}
         columns={columns}

@@ -10,6 +10,12 @@ type Doctor = {
   avatar: string;
 };
 
+type Column<T> = {
+  key: keyof T;
+  label: string;
+  render: (value: any, row: T) => JSX.Element;
+};
+
 const DoctorsTable = () => {
   const doctors: Doctor[] = [
     {
@@ -35,11 +41,7 @@ const DoctorsTable = () => {
     },
   ];
 
-  const columns: {
-    key: keyof Doctor;
-    label: string;
-    render: (value: any, doctor: Doctor) => JSX.Element;
-  }[] = [
+  const columns: Column<Doctor>[] = [
     {
       key: "name",
       label: "Name",
@@ -80,7 +82,8 @@ const DoctorsTable = () => {
   ];
 
   return (
-    <div className="w-full h-full md:basis-[40%]">
+    <div className="w-full h-full md:basis-[40%]  rounded-lg shadow-md bg-white">
+      <h1 className=" font-medium text-lg text-[#101828] p-4">Doctors</h1>
       <Table
         data={doctors}
         columns={columns}

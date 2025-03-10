@@ -28,14 +28,14 @@ const Table = <T,>({
     : data;
 
   return (
-    <div className="w-full overflow-x-auto rounded-lg shadow-md bg-white">
+    <div className="w-full overflow-x-auto">
       <table className="w-full min-w-max border border-[#EAECF0]">
         <thead className="bg-[#F9FAFB]">
           <tr>
             {columns.map((column) => (
               <th
                 key={String(column.key)}
-                className="px-4 py-3 text-left font-medium text-sm text-[#667085] border-b border-[#EAECF0]"
+                className="px-4 py-4 text-left font-medium text-sm text-[#667085] border-b border-[#EAECF0]"
               >
                 {column.label}
               </th>
@@ -46,7 +46,7 @@ const Table = <T,>({
           {paginatedData.map((row) => (
             <tr key={String(row[rowKey])} className="border-b border-[#EAECF0]">
               {columns.map((column) => (
-                <td key={String(column.key)} className="px-4 py-3 text">
+                <td key={String(column.key)} className="px-4 py-4 text">
                   {column.render
                     ? column.render(row[column.key], row)
                     : String(row[column.key])}
