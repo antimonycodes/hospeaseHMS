@@ -149,7 +149,7 @@ const DoctorsTable = () => {
     {
       key: "firstName" as keyof Doctor,
       label: "Name",
-      render: (value: string, row: Doctor) => (
+      render: (row: Doctor) => (
         <div className="flex flex-col">
           <span className="font-medium text-gray-900">
             {row.firstName} {row.lastName}
