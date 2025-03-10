@@ -14,6 +14,6 @@ const Overview = () => {
   const role = useRole();
 
   // Default to 'Unauthorized' if role is not recognized
-  return roleComponents[role] || <p>Unauthorized Access</p>;
+  return role ? roleComponents[role] : <p>Unauthorized Access</p>;
 };
 export default Overview;
