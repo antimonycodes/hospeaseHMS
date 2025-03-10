@@ -28,7 +28,7 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
   );
 
   useEffect(() => {
-    setMenuItems(sidebarRoutes[role] || []);
+    setMenuItems(role ? sidebarRoutes[role] : []);
   }, [role]);
 
   const icons: { [key: string]: string } = {
