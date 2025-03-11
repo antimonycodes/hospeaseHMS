@@ -10,6 +10,7 @@ import Finance from "./pages/Finance";
 import Laboratory from "./pages/Laboratory";
 import DoctorDetails from "./Shared/DoctorDetails";
 import Consultants from "./pages/Consultants";
+import Appointments from "./pages/Appointments";
 
 function App() {
   return (
@@ -35,8 +36,8 @@ function App() {
             <Route path="finance" element={<Finance />} />
             <Route path="laboratory" element={<Laboratory />} />
 
+            <Route path="appointments" element={<Appointments />} />
             {/* 
-          <Route path="appointments" element={<Appointments />} />
           <Route path="users" element={<Users />} />
           <Route path="finance" element={<Finance />} /> */}
           </Route>
