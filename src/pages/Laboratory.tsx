@@ -1,5 +1,5 @@
 const Laboratory = () => {
-  return <div>Laboratory</div>;
+  return <div>Laboratorys</div>;
 };
 
 export default Laboratory;
