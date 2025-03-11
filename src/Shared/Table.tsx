@@ -13,6 +13,7 @@ interface TableProps<T> {
   rowKey: keyof T;
   pagination?: boolean;
   rowsPerPage?: number;
+  radius?: string;
 }
 
 const Table = <T,>({
@@ -21,6 +22,7 @@ const Table = <T,>({
   rowKey,
   pagination = false,
   rowsPerPage = 5,
+  radius = "rounded-lg",
 }: TableProps<T>) => {
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -29,7 +31,7 @@ const Table = <T,>({
     : data;
 
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="w-full overflow-x-auto ">
       <table className="w-full min-w-max border border-[#EAECF0]">
         <thead className="bg-[#F9FAFB]">
           <tr>

@@ -14,9 +14,22 @@
   --color-gray-900: #18181b;
   --breakpoint-xs: 373px;
   --breakpoint-2xs: 420px;
+  --breakpoint-msm: 480px;
+  --breakpoint-mmd: 768px;
+  --breakpoint-mlg: 976px;
+  --breakpoint-mxl: 1440px;
   /* --breakpoint-3xl: 120rem; */
   --color-red-50: oklch(0.971 0.013 17.38);
   --color-red-100: oklch(0.936 0.032 17.717);
   --color-red-200: oklch(0.885 0.062 18.334);
   --shadow-custom: 0px 4px 8px -2px #1018281a;
+}
+
+.hide-scroll {
+  overflow: auto;
+  scrollbar-width: none; /* Firefox */
+}
+
+.hide-scroll::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
 }

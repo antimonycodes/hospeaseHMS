@@ -7,7 +7,7 @@ interface TopNavProps {
 
 const TopNav: React.FC<TopNavProps> = ({ setIsMobileMenuOpen }) => {
   return (
-    <div className="w-full py-2 px-4 flex justify-between items-center border-0 border-[#009952]">
+    <div className="w-full py-2 px-4 flex justify-between items-center border-0 border-[#009952] fixed bg-white z-20 h-[61px]">
       <button
         className="md:hidden p-2 bg-white rounded-md shadow-md"
         onClick={() => setIsMobileMenuOpen((prev) => !prev)}
