@@ -3,15 +3,6 @@ import { useRole } from "../../hooks/useRole";
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import overviewIcon from "../../assets/overviewicon.svg";
-import patientsIcon from "../../assets/patientsicon.svg";
-import doctorsIcon from "../../assets/doctoricon.svg";
-import consultationIcon from "../../assets/consultanticon.svg";
-import nursesIcon from "../../assets/nursesicon.svg";
-import pharmacyIcon from "../../assets/pharmacyicon.svg";
-import labIcon from "../../assets/labicon.svg";
-import financeIcon from "../../assets/financeicon.svg";
-import usersIcon from "../../assets/usericon.svg";
 import { sidebarRoutes } from "../../config/sidebarRoutes";
 
 interface SidebarProps {
@@ -23,25 +14,18 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
   const role = useRole();
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [menuItems, setMenuItems] = useState<{ name: string; path: string }[]>(
-    []
-  );
+  const [menuItems, setMenuItems] = useState<
+    {
+      activeIcon: string | undefined;
+      icon: string | undefined;
+      name: string;
+      path: string;
+    }[]
+  >([]);
 
   useEffect(() => {
     setMenuItems(role ? sidebarRoutes[role] : []);
   }, [role]);
-
-  const icons: { [key: string]: string } = {
-    Overview: overviewIcon,
-    Patients: patientsIcon,
-    Doctors: doctorsIcon,
-    Consultants: consultationIcon,
-    Nurses: nursesIcon,
-    Pharmacy: pharmacyIcon,
-    Laboratory: labIcon,
-    Finance: financeIcon,
-    Users: usersIcon,
-  };
 
   return (
     <div className="">
@@ -74,7 +58,11 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <img
-                    src={icons[item.name]}
+                    src={
+                      location.pathname === item.path
+                        ? item.activeIcon
+                        : item.icon
+                    }
                     className="w-[20px]"
                     alt={item.name}
                   />
@@ -88,7 +76,7 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
 
       {/* Desktop sidebar */}
       <div
-        className={`hidden md:block  transition-all duration-300 ease-in-out bg-white mt-12 ${
+        className={`hidden md:block transition-all duration-300 ease-in-out bg-white mt-12 ${
           isCollapsed ? "w-16" : "w-60"
         }`}
         onMouseEnter={() => setIsCollapsed(false)}
@@ -113,7 +101,9 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
               }`}
             >
               <img
-                src={icons[item.name]}
+                src={
+                  location.pathname === item.path ? item.activeIcon : item.icon
+                }
                 className="w-[20px]"
                 alt={item.name}
               />

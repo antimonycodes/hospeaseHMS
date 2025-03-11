@@ -13,10 +13,10 @@ const DashboardLayout = () => {
         setIsMobileMenuOpen={setIsMobileMenuOpen}
       />
       <main className="w-full bg-[#efefef] overflow-y-auto h-full">
-        <div className="w-full bg-white">
+        <div className="w-full bg-white relative">
           <TopNav setIsMobileMenuOpen={setIsMobileMenuOpen} />
         </div>
-        <div className="p-3 md:p-6">
+        <div className="px-3 py-3 md:px-6 md:pb-6 pt-20">
           <Outlet />
         </div>
       </main>
