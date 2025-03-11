@@ -30,11 +30,11 @@ const QuickStats = () => {
     },
   ];
   return (
-    <div className=" grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4  gap-4 ">
+    <div className=" grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 lg:gap-10 xl:gap-12 ">
       {QuickStatCards.map(({ title, number, percentage, icon }, index) => (
         <div
           key={index}
-          className=" bg-white rounded-lg border-0 border-gray-200 p-[10px] flex flex-col gap-2 relative"
+          className=" bg-white rounded-lg border-0 custom-shadow border-gray-200 p-[10px] flex flex-col gap-2 relative px-8 py-4"
         >
           <div className=" flex items-center justify-between">
             <img src={icon} alt="" width={40} height={40} />
@@ -42,7 +42,7 @@ const QuickStats = () => {
           <h1 className=" text-gray-500 text-xs lg:text-md font-semibold leading-6 tracking-[0.5%]">
             {title}
           </h1>
-          <div className=" flex items-center gap-2">
+          <div className=" flex items-center gap-12">
             <h1 className=" text-gray-900 font-bold">{number}</h1>
             <span
               className={`${

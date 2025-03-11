@@ -6,7 +6,7 @@ import QuickStats from "./QuickStats";
 
 const SuperAdminOverview = () => (
   <div className=" space-y-4">
-    <h2 className="text-xl font-medium">Dashboard</h2>
+    <h2 className="text-xl font-semibold">Dashboard</h2>
     <QuickStats />
     <div className=" flex flex-col md:flex-row gap-4">
       <PatientBarChart />

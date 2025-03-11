@@ -23,7 +23,7 @@ const SaDoctorsPage = () => {
     });
   };
   return (
-    <div className="  rounded-lg shadow-md bg-white p-4">
+    <div className="  rounded-lg custom-shadow bg-white p-4">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl font-semibold text-gray-900">

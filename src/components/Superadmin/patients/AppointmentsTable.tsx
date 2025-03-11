@@ -64,12 +64,42 @@ const patients: Patient[] = [
 ];
 
 const columns: Column<Patient>[] = [
-  { key: "name", label: "Name" },
-  { key: "patientId", label: "Patient ID" },
-  { key: "gender", label: "Gender" },
-  { key: "phone", label: "Phone" },
-  { key: "occupation", label: "Occupation" },
-  { key: "doctor", label: "Doctor Assigned" },
+  {
+    key: "name",
+    label: "Name",
+    render: (_, data) => (
+      <span className="font-medium text-[#101828]">{data.name}</span>
+    ),
+  },
+  {
+    key: "patientId",
+    label: "Patient ID",
+    render: (_, data) => (
+      <span className="text-[#667085]">{data.patientId}</span>
+    ),
+  },
+  {
+    key: "gender",
+    label: "Gender",
+    render: (_, data) => <span className="text-[#667085]">{data.gender}</span>,
+  },
+  {
+    key: "phone",
+    label: "Phone",
+    render: (_, data) => <span className="text-[#667085]">{data.phone}</span>,
+  },
+  {
+    key: "occupation",
+    label: "Occupation",
+    render: (_, data) => (
+      <span className="text-[#667085]">{data.occupation}</span>
+    ),
+  },
+  {
+    key: "doctor",
+    label: "Doctor Assigned",
+    render: (_, data) => <span className="text-[#667085]">{data.doctor}</span>,
+  },
   {
     key: "status",
     label: "Status",
@@ -108,37 +138,35 @@ const AppointmentTable = () => {
       : patients.filter((p) => p.status === activeTab);
 
   return (
-    <div className="">
-      <div className="">
-        <div className="flex space-x-6 ">
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`pb-2 text-sm font-medium ${
-                activeTab === tab
-                  ? "text-green-600 border-b-2 border-green-600"
-                  : "text-gray-500"
-              }`}
-            >
-              {tab}{" "}
-              {activeTab === tab && (
-                <span className="text-xs bg-primary text-white py-0.5 px-3 rounded-xl">
-                  {statusCounts[tab]}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-
-        <Table
-          columns={columns}
-          data={filteredPatients}
-          rowKey="patientId"
-          pagination={true}
-          rowsPerPage={5}
-        />
+    <div className=" mt-2">
+      <div className=" w-full flex space-x-2 md:space-x-6">
+        {tabs.map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`pb-2 text-xs md:text-sm font-medium ${
+              activeTab === tab
+                ? "text-green-600 border-b-2 border-green-600"
+                : "text-gray-500"
+            }`}
+          >
+            {tab}
+            {activeTab === tab && (
+              <span className="  text-xs bg-primary text-white py-0.5 px-3 rounded-xl">
+                {statusCounts[tab]}
+              </span>
+            )}
+          </button>
+        ))}
       </div>
+
+      <Table
+        columns={columns}
+        data={filteredPatients}
+        rowKey="patientId"
+        pagination={true}
+        rowsPerPage={5}
+      />
     </div>
   );
 };

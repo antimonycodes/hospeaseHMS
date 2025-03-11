@@ -49,7 +49,7 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            className="fixed top-0 left-0 h-screen w-64 bg-white shadow-lg z-40 md:hidden"
+            className="fixed top-0 left-0 h-screen w-64 bg-white custom-shadow z-40 md:hidden"
             initial={{ x: -280 }}
             animate={{ x: 0 }}
             exit={{ x: -280 }}
@@ -88,7 +88,7 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
 
       {/* Desktop sidebar */}
       <div
-        className={`hidden md:block h-scree transition-all duration-300 ease-in-out bg-white mt-12 ${
+        className={`hidden md:block  transition-all duration-300 ease-in-out bg-white mt-12 ${
           isCollapsed ? "w-16" : "w-60"
         }`}
         onMouseEnter={() => setIsCollapsed(false)}

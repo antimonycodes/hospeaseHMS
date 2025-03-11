@@ -80,9 +80,15 @@ const DoctorsTable = () => {
       },
     },
   ];
+  // box-shadow: 0px 2px 4px -2px #1018280F;
+
+  // box-shadow: 0px 4px 8px -2px #1018281A;
 
   return (
-    <div className="w-full h-full md:basis-[40%]  rounded-lg shadow-md bg-white">
+    <div
+      className="w-full h-full md:basis-[40%]  rounded-lg  bg-white custom-shadow"
+      // style={{ boxShadow: " 0px 4px 8px -2px #1018281A" }}
+    >
       <h1 className=" font-medium text-lg text-[#101828] p-4">Doctors</h1>
       <Table
         data={doctors}

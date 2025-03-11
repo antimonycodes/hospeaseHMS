@@ -20,7 +20,7 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
 }) => {
   return (
     <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center z-50 p-6">
-      <div className="bg-white rounded-lg shadow-lg overflow-y-auto w-full max-w-2xl h-[90%]">
+      <div className="bg-white rounded-lg custom-shadow overflow-y-auto w-full max-w-2xl h-[90%]">
         <div className="p-4 md:p-12">
           <div className="flex justify-between items-center mb-4 ">
             <h2 className=" text-custom-black text-lg font-semibold">

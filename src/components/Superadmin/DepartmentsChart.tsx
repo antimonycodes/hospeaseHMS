@@ -33,7 +33,7 @@ const DepartmentChart = () => {
   // Custom legend that displays department names and percentages
   const CustomLegend = () => {
     return (
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-2 mt-8">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-2 mt-8 ">
         {data.map((entry, index) => (
           <div
             key={`legend-${index}`}
@@ -58,7 +58,7 @@ const DepartmentChart = () => {
   };
 
   return (
-    <div className=" w-full  md:w-[50%] p-4 bg-white rounded-lg ">
+    <div className=" w-full  md:w-[50%] p-4 bg-white rounded-lg custom-shadow ">
       <h2 className="text-gray-500 text-md font-medium mb-4">
         PATIENTS BY DEPARTMENT
       </h2>

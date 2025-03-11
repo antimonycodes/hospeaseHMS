@@ -43,7 +43,7 @@ const SaFinancePage: React.FC = () => {
   });
 
   return (
-    <div className="rounded-lg shadow-md bg-white p-4">
+    <div className="rounded-lg custom-shadow bg-white p-4">
       <div className="">
         {/* Tab Navigation */}
         <div className="flex  mb-4">

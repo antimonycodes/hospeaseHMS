@@ -20,7 +20,7 @@ const PatientsPage = () => {
   };
 
   return (
-    <div className=" bg-white shadow-custom p-4">
+    <div className=" bg-white custom-shadow p-4">
       <div className=" flex flex-col md:flex-row-reverse gap-4 md:gap-24">
         {/* Search and Button */}
         <div className=" w-full flex-1 flex flex-col md:flex-row items-center gap-2">
@@ -82,7 +82,6 @@ const PatientsPage = () => {
         {activeTab === 0 ? <InformationTable /> : <AppointmentsTable />}
       </div>
 
-      {/* Modal: Conditionally Render Based on Tab */}
       {openModal && modalType === "patient" && (
         <AddPatientModal onClose={() => setOpenModal(false)} />
       )}

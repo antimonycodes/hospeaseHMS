@@ -1,3 +1,4 @@
+import { ArrowDown, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
   BarChart,
@@ -34,6 +35,18 @@ const data: DataPoint[] = [
 
 const PatientBarChart = () => {
   const [isMobile, setIsMobile] = useState(false);
+  const [selectedYear, setSelectedYear] = useState("2025");
+  const [isYearDropdownOpen, setIsYearDropdownOpen] = useState(false);
+
+  const years = ["2021", "2022", "2023", "2024"];
+
+  const handleYearMouseEnter = () => setIsYearDropdownOpen(true);
+  const handleYearMouseLeave = () => setIsYearDropdownOpen(false);
+
+  const handleYearSelect = (year: string) => {
+    setSelectedYear(year);
+    setIsYearDropdownOpen(false);
+  };
 
   useEffect(() => {
     const checkMobile = () => {
@@ -52,7 +65,7 @@ const PatientBarChart = () => {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-4 border rounded-lg shadow-lg">
+        <div className="bg-white p-4 border rounded-lg custom-shadow">
           <p className="font-semibold">{label}</p>
           {payload.map((pld: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: pld.color }}>
@@ -66,8 +79,38 @@ const PatientBarChart = () => {
   };
 
   return (
-    <div className="w-full   bg-white rounded-lg">
-      <div className=" h-[350px] md:h-full ">
+    <div className="w-full   bg-white rounded-lg p-6 custom-shadow">
+      <div className=" flex items-center justify-between md:mx-12">
+        <h1 className=" text-gray-500 text-xs md:text-sm font-medium">
+          PATIENT VISIT BY GENDER
+        </h1>
+        {/* Year Dropdown */}
+        <div
+          className="relative border border-neutrals200 w-fit py-2 px-2 rounded-lg flex gap-2  cursor-pointer"
+          onMouseEnter={handleYearMouseEnter}
+          onMouseLeave={handleYearMouseLeave}
+        >
+          <h1 className=" ">{selectedYear}</h1>
+          {/* <img src={downArrow} alt="Down Arrow" /> */}
+          <ChevronDown />
+          <div
+            className={`absolute bg-white border border-[#A1A1AA] mt-8 rounded-lg shadow-lg z-10 transition-opacity duration-300 ${
+              isYearDropdownOpen ? "opacity-100 visible" : "opacity-0 invisible"
+            }`}
+          >
+            {years.map((year, index) => (
+              <div
+                key={index}
+                className="py-2 px-4 hover:bg-gray-100 cursor-pointer"
+                onClick={() => handleYearSelect(year)}
+              >
+                {year}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className=" h-[350px] md:h-full " style={{ height: "450px" }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}

@@ -9,7 +9,7 @@ const TopNav: React.FC<TopNavProps> = ({ setIsMobileMenuOpen }) => {
   return (
     <div className="w-full py-2 px-4 flex justify-between items-center border-0 border-[#009952]">
       <button
-        className="md:hidden p-2 bg-white rounded-md shadow-md"
+        className="md:hidden mr-2"
         onClick={() => setIsMobileMenuOpen((prev) => !prev)}
       >
         <Menu size={24} />
@@ -19,7 +19,7 @@ const TopNav: React.FC<TopNavProps> = ({ setIsMobileMenuOpen }) => {
         name=""
         id=""
         placeholder="Type to search"
-        className="border border-gray-200 py-2 px-4 rounded-[10px] w-[70%] shrink-0"
+        className="border border-gray-200 py-2 px-4 rounded-[10px] w-[70%] shrink-0 mr-2"
       />
       <div className="flex items-center gap-6">
         <Bell className="text-gray-700 w-5" />
