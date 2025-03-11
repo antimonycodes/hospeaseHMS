@@ -61,8 +61,8 @@ const Table = <T,>({
       </table>
 
       {pagination && (
-        <div className="flex justify-between items-center mt-4 text-sm">
-          <button className="px-4 py-2 border border-[#D0D5DD] rounded-lg flex items-center gap-2 text-[#344054] font-semibold">
+        <div className="flex justify-between items-center mt-4 text-sm p-4">
+          <button className=" cursor-pointer px-4 py-2 border border-[#D0D5DD] rounded-lg flex items-center gap-2 text-[#344054] font-semibold">
             <ArrowLeft />
             Previous
           </button>
@@ -89,7 +89,7 @@ const Table = <T,>({
             </button>
           </div>
 
-          <button className="px-4 py-2 border border-[#D0D5DD] rounded-lg flex items-center gap-2 text-[#344054] font-semibold">
+          <button className="px-4 cursor-pointer py-2 border border-[#D0D5DD] rounded-lg flex items-center gap-2 text-[#344054] font-semibold">
             Next
             <ArrowRight />
           </button>

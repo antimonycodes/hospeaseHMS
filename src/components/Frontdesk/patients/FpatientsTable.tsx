@@ -261,35 +261,35 @@ const FpatientsTable = () => {
       key: "name",
       label: "Name",
       render: (_, patient) => (
-        <span className=" text-[#101828]">{patient.name}</span>
+        <span className=" text-dark font-medium text-sm">{patient.name}</span>
       ),
     },
     {
       key: "patientid",
       label: "Patient ID",
       render: (_, patient) => (
-        <span className="text-[#667085]">{patient.patientid}</span>
+        <span className="text-[#667085] text-sm">{patient.patientid}</span>
       ),
     },
     {
       key: "age",
       label: "Age",
       render: (_, patient) => (
-        <span className="text-[#667085]">{patient.age}</span>
+        <span className="text-[#667085] text-sm">{patient.age}</span>
       ),
     },
     {
       key: "gender",
       label: "Gender",
       render: (_, patient) => (
-        <span className={`text-[#667085]`}>{patient.gender}</span>
+        <span className={`text-[#667085] text-sm`}>{patient.gender}</span>
       ),
     },
     {
       key: "phone",
       label: "Phone",
       render: (_, patient) => (
-        <span className="text-[#667085]">
+        <span className="text-[#667085] text-sm">
           {formatPhoneNumber(patient.phone)}
         </span>
       ),
@@ -298,14 +298,14 @@ const FpatientsTable = () => {
       key: "branch",
       label: "Branch",
       render: (_, patient) => (
-        <span className={` text-[#667085]`}>{patient.branch}</span>
+        <span className={` text-[#667085] text-sm`}>{patient.branch}</span>
       ),
     },
     {
       key: "occupation",
       label: "Occupation",
       render: (_, patient) => (
-        <span className={` text-[#667085]`}>{patient.occupation}</span>
+        <span className={` text-[#667085] text-sm`}>{patient.occupation}</span>
       ),
     },
     {
@@ -320,7 +320,7 @@ const FpatientsTable = () => {
   ];
 
   return (
-    <div className="w-full h-full bg-white rounded-[8px] shadow overflow-hidden">
+    <div className="w-full font-jakarta h-full bg-white rounded-[8px] shadow overflow-hidden">
       <div className="p-6 flex items-center justify-between">
         <h1 className="text-[18px] w-[160px] font-medium">
           Patients{" "}
@@ -372,6 +372,7 @@ const FpatientsTable = () => {
         radius="rounded-none"
       />
 
+      {/* modal */}
       <AddPatientModal isOpen={isModalOpen} onClose={closeModal} />
     </div>
   );
