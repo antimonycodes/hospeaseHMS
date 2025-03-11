@@ -415,7 +415,6 @@ const PatientDetails = () => {
         )}
       </div>
 
-      {/* Add the modal component at the end of your return statement */}
       <EditPatientModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}

@@ -357,7 +357,7 @@ EditPatientModalProps) => {
           <div className="mt-6">
             <button
               type="submit"
-              className="bg-green-500 text-white py-2 px-4 rounded text-sm hover:bg-green-600"
+              className="bg-primary text-white py-2 px-4 rounded text-sm "
             >
               Edit Patient
             </button>

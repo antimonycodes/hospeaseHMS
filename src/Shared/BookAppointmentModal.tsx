@@ -1,16 +1,18 @@
 import { X } from "lucide-react";
+import Input from "./Input";
 
 const BookAppointmentModal = ({ onClose }: { onClose: () => void }) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Handle input change
+  };
+
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-[#1E1E1E40] px-6 ">
       <div className="bg-white w-full max-w-3xl p-6 shadow-lg h-[90%] overflow-y-auto">
         {/* Header */}
-        <div className="flex justify-between items-center pb-4 border-b">
+        <div className="flex justify-between items-center pb-4">
           <h2 className="text-lg font-semibold">Book Appointment</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-red-500"
-          >
+          <button onClick={onClose} className="text-black">
             <X size={20} />
           </button>
         </div>
@@ -19,29 +21,29 @@ const BookAppointmentModal = ({ onClose }: { onClose: () => void }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
           <div>
             <label className="text-sm text-gray-600">Patient ID</label>
-            <input
-              type="text"
-              className="w-full border border-gray-300 rounded-lg px-3 py-4"
-              defaultValue="0010602"
-              readOnly
+            <Input
+              name="patientId"
+              value="0010602"
+              onChange={handleChange}
+              className="border border-gray-300 rounded-lg px-3 py-4"
             />
           </div>
           <div>
             <label className="text-sm text-gray-600">First Name</label>
-            <input
-              type="text"
-              className="w-full border border-gray-300 rounded-lg px-3 py-4"
-              defaultValue="Philip"
-              readOnly
+            <Input
+              name="firstName"
+              value="Philip"
+              onChange={handleChange}
+              className="border border-gray-300 rounded-lg px-3 py-4"
             />
           </div>
           <div>
             <label className="text-sm text-gray-600">Last Name</label>
-            <input
-              type="text"
-              className="w-full border border-gray-300 rounded-lg px-3 py-4"
-              defaultValue="Ikiriko"
-              readOnly
+            <Input
+              name="lastName"
+              value="Ikiriko"
+              onChange={handleChange}
+              className="border border-gray-300 rounded-lg px-3 py-4"
             />
           </div>
           <div>
@@ -53,38 +55,38 @@ const BookAppointmentModal = ({ onClose }: { onClose: () => void }) => {
           </div>
           <div>
             <label className="text-sm text-gray-600">Phone Number</label>
-            <input
-              type="text"
-              className="w-full border border-gray-300 rounded-lg px-3 py-4"
-              defaultValue="+234 708 823 2411"
-              readOnly
+            <Input
+              name="phone"
+              value="+234 708 823 2411"
+              onChange={handleChange}
+              className="border border-gray-300 rounded-lg px-3 py-4"
             />
           </div>
           <div>
             <label className="text-sm text-gray-600">Occupation</label>
-            <input
-              type="text"
-              className="w-full border border-gray-300 rounded-lg px-3 py-4"
-              defaultValue="Banker"
-              readOnly
+            <Input
+              name="occupation"
+              value="Banker"
+              onChange={handleChange}
+              className="border border-gray-300 rounded-lg px-3 py-4"
             />
           </div>
           <div>
             <label className="text-sm text-gray-600">Religion</label>
-            <input
-              type="text"
-              className="w-full border border-gray-300 rounded-lg px-3 py-4"
-              defaultValue="Christian"
-              readOnly
+            <Input
+              name="religion"
+              value="Christian"
+              onChange={handleChange}
+              className="border border-gray-300 rounded-lg px-3 py-4"
             />
           </div>
           <div>
             <label className="text-sm text-gray-600">House Address</label>
-            <input
-              type="text"
-              className="w-full border border-gray-300 rounded-lg px-3 py-4"
-              defaultValue="5, John Ayanfe Close, Apodi, Ibadan"
-              readOnly
+            <Input
+              name="address"
+              value="5, John Ayanfe Close, Apodi, Ibadan"
+              onChange={handleChange}
+              className="border border-gray-300 rounded-lg px-3 py-4"
             />
           </div>
         </div>
@@ -96,9 +98,12 @@ const BookAppointmentModal = ({ onClose }: { onClose: () => void }) => {
           <div className="grid grid-cols-1 gap-4">
             <div>
               <label className="text-sm text-gray-600">Choose Date</label>
-              <input
+              <Input
+                name="date"
                 type="date"
-                className="w-full border border-gray-300 rounded-lg px-3 py-4"
+                value=""
+                onChange={handleChange}
+                className="border border-gray-300 rounded-lg px-3 py-4"
               />
             </div>
             <div>
@@ -120,7 +125,7 @@ const BookAppointmentModal = ({ onClose }: { onClose: () => void }) => {
 
           {/* Book Button */}
           <div className="mt-6">
-            <button className="w-fit bg-primary px-4 text-white py-2 rounded-lg hover:bg-green-700">
+            <button className="w-fit bg-primary px-4 text-white py-2 rounded-lg 0">
               Book Appointment
             </button>
           </div>

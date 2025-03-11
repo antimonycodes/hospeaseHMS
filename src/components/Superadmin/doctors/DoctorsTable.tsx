@@ -195,7 +195,7 @@ const DoctorsTable = () => {
             />
             <div
               className={`relative w-10 h-5 rounded-full transition-colors ${
-                value ? "bg-green-500" : "bg-gray-200"
+                value ? "bg-primary" : "bg-gray-200"
               }`}
             >
               <div
