@@ -1,3 +1,4 @@
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import React, { useState } from "react";
 
 interface Column<T> {
@@ -58,24 +59,37 @@ const Table = <T,>({
       </table>
 
       {pagination && (
-        <div className="flex justify-end space-x-2 p-3">
-          <button
-            className="px-3 py-1 border rounded disabled:opacity-50"
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-          >
-            Prev
+        <div className="flex justify-between items-center mt-4 text-sm">
+          <button className="px-4 py-2 border border-[#D0D5DD] rounded-lg flex items-center gap-2 text-[#344054] font-semibold">
+            <ArrowLeft />
+            Previous
           </button>
-          <button
-            className="px-3 py-1 border rounded disabled:opacity-50"
-            onClick={() =>
-              setCurrentPage((prev) =>
-                prev * rowsPerPage < data.length ? prev + 1 : prev
-              )
-            }
-            disabled={currentPage * rowsPerPage >= data.length}
-          >
+
+          <div className="flex space-x-1 items-center">
+            <button className="w-6 h-6 flex items-center justify-center bg-[#F9F5FF] p-6 rounded-lg text-sm text-[#7F56D9] font-medium">
+              1
+            </button>
+            <button className="w-6 h-6 flex items-center justify-center rounded-full text-sm text-[#667085] font-medium">
+              2
+            </button>
+            <button className="w-6 h-6 flex items-center justify-center rounded-full text-sm text-[#667085] font-medium">
+              3
+            </button>
+            <span className="px-1">...</span>
+            <button className="w-6 h-6 flex items-center justify-center rounded-full text-sm text-[#667085] font-medium">
+              8
+            </button>
+            <button className="w-6 h-6 flex items-center justify-center rounded-full text-sm text-[#667085] font-medium">
+              9
+            </button>
+            <button className="w-6 h-6 flex items-center justify-center rounded-full text-sm text-[#667085] font-medium">
+              10
+            </button>
+          </div>
+
+          <button className="px-4 py-2 border border-[#D0D5DD] rounded-lg flex items-center gap-2 text-[#344054] font-semibold">
             Next
+            <ArrowRight />
           </button>
         </div>
       )}

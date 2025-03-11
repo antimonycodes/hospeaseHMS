@@ -35,21 +35,7 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
             {/* Upload Picture */}
             <div className="mb-4 flex gap-4 ">
               <div className="mb-2 text-center">
-                <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center">
-                  <svg
-                    className="h-8 w-8 text-gray-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
-                </div>
+                <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center"></div>
               </div>
               <div className=" space-y-2">
                 <p className=" text-custom-black font-medium">Upload Picture</p>

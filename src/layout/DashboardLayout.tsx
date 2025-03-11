@@ -16,7 +16,7 @@ const DashboardLayout = () => {
         <div className="w-full bg-white">
           <TopNav setIsMobileMenuOpen={setIsMobileMenuOpen} />
         </div>
-        <div className="p-6">
+        <div className="p-3 md:p-6">
           <Outlet />
         </div>
       </main>
