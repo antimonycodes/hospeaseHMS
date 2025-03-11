@@ -120,6 +120,7 @@ const PatientBarChart = () => {
               left: isMobile ? 0 : 0,
               bottom: 5,
             }}
+            barSize={6}
           >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
@@ -128,16 +129,18 @@ const PatientBarChart = () => {
               interval={isMobile ? 0 : 0}
             />
             <YAxis
+              domain={[100, 800]} // Set the Y-axis domain to start from 100 and end at 800
+              ticks={[100, 200, 300, 400, 500, 600, 700, 800]} // Explicitly define the tick values
               tick={{ fontSize: isMobile ? 12 : 14 }}
               width={isMobile ? 30 : 40}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Legend
+            {/* <Legend
               wrapperStyle={{
                 fontSize: isMobile ? "12px" : "14px",
                 paddingTop: "10px",
               }}
-            />
+            /> */}
             <Bar
               dataKey="value1"
               name="Value 1"

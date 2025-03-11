@@ -19,7 +19,7 @@ interface Doctor {
   active: boolean;
 }
 
-const DoctorsTable = () => {
+const ConsultantTable = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([
     {
       id: "1",
@@ -270,4 +270,4 @@ const DoctorsTable = () => {
   );
 };
 
-export default DoctorsTable;
+export default ConsultantTable;
