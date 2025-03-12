@@ -1,18 +1,20 @@
-import Button from "./Button";
+import Button from "../../../Shared/Button";
 import { X } from "lucide-react";
 interface AddDoctorModalProps {
   formData: {
     firstName: string;
     lastName: string;
+    nurseId: string;
     email: string;
     phone: string;
     religion: string;
     houseAddress: string;
+    password: string;
   };
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   setShowModal: (show: boolean) => void;
 }
-const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
+const AddNurseModal: React.FC<AddDoctorModalProps> = ({
   formData,
   handleInputChange,
 
@@ -24,7 +26,7 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
         <div className="p-4 md:p-12">
           <div className="flex justify-between items-center mb-4 ">
             <h2 className=" text-custom-black text-lg font-semibold">
-              Add New Doctor
+              Add New Nurse
             </h2>
             <button onClick={() => setShowModal(false)} className="">
               <X className=" text-black" />
@@ -52,9 +54,10 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
                 <Button variant="primary">Upload</Button>
               </div>
             </div>
+            {/*  */}
+            <div className=" grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Name Fields */}
 
-            {/* Name Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label
                   htmlFor="firstName"
@@ -91,10 +94,29 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
                   required
                 />
               </div>
-            </div>
 
-            {/* Email and Phone */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              {/* nurse id */}
+              <div>
+                <label
+                  htmlFor="lastName"
+                  className="block text-sm font-medium text-custom-black  mb-1"
+                >
+                  Nurse ID
+                </label>
+                <input
+                  type="text"
+                  id="lastName"
+                  name="lastName"
+                  value={formData.nurseId}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-4 border border-[#D0D5DD] placeholder:text-[#98A2B3] rounded-md"
+                  placeholder="HS23455"
+                  required
+                />
+              </div>
+
+              {/* Email and Phone */}
+
               <div>
                 <label
                   htmlFor="email"
@@ -131,10 +153,9 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
                   required
                 />
               </div>
-            </div>
 
-            {/* Religion and Address */}
-            <div className="grid  grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              {/* Religion and Address */}
+
               <div>
                 <label
                   htmlFor="religion"
@@ -169,9 +190,30 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
                   placeholder="10, Road George close, Surdere Ibadan"
                 />
               </div>
+              {/* password */}
+              <div>
+                <label
+                  htmlFor="lastName"
+                  className="block text-sm font-medium text-custom-black  mb-1"
+                >
+                  Password
+                </label>
+                <input
+                  type="text"
+                  id="lastName"
+                  name="lastName"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-4 border border-[#D0D5DD] placeholder:text-[#98A2B3] rounded-md"
+                  placeholder="12345djdjdh"
+                  required
+                />
+              </div>
             </div>
 
-            <Button>Add Doctor</Button>
+            <div className=" mt-6">
+              <Button>Add Doctor</Button>
+            </div>
           </form>
         </div>
       </div>
@@ -179,4 +221,4 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
   );
 };
 
-export default AddDoctorModal;
+export default AddNurseModal;

@@ -3,7 +3,7 @@ import React, { useState } from "react";
 
 interface Column<T> {
   key: keyof T;
-  label: string;
+  label: any;
   render?: (value: any, row: T) => React.ReactNode;
 }
 

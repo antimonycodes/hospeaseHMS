@@ -20,8 +20,15 @@ const SaFinancePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"Payments" | "Expenses">(
     "Payments"
   );
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [showExpenseModal, setShowExpenseModal] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [modalType, setModalType] = useState<"Payments" | "Expenses">(
+    "Payments"
+  );
+
+  const handleOpenModal = () => {
+    setModalType(activeTab === "Payments" ? "Payments" : "Expenses");
+    setOpenModal(true);
+  };
 
   // Payment form states
   const [paymentForm, setPaymentForm] = useState({
@@ -83,7 +90,7 @@ const SaFinancePage: React.FC = () => {
               <Button
                 variant="primary"
                 size="md"
-                onClick={() => setShowPaymentModal(true)}
+                onClick={handleOpenModal}
                 className="flex items-center gap-2 px-4"
               >
                 Add new
@@ -99,19 +106,17 @@ const SaFinancePage: React.FC = () => {
         {activeTab === "Expenses" && <ExpenseTable />}
 
         {/* Payment Modal */}
-        {showPaymentModal && (
+        {openModal && modalType === "Payments" && (
           <AddPaymentModal
-            isOpen={showPaymentModal}
-            onClose={() => setShowPaymentModal(false)}
+            onClose={() => setOpenModal(false)}
             formData={paymentForm}
           />
         )}
 
         {/* Expense Modal */}
-        {showExpenseModal && (
+        {openModal && modalType === "Expenses" && (
           <AddExpenseModal
-            isOpen={showExpenseModal}
-            onClose={() => setShowPaymentModal(false)}
+            onClose={() => setOpenModal(false)}
             formData={expenseForm}
           />
         )}

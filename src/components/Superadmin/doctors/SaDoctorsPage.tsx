@@ -62,6 +62,7 @@ const SaDoctorsPage = () => {
         </button>
       </div>
 
+      {/* table */}
       <DoctorsTable />
 
       {/* Add Doctor Modal */}

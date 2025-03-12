@@ -111,12 +111,48 @@ const paymentData: Payment[] = [
 
 const PaymentTable = () => {
   const paymentColumns = [
-    { key: "id" as keyof Payment, label: "Payment ID" },
-    { key: "patient" as keyof Payment, label: "Patient" },
-    { key: "amount" as keyof Payment, label: "Amount" },
-    { key: "purpose" as keyof Payment, label: "Purpose" },
-    { key: "paymentMethod" as keyof Payment, label: "Payment Method" },
-    { key: "date" as keyof Payment, label: "Date" },
+    {
+      key: "id" as keyof Payment,
+      label: "Payment ID",
+      render: (value: string) => (
+        <span className="text-sm text-custom-black font-medium">{value}</span>
+      ),
+    },
+    {
+      key: "patient" as keyof Payment,
+      label: "Patient",
+      render: (value: string) => (
+        <span className="text-sm text-[#667085]">{value}</span>
+      ),
+    },
+    {
+      key: "amount" as keyof Payment,
+      label: "Amount",
+      render: (value: string) => (
+        <span className="text-sm text-[#667085]">{value}</span>
+      ),
+    },
+    {
+      key: "purpose" as keyof Payment,
+      label: "Purpose",
+      render: (value: string) => (
+        <span className="text-sm text-[#667085]">{value}</span>
+      ),
+    },
+    {
+      key: "paymentMethod" as keyof Payment,
+      label: "Payment Method",
+      render: (value: string) => (
+        <span className="text-sm text-[#667085]">{value}</span>
+      ),
+    },
+    {
+      key: "date" as keyof Payment,
+      label: "Date",
+      render: (value: string) => (
+        <span className="text-sm text-[#667085]">{value}</span>
+      ),
+    },
   ];
   return (
     <div>

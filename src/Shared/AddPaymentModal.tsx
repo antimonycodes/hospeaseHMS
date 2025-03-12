@@ -10,14 +10,14 @@ interface formDataData {
 }
 
 interface AddPaymentModalProps {
-  isOpen: boolean;
+  // isOpen: boolean;
   onClose: () => void;
   formData: formDataData;
 }
 
 const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
   //   formData,
-  isOpen,
+  // isOpen,
   onClose,
   formData,
 }) => {
@@ -25,7 +25,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
     <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center z-50 p-6">
       <div className="bg-white rounded-lg p-12 w-full max-w-2xl">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-smedium">Add New payment</h2>
+          <h2 className="text-lg font-medium">Add New payment</h2>
           <button onClick={onClose}>
             <X />
           </button>
@@ -33,7 +33,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-mediumd text-custom-black mb-1">
+            <label className="block text-sm font-medium text-custom-black mb-1">
               Payment ID
             </label>
             <input
@@ -45,7 +45,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-smedium text-custom-black mb-1">
+            <label className="block text-sm font-medium text-custom-black mb-1">
               Patient's First Name
             </label>
             <input
@@ -57,7 +57,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-smedium text-custom-black mb-1">
+            <label className="block text-sm font-medium text-custom-black mb-1">
               Patient's Last Name
             </label>
             <input
@@ -69,7 +69,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-smedium text-custom-black mb-1">
+            <label className="block text-sm font-medium text-custom-black mb-1">
               Amount
             </label>
             <input
@@ -81,7 +81,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-smedium text-custom-black mb-1">
+            <label className="block text-sm font-medium text-custom-black mb-1">
               Purpose
             </label>
             <input
@@ -93,7 +93,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-smedium text-custom-black mb-1">
+            <label className="block text-sm font-medium text-custom-black mb-1">
               Payment Method
             </label>
             <div className="relative">

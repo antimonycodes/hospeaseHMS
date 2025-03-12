@@ -11,6 +11,9 @@ import Laboratory from "./pages/Laboratory";
 import DoctorDetails from "./Shared/DoctorDetails";
 import Consultants from "./pages/Consultants";
 import Appointments from "./pages/Appointments";
+import Users from "./pages/Users";
+import Nurses from "./pages/Nurses";
+import Pharmacy from "./pages/Pharmacy";
 
 function App() {
   return (
@@ -35,11 +38,10 @@ function App() {
             <Route path="consultants" element={<Consultants />} />
             <Route path="finance" element={<Finance />} />
             <Route path="laboratory" element={<Laboratory />} />
-
             <Route path="appointments" element={<Appointments />} />
-            {/* 
-          <Route path="users" element={<Users />} />
-          <Route path="finance" element={<Finance />} /> */}
+            <Route path="nurses" element={<Nurses />} />
+            <Route path="pharmacy" element={<Pharmacy />} />
+            <Route path="users" element={<Users />} />
           </Route>
         </Routes>
       </AuthProvider>

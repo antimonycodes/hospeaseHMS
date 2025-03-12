@@ -8,7 +8,7 @@ interface Patient {
   phone: string;
   occupation: string;
   doctor: string;
-  status: "Pending" | "Accepted" | "Declined" | "Rescheduled";
+  status: "Pending" | "Completed";
 }
 
 interface Column<T> {
@@ -18,10 +18,8 @@ interface Column<T> {
 }
 
 const statusStyles: Record<Patient["status"], string> = {
-  Pending: "bg-[#FFEBAA] text-[#B58A00]",
-  Accepted: "bg-[#CFFFE9] text-[#009952]",
-  Declined: "bg-[#FBE1E1] text-[#F83E41]",
-  Rescheduled: "bg-[#BED4FF] text-[#101828]",
+  Pending: "bg-[#FCE9E9] text-[#F83E41]",
+  Completed: "bg-[#CFFFE9] text-[#009952]",
 };
 
 export const patients: Patient[] = [
@@ -41,7 +39,7 @@ export const patients: Patient[] = [
     phone: "+234 802 987 8543",
     occupation: "Tailor",
     doctor: "Dr Mary Omisore",
-    status: "Declined",
+    status: "Completed",
   },
   {
     name: "Mary Durusaiye",
@@ -50,7 +48,7 @@ export const patients: Patient[] = [
     phone: "+234 805 804 5130",
     occupation: "Farmer",
     doctor: "Dr Michael Saidu",
-    status: "Rescheduled",
+    status: "Completed",
   },
   {
     name: "Martha Taribo",
@@ -59,7 +57,7 @@ export const patients: Patient[] = [
     phone: "+234 803 800 1111",
     occupation: "Teacher",
     doctor: "Dr Andrew Oyeleke",
-    status: "Accepted",
+    status: "Pending",
   },
 ];
 
@@ -111,9 +109,21 @@ const columns: Column<Patient>[] = [
       </span>
     ),
   },
+  {
+    key: "id" as keyof Patient,
+    label: "Action",
+    render: (_: string, row: Patient) => (
+      <span
+        // onClick={() => handleViewMore(row)}
+        className="text-[#009952] font-medium text-sm cursor-pointer"
+      >
+        View More
+      </span>
+    ),
+  },
 ];
 
-const tabs = ["All", "Pending", "Accepted", "Declined", "Rescheduled"] as const;
+const tabs = ["Pending", "Completed"] as const;
 type TabType = (typeof tabs)[number];
 
 // **Calculate the count for each status**
@@ -121,21 +131,18 @@ const getStatusCounts = () => {
   return patients.reduce(
     (acc, patient) => {
       acc[patient.status]++;
-      acc.All++;
+      // acc.Completed++;
       return acc;
     },
-    { All: 0, Pending: 0, Accepted: 0, Declined: 0, Rescheduled: 0 }
+    { Pending: 0, Completed: 0 }
   );
 };
 
-const AppointmentTable = () => {
-  const [activeTab, setActiveTab] = useState<TabType>("All");
+const PatientsTable = () => {
+  const [activeTab, setActiveTab] = useState<TabType>("Pending");
   const statusCounts = getStatusCounts();
 
-  const filteredPatients =
-    activeTab === "All"
-      ? patients
-      : patients.filter((p) => p.status === activeTab);
+  const filteredPatients = patients.filter((p) => p.status === activeTab);
 
   return (
     <div className=" mt-2">
@@ -170,5 +177,4 @@ const AppointmentTable = () => {
     </div>
   );
 };
-
-export default AppointmentTable;
+export default PatientsTable;

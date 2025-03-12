@@ -1,3 +1,4 @@
+import { Search } from "lucide-react";
 import { useState, JSX } from "react";
 import Table from "../../../Shared/Table";
 
@@ -8,7 +9,8 @@ interface Patient {
   phone: string;
   occupation: string;
   doctor: string;
-  status: "Pending" | "Accepted" | "Declined" | "Rescheduled";
+  status: "Pending" | "Ongoing" | "Completed";
+  viewMore: string;
 }
 
 interface Column<T> {
@@ -17,11 +19,18 @@ interface Column<T> {
   render?: (value: any, row: T) => JSX.Element;
 }
 
-const statusStyles: Record<Patient["status"], string> = {
-  Pending: "bg-[#FFEBAA] text-[#B58A00]",
-  Accepted: "bg-[#CFFFE9] text-[#009952]",
-  Declined: "bg-[#FBE1E1] text-[#F83E41]",
-  Rescheduled: "bg-[#BED4FF] text-[#101828]",
+const tabs = ["Pending", "Ongoing", "Completed"] as const;
+type TabType = (typeof tabs)[number];
+
+// **Calculate the count for each status**
+const getStatusCounts = () => {
+  return patients.reduce(
+    (acc, patient) => {
+      acc[patient.status]++;
+      return acc;
+    },
+    { Pending: 0, Ongoing: 0, Completed: 0 }
+  );
 };
 
 export const patients: Patient[] = [
@@ -33,6 +42,7 @@ export const patients: Patient[] = [
     occupation: "Banker",
     doctor: "Dr Omogpe Peter",
     status: "Pending",
+    viewMore: "View More",
   },
   {
     name: "John Diongoli",
@@ -41,7 +51,8 @@ export const patients: Patient[] = [
     phone: "+234 802 987 8543",
     occupation: "Tailor",
     doctor: "Dr Mary Omisore",
-    status: "Declined",
+    status: "Ongoing",
+    viewMore: "View More",
   },
   {
     name: "Mary Durusaiye",
@@ -50,7 +61,8 @@ export const patients: Patient[] = [
     phone: "+234 805 804 5130",
     occupation: "Farmer",
     doctor: "Dr Michael Saidu",
-    status: "Rescheduled",
+    status: "Completed",
+    viewMore: "View More",
   },
   {
     name: "Martha Taribo",
@@ -59,7 +71,8 @@ export const patients: Patient[] = [
     phone: "+234 803 800 1111",
     occupation: "Teacher",
     doctor: "Dr Andrew Oyeleke",
-    status: "Accepted",
+    status: "Pending",
+    viewMore: "View More",
   },
 ];
 
@@ -111,35 +124,53 @@ const columns: Column<Patient>[] = [
       </span>
     ),
   },
+  {
+    key: "viewMore",
+    label: "",
+    render: (_, data) => (
+      <span
+        className="text-primary text-sm font-medium cursor-pointer"
+        // onClick={() => handleViewMore(data.patientId)}
+      >
+        View More
+      </span>
+    ),
+  },
 ];
 
-const tabs = ["All", "Pending", "Accepted", "Declined", "Rescheduled"] as const;
-type TabType = (typeof tabs)[number];
-
-// **Calculate the count for each status**
-const getStatusCounts = () => {
-  return patients.reduce(
-    (acc, patient) => {
-      acc[patient.status]++;
-      acc.All++;
-      return acc;
-    },
-    { All: 0, Pending: 0, Accepted: 0, Declined: 0, Rescheduled: 0 }
-  );
+const statusStyles: Record<Patient["status"], string> = {
+  Ongoing: "bg-[#FFEBAA] text-[#B58A00]",
+  Completed: "bg-[#CFFFE9] text-[#009952]",
+  Pending: "bg-[#FBE1E1] text-[#F83E41]",
 };
 
-const AppointmentTable = () => {
-  const [activeTab, setActiveTab] = useState<TabType>("All");
+const SaLaboratoryPage = () => {
+  const [activeTab, setActiveTab] = useState<TabType>("Pending");
   const statusCounts = getStatusCounts();
 
-  const filteredPatients =
-    activeTab === "All"
-      ? patients
-      : patients.filter((p) => p.status === activeTab);
+  const filteredPatients = patients.filter((p) => p.status === activeTab);
 
   return (
-    <div className=" mt-2">
-      <div className=" w-full flex space-x-2 md:space-x-6">
+    <div className="rounded-lg custom-shadow bg-white p-4">
+      {/* search and filter */}
+      <div className=" flex items-center justify-between gap-24">
+        <div className=" flex gap-2">
+          {/* title */}
+          <h1>Patient</h1>
+          <span>3000</span>
+        </div>
+        {/* search input */}
+        <div className="relative w-full flex-1">
+          <input
+            type="text"
+            placeholder="Type to search"
+            className="w-full border border-gray-200 py-2 pl-10 pr-4 rounded-lg"
+          />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1AA] size-4" />
+        </div>
+      </div>
+      {/* Tabs */}
+      <div className=" w-full flex space-x-2 md:space-x-6 mt-4">
         {tabs.map((tab) => (
           <button
             key={tab}
@@ -160,6 +191,7 @@ const AppointmentTable = () => {
         ))}
       </div>
 
+      {/* Table */}
       <Table
         columns={columns}
         data={filteredPatients}
@@ -171,4 +203,4 @@ const AppointmentTable = () => {
   );
 };
 
-export default AppointmentTable;
+export default SaLaboratoryPage;

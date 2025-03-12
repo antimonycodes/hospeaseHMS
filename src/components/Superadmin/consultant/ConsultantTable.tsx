@@ -258,7 +258,6 @@ const ConsultantTable = () => {
 
   return (
     <div>
-      {/* Table */}
       <Table
         columns={columns}
         data={doctors}
