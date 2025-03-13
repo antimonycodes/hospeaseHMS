@@ -81,7 +81,7 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
 
       {/* Desktop sidebar */}
       <div
-        className={`hidden md:block transition-all duration-300 ease-in-out bg-white mt-12 ${
+        className={`hidden md:block transition-all duration-300 ease-in-out bg-white mt-6 ${
           isCollapsed ? "w-16" : "w-60"
         }`}
         onMouseEnter={() => setIsCollapsed(false)}
@@ -100,13 +100,13 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
             </>
           ) : (
             <>
-              <div className=" w-[80%]">
+              <div className=" px-6 w-[80%]">
                 <img src={logo} alt="" />
               </div>
             </>
           )}
         </div>
-        <div className="flex flex-col p-2 mt-8">
+        <div className="flex flex-col p-2 mt-3">
           {menuItems.map((item) => (
             <Link
               key={item.path}
