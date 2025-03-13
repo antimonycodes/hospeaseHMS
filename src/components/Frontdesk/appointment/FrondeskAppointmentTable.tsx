@@ -2,6 +2,8 @@ import { useState, JSX } from "react";
 import Table from "../../../Shared/Table";
 import { getImageSrc } from "../../../utils/imageUtils";
 import AddPatientModal from "../patients/AddPatientModal";
+import FrontdeskAppointmentModal from "./FrontdeskAppointmentModal";
+import { useNavigate } from "react-router-dom";
 
 interface Patient {
   name: string;
@@ -65,56 +67,6 @@ const patients: Patient[] = [
   },
 ];
 
-const columns: Column<Patient>[] = [
-  {
-    key: "name",
-    label: "Name",
-    render: (_, data) => (
-      <span className="font-medium text-[#101828]">{data.name}</span>
-    ),
-  },
-  {
-    key: "patientId",
-    label: "Patient ID",
-    render: (_, data) => (
-      <span className="text-[#667085]">{data.patientId}</span>
-    ),
-  },
-  {
-    key: "gender",
-    label: "Gender",
-    render: (_, data) => <span className="text-[#667085]">{data.gender}</span>,
-  },
-  {
-    key: "phone",
-    label: "Phone",
-    render: (_, data) => <span className="text-[#667085]">{data.phone}</span>,
-  },
-  {
-    key: "occupation",
-    label: "Occupation",
-    render: (_, data) => (
-      <span className="text-[#667085]">{data.occupation}</span>
-    ),
-  },
-  {
-    key: "doctor",
-    label: "Doctor Assigned",
-    render: (_, data) => <span className="text-[#667085]">{data.doctor}</span>,
-  },
-  {
-    key: "status",
-    label: "Status",
-    render: (status: Patient["status"]) => (
-      <span
-        className={`px-3 py-1 rounded-full text-sm font-medium ${statusStyles[status]}`}
-      >
-        {status}
-      </span>
-    ),
-  },
-];
-
 const tabs = ["All", "Pending", "Accepted", "Declined", "Rescheduled"] as const;
 type TabType = (typeof tabs)[number];
 
@@ -134,6 +86,81 @@ const FrondeskAppointmentTable = () => {
   const [activeTab, setActiveTab] = useState<TabType>("All");
   const statusCounts = getStatusCounts();
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const navigate = useNavigate();
+
+  const details = (patientId: string) => {
+    navigate(`/dashboard/appointments/${patientId}`);
+  };
+
+  // table content
+  const columns: Column<Patient>[] = [
+    {
+      key: "name",
+      label: "Name",
+      render: (_, data) => (
+        <span className="font-medium text-[#101828] text-sm">{data.name}</span>
+      ),
+    },
+    {
+      key: "patientId",
+      label: "Patient ID",
+      render: (_, data) => (
+        <span className="text-[#667085] text-sm">{data.patientId}</span>
+      ),
+    },
+    {
+      key: "gender",
+      label: "Gender",
+      render: (_, data) => (
+        <span className="text-[#667085] text-sm">{data.gender}</span>
+      ),
+    },
+    {
+      key: "phone",
+      label: "Phone",
+      render: (_, data) => (
+        <span className="text-[#667085] text-sm">{data.phone}</span>
+      ),
+    },
+    {
+      key: "occupation",
+      label: "Occupation",
+      render: (_, data) => (
+        <span className="text-[#667085] text-sm">{data.occupation}</span>
+      ),
+    },
+    {
+      key: "doctor",
+      label: "Doctor Assigned",
+      render: (_, data) => (
+        <span className="text-[#667085] text-sm">{data.doctor}</span>
+      ),
+    },
+    {
+      key: "status",
+      label: "Status",
+      render: (status: Patient["status"]) => (
+        <span
+          className={`px-3 py-1 rounded-full text-sm font-medium ${statusStyles[status]}`}
+        >
+          {status}
+        </span>
+      ),
+    },
+    {
+      key: "patientId",
+      label: "",
+      render: (_, data) => (
+        <button
+          className="cursor-pointer text-[#009952] text-sm font-medium"
+          onClick={() => details(data.patientId)}
+        >
+          View more
+        </button>
+      ),
+    },
+  ];
 
   // Function to open modal
   const openModal = () => {
@@ -171,9 +198,10 @@ const FrondeskAppointmentTable = () => {
             name=""
             id=""
             placeholder="Type to search"
-            className="outline-none"
+            className="outline-none font-medium placeholder:text-xs text-xs"
           />
         </div>
+
         <div className="flex items-center gap-4">
           {/* filter and add button */}
           <div className="flex items-center gap-4">
@@ -185,23 +213,25 @@ const FrondeskAppointmentTable = () => {
             {/* add button */}
             <button
               onClick={openModal}
-              className="w-[120px] flex items-center justify-center gap-1 cursor-pointer text-white bg-primary h-[40px] rounded-[8px]"
+              className="min-w-[120px] flex items-center justify-center gap-2 cursor-pointer text-white text-sm bg-primary px-6 h-[40px] rounded-[8px]"
             >
-              Add new
+              Book new appointment
               <img src={getImageSrc("plus.svg")} alt="" />
             </button>
           </div>
         </div>
       </div>
-      <div className=" w-full flex space-x-2 md:space-x-6">
+
+      {/* table tabs */}
+      <div className=" px-4 w-full flex space-x-2 md:space-x-6">
         {tabs.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`pb-2 text-xs md:text-sm font-medium ${
+            className={`pb-4 flex items-center gap-2 text-xs md:text-sm font-medium cursor-pointer ${
               activeTab === tab
                 ? "text-green-600 border-b-2 border-green-600"
-                : "text-gray-500"
+                : "text-[#667185]"
             }`}
           >
             {tab}
@@ -223,7 +253,7 @@ const FrondeskAppointmentTable = () => {
       />
 
       {/* modal */}
-      <AddPatientModal isOpen={isModalOpen} onClose={closeModal} />
+      <FrontdeskAppointmentModal isOpen={isModalOpen} onClose={closeModal} />
     </div>
   );
 };
