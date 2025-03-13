@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../store/AuthContext";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Mail } from "lucide-react";
+import logo from "../assets/logo-full.png";
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -14,9 +15,12 @@ const Signup = () => {
 
   return (
     <div className=" bg-[#E3FFF2] flex flex-col items-center justify-center h-screen">
-      <h1 className=" text-[#009952]  text-2xl md:text-4xl font-bold mb-4">
+      {/* <h1 className=" text-[#009952]  text-2xl md:text-4xl font-bold mb-4">
         Hospease Technologies Ltd
-      </h1>
+      </h1> */}
+      <div className=" w-56">
+        <img src={logo} alt="" />
+      </div>
       <div className=" bg-white py-8 px-7 border border-[#D0D5DD] rounded-[10px] mt-4 flex flex-col items-center">
         <div>
           <h1 className=" text-center text-[#101928] text-3xl font-semibold mb-2">
