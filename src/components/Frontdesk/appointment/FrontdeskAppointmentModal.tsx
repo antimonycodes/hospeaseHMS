@@ -4,7 +4,8 @@ interface Props {
   isOpen: any;
   onClose: any;
 }
-const AddPatientModal = ({ isOpen, onClose }: Props) => {
+
+const FrontdeskAppointmentModal = ({ isOpen, onClose }: Props) => {
   return (
     <div
       className={`fixed left-0 top-0 w-full bg-black/50 min-h-screen z-[100] items-center p-4 justify-center ${
@@ -15,7 +16,7 @@ const AddPatientModal = ({ isOpen, onClose }: Props) => {
         <div>
           {/* head section */}
           <div className="flex items-center justify-between w-full">
-            <h1 className="w-full text-[18px] font-medium">Add New Patient</h1>
+            <h1 className="w-full text-[18px] font-medium">Book Appointment</h1>
 
             {/* close button */}
             <button className="cursor-pointer" onClick={onClose}>
@@ -27,38 +28,7 @@ const AddPatientModal = ({ isOpen, onClose }: Props) => {
           <form className="text-[#101928] text-sm mt-7">
             {/* patients details */}
             <div className="flex flex-col gap-[29px]">
-              {/* first name / last name */}
-              <div className="grid gap-5 mmd:grid-cols-2">
-                {/* first name */}
-                <div>
-                  <label className="font-medium" htmlFor="firstName">
-                    First Name
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      className="p-[16px] border border-[#D0D5DD] outline-primary w-full rounded-[6px] placeholder:text-[#98A2B3] text-[#98A2B3]"
-                      placeholder=""
-                    />
-                  </div>
-                </div>
-
-                {/* last name */}
-                <div>
-                  <label className="font-medium" htmlFor="firstName">
-                    Last Name
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      className="p-[16px] border border-[#D0D5DD] outline-primary w-full rounded-[6px] placeholder:text-[#98A2B3] text-[#98A2B3]"
-                      placeholder=""
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* patient id / gender */}
+              {/* patient id / first name */}
               <div className="grid gap-5 mmd:grid-cols-2">
                 {/* patient id */}
                 <div>
@@ -74,114 +44,6 @@ const AddPatientModal = ({ isOpen, onClose }: Props) => {
                   </div>
                 </div>
 
-                {/* gender */}
-                <div>
-                  <label className="font-medium" htmlFor="gender">
-                    Gender
-                  </label>
-                  <div className="mt-1">
-                    <select
-                      name=""
-                      id=""
-                      className="p-[16px] border border-[#D0D5DD] outline-primary w-full rounded-[6px] placeholder:text-[#98A2B3] text-[#98A2B3]"
-                    >
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* branch / phone number */}
-              <div className="grid gap-5 mmd:grid-cols-2">
-                {/* branch */}
-                <div>
-                  <label className="font-medium" htmlFor="branch">
-                    Branch
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      className="p-[16px] border border-[#D0D5DD] outline-primary w-full rounded-[6px] placeholder:text-[#98A2B3] text-[#98A2B3]"
-                      placeholder=""
-                    />
-                  </div>
-                </div>
-
-                {/* phone number */}
-                <div>
-                  <label className="font-medium" htmlFor="phoneNumber">
-                    Phone Number
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      className="p-[16px] border border-[#D0D5DD] outline-primary w-full rounded-[6px] placeholder:text-[#98A2B3] text-[#98A2B3]"
-                      placeholder=""
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* occupation / religion */}
-              <div className="grid gap-5 mmd:grid-cols-2">
-                {/* occupation */}
-                <div>
-                  <label className="font-medium" htmlFor="occupation">
-                    Occupation
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      className="p-[16px] border border-[#D0D5DD] outline-primary w-full rounded-[6px] placeholder:text-[#98A2B3] text-[#98A2B3]"
-                      placeholder=""
-                    />
-                  </div>
-                </div>
-
-                {/* religion */}
-                <div>
-                  <label className="font-medium" htmlFor="religion">
-                    Religion
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      className="p-[16px] border border-[#D0D5DD] outline-primary w-full rounded-[6px] placeholder:text-[#98A2B3] text-[#98A2B3]"
-                      placeholder=""
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* house address*/}
-              <div className="grid gap-5 mmd:grid-cols-2">
-                {/* House Address */}
-                <div>
-                  <label className="font-medium" htmlFor="houseAddress">
-                    House Address
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      className="p-[16px] border border-[#D0D5DD] outline-primary w-full rounded-[6px] placeholder:text-[#98A2B3] text-[#98A2B3]"
-                      placeholder=""
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h1 className="w-full border-b border-[#979797] py-5 mb-20 text-[18px] font-medium">
-                Add Next of kin
-              </h1>
-            </div>
-
-            {/* patients next of kin */}
-            <div className="flex flex-col gap-[29px]">
-              {/* first name / last name */}
-              <div className="grid gap-5 mmd:grid-cols-2">
                 {/* first name */}
                 <div>
                   <label className="font-medium" htmlFor="firstName">
@@ -195,7 +57,10 @@ const AddPatientModal = ({ isOpen, onClose }: Props) => {
                     />
                   </div>
                 </div>
+              </div>
 
+              {/* last name / gender */}
+              <div className="grid gap-5 mmd:grid-cols-2">
                 {/* last name */}
                 <div>
                   <label className="font-medium" htmlFor="firstName">
@@ -209,10 +74,7 @@ const AddPatientModal = ({ isOpen, onClose }: Props) => {
                     />
                   </div>
                 </div>
-              </div>
 
-              {/* phone number / gender */}
-              <div className="grid gap-5 mmd:grid-cols-2">
                 {/* gender */}
                 <div>
                   <label className="font-medium" htmlFor="gender">
@@ -229,7 +91,10 @@ const AddPatientModal = ({ isOpen, onClose }: Props) => {
                     </select>
                   </div>
                 </div>
+              </div>
 
+              {/* phone number / Ocuppation */}
+              <div className="grid gap-5 mmd:grid-cols-2">
                 {/* phone number */}
                 <div>
                   <label className="font-medium" htmlFor="phoneNumber">
@@ -243,14 +108,28 @@ const AddPatientModal = ({ isOpen, onClose }: Props) => {
                     />
                   </div>
                 </div>
-              </div>
 
-              {/* occupation / house address */}
-              <div className="grid gap-5 mmd:grid-cols-2">
                 {/* occupation */}
                 <div>
                   <label className="font-medium" htmlFor="occupation">
                     Occupation
+                  </label>
+                  <div className="mt-1">
+                    <input
+                      type="text"
+                      className="p-[16px] border border-[#D0D5DD] outline-primary w-full rounded-[6px] placeholder:text-[#98A2B3] text-[#98A2B3]"
+                      placeholder=""
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* religion / house address */}
+              <div className="grid gap-5 mmd:grid-cols-2">
+                {/* religion */}
+                <div>
+                  <label className="font-medium" htmlFor="religion">
+                    Religion
                   </label>
                   <div className="mt-1">
                     <input
@@ -275,33 +154,52 @@ const AddPatientModal = ({ isOpen, onClose }: Props) => {
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* religion / relationship */}
-              <div className="grid gap-5 mmd:grid-cols-2">
-                {/* religion */}
+            {/* Appointment Booking Section */}
+            <div className="mt-6">
+              <h3 className="w-full text-[18px] font-medium">
+                Book Appointment
+              </h3>
+
+              <div className="grid grid-cols-1 gap-4 mt-7">
                 <div>
-                  <label className="font-medium" htmlFor="religion">
-                    Religion
+                  <label className="font-medium" htmlFor="date">
+                    Choose Date
                   </label>
                   <div className="mt-1">
                     <input
-                      type="text"
+                      name="date"
+                      type="date"
                       className="p-[16px] border border-[#D0D5DD] outline-primary w-full rounded-[6px] placeholder:text-[#98A2B3] text-[#98A2B3]"
-                      placeholder=""
                     />
                   </div>
                 </div>
-                {/* branch */}
+
+                {/* Choose time */}
                 <div>
-                  <label className="font-medium" htmlFor="branch">
-                    Branch
+                  <label className="font-medium" htmlFor="time">
+                    Choose Time
                   </label>
                   <div className="mt-1">
-                    <input
-                      type="text"
-                      className="p-[16px] border border-[#D0D5DD] outline-primary w-full rounded-[6px] placeholder:text-[#98A2B3] text-[#98A2B3]"
-                      placeholder=""
-                    />
+                    <select className="p-[16px] border border-[#D0D5DD] outline-primary w-full rounded-[6px] placeholder:text-[#98A2B3] text-[#98A2B3]">
+                      <option>02:00pm</option>
+                      <option>10:00am</option>
+                      <option>12:00pm</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* select doctors */}
+                <div>
+                  <label className="font-medium" htmlFor="doctor">
+                    Select Doctor
+                  </label>
+                  <div className="mt-1">
+                    <select className="p-[16px] border border-[#D0D5DD] outline-primary w-full rounded-[6px] placeholder:text-[#98A2B3] text-[#98A2B3]">
+                      <option>Dr Omoge Peter</option>
+                      <option>Dr Akinwale John</option>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -309,8 +207,8 @@ const AddPatientModal = ({ isOpen, onClose }: Props) => {
 
             {/* button */}
             <div className="mt-10">
-              <button className="bg-primary cursor-pointer text-white py-[8px] px-[14px] text-sm rounded-[8px]">
-                Add Patient
+              <button className="bg-primary cursor-pointer text-white py-[8px] px-[14px] font-medium text-sm rounded-[8px]">
+                Book appointment
               </button>
             </div>
           </form>
@@ -320,4 +218,4 @@ const AddPatientModal = ({ isOpen, onClose }: Props) => {
   );
 };
 
-export default AddPatientModal;
+export default FrontdeskAppointmentModal;

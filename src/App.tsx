@@ -14,6 +14,7 @@ import Appointments from "./pages/Appointments";
 import Users from "./pages/Users";
 import Nurses from "./pages/Nurses";
 import Pharmacy from "./pages/Pharmacy";
+import AppointmentDetails from "./components/Frontdesk/appointment/AppointmentDetails";
 
 function App() {
   return (
@@ -29,6 +30,10 @@ function App() {
             <Route
               path="/dashboard/patients/:patientId"
               element={<PatientDetails />}
+            />
+            <Route
+              path="/dashboard/appointments/:patientId"
+              element={<AppointmentDetails />}
             />
             <Route path="doctors" element={<Doctors />} />
             <Route

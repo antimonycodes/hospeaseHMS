@@ -320,7 +320,7 @@ const FpatientsTable = () => {
   ];
 
   return (
-    <div className="w-full font-jakarta h-full bg-white rounded-[8px] shadow overflow-hidden">
+    <div className="w-full font-inter h-full bg-white rounded-[8px] shadow overflow-hidden">
       <div className="p-6 flex items-center justify-between">
         <h1 className="text-[18px] w-[160px] font-medium">
           Patients{" "}
@@ -341,7 +341,7 @@ const FpatientsTable = () => {
             name=""
             id=""
             placeholder="Type to search"
-            className="outline-none"
+            className="outline-none font-medium placeholder:text-xs text-xs"
           />
         </div>
         <div className="flex items-center gap-4">
@@ -355,7 +355,7 @@ const FpatientsTable = () => {
             {/* add button */}
             <button
               onClick={openModal}
-              className="w-[120px] flex items-center justify-center gap-1 cursor-pointer text-white bg-primary h-[40px] rounded-[8px]"
+              className="w-[120px] flex items-center justify-center gap-2 cursor-pointer text-white text-sm bg-primary h-[40px] rounded-[8px]"
             >
               Add new
               <img src={getImageSrc("plus.svg")} alt="" />

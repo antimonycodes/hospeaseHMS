@@ -24,7 +24,7 @@ const FrontdeskCards = () => {
     },
   ];
   return (
-    <div>
+    <div className="font-jakarta">
       <h1 className="font-medium text-[20px] text-[#101828] pb-[21px]">
         Front desk Dashboard
       </h1>
