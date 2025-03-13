@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { sidebarRoutes } from "../../config/sidebarRoutes";
+import logo from "../../assets/logo-full.png";
+import logoSmall from "../../assets/logo-small.png";
 
 interface SidebarProps {
   isMobileMenuOpen: boolean;
@@ -33,14 +35,17 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            className="fixed top-0 left-0 h-screen w-64 bg-white custom-shadow z-40 md:hidden"
+            className="fixed top-0 left-0 h-screen w-64 overflow-y-auto bg-white custom-shadow z-40 md:hidden"
             initial={{ x: -280 }}
             animate={{ x: 0 }}
             exit={{ x: -280 }}
             transition={{ type: "spring", damping: 25 }}
           >
-            <div className="p-4 flex justify-between items-center border-b">
-              <h1 className="text-primary font-medium text-2xl">hospease</h1>
+            <div className="p-4 flex justify-between items-center ">
+              {/* <h1 className="text-primary font-medium text-2xl">hospease</h1> */}
+              <div className=" w-24">
+                <img src={logo} alt="" />
+              </div>
               <button onClick={() => setIsMobileMenuOpen(false)}>
                 <X size={24} />
               </button>
@@ -76,20 +81,32 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
 
       {/* Desktop sidebar */}
       <div
-        className={`hidden md:block transition-all duration-300 ease-in-out bg-white mt-12 ${
+        className={`hidden md:block transition-all duration-300 ease-in-out bg-white mt-6 ${
           isCollapsed ? "w-16" : "w-60"
         }`}
         onMouseEnter={() => setIsCollapsed(false)}
         onMouseLeave={() => setIsCollapsed(true)}
       >
-        <h1
-          className={`text-primary font-medium text-2xl px-3 ${
-            isCollapsed ? "opacity-0" : "opacity-100"
-          } transition-opacity duration-300`}
-        >
-          {!isCollapsed && "hospease"}
-        </h1>
-        <div className="flex flex-col p-2 mt-8">
+        <div>
+          {/* {!isCollapsed && "hospease"} */}
+          {/* <div className=" w-[80%]">
+            <img src={logo} alt="" />
+          </div> */}
+          {isCollapsed ? (
+            <>
+              <div className=" ]">
+                <img src={logoSmall} alt="" />
+              </div>
+            </>
+          ) : (
+            <>
+              <div className=" px-6 w-[80%]">
+                <img src={logo} alt="" />
+              </div>
+            </>
+          )}
+        </div>
+        <div className="flex flex-col p-2 mt-3">
           {menuItems.map((item) => (
             <Link
               key={item.path}

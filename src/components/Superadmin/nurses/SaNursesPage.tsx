@@ -28,16 +28,16 @@ const SaNursesPage = () => {
   };
 
   return (
-    <div className="rounded-lg custom-shadow bg-white p-4">
+    <div className=" w-full rounded-lg custom-shadow bg-white p-4">
       {/* header */}
-      <div className=" flex items-center justify-between gap-24 mb-8">
+      <div className=" w-full flex items-center justify-between mb-8">
         <div className=" flex gap-2">
           {/* title */}
           <h1>Nurses</h1>
           <span>3000</span>
         </div>
         {/* add button */}
-        <div className="w-full md:w-auto">
+        <div className=" md:w-auto">
           <Button
             onClick={() => setShowModal(true)}
             variant="primary"

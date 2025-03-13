@@ -153,7 +153,7 @@ const SaLaboratoryPage = () => {
   return (
     <div className="rounded-lg custom-shadow bg-white p-4">
       {/* search and filter */}
-      <div className=" flex items-center justify-between gap-24">
+      <div className=" flex items-center justify-between gap-8 lg:gap-24">
         <div className=" flex gap-2">
           {/* title */}
           <h1>Patient</h1>
