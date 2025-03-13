@@ -14,6 +14,8 @@ import Appointments from "./pages/Appointments";
 import Users from "./pages/Users";
 import Nurses from "./pages/Nurses";
 import Pharmacy from "./pages/Pharmacy";
+import Payment from "./pages/Payment";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -42,6 +44,8 @@ function App() {
             <Route path="nurses" element={<Nurses />} />
             <Route path="pharmacy" element={<Pharmacy />} />
             <Route path="users" element={<Users />} />
+            <Route path="payment" element={<Payment />} />
+            <Route path="profile" element={<Profile />} />
           </Route>
         </Routes>
       </AuthProvider>

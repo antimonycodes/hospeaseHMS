@@ -1,6 +1,8 @@
 import { useState } from "react";
 import DoctorsTable from "./ConsultantTable";
 import AddDoctorModal from "../../../Shared/AddDoctorModal";
+import Button from "../../../Shared/Button";
+import { Plus } from "lucide-react";
 
 const SaConsultantPage = () => {
   const [showModal, setShowModal] = useState(false);
@@ -32,34 +34,19 @@ const SaConsultantPage = () => {
             {/* {doctors.length} */}
           </span>
         </h1>
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-primary hover:bg-green-700 text-white px-4 py-4 rounded-md flex items-center"
-        >
-          <span className="mr-1">Add new</span>
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+        {/* add button */}
+        <div className=" md:w-auto">
+          <Button
+            onClick={() => setShowModal(true)}
+            variant="primary"
+            size="md"
+            // onClick={handleOpenModal}
+            className="flex items-center gap-2 px-4"
           >
-            <path
-              d="M8 3.33333V12.6667"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M3.33334 8H12.6667"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
+            Add new
+            <Plus size={16} />
+          </Button>
+        </div>
       </div>
 
       <DoctorsTable />
