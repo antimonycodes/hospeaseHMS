@@ -159,7 +159,7 @@ const PatientsTable = () => {
           >
             {tab}
             {activeTab === tab && (
-              <span className="  text-xs bg-primary text-white py-0.5 px-3 rounded-xl">
+              <span className="  text-xs bg-primary text-white py-0.5 px-3 rounded-xl ml-1">
                 {statusCounts[tab]}
               </span>
             )}

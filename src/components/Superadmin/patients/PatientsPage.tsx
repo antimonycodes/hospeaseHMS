@@ -49,7 +49,7 @@ const PatientsPage = () => {
         {/* Tabs */}
         <div className="flex items-center text-xs gap-3">
           <h1
-            className={`relative inline-block flex-none cursor-pointer font-semibold ${
+            className={`relative inline-block flex-none cursor-pointer text-base font-semibold ${
               activeTab === 0 ? "text-primary" : "text-[#667185]"
             }`}
             onClick={() => setActiveTab(0)}
@@ -62,7 +62,7 @@ const PatientsPage = () => {
             ></div>
           </h1>
           <h1
-            className={`relative inline-block flex-none cursor-pointer font-semibold ${
+            className={`relative inline-block flex-none cursor-pointer text-base font-semibold ${
               activeTab === 1 ? "text-primary" : "text-[#667185]"
             }`}
             onClick={() => setActiveTab(1)}

@@ -19,7 +19,7 @@ import Profile from "./pages/Profile";
 
 function App() {
   return (
-    <>
+    <div className=" font-inter">
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Signup />} />
@@ -49,7 +49,7 @@ function App() {
           </Route>
         </Routes>
       </AuthProvider>
-    </>
+    </div>
   );
 }
 

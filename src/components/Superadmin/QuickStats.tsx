@@ -43,7 +43,7 @@ const QuickStats = () => {
             {title}
           </h1>
           <div className=" flex items-center gap-12">
-            <h1 className=" text-gray-900 font-bold">{number}</h1>
+            <h1 className=" text-gray-900 font-bold text-[21px]">{number}</h1>
             <span
               className={`${
                 percentage.includes("-")
