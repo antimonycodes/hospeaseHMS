@@ -29,7 +29,7 @@ const SaConsultantPage = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl font-semibold text-gray-900">
-          Doctors{" "}
+          Consultants{" "}
           <span className="text-[#6941C6] bg-[#F9F5FF] py-1 px-4 rounded-full text-sm">
             {/* {doctors.length} */}
           </span>

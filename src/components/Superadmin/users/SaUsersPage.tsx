@@ -3,6 +3,7 @@ import Button from "../../../Shared/Button";
 import { Plus, Search } from "lucide-react";
 import AdministratorTable from "./AdministratorTable";
 import DepartmentTable from "./DepartmentTable";
+import AddDepartmentModal from "./AddDepartmentModal";
 
 const SaUsersPage = () => {
   const [activeTab, setActiveTab] = useState<"Department" | "Administrator">(
@@ -59,7 +60,7 @@ const SaUsersPage = () => {
             <Button
               variant="primary"
               size="md"
-              //   onClick={handleOpenModal}
+              onClick={handleOpenModal}
               className="flex items-center gap-2 px-4"
             >
               Add new
@@ -77,6 +78,9 @@ const SaUsersPage = () => {
       )}
 
       {/* modals */}
+      {openModal && modalType === "Department" && (
+        <AddDepartmentModal onclose={() => setOpenModal(false)} />
+      )}
     </div>
   );
 };
