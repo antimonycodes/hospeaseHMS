@@ -1,9 +1,9 @@
-import { useState, JSX } from "react";
-import Table from "../../../Shared/Table";
-import { getImageSrc } from "../../../utils/imageUtils";
-import FrontdeskAppointmentModal from "./FrontdeskAppointmentModal";
 import { useNavigate } from "react-router-dom";
+import Table from "../../../Shared/Table";
 import { getUserColumns } from "../../../Shared/UsersColumn";
+import { getImageSrc } from "../../../utils/imageUtils";
+import FrontdeskAppointmentModal from "../../Frontdesk/appointment/FrontdeskAppointmentModal";
+import { useState } from "react";
 
 interface Patient {
   name: string;
@@ -12,7 +12,7 @@ interface Patient {
   phone: string;
   occupation: string;
   doctor: string;
-  status: "Pending" | "Accepted" | "Declined" | "Rescheduled";
+  status: "Accepted" | "Completed";
 }
 
 const patients: Patient[] = [
@@ -23,7 +23,7 @@ const patients: Patient[] = [
     phone: "+234 709 823 2411",
     occupation: "Banker",
     doctor: "Dr Omogpe Peter",
-    status: "Pending",
+    status: "Accepted",
   },
   {
     name: "John Diongoli",
@@ -32,7 +32,7 @@ const patients: Patient[] = [
     phone: "+234 802 987 8543",
     occupation: "Tailor",
     doctor: "Dr Mary Omisore",
-    status: "Declined",
+    status: "Accepted",
   },
   {
     name: "Mary Durusaiye",
@@ -41,7 +41,7 @@ const patients: Patient[] = [
     phone: "+234 805 804 5130",
     occupation: "Farmer",
     doctor: "Dr Michael Saidu",
-    status: "Rescheduled",
+    status: "Completed",
   },
   {
     name: "Martha Taribo",
@@ -54,7 +54,7 @@ const patients: Patient[] = [
   },
 ];
 
-const tabs = ["All", "Pending", "Accepted", "Declined", "Rescheduled"] as const;
+const tabs = ["New", "Accepted", "Completed"] as const;
 type TabType = (typeof tabs)[number];
 
 // **Calculate the count for each status**
@@ -62,15 +62,14 @@ const getStatusCounts = () => {
   return patients.reduce(
     (acc, patient) => {
       acc[patient.status]++;
-      acc.All++;
+      acc.New++;
       return acc;
     },
-    { All: 0, Pending: 0, Accepted: 0, Declined: 0, Rescheduled: 0 }
+    { New: 0, Accepted: 0, Completed: 0 }
   );
 };
-
-const FrondeskAppointmentTable = () => {
-  const [activeTab, setActiveTab] = useState<TabType>("All");
+const DoctorsAppointment = () => {
+  const [activeTab, setActiveTab] = useState<TabType>("New");
   const statusCounts = getStatusCounts();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -81,7 +80,7 @@ const FrondeskAppointmentTable = () => {
   };
 
   // Dynamically generate columns based on the data
-  const columns = getUserColumns(details, patients);
+  const columns = getUserColumns(details, patients, false);
 
   // Function to open modal
   const openModal = () => {
@@ -94,7 +93,7 @@ const FrondeskAppointmentTable = () => {
   };
 
   const filteredPatients =
-    activeTab === "All"
+    activeTab === "New"
       ? patients
       : patients.filter((p) => p.status === activeTab);
   return (
@@ -129,15 +128,6 @@ const FrondeskAppointmentTable = () => {
             {/* filter */}
             <button className="cursor-pointer">
               <img src={getImageSrc("filter.svg")} alt="" />
-            </button>
-
-            {/* add button */}
-            <button
-              onClick={openModal}
-              className="min-w-[120px] flex items-center justify-center gap-2 cursor-pointer text-white text-sm bg-primary px-6 h-[40px] rounded-[8px]"
-            >
-              Book new appointment
-              <img src={getImageSrc("plus.svg")} alt="" />
             </button>
           </div>
         </div>
@@ -179,4 +169,4 @@ const FrondeskAppointmentTable = () => {
   );
 };
 
-export default FrondeskAppointmentTable;
+export default DoctorsAppointment;
