@@ -2,7 +2,7 @@ import FrondeskAppointmentTable from "./FrondeskAppointmentTable";
 
 const FrontdeskAppointment = () => {
   return (
-    <div>
+    <div className="font-inter">
       <FrondeskAppointmentTable />
     </div>
   );

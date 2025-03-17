@@ -1,6 +1,14 @@
+import FrontdeskChart from "../Frontdesk/FrontdeskChart";
+import FrontdeskTable from "../Frontdesk/FrontdeskTable";
+import DoctorCards from "./DoctorCards";
+
 const DoctorOverview = () => (
-  <div>
-    <h2 className="text-xl font-bold"> Dashboard</h2>
+  <div className="font-inter">
+    <div className=" flex flex-col gap-4">
+      <DoctorCards />
+      <FrontdeskChart />
+      <FrontdeskTable />
+    </div>
   </div>
 );
 export default DoctorOverview;

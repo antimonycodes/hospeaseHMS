@@ -4,7 +4,7 @@ import FrontdeskTable from "./FrontdeskTable";
 
 const FrontdeskOverview = () => {
   return (
-    <div className=" font-jakarta">
+    <div className=" font-inter">
       <div className=" flex flex-col gap-4">
         <FrontdeskCards />
         <FrontdeskChart />

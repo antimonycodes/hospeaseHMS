@@ -1,8 +1,8 @@
-import { JSX, useState } from "react";
+import React, { JSX, useState } from "react";
 import Table from "../../../Shared/Table";
-import { formatPhoneNumber } from "../../../utils/formatPhoneNumber";
 import { getImageSrc } from "../../../utils/imageUtils";
-import AddPatientModal from "./AddPatientModal";
+import { formatPhoneNumber } from "../../../utils/formatPhoneNumber";
+import { useNavigate } from "react-router-dom";
 
 type Patient = {
   id: string;
@@ -15,9 +15,14 @@ type Patient = {
   occupation: string;
   age: number;
 };
-
-const FpatientsTable = () => {
+const Dpatients = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const navigate = useNavigate();
+
+  const details = (patientId: string) => {
+    navigate(`/dashboard/appointments/${patientId}`);
+  };
 
   // Function to open modal
   const openModal = () => {
@@ -295,13 +300,6 @@ const FpatientsTable = () => {
       ),
     },
     {
-      key: "branch",
-      label: "Branch",
-      render: (_, patient) => (
-        <span className={` text-[#667085] text-sm`}>{patient.branch}</span>
-      ),
-    },
-    {
       key: "occupation",
       label: "Occupation",
       render: (_, patient) => (
@@ -309,11 +307,14 @@ const FpatientsTable = () => {
       ),
     },
     {
-      key: "patientid",
+      key: "id",
       label: "",
-      render: (_, patient) => (
-        <button>
-          <img src={getImageSrc("edit.svg")} alt="" />
+      render: (_, data) => (
+        <button
+          className="cursor-pointer text-[#009952] text-sm font-medium"
+          onClick={() => details(data.id)}
+        >
+          View more
         </button>
       ),
     },
@@ -351,15 +352,6 @@ const FpatientsTable = () => {
             <button className="cursor-pointer">
               <img src={getImageSrc("filter.svg")} alt="" />
             </button>
-
-            {/* add button */}
-            <button
-              onClick={openModal}
-              className="w-[120px] flex items-center justify-center gap-2 cursor-pointer text-white text-sm bg-primary h-[40px] rounded-[8px]"
-            >
-              Add new
-              <img src={getImageSrc("plus.svg")} alt="" />
-            </button>
           </div>
         </div>
       </div>
@@ -371,11 +363,8 @@ const FpatientsTable = () => {
         rowsPerPage={10}
         radius="rounded-none"
       />
-
-      {/* modal */}
-      <AddPatientModal isOpen={isModalOpen} onClose={closeModal} />
     </div>
   );
 };
 
-export default FpatientsTable;
+export default Dpatients;

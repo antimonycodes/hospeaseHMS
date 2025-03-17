@@ -85,17 +85,24 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       activeIcon: getImageSrc("overviewicon-active.svg"),
     },
     {
+      name: "Patients",
+      path: "/dashboard/patients",
+      icon: getImageSrc("patientsicon.svg"),
+      activeIcon: getImageSrc("patienticonsLight.svg"),
+    },
+    {
       name: "Appointments",
       path: "/dashboard/appointments",
       icon: getImageSrc("appointmentsdark.svg"),
       activeIcon: getImageSrc("appointmentLight.svg"),
     },
     {
-      name: "Patients",
-      path: "/dashboard/patients",
-      icon: getImageSrc("patientsicon.svg"),
-      activeIcon: getImageSrc("patienticonsLight.svg"),
+      name: "Shifts",
+      path: "/dashboard/shifts",
+      icon: getImageSrc("appointmentsdark.svg"),
+      activeIcon: getImageSrc("appointmentLight.svg"),
     },
+    
   ],
   frontdesk: [
     {
@@ -116,5 +123,6 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       icon: getImageSrc("appointmentsdark.svg"),
       activeIcon: getImageSrc("appointmentLight.svg"),
     },
+    
   ],
 };
