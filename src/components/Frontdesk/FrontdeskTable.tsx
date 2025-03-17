@@ -184,14 +184,16 @@ const FrontdeskTable = () => {
       key: "name",
       label: "Name",
       render: (_, patient) => (
-        <span className=" text-[#101828]">{patient.name}</span>
+        <span className=" text-[#101828] font-medium text-sm">
+          {patient.name}
+        </span>
       ),
     },
     {
       key: "age",
       label: "Age",
       render: (_, patient) => (
-        <span className="text-[#667085]">{patient.age}</span>
+        <span className="text-[#667085] text-sm">{patient.age}</span>
       ),
     },
 
@@ -199,7 +201,7 @@ const FrontdeskTable = () => {
       key: "phone",
       label: "Phone",
       render: (_, patient) => (
-        <span className="text-[#667085]">
+        <span className="text-[#667085] text-sm">
           {formatPhoneNumber(patient.phone)}
         </span>
       ),
@@ -208,14 +210,14 @@ const FrontdeskTable = () => {
       key: "gender",
       label: "Gender",
       render: (_, patient) => (
-        <span className={`font-medium text-[#667085]`}>{patient.gender}</span>
+        <span className={` text-[#667085] text-sm`}>{patient.gender}</span>
       ),
     },
     {
       key: "lastVisit",
       label: "Last Visit",
       render: (_, patient) => (
-        <span className="text-[#667085]">{patient.lastVisit}</span>
+        <span className="text-[#667085] text-sm">{patient.lastVisit}</span>
       ),
     },
   ];

@@ -16,7 +16,8 @@ import Nurses from "./pages/Nurses";
 import Pharmacy from "./pages/Pharmacy";
 import AppointmentDetails from "./components/Frontdesk/appointment/AppointmentDetails";
 import Payment from "./pages/Payment";
-import Profile from "./pages/Profile"
+import Profile from "./pages/Profile";
+import Shift from "./pages/Shift";
 
 function App() {
   return (
@@ -51,6 +52,7 @@ function App() {
             <Route path="users" element={<Users />} />
             <Route path="payment" element={<Payment />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="shifts" element={<Shift />} />
           </Route>
         </Routes>
       </AuthProvider>

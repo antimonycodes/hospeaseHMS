@@ -66,7 +66,7 @@ const FrontdeskChart = () => {
   };
 
   return (
-    <div className="w-full bg-white rounded-lg p-10">
+    <div className="w-full bg-white rounded-lg p-10 font-jakarta">
       <div className="flex items-center justify-between pb-10">
         <h1>Patients visit by Gender</h1>
         <button>Guess</button>
