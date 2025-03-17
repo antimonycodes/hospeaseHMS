@@ -79,7 +79,7 @@ const SaUsersPage = () => {
 
       {/* modals */}
       {openModal && modalType === "Department" && (
-        <AddDepartmentModal onclose={() => setOpenModal(false)} />
+        <AddDepartmentModal onClose={() => setOpenModal(false)} />
       )}
     </div>
   );
