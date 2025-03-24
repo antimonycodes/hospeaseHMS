@@ -158,11 +158,12 @@
 import { Link, useLocation } from "react-router-dom";
 import { useRole } from "../../hooks/useRole";
 import { useEffect, useState, useRef } from "react";
-import { X } from "lucide-react";
+import { ArrowLeftToLine, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { sidebarRoutes } from "../../config/sidebarRoutes";
 import logo from "../../assets/logo-full.png";
 import logoSmall from "../../assets/logo-small.png";
+import { useAuth } from "../../store/AuthContext";
 
 interface SidebarProps {
   isMobileMenuOpen: boolean;
@@ -215,6 +216,7 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
     };
   }, []);
 
+  const { logout } = useAuth();
   return (
     <div className="font-jakarta h-full">
       {/* Mobile sidebar */}
@@ -313,6 +315,13 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
               )}
             </Link>
           ))}
+        </div>
+        {/*  */}
+        <div className=" absolute bottom-24 cursor-pointer">
+          <h1 className="" onClick={() => logout()}>
+            Log out
+          </h1>
+          <ArrowLeftToLine />
         </div>
       </div>
 
