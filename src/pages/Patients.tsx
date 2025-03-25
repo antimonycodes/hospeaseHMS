@@ -3,7 +3,7 @@ import PatientsPage from "../components/Superadmin/patients/PatientsPage";
 import { useRole } from "../hooks/useRole";
 import FpatientsTable from "../components/Frontdesk/patients/FpatientsTable";
 import Dpatients from "../components/Doctor/patients/Dpatients";
-import Labpatients from "../components/Laboratory/patients/labpatients";
+import Labpatients from "../components/Laboratory/patients/Labpatients";
 
 const roleComponents: Record<string, JSX.Element> = {
   superadmin: <PatientsPage />,
