@@ -7,7 +7,7 @@ const Laboverview = () => {
     <div className="font-inter">
       <div className=" flex flex-col gap-4">
         <Overviewcard cardTitle="Laboratory Dashboard" />
-        <OverviewChart />
+        <OverviewChart ChartTitle="Laboratory Tests" />
       </div>
     </div>
   );
