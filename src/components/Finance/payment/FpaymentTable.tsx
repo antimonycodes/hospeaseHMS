@@ -18,14 +18,19 @@ interface FpaymentTableProps {
 
 const FpaymentTable = ({ payments }: FpaymentTableProps) => {
   const [paymentData, setPaymentData] = useState<Payment[]>([]);
+  const [filterStatus] = useState<"All" | "Full Payment" | "Half Payment">(
+    "All"
+  );
 
   useEffect(() => {
-    // Filter payments to only include those with status "Full Payment"
-    const fullPayments = payments.filter(
-      (payment) => payment.status === "Full Payment"
-    );
-    setPaymentData(fullPayments);
-  }, [payments]);
+    let filteredPayments = payments;
+    if (filterStatus !== "All") {
+      filteredPayments = payments.filter(
+        (payment) => payment.status === filterStatus
+      );
+    }
+    setPaymentData(filteredPayments);
+  }, [payments, filterStatus]);
 
   const togglePaymentStatus = (id: string) => {
     setPaymentData((prevPayments) =>
@@ -139,3 +144,21 @@ const FpaymentTable = ({ payments }: FpaymentTableProps) => {
 };
 
 export default FpaymentTable;
+
+{
+  /* <div className="flex justify-end p-4">
+<select
+  value={filterStatus}
+  onChange={(e) =>
+    setFilterStatus(
+      e.target.value as "All" | "Full Payment" | "Half Payment"
+    )
+  }
+  className="border border-gray-300 rounded p-2"
+>
+  <option value="All">All</option>
+  <option value="Full Payment">Full Payment</option>
+  <option value="Half Payment">Half Payment</option>
+</select>
+</div> */
+}
