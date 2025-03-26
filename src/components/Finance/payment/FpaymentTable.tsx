@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import Table from "../../../Shared/Table";
 
 interface Payment {
@@ -8,7 +8,7 @@ interface Payment {
   purpose: string;
   paymentMethod: string;
   date: string;
-  status: "Full Payment" | "Half Payment" | "All";
+  status: "All" | "Full Payment" | "Half Payment";
   active: boolean;
 }
 
@@ -17,18 +17,28 @@ interface FpaymentTableProps {
 }
 
 const FpaymentTable = ({ payments }: FpaymentTableProps) => {
-  const [paymentStatuses, setPaymentStatuses] = useState(
-    payments.reduce((acc, payment) => {
-      acc[payment.id] = payment.active;
-      return acc;
-    }, {} as Record<string, boolean>)
-  );
+  const [paymentData, setPaymentData] = useState<Payment[]>([]);
+
+  useEffect(() => {
+    // Filter payments to only include those with status "Full Payment"
+    const fullPayments = payments.filter(
+      (payment) => payment.status === "Full Payment"
+    );
+    setPaymentData(fullPayments);
+  }, [payments]);
 
   const togglePaymentStatus = (id: string) => {
-    setPaymentStatuses((prevStatuses) => ({
-      ...prevStatuses,
-      [id]: !prevStatuses[id],
-    }));
+    setPaymentData((prevPayments) =>
+      prevPayments.map((payment) =>
+        payment.id === id
+          ? {
+              ...payment,
+              active: !payment.active,
+              status: !payment.active ? "Full Payment" : "Half Payment",
+            }
+          : payment
+      )
+    );
   };
 
   const columns: {
@@ -81,23 +91,23 @@ const FpaymentTable = ({ payments }: FpaymentTableProps) => {
     {
       key: "active",
       label: "Payment Status",
-      render: (value, row) => (
+      render: (_, row) => (
         <div className="flex items-center">
           <label className="inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
               className="sr-only"
-              checked={paymentStatuses[row.id]}
+              checked={row.active}
               onChange={() => togglePaymentStatus(row.id)}
             />
             <div
               className={`relative w-10 h-5 rounded-full transition-colors ${
-                paymentStatuses[row.id] ? "bg-primary" : "bg-gray-200"
+                row.active ? "bg-primary" : "bg-gray-200"
               }`}
             >
               <div
                 className={`absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform ${
-                  paymentStatuses[row.id] ? "transform translate-x-5" : ""
+                  row.active ? "transform translate-x-5" : ""
                 }`}
               ></div>
             </div>
@@ -115,12 +125,12 @@ const FpaymentTable = ({ payments }: FpaymentTableProps) => {
   ];
 
   return (
-    <div className="w-full bg-white rounded-b-[8px] shadow-table ">
+    <div className="w-full bg-white rounded-b-[8px] shadow-table">
       <Table
-        data={payments}
+        data={paymentData}
         columns={columns}
         rowKey="id"
-        pagination={payments.length > 10}
+        pagination={paymentData.length > 10}
         rowsPerPage={10}
         radius="rounded-none"
       />

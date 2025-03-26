@@ -30,6 +30,7 @@ const Tablehead: React.FC<TableheadProps> = ({
             <button className="cursor-pointer">
               <img src={getImageSrc("filter.svg")} alt="Filter" />
             </button>
+            <button className=" border rounded-xl ">Add New</button>
           </div>
         )}
       </div>

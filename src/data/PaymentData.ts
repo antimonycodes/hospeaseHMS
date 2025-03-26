@@ -21,7 +21,7 @@ export const paymentData: Payment[] = [
     active: true,
   },
   {
-    id: "HP-22345",
+    id: "HP-22346",
     patient: "Mary Benson",
     amount: "₦100,000",
     purpose: "Membership card",
@@ -31,7 +31,7 @@ export const paymentData: Payment[] = [
     active: true,
   },
   {
-    id: "HP-22345",
+    id: "HP-22347",
     patient: "Mary Benson",
     amount: "₦100,000",
     purpose: "Surgery",
@@ -41,7 +41,7 @@ export const paymentData: Payment[] = [
     active: true,
   },
   {
-    id: "HP-22345",
+    id: "HP-22348",
     patient: "Mary Benson",
     amount: "₦100,000",
     purpose: "Surgery",
@@ -51,7 +51,7 @@ export const paymentData: Payment[] = [
     active: true,
   },
   {
-    id: "HP-22345",
+    id: "HP-22349",
     patient: "Mary Benson",
     amount: "₦100,000",
     purpose: "Membership card",
@@ -61,7 +61,7 @@ export const paymentData: Payment[] = [
     active: false,
   },
   {
-    id: "HP-22345",
+    id: "HP-22350",
     patient: "Mary Benson",
     amount: "₦100,000",
     purpose: "Membership card",
@@ -71,7 +71,7 @@ export const paymentData: Payment[] = [
     active: false,
   },
   {
-    id: "HP-22345",
+    id: "HP-22351",
     patient: "Mary Benson",
     amount: "₦100,000",
     purpose: "Membership card",
@@ -81,7 +81,7 @@ export const paymentData: Payment[] = [
     active: true,
   },
   {
-    id: "HP-22345",
+    id: "HP-22352",
     patient: "Mary Benson",
     amount: "₦100,000",
     purpose: "Membership card",
@@ -91,7 +91,7 @@ export const paymentData: Payment[] = [
     active: true,
   },
   {
-    id: "HP-22345",
+    id: "HP-22353",
     patient: "Mary Benson",
     amount: "₦100,000",
     purpose: "Membership card",
@@ -101,7 +101,7 @@ export const paymentData: Payment[] = [
     active: false,
   },
   {
-    id: "HP-22345",
+    id: "HP-22354",
     patient: "Mary Benson",
     amount: "₦100,000",
     purpose: "Membership card",
@@ -111,7 +111,7 @@ export const paymentData: Payment[] = [
     active: false,
   },
   {
-    id: "HP-22345",
+    id: "HP-22355",
     patient: "Mary Benson",
     amount: "₦100,000",
     purpose: "Membership card",
@@ -121,7 +121,7 @@ export const paymentData: Payment[] = [
     active: false,
   },
   {
-    id: "HP-22345",
+    id: "HP-22356",
     patient: "Mary Benson",
     amount: "₦100,000",
     purpose: "Membership card",
