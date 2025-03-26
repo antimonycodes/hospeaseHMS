@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import Table from "../../../Shared/Table";
 import img from "../../../assets/ribiero.png";
-import { useState } from "react";
+import { useState, JSX } from "react";
 
 interface Doctor {
   id: string;
@@ -137,7 +137,11 @@ const ConsultantTable = () => {
     },
   ]);
 
-  const columns = [
+  const columns: {
+    key: keyof Doctor;
+    label: string;
+    render?: (value: any, patient: Doctor) => JSX.Element;
+  }[] = [
     {
       key: "picture" as keyof Doctor,
       label: "Avatar",

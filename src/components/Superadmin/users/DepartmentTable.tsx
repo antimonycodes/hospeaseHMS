@@ -1,5 +1,6 @@
 import { Pencil } from "lucide-react";
 import Table from "../../../Shared/Table";
+import { JSX } from "react";
 
 interface StaffMember {
   id: number;
@@ -7,8 +8,14 @@ interface StaffMember {
   email: string;
 }
 
+interface Column {
+  key: keyof StaffMember;
+  label: string;
+  render?: (value: any, row: StaffMember) => JSX.Element;
+}
+
 const DepartmentTable = () => {
-  const columns = [
+  const columns: Column[] = [
     {
       key: "name" as keyof StaffMember,
       label: "Name",

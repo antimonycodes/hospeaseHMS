@@ -1,5 +1,6 @@
 import { Pencil } from "lucide-react";
 import Table from "../../../Shared/Table";
+import { JSX } from "react";
 
 interface Admin {
   id: number;
@@ -7,8 +8,14 @@ interface Admin {
   email: string;
 }
 
+interface Column {
+  key: keyof Admin;
+  label: string;
+  render?: (value: any, patient: Admin) => JSX.Element;
+}
+
 const AdministratorTable = () => {
-  const columns = [
+  const columns: Column[] = [
     {
       key: "name" as keyof Admin,
       label: "Name",
