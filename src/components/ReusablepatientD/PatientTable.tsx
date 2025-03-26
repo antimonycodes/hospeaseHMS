@@ -1,19 +1,7 @@
 import Table from "../../Shared/Table";
 import { formatPhoneNumber } from "../../utils/formatPhoneNumber";
 import { useNavigate } from "react-router-dom";
-
-type Patient = {
-  id: string;
-  lastVisit: string;
-  name: string;
-  phone: string;
-  gender: "Male" | "Female";
-  patientid: string;
-  branch: string;
-  occupation: string;
-  age: number;
-  status: "Pending" | "Ongoing" | "Completed";
-};
+import { Patient } from "../../data/patientsData";
 
 interface PatientTableProps {
   patients: Patient[];
@@ -26,76 +14,81 @@ const PatientTable = ({ patients }: PatientTableProps) => {
     navigate(`/dashboard/appointments/${patientId}`);
   };
 
-  const columns = [
+  const statusStyles: Record<Patient["status"], string> = {
+    Ongoing: "bg-[#FFEBAA] text-[#B58A00]",
+    Completed: "bg-[#CFFFE9] text-[#009952]",
+    Pending: "bg-[#FBE1E1] text-[#F83E41]",
+  };
+
+  // Explicitly define the type for columns
+  const columns: {
+    key: keyof Patient;
+    label: string;
+    render: (value: string | number, row: Patient) => React.ReactNode;
+  }[] = [
     {
-      key: "name" as keyof Patient,
+      key: "name",
       label: "Name",
-      render: (_: any, patient: Patient) => (
-        <span className="text-dark font-medium text-sm">{patient.name}</span>
+      render: (value) => (
+        <span className="text-dark font-medium text-sm">{value}</span>
       ),
     },
     {
-      key: "patientid" as keyof Patient,
+      key: "patientid",
       label: "Patient ID",
-      render: (_: any, patient: Patient) => (
-        <span className="text-[#667085] text-sm">{patient.patientid}</span>
+      render: (value) => (
+        <span className="text-[#667085] text-sm">{value}</span>
       ),
     },
     {
-      key: "gender" as keyof Patient,
+      key: "gender",
       label: "Gender",
-      render: (_: any, patient: Patient) => (
-        <span className="text-[#667085] text-sm">{patient.gender}</span>
+      render: (value) => (
+        <span className="text-[#667085] text-sm">{value}</span>
       ),
     },
     {
-      key: "phone" as keyof Patient,
+      key: "phone",
       label: "Phone",
-      render: (_: any, patient: Patient) => (
+      render: (value) => (
         <span className="text-[#667085] text-sm">
-          {formatPhoneNumber(patient.phone)}
+          {formatPhoneNumber(value as string)}
         </span>
       ),
     },
     {
-      key: "occupation" as keyof Patient,
+      key: "occupation",
       label: "Occupation",
-      render: (_: any, patient: Patient) => (
-        <span className="text-[#667085] text-sm">{patient.occupation}</span>
+      render: (value) => (
+        <span className="text-[#667085] text-sm">{value}</span>
       ),
     },
     {
-      key: "status" as keyof Patient,
+      key: "status",
       label: "Status",
-      render: (_: any, patient: Patient) => (
+      render: (value) => (
         <span
           className={`text-sm px-2 py-1 rounded-full ${
-            statusStyles[patient.status]
+            statusStyles[value as Patient["status"]]
           }`}
         >
-          {patient.status}
+          {value}
         </span>
       ),
     },
     {
-      key: "id" as keyof Patient,
+      key: "id",
       label: "",
-      render: (_: any, data: Patient) => (
+      render: (value, row) => (
         <button
           className="cursor-pointer text-[#009952] text-sm font-medium"
-          onClick={() => details(data.id)}
+          onClick={() => details(row.id)}
         >
           View more
         </button>
       ),
     },
   ];
-
-  const statusStyles: Record<Patient["status"], string> = {
-    Ongoing: "bg-[#FFEBAA] text-[#B58A00]",
-    Completed: "bg-[#CFFFE9] text-[#009952]",
-    Pending: "bg-[#FBE1E1] text-[#F83E41]",
-  };
 
   return (
     <div className="w-full h-full bg-white">

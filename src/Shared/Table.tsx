@@ -1,10 +1,10 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 interface Column<T> {
   key: keyof T;
-  label: any;
-  render?: (value: any, row: T) => React.ReactNode;
+  label: React.ReactNode;
+  render?: (value: T[keyof T], row: T) => React.ReactNode;
 }
 
 interface TableProps<T> {
@@ -26,13 +26,19 @@ const Table = <T,>({
 }: TableProps<T>) => {
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Reset currentPage when rowsPerPage or data changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [rowsPerPage, data]);
+
+  const totalPages = Math.ceil(data.length / rowsPerPage);
   const paginatedData = pagination
     ? data.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
     : data;
 
   return (
-    <div className="w-full overflow-x-auto ">
-      <table className="w-full min-w-max border border-[#EAECF0]">
+    <div className="w-full overflow-x-auto">
+      <table className={`w-full min-w-max border border-[#EAECF0] ${radius}`}>
         <thead className="bg-[#F9FAFB]">
           <tr>
             {columns.map((column) => (
@@ -60,36 +66,47 @@ const Table = <T,>({
         </tbody>
       </table>
 
-      {pagination && (
+      {pagination && totalPages > 1 && (
         <div className="flex justify-between items-center mt-4 text-sm p-4">
-          <button className=" cursor-pointer px-4 py-2 border border-[#D0D5DD] rounded-lg flex items-center gap-2 text-[#344054] font-semibold">
+          {/* Previous Button */}
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className={`cursor-pointer px-4 py-2 border border-[#D0D5DD] rounded-lg flex items-center gap-2 text-[#344054] font-semibold ${
+              currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+          >
             <ArrowLeft />
             Previous
           </button>
 
+          {/* Page Numbers */}
           <div className="flex space-x-1 items-center">
-            <button className="w-6 h-6 flex items-center justify-center bg-[#F9F5FF] p-6 rounded-lg text-sm text-[#7F56D9] font-medium">
-              1
-            </button>
-            <button className="w-6 h-6 flex items-center justify-center rounded-full text-sm text-[#667085] font-medium">
-              2
-            </button>
-            <button className="w-6 h-6 flex items-center justify-center rounded-full text-sm text-[#667085] font-medium">
-              3
-            </button>
-            <span className="px-1">...</span>
-            <button className="w-6 h-6 flex items-center justify-center rounded-full text-sm text-[#667085] font-medium">
-              8
-            </button>
-            <button className="w-6 h-6 flex items-center justify-center rounded-full text-sm text-[#667085] font-medium">
-              9
-            </button>
-            <button className="w-6 h-6 flex items-center justify-center rounded-full text-sm text-[#667085] font-medium">
-              10
-            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`w-6 h-6 flex items-center justify-center rounded-lg text-sm font-medium ${
+                  page === currentPage
+                    ? "bg-[#F9F5FF] text-[#7F56D9]"
+                    : "text-[#667085]"
+                }`}
+              >
+                {page}
+              </button>
+            ))}
           </div>
 
-          <button className="px-4 cursor-pointer py-2 border border-[#D0D5DD] rounded-lg flex items-center gap-2 text-[#344054] font-semibold">
+          {/* Next Button */}
+          <button
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+            className={`px-4 cursor-pointer py-2 border border-[#D0D5DD] rounded-lg flex items-center gap-2 text-[#344054] font-semibold ${
+              currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+          >
             Next
             <ArrowRight />
           </button>
