@@ -136,7 +136,7 @@ const FrontdeskTable = () => {
     {
       id: "16",
       lastVisit: "01-01-2025",
-      name: "Benjamin Clark",
+      name: "Benjamin Clarkk",
       phone: "+2348205839499",
       gender: "Male",
       age: 41,
