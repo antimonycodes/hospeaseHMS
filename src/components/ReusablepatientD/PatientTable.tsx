@@ -20,7 +20,6 @@ const PatientTable = ({ patients }: PatientTableProps) => {
     Pending: "bg-[#FBE1E1] text-[#F83E41]",
   };
 
-  // Explicitly define the type for columns
   const columns: {
     key: keyof Patient;
     label: string;

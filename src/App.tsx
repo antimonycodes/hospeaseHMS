@@ -18,6 +18,7 @@ import AppointmentDetails from "./components/Frontdesk/appointment/AppointmentDe
 import Payment from "./pages/Payment";
 import Profile from "./pages/Profile";
 import Shift from "./pages/Shift";
+import Expenses from "./pages/Expenses";
 
 function App() {
   return (
@@ -53,6 +54,7 @@ function App() {
             <Route path="payment" element={<Payment />} />
             <Route path="profile" element={<Profile />} />
             <Route path="shifts" element={<Shift />} />
+            <Route path="expenses" element={<Expenses />} />
           </Route>
         </Routes>
       </AuthProvider>

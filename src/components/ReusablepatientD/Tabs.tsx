@@ -1,31 +1,33 @@
-import { useState } from "react";
+type TabType<T extends string> = T;
 
-type TabType = "Pending" | "Ongoing" | "Completed";
-
-interface TabsProps {
-  activeTab: TabType;
-  setActiveTab: (tab: TabType) => void;
-  statusCounts: { [key in TabType]: number };
+interface TabsProps<T extends string> {
+  activeTab: TabType<T>;
+  setActiveTab: (tab: TabType<T>) => void;
+  statusCounts: { [key in TabType<T>]: number };
+  tabs: TabType<T>[];
 }
 
-const Tabs = ({ activeTab, setActiveTab, statusCounts }: TabsProps) => {
-  const tabs: TabType[] = ["Pending", "Ongoing", "Completed"];
-
+const Tabs = <T extends string>({
+  activeTab,
+  setActiveTab,
+  statusCounts,
+  tabs,
+}: TabsProps<T>) => {
   return (
-    <div className="px-6 w-full bg-white flex space-x-2 md:space-x-6 ">
+    <div className="px-6 w-full bg-white flex space-x-2 md:space-x-6">
       {tabs.map((tab) => (
         <button
           key={tab}
           onClick={() => setActiveTab(tab)}
-          className={`pb-4   text-xs md:text-sm font-medium ${
+          className={`pb-4 text-xs md:text-sm font-medium ${
             activeTab === tab
               ? "text-green-600 border-b-2 border-green-600"
               : "text-gray-500"
           }`}
         >
           {tab}
-          {activeTab === tab && (
-            <span className="text-xs  bg-primary text-white py-0.5 px-3 rounded-xl">
+          {statusCounts[tab] !== undefined && activeTab === tab && (
+            <span className="text-xs bg-primary text-white py-0.5 px-3 rounded-xl">
               {statusCounts[tab]}
             </span>
           )}

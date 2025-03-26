@@ -106,7 +106,7 @@ export const patients: Patient[] = [
     branch: "Agodi",
     occupation: "Banker",
     age: 33,
-    status: "Pending",
+    status: "Ongoing",
   },
   {
     id: "9",
@@ -178,7 +178,7 @@ export const patients: Patient[] = [
     branch: "Agodi",
     occupation: "Banker",
     age: 38,
-    status: "Completed",
+    status: "Ongoing",
   },
   {
     id: "15",

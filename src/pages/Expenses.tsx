@@ -1,17 +1,16 @@
-import Fpayment from "../components/Finance/payment/Fpayment";
-import PaymentPage from "../components/Superadmin/payment/PaymentPage";
+import Fexpenses from "../components/Finance/expenses/Fexpenses";
 import { useRole } from "../hooks/useRole";
 import { JSX } from "react";
 const roleComponents: Record<string, JSX.Element> = {
-  superadmin: <PaymentPage />,
-  finance: <Fpayment />,
+  finance: <Fexpenses />,
+  // doctor:
+  // frontdesk:
 };
-
-const Payment = () => {
+const Expenses = () => {
   const role = useRole();
 
   // Default to 'Unauthorized' if role is not recognized
   return role ? roleComponents[role] : <p>Unauthorized Access</p>;
 };
 
-export default Payment;
+export default Expenses;

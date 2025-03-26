@@ -1,4 +1,5 @@
 import DoctorOverview from "../components/Doctor/DoctorOverview";
+import Foverview from "../components/Finance/overview/Foverview";
 import FrontdeskOverview from "../components/Frontdesk/FrontdeskOverview";
 import Laboverview from "../components/Laboratory/Overview/Laboverview";
 import SuperAdminOverview from "../components/Superadmin/SuperAdminOverview";
@@ -11,6 +12,7 @@ const roleComponents: Record<string, JSX.Element> = {
   doctor: <DoctorOverview />,
   frontdesk: <FrontdeskOverview />,
   laboratory: <Laboverview />,
+  finance: <Foverview />,
 };
 
 const Overview = () => {

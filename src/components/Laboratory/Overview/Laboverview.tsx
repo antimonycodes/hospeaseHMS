@@ -1,5 +1,4 @@
-import React from "react";
-import Overviewcard from "../../ReusabledashboardD/Overviewcard";
+import OverviewCard from "../../ReusabledashboardD/Overviewcard";
 import OverviewChart from "../../ReusabledashboardD/OverviewChart";
 import LaboverviewTable from "./LaboverviewTable";
 
@@ -7,7 +6,11 @@ const Laboverview = () => {
   return (
     <div className="font-inter">
       <div className=" flex flex-col gap-4">
-        <Overviewcard cardTitle="Laboratory Dashboard" />
+        <OverviewCard
+          cardTitle="Laboratory Dashboard"
+          category="lab"
+          limit={4}
+        />
         <OverviewChart ChartTitle="Laboratory Tests" />
         <LaboverviewTable />
       </div>

@@ -119,6 +119,12 @@ const Signup = () => {
         >
           Login as Laboratory
         </button>
+        <button
+          onClick={() => handleLogin("finance")}
+          className=" cursor-pointer"
+        >
+          Login as Finance
+        </button>
       </div>
     </div>
   );

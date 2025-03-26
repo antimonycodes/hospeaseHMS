@@ -1,13 +1,13 @@
 import React, { useState } from "react";
+import { patients } from "../../../data/patientsData";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import Tabs from "../../ReusablepatientD/Tabs";
-import PatientTable from "../../ReusablepatientD/PatientTable";
-import { patients } from "../../../data/patientsData";
+import PatientTable from "../../ReusablepatientD/PatientTable"; // Ensure correct import
 
 const getStatusCounts = () => {
   return patients.reduce(
     (acc, patient) => {
-      acc[patient.status]++;
+      acc[patient.status] = (acc[patient.status] || 0) + 1;
       return acc;
     },
     { Pending: 0, Ongoing: 0, Completed: 0 }
@@ -24,11 +24,13 @@ const Labpatients = () => {
   return (
     <div>
       <Tablehead tableTitle="Patients" tableCount={patients.length} />
-      <Tabs
+      <Tabs<"Pending" | "Ongoing" | "Completed">
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         statusCounts={statusCounts}
+        tabs={["Pending", "Ongoing", "Completed"]}
       />
+
       <PatientTable patients={filteredPatients} />
     </div>
   );

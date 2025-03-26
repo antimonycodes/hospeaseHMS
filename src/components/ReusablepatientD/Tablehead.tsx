@@ -3,7 +3,7 @@ import SearchBar from "./SearchBar";
 
 interface TableheadProps {
   tableTitle: string;
-  tableCount: number;
+  tableCount?: number;
   showControls?: boolean;
 }
 
@@ -13,13 +13,15 @@ const Tablehead: React.FC<TableheadProps> = ({
   showControls = true,
 }) => {
   return (
-    <div className="w-full font-inter h-full bg-white rounded-t-[8px] shadow overflow-hidden">
+    <div className="w-full font-inter  bg-white rounded-t-[8px] shadow overflow-hidden">
       <div className="p-6 flex items-center justify-between">
-        <h1 className="text-[18px] w-[160px] font-medium">
+        <h1 className="text-[18px]  font-medium">
           {tableTitle}
-          <span className="bg-[#F9F5FF] py-[2px] px-[8px] rounded-[16px] text-[#6941C6] font-medium text-[12px]">
-            {tableCount}
-          </span>
+          {tableCount !== undefined && (
+            <span className="bg-[#F9F5FF] py-[2px] px-[8px] rounded-[16px] text-[#6941C6] font-medium text-[12px]">
+              {tableCount}
+            </span>
+          )}
         </h1>
 
         {showControls && (
