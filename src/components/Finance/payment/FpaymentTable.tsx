@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import Table from "../../../Shared/Table";
 
 interface Payment {
@@ -8,6 +9,7 @@ interface Payment {
   paymentMethod: string;
   date: string;
   status: "Full Payment" | "Half Payment" | "All";
+  active: boolean;
 }
 
 interface FpaymentTableProps {
@@ -15,10 +17,24 @@ interface FpaymentTableProps {
 }
 
 const FpaymentTable = ({ payments }: FpaymentTableProps) => {
+  const [paymentStatuses, setPaymentStatuses] = useState(
+    payments.reduce((acc, payment) => {
+      acc[payment.id] = payment.active;
+      return acc;
+    }, {} as Record<string, boolean>)
+  );
+
+  const togglePaymentStatus = (id: string) => {
+    setPaymentStatuses((prevStatuses) => ({
+      ...prevStatuses,
+      [id]: !prevStatuses[id],
+    }));
+  };
+
   const columns: {
     key: keyof Payment;
     label: string;
-    render: (value: string | number, row: Payment) => React.ReactNode;
+    render: (value: string | number | boolean, row: Payment) => React.ReactNode;
   }[] = [
     {
       key: "id",
@@ -60,6 +76,33 @@ const FpaymentTable = ({ payments }: FpaymentTableProps) => {
       label: "Payment Type",
       render: (value) => (
         <span className="text-[#667085] text-sm">{value}</span>
+      ),
+    },
+    {
+      key: "active",
+      label: "Payment Status",
+      render: (value, row) => (
+        <div className="flex items-center">
+          <label className="inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              className="sr-only"
+              checked={paymentStatuses[row.id]}
+              onChange={() => togglePaymentStatus(row.id)}
+            />
+            <div
+              className={`relative w-10 h-5 rounded-full transition-colors ${
+                paymentStatuses[row.id] ? "bg-primary" : "bg-gray-200"
+              }`}
+            >
+              <div
+                className={`absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform ${
+                  paymentStatuses[row.id] ? "transform translate-x-5" : ""
+                }`}
+              ></div>
+            </div>
+          </label>
+        </div>
       ),
     },
     {

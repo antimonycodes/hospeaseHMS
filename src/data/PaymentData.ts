@@ -6,6 +6,7 @@ export interface Payment {
   paymentMethod: string;
   date: string;
   status: "All" | "Full Payment" | "Half Payment";
+  active: boolean;
 }
 
 export const paymentData: Payment[] = [
@@ -17,6 +18,7 @@ export const paymentData: Payment[] = [
     paymentMethod: "Bank Transfer",
     date: "22-02-2025",
     status: "Full Payment",
+    active: true,
   },
   {
     id: "HP-22345",
@@ -26,6 +28,7 @@ export const paymentData: Payment[] = [
     paymentMethod: "Bank Transfer",
     date: "22-02-2025",
     status: "Full Payment",
+    active: true,
   },
   {
     id: "HP-22345",
@@ -35,6 +38,7 @@ export const paymentData: Payment[] = [
     paymentMethod: "Bank Transfer",
     date: "22-02-2025",
     status: "Full Payment",
+    active: true,
   },
   {
     id: "HP-22345",
@@ -44,6 +48,7 @@ export const paymentData: Payment[] = [
     paymentMethod: "Bank Transfer",
     date: "22-02-2025",
     status: "Full Payment",
+    active: true,
   },
   {
     id: "HP-22345",
@@ -53,6 +58,7 @@ export const paymentData: Payment[] = [
     paymentMethod: "Bank Transfer",
     date: "22-02-2025",
     status: "Half Payment",
+    active: false,
   },
   {
     id: "HP-22345",
@@ -62,6 +68,7 @@ export const paymentData: Payment[] = [
     paymentMethod: "Bank Transfer",
     date: "22-02-2025",
     status: "Half Payment",
+    active: false,
   },
   {
     id: "HP-22345",
@@ -71,6 +78,7 @@ export const paymentData: Payment[] = [
     paymentMethod: "Bank Transfer",
     date: "22-02-2025",
     status: "Full Payment",
+    active: true,
   },
   {
     id: "HP-22345",
@@ -80,6 +88,7 @@ export const paymentData: Payment[] = [
     paymentMethod: "Bank Transfer",
     date: "22-02-2025",
     status: "Full Payment",
+    active: true,
   },
   {
     id: "HP-22345",
@@ -89,6 +98,7 @@ export const paymentData: Payment[] = [
     paymentMethod: "Bank Transfer",
     date: "22-02-2025",
     status: "Half Payment",
+    active: false,
   },
   {
     id: "HP-22345",
@@ -98,6 +108,7 @@ export const paymentData: Payment[] = [
     paymentMethod: "Bank Transfer",
     date: "22-02-2025",
     status: "Half Payment",
+    active: false,
   },
   {
     id: "HP-22345",
@@ -107,6 +118,7 @@ export const paymentData: Payment[] = [
     paymentMethod: "Bank Transfer",
     date: "22-02-2025",
     status: "Half Payment",
+    active: false,
   },
   {
     id: "HP-22345",
@@ -116,5 +128,6 @@ export const paymentData: Payment[] = [
     paymentMethod: "Bank Transfer",
     date: "22-02-2025",
     status: "Half Payment",
+    active: false,
   },
 ];

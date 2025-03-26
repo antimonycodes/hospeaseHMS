@@ -1,4 +1,4 @@
-import { paymentData, Payment } from "../../../data/PaymentData";
+import { paymentData } from "../../../data/PaymentData";
 import React, { useState } from "react";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import Tabs from "../../ReusablepatientD/Tabs";

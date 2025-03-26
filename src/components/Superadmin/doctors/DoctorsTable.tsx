@@ -141,16 +141,12 @@ const DoctorsTable = () => {
     {
       key: "picture" as keyof Doctor,
       label: "Avatar",
-      render: (value: string, row: Doctor) => (
+      render: (value: string | number | boolean | undefined, row: Doctor) => (
         <div className="flex items-center gap-2">
           <img
-            src={value}
+            src={value as string}
             alt={`Dr. ${row.firstName} ${row.lastName}`}
             className="h-10 w-10 border rounded-full object-cover border-gray-300"
-            // onError={(e) => {
-            //   (e.target as HTMLImageElement).src =
-            //     "https://via.placeholder.com/40";
-            // }}
           />
           <h1 className=" text-custom-black font-medium">
             {row.firstName} {row.lastName}
@@ -161,34 +157,34 @@ const DoctorsTable = () => {
     {
       key: "staffId" as keyof Doctor,
       label: "Staff ID",
-      render: (row: Doctor) => (
+      render: (value: string | number | boolean | undefined, row: Doctor) => (
         <div className="flex flex-col">
-          <span className="text-sm text-gray-500">HCS{row.id}455</span>
+          <span className="text-sm text-gray-500">{`HCS${row.id}455`}</span>
         </div>
       ),
     },
     {
       key: "phone" as keyof Doctor,
       label: "Phone",
-      render: (value: string) => (
+      render: (value: string | number | boolean | undefined) => (
         <div className="flex flex-col">
-          <span className="text-sm text-gray-500">{value}</span>
+          <span className="text-sm text-gray-500">{String(value)}</span>
         </div>
       ),
     },
     {
       key: "email" as keyof Doctor,
       label: "Email address",
-      render: (value: string) => (
+      render: (value: string | number | boolean | undefined) => (
         <div className="flex flex-col">
-          <span className="text-sm text-gray-500">{value}</span>
+          <span className="text-sm text-gray-500">{String(value)}</span>
         </div>
       ),
     },
     {
       key: "status" as keyof Doctor,
       label: "Status",
-      render: (value: string) => (
+      render: (value: string | number | boolean | undefined) => (
         <span
           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
             value === "Available"
@@ -196,20 +192,20 @@ const DoctorsTable = () => {
               : "bg-[#FCE9E9] text-[#F83E41]"
           }`}
         >
-          {value}
+          {String(value)}
         </span>
       ),
     },
     {
       key: "active" as keyof Doctor,
       label: "Control",
-      render: (value: boolean, row: Doctor) => (
+      render: (value: string | number | boolean | undefined, row: Doctor) => (
         <div className="flex items-center">
           <label className="inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
               className="sr-only"
-              checked={value}
+              checked={!!value}
               onChange={() => toggleDoctorStatus(row.id)}
             />
             <div
@@ -251,10 +247,6 @@ const DoctorsTable = () => {
       )
     );
   };
-
-  //   const viewDoctorDetails = (doctor: Doctor) => {
-  //     setSelectedDoctor(doctor);
-  //   };
 
   return (
     <div>
