@@ -5,11 +5,14 @@ import FpatientsTable from "../components/Frontdesk/patients/FpatientsTable";
 import Dpatients from "../components/Doctor/patients/Dpatients";
 import Labpatients from "../components/Laboratory/patients/Labpatients";
 
+import PharmPatients from "../components/Pharmacy/Patients/PharmPatients";
+
 const roleComponents: Record<string, JSX.Element> = {
   superadmin: <PatientsPage />,
   doctor: <Dpatients />,
   frontdesk: <FpatientsTable />,
   laboratory: <Labpatients />,
+  pharmacy: <PharmPatients />,
 };
 
 const Patients = () => {

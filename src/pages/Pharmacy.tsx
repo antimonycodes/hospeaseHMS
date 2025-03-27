@@ -1,9 +1,12 @@
 import { JSX } from "react";
 import SaPharnacyPage from "../components/Superadmin/pharmacy/SaPharnacyPage";
 import { useRole } from "../hooks/useRole";
+import PharmInventory from "../components/Pharmacy/Inventory/PharmInventory";
 
 const roleComponents: Record<string, JSX.Element> = {
   superadmin: <SaPharnacyPage />,
+  pharmacy: <PharmInventory />,
+
   //   doctor:  ,
   // frontdesk: ,
 };

@@ -2,6 +2,7 @@ import DoctorOverview from "../components/Doctor/DoctorOverview";
 import Foverview from "../components/Finance/overview/Foverview";
 import FrontdeskOverview from "../components/Frontdesk/FrontdeskOverview";
 import Laboverview from "../components/Laboratory/Overview/Laboverview";
+import PharmDash from "../components/Pharmacy/Overview/PharmDash";
 import SuperAdminOverview from "../components/Superadmin/SuperAdminOverview";
 // import SuperAdminOverview from "../components/Superadmin/Overview";
 import { useRole } from "../hooks/useRole";
@@ -13,6 +14,7 @@ const roleComponents: Record<string, JSX.Element> = {
   frontdesk: <FrontdeskOverview />,
   laboratory: <Laboverview />,
   finance: <Foverview />,
+  pharmacy: <PharmDash />,
 };
 
 const Overview = () => {
