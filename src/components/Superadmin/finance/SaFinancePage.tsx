@@ -1,20 +1,20 @@
 import React, { useState } from "react";
-import Table from "../../../Shared/Table";
-import { Plus, Search, X } from "lucide-react";
+
+import { Plus, Search } from "lucide-react";
 import Button from "../../../Shared/Button";
 import ExpenseTable from "./ExpenseTable";
 import PaymentTable from "./PaymentTable";
 import AddPaymentModal from "../../../Shared/AddPaymentModal";
 import AddExpenseModal from "../../../Shared/AddExpenseModal";
 
-interface Expense {
-  id: string;
-  item: string;
-  amount: string;
-  purchasedFrom: string;
-  purchasedBy: string;
-  paymentMethod: string;
-}
+// interface Expense {
+//   id: string;
+//   item: string;
+//   amount: string;
+//   purchasedFrom: string;
+//   purchasedBy: string;
+//   paymentMethod: string;
+// }
 
 const SaFinancePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"Payments" | "Expenses">(
@@ -31,7 +31,7 @@ const SaFinancePage: React.FC = () => {
   };
 
   // Payment form states
-  const [paymentForm, setPaymentForm] = useState({
+  const [paymentForm] = useState({
     id: "",
     patientFirstName: "",
     patientLastName: "",
@@ -41,7 +41,7 @@ const SaFinancePage: React.FC = () => {
   });
 
   // Expense form states
-  const [expenseForm, setExpenseForm] = useState({
+  const [expenseForm] = useState({
     item: "",
     purchasedFrom: "",
     amount: "",

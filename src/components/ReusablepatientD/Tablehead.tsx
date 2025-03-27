@@ -1,3 +1,4 @@
+import { Plus } from "lucide-react";
 import Button from "../../Shared/Button";
 import { getImageSrc } from "../../utils/imageUtils";
 import SearchBar from "./SearchBar";
@@ -8,6 +9,7 @@ interface TableheadProps {
   showControls?: boolean;
   showSearchBar?: boolean;
   showButton?: boolean;
+  onButtonClick?: () => void;
 }
 
 const Tablehead: React.FC<TableheadProps> = ({
@@ -15,7 +17,8 @@ const Tablehead: React.FC<TableheadProps> = ({
   tableCount,
   showControls = true,
   showSearchBar = true,
-  showButton = true,
+  showButton = false,
+  onButtonClick,
 }) => {
   return (
     <div className="w-full font-inter  bg-white rounded-t-[8px] shadow overflow-hidden">
@@ -32,7 +35,11 @@ const Tablehead: React.FC<TableheadProps> = ({
         </div>
         {/*  */}
         <div className="flex flex-grow justify-end items-center space-x-4">
-          {showSearchBar && <SearchBar />}
+          {showSearchBar && (
+            <div className="md:w-[70%]">
+              <SearchBar />
+            </div>
+          )}
 
           {showControls && (
             <button className="cursor-pointer">
@@ -43,9 +50,11 @@ const Tablehead: React.FC<TableheadProps> = ({
             <div className="  ">
               <Button
                 variant="primary"
-                className="text-[10px]  sm:text-[14px]  "
+                size="md"
+                className="text-[10px]  sm:text-[14px] flex items-center gap-2 px-4 "
+                onClick={onButtonClick}
               >
-                Add New{" "}
+                Add New <Plus size={16} />
               </Button>
             </div>
           )}

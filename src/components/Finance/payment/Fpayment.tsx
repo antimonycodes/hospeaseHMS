@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import Tabs from "../../ReusablepatientD/Tabs";
 import FpaymentTable from "./FpaymentTable";
+import AddPaymentModal from "../../../Shared/AddPaymentModal";
 
 type PaymentStatus = "All" | "Full Payment" | "Half Payment";
 
@@ -20,6 +21,11 @@ const getPaymentCounts = () => {
 };
 
 const Fpayment = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
   const [activeTab, setActiveTab] = useState<PaymentStatus>("All");
   const statusCounts = getPaymentCounts();
   const filteredPayments =
@@ -28,7 +34,25 @@ const Fpayment = () => {
       : paymentData.filter((p) => p.status === activeTab);
   return (
     <div>
-      <Tablehead tableTitle="Payments" />
+      <Tablehead
+        tableTitle="Payments"
+        showButton={true}
+        onButtonClick={openModal}
+      />
+      {isModalOpen && (
+        <AddPaymentModal
+          onClose={closeModal}
+          formData={{
+            id: "",
+            patientFirstName: "",
+            patientLastName: "",
+            amount: "",
+            purpose: "",
+            paymentMethod: "",
+          }}
+        />
+      )}
+
       <Tabs<"All" | "Full Payment" | "Half Payment">
         activeTab={activeTab}
         setActiveTab={setActiveTab}

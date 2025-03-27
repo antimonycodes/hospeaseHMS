@@ -14,10 +14,7 @@ interface AddExpenseModalProps {
   formData: formDataData;
 }
 
-const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
-  onClose,
-  formData,
-}) => {
+const AddExpenseModal: React.FC<AddExpenseModalProps> = ({ onClose }) => {
   return (
     <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center z-50 p-6">
       <div className="bg-white rounded-lg p-12 w-full max-w-2xl">
@@ -84,7 +81,7 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
             <div className="relative">
               <select
                 name="paymentMethod"
-                // value={expenseForm.paymentMethod}
+                // value={formData.paymentMethod}
                 className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm appearance-none"
               >
                 <option value="Bank Transfer">Bank Transfer</option>
