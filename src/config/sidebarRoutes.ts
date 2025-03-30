@@ -9,7 +9,7 @@ export interface SidebarRoute {
 }
 
 export const sidebarRoutes: Record<string, SidebarRoute[]> = {
-  superadmin: [
+  admin: [
     {
       name: "Overview",
       path: "/dashboard/overview",

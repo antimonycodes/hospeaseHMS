@@ -1,41 +1,23 @@
 import { useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { useNurseStore } from "../../../store/super-admin/useNuseStore";
+import Button from "../../../Shared/Button";
 import { ArrowLeft } from "lucide-react";
-import Button from "./Button";
-import { useDoctorStore } from "../store/super-admin/useDoctorStore";
 
-interface Doctor {
-  id: string;
-  attributes: {
-    first_name: string;
-    last_name: string;
-    phone: string;
-    details: {
-      age: number;
-      religion: string;
-      address: string;
-    };
-  };
-  gender: string;
-}
-
-const DoctorDetails = () => {
-  const { id } = useParams();
+const NurseDetails = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { selectedDoctor, getDoctorById, isLoading } = useDoctorStore() as {
-    selectedDoctor: Doctor | null;
-    getDoctorById: (id: string) => void;
-    isLoading: boolean;
-  };
+
+  const { getNurseById, selectedNurse, isLoading } = useNurseStore();
 
   useEffect(() => {
     if (id) {
-      getDoctorById(id);
+      getNurseById(id);
     }
-  }, [id, getDoctorById]);
+  }, [id, getNurseById]);
+  console.log(selectedNurse);
 
   if (isLoading) return <p>Loading doctor details...</p>;
-  if (!selectedDoctor) return <p>Doctor not found</p>;
 
   return (
     <div className="bg-white rounded-lg shadow-md w-full">
@@ -61,22 +43,20 @@ const DoctorDetails = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <Info
             label="First Name"
-            value={selectedDoctor?.attributes?.first_name}
+            value={selectedNurse.attributes.first_name}
           />
-          <Info
-            label="Last Name"
-            value={selectedDoctor?.attributes?.last_name}
-          />
-          <Info label="Age" value={selectedDoctor?.attributes?.details?.age} />
-          <Info label="Gender" value={selectedDoctor?.gender} />
+          <Info label="Last Name" value={selectedNurse.attributes.last_name} />
+          <Info label="Staff ID" value={selectedNurse.attributes.nurse_id} />
+          <Info label="Age" value={selectedNurse.attributes.details.age} />
+          <Info label="Gender" value={selectedNurse.gender} />
           <Info
             label="Religion"
-            value={selectedDoctor?.attributes?.details?.religion}
+            value={selectedNurse.attributes.details.religion}
           />
-          <Info label="Phone" value={selectedDoctor?.attributes?.phone} />
+          <Info label="Phone" value={selectedNurse.attributes.phone} />
           <Info
             label="House Address"
-            value={selectedDoctor?.attributes?.details?.address}
+            value={selectedNurse.attributes.details.address}
           />
         </div>
       </div>
@@ -88,9 +68,9 @@ const Info = ({ label, value }: { label: string; value?: string | number }) => (
   <div className="mb-4">
     <p className="text-sm text-[#667085]">{label}</p>
     <p className="text-sm md:text-base font-medium text-custom-black">
-      {value ?? "N/A"}
+      {value || "N/A"}
     </p>
   </div>
 );
 
-export default DoctorDetails;
+export default NurseDetails;

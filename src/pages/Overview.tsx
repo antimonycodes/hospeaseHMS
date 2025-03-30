@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import DoctorOverview from "../components/Doctor/DoctorOverview";
 import Foverview from "../components/Finance/overview/Foverview";
 import FrontdeskOverview from "../components/Frontdesk/FrontdeskOverview";
@@ -9,7 +10,7 @@ import { useRole } from "../hooks/useRole";
 import { JSX } from "react";
 
 const roleComponents: Record<string, JSX.Element> = {
-  superadmin: <SuperAdminOverview />,
+  admin: <SuperAdminOverview />,
   doctor: <DoctorOverview />,
   frontdesk: <FrontdeskOverview />,
   laboratory: <Laboverview />,
@@ -18,9 +19,11 @@ const roleComponents: Record<string, JSX.Element> = {
 };
 
 const Overview = () => {
+  const navigate = useNavigate();
   const role = useRole();
 
   // Default to 'Unauthorized' if role is not recognized
-  return role ? roleComponents[role] : <p>Unauthorized Access</p>;
+  // return role ? roleComponents[role] : <p>Unauthorized Access</p>;
+  return role ? roleComponents[role] : (navigate("/signin"), null);
 };
 export default Overview;

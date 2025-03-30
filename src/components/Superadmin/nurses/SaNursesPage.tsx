@@ -2,21 +2,28 @@ import { Plus } from "lucide-react";
 import Button from "../../../Shared/Button";
 import SaNurseTable from "./SaNurseTable";
 import AddNurseModal from "./AddNurseModal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNurseStore } from "../../../store/super-admin/useNuseStore";
 
 const SaNursesPage = () => {
   const [showModal, setShowModal] = useState(false);
 
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    nurseId: "",
+    first_name: "",
+    last_name: "",
+    nurse_id: "",
     email: "",
     phone: "",
     religion: "",
-    houseAddress: "",
-    password: "",
+    address: "",
+    dob: "",
   });
+
+  useEffect(() => {
+    getNurses();
+  }, []);
+
+  const { isLoading, getNurses, nurses, createNurse } = useNurseStore();
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,7 +59,7 @@ const SaNursesPage = () => {
       </div>
 
       {/* table */}
-      <SaNurseTable />
+      <SaNurseTable nurses={nurses} isLoading={isLoading} />
 
       {/* Add Doctor Modal */}
       {showModal && (
@@ -60,6 +67,7 @@ const SaNursesPage = () => {
           formData={formData}
           handleInputChange={handleInputChange}
           setShowModal={setShowModal}
+          createNurse={createNurse}
         />
       )}
     </div>

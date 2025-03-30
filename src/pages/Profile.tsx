@@ -1,10 +1,17 @@
-import { useState } from "react";
-import img from "../assets/ribiero.png";
+import { useEffect, useState } from "react";
 import Button from "../Shared/Button";
 import ChangePasswordModal from "../components/Superadmin/profile/ChangePasswordModal";
+import { useProfileStore } from "../store/super-admin/useProfileStore";
 
 const Profile = () => {
   const [showModal, setShowModal] = useState(false);
+
+  const { profileData, isLoading, getProfileData, changePassword } =
+    useProfileStore();
+
+  useEffect(() => {
+    getProfileData();
+  }, [getProfileData]);
 
   const details = {
     name: "Life Care Hospital",
@@ -13,6 +20,10 @@ const Profile = () => {
     phoneNumber: ["+2347065666954,", "  +2347087643287"],
   };
 
+  if (isLoading && !profileData) {
+    return <div>Loading profile...</div>;
+  }
+
   return (
     <div>
       <h1 className="text-custom-black text-xl font-medium mb-4">Profile</h1>
@@ -20,14 +31,14 @@ const Profile = () => {
         {/* Avatar */}
         <div className=" w-fit flex flex-col items-center space-y-4">
           <h1 className=" text-[#667085] font-medium">
-            Hospital Profile Picture
+            Hospital Profile Picture{" "}
           </h1>
           {/* img */}
           <div className=" size-20">
             <img
-              src={img}
+              src={undefined}
               alt="Logo"
-              className=" h-full w-full border border-[#009952]  rounded-full"
+              className=" h-full w-full bord er border-[#009952]  rounded-full"
             />
           </div>
           {/* button */}
@@ -39,7 +50,7 @@ const Profile = () => {
           <div>
             <label className=" text-[#667085] font-medium">Hospital Name</label>
             <h1 className=" text-[#3E3E3E] font-medium text-xl">
-              {details.name}
+              {profileData?.attributes?.name}
             </h1>
           </div>
           {/* email */}
@@ -48,7 +59,7 @@ const Profile = () => {
               Hospital email Address
             </label>
             <h1 className=" text-[#3E3E3E] font-medium text-xl">
-              {details.email}
+              {profileData?.attributes?.email}
             </h1>
           </div>
           {/* address */}
@@ -57,12 +68,14 @@ const Profile = () => {
               Hospital Address
             </label>
             <h1 className=" text-[#3E3E3E] font-medium text-xl">
-              {details.address}
+              {profileData?.attributes?.address}
             </h1>
           </div>
           {/* phone number */}
           <div>
-            <label className=" text-[#667085] font-medium">Hospital Name</label>
+            <label className=" text-[#667085] font-medium">
+              Hospital Phone number
+            </label>
             <h1 className=" text-[#3E3E3E] font-medium text-xl">
               {details.phoneNumber}
             </h1>
@@ -78,7 +91,13 @@ const Profile = () => {
       </div>
 
       {/* modal */}
-      {showModal && <ChangePasswordModal setShowModal={setShowModal} />}
+      {showModal && (
+        <ChangePasswordModal
+          setShowModal={setShowModal}
+          changePassword={changePassword}
+          isLoading={isLoading}
+        />
+      )}
     </div>
   );
 };

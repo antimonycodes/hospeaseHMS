@@ -1,125 +1,70 @@
 import Table from "../../../Shared/Table";
-import { EyeIcon } from "lucide-react"; // Import the eye icon for "view more"
+import { EyeIcon } from "lucide-react";
+import {
+  Nurse,
+  NurseAttributes,
+} from "../../../store/super-admin/useNuseStore";
+import { useNavigate } from "react-router-dom";
+type Column<T> = {
+  key: keyof T;
+  label: string;
+  render: (value: any, row: T) => React.ReactNode;
+};
 
-interface Nurses {
-  name: string;
-  id: string;
-  phone: string;
-  email: string;
-  status: string;
+interface Props {
+  isLoading: boolean;
+  nurses: Nurse[];
 }
 
-const nurses: Nurses[] = [
-  {
-    name: "Ruth Nwabuze",
-    id: "HS23455",
-    phone: "+234 704 256 8201",
-    email: "zoeby@aol.com",
-    status: "Out-of-work",
-  },
-  {
-    name: "James Kawu",
-    id: "HS23455",
-    phone: "+234 702 129 7529",
-    email: "lukew@zoho.com",
-    status: "Available",
-  },
-  {
-    name: "Priscilla Agbasi",
-    id: "HS23455",
-    phone: "+234 919 360 5590",
-    email: "ondosunshine@outlook.com",
-    status: "Available",
-  },
-  {
-    name: "Elizabeth Tukar",
-    id: "HS23455",
-    phone: "+234 819 829 4826",
-    email: "leah@protonmail.com",
-    status: "Out-of-work",
-  },
-  {
-    name: "Joseph Ike",
-    id: "HS23455",
-    phone: "+234 902 099 7282",
-    email: "adamawapeak@protonmail.com",
-    status: "Out-of-work",
-  },
-  {
-    name: "Daniel Kureebi",
-    id: "HS23455",
-    phone: "+234 805 145 6346",
-    email: "michaelb@mail.com",
-    status: "Out-of-work",
-  },
-  {
-    name: "Joseph Weridide",
-    id: "HS23455",
-    phone: "+234 815 242 7824",
-    email: "alexm@outlook.com",
-    status: "Out-of-work",
-  },
-  {
-    name: "Deborah Iwalewa",
-    id: "HS23455",
-    phone: "+234 902 354 1574",
-    email: "isaiahm@yandex.com",
-    status: "Out-of-work",
-  },
-  {
-    name: "Timothy Ebikake",
-    id: "HS23455",
-    phone: "+234 811 962 3141",
-    email: "lagosboy@mail.com",
-    status: "Out-of-work",
-  },
-  {
-    name: "Victoria Opuogbo",
-    id: "HS23455",
-    phone: "+234 809 771 7212",
-    email: "kancroyalty@outlook.com",
-    status: "Out-of-work",
-  },
-];
+const SaNurseTable = ({ nurses, isLoading }: Props) => {
+  const navigate = useNavigate();
 
-const SaNurseTable = () => {
-  const handleViewMore = (nurse: Nurses) => {
+  const handleViewMore = (nurse: NurseAttributes) => {
     console.log("View more clicked for:", nurse);
+    navigate(`/dashboard/nurses/${nurse.id}`);
   };
 
-  const nursesColumn = [
+  // Extract `attributes` and add `id` to each nurse
+  const transformedNurses: NurseAttributes[] = nurses.map((nurse) => ({
+    ...nurse.attributes,
+    id: nurse.id, // Add ID separately for rowKey
+  }));
+
+  const nursesColumn: Column<NurseAttributes>[] = [
     {
-      key: "name" as keyof Nurses,
+      key: "first_name",
       label: "Name",
-      render: (value: string) => (
-        <span className="text-sm text-custom-black font-medium">{value}</span>
+      render: (value, row) => (
+        <span className="text-sm text-custom-black font-medium">
+          {row.first_name} {row.last_name}
+        </span>
       ),
     },
     {
-      key: "id" as keyof Nurses,
+      key: "nurse_id",
       label: "Nurse ID",
-      render: (value: string) => (
-        <span className="text-sm text-[#667085]">{value}</span>
+      render: (value) => (
+        <span className="text-sm text-[#667085]">{value ?? "N/A"}</span>
       ),
     },
     {
-      key: "phone" as keyof Nurses,
+      key: "phone",
       label: "Phone",
-      render: (value: string) => (
-        <span className="text-sm text-[#667085]">{value}</span>
+      render: (value) => (
+        <span className="text-sm text-[#667085]">{value ?? "N/A"}</span>
       ),
     },
     {
-      key: "email" as keyof Nurses,
+      key: "email",
       label: "Email",
-      render: (value: string) => (
-        <span className="text-sm text-[#667085]">{value}</span>
+      render: (value) => (
+        <span className="text-sm text-[#667085]">{value ?? "N/A"}</span>
       ),
     },
     {
-      key: "status" as keyof Nurses,
+      key: "shift_status",
       label: "Status",
-      render: (value: string) => (
+      render: (value) => (
         <span
           className={`py-1.5 px-2.5 rounded-full text-sm ${
             value === "Available"
@@ -127,14 +72,14 @@ const SaNurseTable = () => {
               : "text-[#009952] bg-[#CCFFE7]"
           }`}
         >
-          {value}
+          {value ?? "N/A"}
         </span>
       ),
     },
     {
-      key: "id" as keyof Nurses,
+      key: "id",
       label: "Action",
-      render: (_: string, row: Nurses) => (
+      render: (_, row) => (
         <span
           onClick={() => handleViewMore(row)}
           className="text-[#009952] font-medium text-sm cursor-pointer"
@@ -149,7 +94,7 @@ const SaNurseTable = () => {
     <div>
       <Table
         columns={nursesColumn}
-        data={nurses}
+        data={transformedNurses}
         rowKey="id"
         pagination={true}
         rowsPerPage={10}
