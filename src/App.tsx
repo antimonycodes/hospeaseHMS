@@ -19,18 +19,14 @@ import Payment from "./pages/Payment";
 import Profile from "./pages/Profile";
 import Shift from "./pages/Shift";
 import Expenses from "./pages/Expenses";
-<<<<<<< HEAD
 import Inventory from "./pages/Inventory";
 import Stocks from "./pages/Stocks";
 import Request from "./pages/Request";
 
-
-=======
 import Signin from "./_Auth/Signin";
 import ConsultantDetails from "./components/Superadmin/consultant/ConsultantDetails";
 import { Toaster } from "react-hot-toast";
 import NurseDetails from "./components/Superadmin/nurses/NurseDetails";
->>>>>>> da874f1729ae2ef9f1db1d7067124aae49e10fa6
 
 function App() {
   return (
@@ -41,44 +37,6 @@ function App() {
         <Route path="/signin" element={<Signin />} />
         <Route path="/signup" element={<Signup />} />
 
-<<<<<<< HEAD
-          <Route path="/dashboard" element={<DashboardLayout />}>
-            <Route index element={<Navigate to="overview" />} />
-            <Route path="overview" element={<Overview />} />
-            <Route path="patients" element={<Patients />} />
-            <Route
-              path="/dashboard/patients/:patientId"
-              element={<PatientDetails />}
-            />
-            <Route
-              path="/dashboard/appointments/:patientId"
-              element={<AppointmentDetails />}
-            />
-            <Route path="doctors" element={<Doctors />} />
-            <Route
-              path="/dashboard/doctors/doctor"
-              element={<DoctorDetails />}
-            />
-            <Route path="consultants" element={<Consultants />} />
-            <Route path="finance" element={<Finance />} />
-            <Route path="laboratory" element={<Laboratory />} />
-            <Route path="appointments" element={<Appointments />} />
-            <Route path="nurses" element={<Nurses />} />
-            <Route path="pharmacy" element={<Pharmacy />} />
-            <Route path="users" element={<Users />} />
-            <Route path="payment" element={<Payment />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="shifts" element={<Shift />} />
-            <Route path="expenses" element={<Expenses />} />
-            <Route path="inventory" element={<Inventory />} />
-            <Route path="stocks" element={<Stocks />} />
-            <Route path="request" element={<Request/>} />
-        
-            
-          </Route>
-        </Routes>
-      </AuthProvider>
-=======
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<Navigate to="overview" />} />
           <Route path="overview" element={<Overview />} />
@@ -103,12 +61,13 @@ function App() {
           <Route path="payment" element={<Payment />} />
           <Route path="profile" element={<Profile />} />
           <Route path="shifts" element={<Shift />} />
-          <Route path="expenses" element={<Expenses />} />
+          <Route path="inventory" element={<Inventory />} />
+          <Route path="stock" element={<Stocks />} />
+          <Route path="request" element={<Request />} />
         </Route>
       </Routes>
       <Toaster />
       {/* </AuthProvider> */}
->>>>>>> da874f1729ae2ef9f1db1d7067124aae49e10fa6
     </div>
   );
 }

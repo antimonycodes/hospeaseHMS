@@ -29,7 +29,7 @@ const Signup = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log(formData);
-    signup(formData);
+    // signup(formData);
   };
 
   return (
@@ -43,70 +43,6 @@ const Signup = () => {
         />
       </div>
 
-<<<<<<< HEAD
-      {/*  login buttons for stimulation*/}
-      <div className=" cursor-pointer flex-col flex">
-        <button
-          onClick={() => handleLogin("superadmin")}
-          className=" cursor-pointer"
-        >
-          Login as Super Admin
-        </button>
-        <button
-          onClick={() => handleLogin("doctor")}
-          className=" cursor-pointer"
-        >
-          Login as Doctor
-        </button>
-        <button
-          onClick={() => handleLogin("frontdesk")}
-          className=" cursor-pointer"
-        >
-          Login as Front Desk
-        </button>
-        <button
-          onClick={() => handleLogin("laboratory")}
-          className=" cursor-pointer"
-        >
-          Login as Laboratory
-        </button>
-        <button
-          onClick={() => handleLogin("finance")}
-          className=" cursor-pointer"
-        >
-          Login as Finance
-        </button>
-        <button
-          onClick={() => handleLogin("pharmacy")}
-          className=" cursor-pointer"
-        >
-          Login as Pharmacy
-        </button>
-        <button
-          onClick={() => handleLogin("inventory")}
-          className=" cursor-pointer"
-        >
-          Login as Inventory
-        </button>
-        <button
-          onClick={() => handleLogin("nurses")}
-          className=" cursor-pointer"
-        >
-          Login as Nurses
-        </button>
-        <button
-          onClick={() => handleLogin("matron")}
-          className=" cursor-pointer"
-        >
-          Login as Matron
-        </button>
-        <button
-          onClick={() => handleLogin("consultant")}
-          className=" cursor-pointer"
-        >
-          Login as Consultant
-        </button>
-=======
       {/* Form Section */}
       <div className="basis-1/2 w-full h-full bg-[#E3FFF2] flex items-center justify-center overflow-y-auto">
         <div className="flex flex-col items-center gap-6 w-full max-w-lg h-full p-6">
@@ -222,7 +158,6 @@ const Signup = () => {
             </form>
           </div>
         </div>
->>>>>>> da874f1729ae2ef9f1db1d7067124aae49e10fa6
       </div>
     </div>
   );
