@@ -3,7 +3,7 @@ import { useRole } from "../hooks/useRole";
 import { JSX } from "react";
 
 const roleComponents: Record<string, JSX.Element> = {
-  superadmin: <SaLaboratoryPage />,
+  admin: <SaLaboratoryPage />,
   // doctor:
   // frontdesk:
 };

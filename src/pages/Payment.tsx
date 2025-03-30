@@ -3,7 +3,7 @@ import PaymentPage from "../components/Superadmin/payment/PaymentPage";
 import { useRole } from "../hooks/useRole";
 import { JSX } from "react";
 const roleComponents: Record<string, JSX.Element> = {
-  superadmin: <PaymentPage />,
+  admin: <PaymentPage />,
   finance: <Fpayment />,
 };
 

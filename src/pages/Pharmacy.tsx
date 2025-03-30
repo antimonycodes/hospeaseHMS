@@ -4,7 +4,7 @@ import { useRole } from "../hooks/useRole";
 import PharmInventory from "../components/Pharmacy/Inventory/PharmInventory";
 
 const roleComponents: Record<string, JSX.Element> = {
-  superadmin: <SaPharnacyPage />,
+  admin: <SaPharnacyPage />,
   pharmacy: <PharmInventory />,
 
   //   doctor:  ,

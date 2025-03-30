@@ -22,7 +22,7 @@ const SaDoctorsPage = () => {
 
   useEffect(() => {
     getAllDoctors();
-  }, []);
+  }, [getAllDoctors]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
