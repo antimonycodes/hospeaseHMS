@@ -87,11 +87,12 @@ const LaboverviewTable = () => {
       {/* Pending Tests */}
       <div className="w-1/2">
         <Tablehead
+          showSearchBar={false}
           tableTitle="Pending Tests"
           tableCount={pendingPatients.length}
           showControls={false}
         />
-        <div className="w-full bg-white shadow overflow-hidden rounded-b-[8px]">
+        <div>
           <Table
             data={pendingPatients.slice(0, 3)}
             columns={columns}
@@ -108,8 +109,9 @@ const LaboverviewTable = () => {
           tableTitle="Ongoing Tests"
           tableCount={ongoingPatients.length}
           showControls={false}
+          showSearchBar={false}
         />
-        <div className="w-full bg-white shadow overflow-hidden rounded-b-[8px]">
+        <div>
           <Table
             data={ongoingPatients.slice(0, 3)}
             columns={columnss}

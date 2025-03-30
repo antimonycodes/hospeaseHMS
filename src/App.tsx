@@ -19,6 +19,11 @@ import Payment from "./pages/Payment";
 import Profile from "./pages/Profile";
 import Shift from "./pages/Shift";
 import Expenses from "./pages/Expenses";
+import Inventory from "./pages/Inventory";
+import Stocks from "./pages/Stocks";
+import Request from "./pages/Request";
+
+
 
 function App() {
   return (
@@ -55,6 +60,11 @@ function App() {
             <Route path="profile" element={<Profile />} />
             <Route path="shifts" element={<Shift />} />
             <Route path="expenses" element={<Expenses />} />
+            <Route path="inventory" element={<Inventory />} />
+            <Route path="stocks" element={<Stocks />} />
+            <Route path="request" element={<Request/>} />
+        
+            
           </Route>
         </Routes>
       </AuthProvider>

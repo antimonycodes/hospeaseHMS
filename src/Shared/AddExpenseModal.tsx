@@ -19,7 +19,7 @@ const AddExpenseModal: React.FC<AddExpenseModalProps> = ({ onClose }) => {
     <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center z-50 p-6">
       <div className="bg-white rounded-lg p-12 w-full max-w-2xl">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-medium">Add New expense</h2>
+          <h2 className="text-lg font-medium">Add New </h2>
           <button onClick={onClose}>
             <X />
           </button>

@@ -37,7 +37,7 @@ const Table = <T,>({
     : data;
 
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="w-full overflow-x-auto rounded-b-[8px] shadow-table bg-white">
       <table className={`w-full min-w-max border border-[#EAECF0] ${radius}`}>
         <thead className="bg-[#F9FAFB]">
           <tr>

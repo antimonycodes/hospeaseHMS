@@ -131,6 +131,30 @@ const Signup = () => {
         >
           Login as Pharmacy
         </button>
+        <button
+          onClick={() => handleLogin("inventory")}
+          className=" cursor-pointer"
+        >
+          Login as Inventory
+        </button>
+        <button
+          onClick={() => handleLogin("nurses")}
+          className=" cursor-pointer"
+        >
+          Login as Nurses
+        </button>
+        <button
+          onClick={() => handleLogin("matron")}
+          className=" cursor-pointer"
+        >
+          Login as Matron
+        </button>
+        <button
+          onClick={() => handleLogin("consultant")}
+          className=" cursor-pointer"
+        >
+          Login as Consultant
+        </button>
       </div>
     </div>
   );

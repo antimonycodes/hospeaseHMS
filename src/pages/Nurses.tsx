@@ -1,10 +1,11 @@
 import { JSX } from "react";
-
 import { useRole } from "../hooks/useRole";
 import SaNursesPage from "../components/Superadmin/nurses/SaNursesPage";
+import MatronNurse from "../components/Matron/nurse/MatronNurse";
 
 const roleComponents: Record<string, JSX.Element> = {
   superadmin: <SaNursesPage />,
+  matron: <MatronNurse />,
   //   doctor:  ,
   // frontdesk:
 };

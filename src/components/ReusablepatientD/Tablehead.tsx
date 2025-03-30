@@ -23,7 +23,7 @@ const Tablehead: React.FC<TableheadProps> = ({
   return (
     <div className="w-full font-inter  bg-white rounded-t-[8px] shadow overflow-hidden">
       <div className="p-6 flex items-center justify-between space-x-3">
-        <div className="w-[15%] ">
+        <div className="min-w-[15%] ">
           <h1 className="text-base sm:text-[18px]    font-medium">
             {tableTitle}
             {tableCount !== undefined && (
@@ -36,7 +36,7 @@ const Tablehead: React.FC<TableheadProps> = ({
         {/*  */}
         <div className="flex flex-grow justify-end items-center space-x-4">
           {showSearchBar && (
-            <div className="w-full min-w-[70%] ">
+            <div className="w-full min-w-[60%] ">
               <SearchBar />
             </div>
           )}
@@ -47,10 +47,10 @@ const Tablehead: React.FC<TableheadProps> = ({
             </button>
           )}
           {showButton && (
-            <div className="  ">
+            <div className="w-[18%] flex justify-end  ">
               <Button
                 variant="primary"
-                size="sm"
+                size="md"
                 className=" flex items-center gap-2  "
                 onClick={onButtonClick}
               >

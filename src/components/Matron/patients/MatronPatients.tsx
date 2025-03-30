@@ -17,13 +17,12 @@ const getStatusCounts = () => {
   );
 };
 
-const PharmPatients = () => {
+const MatronPatients = () => {
   const [activeTab, setActiveTab] = useState<"Pending" | "Completed">(
     "Pending"
   );
   const statusCounts = getStatusCounts();
   const filteredPatients = patients.filter((p) => p.status === activeTab);
-
   return (
     <div>
       <Tablehead tableTitle="Patients" tableCount={patients.length} />
@@ -38,4 +37,4 @@ const PharmPatients = () => {
   );
 };
 
-export default PharmPatients;
+export default MatronPatients;

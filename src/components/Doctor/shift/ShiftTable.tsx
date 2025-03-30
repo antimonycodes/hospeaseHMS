@@ -1,5 +1,6 @@
 import React, { JSX } from "react";
 import Table from "../../../Shared/Table";
+import { ShiftData } from "../../../data/nurseData";
 
 interface ShiftItem {
   id: string;
@@ -10,36 +11,6 @@ interface ShiftItem {
   department: string;
   selected?: boolean;
 }
-
-const ShiftData: ShiftItem[] = [
-  {
-    id: "1",
-    day: "Monday, 12th Jan, 2025",
-    shift: "Morning",
-    start: "08:00am",
-    end: "08:00pm",
-    department: "Urology",
-    selected: false,
-  },
-  {
-    id: "2",
-    day: "Monday, 17th March, 2025",
-    shift: "Morning",
-    start: "08:00am",
-    end: "08:00pm",
-    department: "Urology",
-    selected: false,
-  },
-  {
-    id: "3",
-    day: "Wednesday, 19th March, 2025",
-    shift: "Morning",
-    start: "08:00am",
-    end: "08:00pm",
-    department: "Urology",
-    selected: false,
-  },
-];
 
 const ShiftTable = () => {
   const [selectedItems, setSelectedItems] = React.useState<string[]>([]);

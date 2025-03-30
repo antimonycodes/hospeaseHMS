@@ -41,6 +41,8 @@ const Fpayment = () => {
       />
       {isModalOpen && (
         <AddPaymentModal
+          showSearchBar={true}
+          showPaymentType={true}
           onClose={closeModal}
           formData={{
             id: "",
@@ -49,6 +51,7 @@ const Fpayment = () => {
             amount: "",
             purpose: "",
             paymentMethod: "",
+            paymentType: "",
           }}
         />
       )}

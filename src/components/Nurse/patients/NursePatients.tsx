@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import { patients } from "../../../data/patientsData";
 import Tabs from "../../ReusablepatientD/Tabs";
-
 import PatientTable from "../../ReusablepatientD/PatientTable";
 
 const getStatusCounts = () => {
@@ -17,7 +16,7 @@ const getStatusCounts = () => {
   );
 };
 
-const PharmPatients = () => {
+const NursePatients = () => {
   const [activeTab, setActiveTab] = useState<"Pending" | "Completed">(
     "Pending"
   );
@@ -38,4 +37,4 @@ const PharmPatients = () => {
   );
 };
 
-export default PharmPatients;
+export default NursePatients;

@@ -19,15 +19,15 @@ const OverviewCard: React.FC<OverviewCardProps> = ({
   ).slice(0, limit);
 
   return (
-    <div className="font-jakarta">
+    <div className="font-jakarta  ">
       <h1 className="font-medium text-[20px] text-[#101828] pb-[21px]">
         {cardTitle}
       </h1>
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-[21px]">
+      <div className="flex   gap-[21px] w-full">
         {filteredCards.map(({ title, number, icon }, index) => (
           <div
             key={index}
-            className="bg-white rounded-lg border-0 border-gray-200 py-[15px] pl-[43px] pr-[15px] flex flex-col gap-2 relative"
+            className="bg-white w-full rounded-lg border-0 border-gray-200 py-[15px] pl-[43px] pr-[15px] flex flex-col gap-2 relative"
           >
             <div className="flex items-center justify-between">
               <img src={getImageSrc(icon)} alt={title} width={40} height={40} />

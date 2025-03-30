@@ -1,22 +1,17 @@
-import { useNavigate } from "react-router-dom";
-import { Patient } from "../../../data/patientsData";
+import React from "react";
 import Table from "../../../Shared/Table";
+import { Patient, patients } from "../../../data/patientsData";
 import { formatPhoneNumber } from "../../../utils/formatPhoneNumber";
-interface PharmpatientTableProps {
-  patients: Patient[];
-}
 
-const PharmpatientTable = ({ patients }: PharmpatientTableProps) => {
-  const navigate = useNavigate();
-
-  const details = (patientId: string) => {
-    navigate(`/dashboard/appointments/${patientId}`);
-  };
+const PharmCard = () => {
+  const pendingPatients = patients.filter(
+    (patient) => patient.status === "Pending"
+  );
 
   const statusStyles: Record<Patient["status"], string> = {
+    Ongoing: "bg-[#FFEBAA] text-[#B58A00]",
     Completed: "bg-[#CFFFE9] text-[#009952]",
     Pending: "bg-[#FBE1E1] text-[#F83E41]",
-    Ongoing: "bg-[#FFEBAA] text-[#B58A00]",
   };
 
   const columns: {
@@ -35,14 +30,21 @@ const PharmpatientTable = ({ patients }: PharmpatientTableProps) => {
       key: "patientid",
       label: "Patient ID",
       render: (value) => (
-        <span className="text-[#667085] text-sm">{value}</span>
+        <span className="text-dark font-medium text-sm">{value}</span>
       ),
     },
     {
       key: "gender",
       label: "Gender",
       render: (value) => (
-        <span className="text-[#667085] text-sm">{value}</span>
+        <span className="text-dark font-medium text-sm">{value}</span>
+      ),
+    },
+    {
+      key: "occupation",
+      label: "Occupation",
+      render: (value) => (
+        <span className="text-dark font-medium text-sm">{value}</span>
       ),
     },
     {
@@ -52,13 +54,6 @@ const PharmpatientTable = ({ patients }: PharmpatientTableProps) => {
         <span className="text-[#667085] text-sm">
           {formatPhoneNumber(value as string)}
         </span>
-      ),
-    },
-    {
-      key: "occupation",
-      label: "Occupation",
-      render: (value) => (
-        <span className="text-[#667085] text-sm">{value}</span>
       ),
     },
     {
@@ -74,31 +69,19 @@ const PharmpatientTable = ({ patients }: PharmpatientTableProps) => {
         </span>
       ),
     },
-    {
-      key: "id",
-      label: "",
-      render: (value, row) => (
-        <button
-          className="cursor-pointer text-[#009952] text-sm font-medium"
-          onClick={() => details(row.id)}
-        >
-          View more
-        </button>
-      ),
-    },
   ];
+
   return (
     <div>
       <Table
-        data={patients}
+        data={pendingPatients.slice(0, 3)}
         columns={columns}
         rowKey="id"
-        pagination={patients.length > 10}
-        rowsPerPage={10}
-        radius="rounded-none"
+        pagination={false}
+        radius="rounded-lg"
       />
     </div>
   );
 };
 
-export default PharmpatientTable;
+export default PharmCard;

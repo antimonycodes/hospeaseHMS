@@ -38,7 +38,7 @@ const AddPatientModal = ({ onClose }: { onClose: () => void }) => {
 
   return (
     <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg w-full max-w-3xl p-6 shadow-lg h-[90%] overflow-y-auto">
+      <div className="bg-white rounded-lg w-full max-w-3xl p-6  shadow-lg h-[90%] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">Add new Patient</h2>
           <button onClick={onClose} className="hover:text-gray-200">

@@ -1,9 +1,8 @@
-import React, { useState } from "react";
-import Tablehead from "../../ReusablepatientD/Tablehead";
-import { patients } from "../../../data/patientsData";
-import Tabs from "../../ReusablepatientD/Tabs";
-
-import PatientTable from "../../ReusablepatientD/PatientTable";
+import { useState } from "react";
+import { patients } from "../../data/patientsData";
+import Tablehead from "../ReusablepatientD/Tablehead";
+import Tabs from "../ReusablepatientD/Tabs";
+import PatientTable from "../ReusablepatientD/PatientTable";
 
 const getStatusCounts = () => {
   return patients.reduce(
@@ -17,13 +16,12 @@ const getStatusCounts = () => {
   );
 };
 
-const PharmPatients = () => {
+const ConsultantPatients = () => {
   const [activeTab, setActiveTab] = useState<"Pending" | "Completed">(
     "Pending"
   );
   const statusCounts = getStatusCounts();
   const filteredPatients = patients.filter((p) => p.status === activeTab);
-
   return (
     <div>
       <Tablehead tableTitle="Patients" tableCount={patients.length} />
@@ -38,4 +36,4 @@ const PharmPatients = () => {
   );
 };
 
-export default PharmPatients;
+export default ConsultantPatients;

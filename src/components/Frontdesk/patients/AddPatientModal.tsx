@@ -1,17 +1,12 @@
 import { HiX } from "react-icons/hi";
 
 interface Props {
-  isOpen: any;
   onClose: any;
 }
-const AddPatientModal = ({ isOpen, onClose }: Props) => {
+const AddPatientModal = ({ onClose }: Props) => {
   return (
-    <div
-      className={`fixed left-0 top-0 w-full bg-black/50 min-h-screen z-[100] items-center p-4 justify-center ${
-        isOpen ? "flex" : "hidden"
-      }`}
-    >
-      <div className="bg-white px-[18px] msm:px-[59px] py-[18px] rounded-[10px] w-[980px] overflow-y-scroll hide-scroll h-[900px]">
+    <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center z-50 p-6 ">
+      <div className="bg-white hide-scroll rounded-lg custom-shadow overflow-y-auto   p-12 h-[90%] w-full  max-w-[980px] ">
         <div>
           {/* head section */}
           <div className="flex items-center justify-between w-full">

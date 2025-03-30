@@ -172,9 +172,77 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
     },
     {
       name: "Inventory",
-      path: "/dashboard/pharmacy",
+      path: "/dashboard/inventory",
       icon: getImageSrc("pharmacyicon.svg"),
       activeIcon: getImageSrc("pharmacyWhite.svg"),
+    },
+  ],
+  inventory: [
+    {
+      name: "Overview",
+      path: "/dashboard/overview",
+      icon: getImageSrc("darkdashboarddark.svg"),
+      activeIcon: getImageSrc("overviewicon.svg"),
+    },
+    {
+      name: "Stocks",
+      path: "/dashboard/stocks",
+      icon: getImageSrc("patientsicon.svg"),
+      activeIcon: getImageSrc("patienticonsLight.svg"),
+    },
+    {
+      name: "Request",
+      path: "/dashboard/request",
+      icon: getImageSrc("pharmacyicon.svg"),
+      activeIcon: getImageSrc("pharmacyWhite.svg"),
+    },
+  ],
+  nurses: [
+    {
+      name: "Overview",
+      path: "/dashboard/overview",
+      icon: getImageSrc("darkdashboarddark.svg"),
+      activeIcon: getImageSrc("overviewicon.svg"),
+    },
+    {
+      name: "Patients",
+      path: "/dashboard/patients",
+      icon: getImageSrc("patientsicon.svg"),
+      activeIcon: getImageSrc("patienticonsLight.svg"),
+    },
+    {
+      name: "Shifts",
+      path: "/dashboard/shifts",
+      icon: getImageSrc("pharmacyicon.svg"),
+      activeIcon: getImageSrc("pharmacyWhite.svg"),
+    },
+  ],
+  matron: [
+    {
+      name: "Overview",
+      path: "/dashboard/overview",
+      icon: getImageSrc("darkdashboarddark.svg"),
+      activeIcon: getImageSrc("overviewicon.svg"),
+    },
+    {
+      name: "Nurse",
+      path: "/dashboard/nurses",
+      icon: getImageSrc("pharmacyicon.svg"),
+      activeIcon: getImageSrc("pharmacyWhite.svg"),
+    },
+    {
+      name: "Patients",
+      path: "/dashboard/patients",
+      icon: getImageSrc("patientsicon.svg"),
+      activeIcon: getImageSrc("patienticonsLight.svg"),
+    },
+  ],
+  consultant: [
+    {
+      name: "Patients",
+      path: "/dashboard/patients",
+      icon: getImageSrc("patientsicon.svg"),
+      activeIcon: getImageSrc("patienticonsLight.svg"),
     },
   ],
 };
