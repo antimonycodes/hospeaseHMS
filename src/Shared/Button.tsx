@@ -11,6 +11,7 @@ type ButtonProps = {
   rounded?: "none" | "sm" | "md" | "lg" | "full";
   icon?: React.ReactNode; // Accepts an icon component
   iconPosition?: "left" | "right"; // Controls icon placement
+  type?: "" | "button" | "submit" | "reset";
 };
 
 const Button: React.FC<ButtonProps> = ({
@@ -23,6 +24,7 @@ const Button: React.FC<ButtonProps> = ({
   rounded = "md",
   icon,
   iconPosition = "left",
+  type = "",
 }) => {
   const baseStyles =
     " w- flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring";

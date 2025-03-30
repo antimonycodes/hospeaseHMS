@@ -19,108 +19,99 @@ type Columns = {
   render?: (value: any, patient: InformationData) => JSX.Element;
 };
 
-const InformationTable = () => {
-  const navigate = useNavigate();
-  const handleViewMore = (patientId: string) => {
-    navigate(`/dashboard/patients/${patientId}`);
-  };
+type InformationTableProps = {
+  patients: {
+    attributes: {
+      first_name: string;
+      last_name: string;
+      age: number;
+      gender: string;
+      phone_number: string;
+      branch: string;
+      occupation: string;
+    };
+    id: number;
+  }[];
+};
 
-  const informationData: InformationData[] = [
-    {
-      name: "Philip Ikiko",
-      patientId: "001602",
-      age: 32,
-      gender: "male",
-      phone: "2347098765435",
-      branch: "agodi",
-      occupation: "Banker",
-      viewMore: "View More",
-    },
-    {
-      name: "Philip Ikiko",
-      patientId: "001602",
-      age: 32,
-      gender: "male",
-      phone: "2347098765435",
-      branch: "agodi",
-      occupation: "Banker",
-      viewMore: "View More",
-    },
-    {
-      name: "Philip Ikiko",
-      patientId: "001602",
-      age: 32,
-      gender: "male",
-      phone: "2347098765435",
-      branch: "agodi",
-      occupation: "Banker",
-      viewMore: "View More",
-    },
-    {
-      name: "Philip Ikiko",
-      patientId: "001602",
-      age: 32,
-      gender: "male",
-      phone: "2347098765435",
-      branch: "agodi",
-      occupation: "Banker",
-      viewMore: "View More",
-    },
-  ];
+const InformationTable = ({ patients }: InformationTableProps) => {
+  console.log(patients);
+
+  const navigate = useNavigate();
+
+  const formattedPatients = patients.map((patient: any) => ({
+    name: `${patient.attributes.first_name} ${patient.attributes.last_name}`,
+    patientId: patient.id.toString(), // Convert ID to string if needed
+    age: patient.attributes.age,
+    gender: patient.attributes.gender,
+    phone: patient.attributes.phone_number,
+    branch: patient.attributes.branch,
+    occupation: patient.attributes.occupation,
+    viewMore: "View More",
+    id: patient.id,
+  }));
+  const handleViewMore = (id: string) => {
+    console.log("Navigating to patient ID:", id);
+    navigate(`/dashboard/patients/${id}`);
+  };
 
   const columns: Columns[] = [
     {
       key: "name",
       label: "Name",
-      render: (_, data) => (
-        <span className="font-medium text-[#101828]">{data.name}</span>
+      render: (_, patient) => (
+        <span className="font-medium text-[#101828]">{patient.name}</span>
       ),
     },
     {
       key: "patientId",
       label: "Patient ID",
-      render: (_, data) => (
-        <span className="text-[#667085]">{data.patientId}</span>
+      render: (_, patient) => (
+        <span className="text-[#667085]">{patient.patientId}</span>
       ),
     },
     {
       key: "age",
       label: "Age",
-      render: (_, data) => <span className="text-[#667085]">{data.age}</span>,
+      render: (_, patient) => (
+        <span className="text-[#667085]">{patient.age}</span>
+      ),
     },
     {
       key: "gender",
       label: "Gender",
-      render: (_, data) => (
-        <span className="text-[#667085]">{data.gender}</span>
+      render: (_, patient) => (
+        <span className="text-[#667085]">{patient.gender}</span>
       ),
     },
     {
       key: "phone",
       label: "Phone",
-      render: (_, data) => <span className="text-[#667085]">{data.phone}</span>,
+      render: (_, patient) => (
+        <span className="text-[#667085]">{patient.phone}</span>
+      ),
     },
     {
       key: "branch",
       label: "Branch",
-      render: (_, data) => (
-        <span className="text-[#667085]">{data.branch}</span>
+      render: (_, patient) => (
+        <span className="text-[#667085]">{patient.branch}</span>
       ),
     },
     {
       key: "occupation",
       label: "Occupation",
-      render: (_, data) => (
-        <span className="text-[#667085]">{data.occupation}</span>
+      render: (_, patient) => (
+        <span className="text-[#667085]">{patient.occupation}</span>
       ),
     },
     {
       key: "viewMore",
       label: "",
-      render: (_, data) => (
+      render: (_, patient) => (
         <span
           className="text-primary text-sm font-medium cursor-pointer"
-          onClick={() => handleViewMore(data.patientId)}
+          onClick={() => handleViewMore(patient.patientId)}
         >
           View More
         </span>
@@ -131,10 +122,10 @@ const InformationTable = () => {
   return (
     <div className="w-full h-full">
       <Table
-        data={informationData}
+        data={formattedPatients}
         columns={columns}
         rowKey="patientId"
-        pagination={informationData.length > 10}
+        pagination={formattedPatients.length > 10}
         rowsPerPage={10}
       />
     </div>

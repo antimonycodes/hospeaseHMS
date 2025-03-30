@@ -1,20 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DoctorsTable from "./ConsultantTable";
 import AddDoctorModal from "../../../Shared/AddDoctorModal";
 import Button from "../../../Shared/Button";
 import { Plus } from "lucide-react";
+import { useDoctorStore } from "../../../store/super-admin/useDoctorStore";
+import ConsultantTable from "./ConsultantTable";
 
 const SaConsultantPage = () => {
   const [showModal, setShowModal] = useState(false);
+  const createConsultant = useDoctorStore((state) => state.createConsultant);
+  const { getAllConsultants, consultants, createDoctor } = useDoctorStore();
 
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    first_name: "",
+    last_name: "",
     email: "",
     phone: "",
     religion: "",
     houseAddress: "",
+    consultant_id: "21",
   });
+
+  useEffect(() => {
+    getAllConsultants();
+  }, []);
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,7 +58,7 @@ const SaConsultantPage = () => {
         </div>
       </div>
 
-      <DoctorsTable />
+      <ConsultantTable consultants={consultants} />
 
       {/* Add Doctor Modal */}
       {showModal && (
@@ -57,6 +66,8 @@ const SaConsultantPage = () => {
           formData={formData}
           handleInputChange={handleInputChange}
           setShowModal={setShowModal}
+          createConsultant={createConsultant}
+          createDoctor={createDoctor}
         />
       )}
     </div>

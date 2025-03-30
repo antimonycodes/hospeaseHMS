@@ -10,7 +10,7 @@ import MatronPatients from "../components/Matron/patients/MatronPatients";
 import ConsultantPatients from "../components/Consultant/ConsultantPatients";
 
 const roleComponents: Record<string, JSX.Element> = {
-  superadmin: <PatientsPage />,
+  admin: <PatientsPage />,
   doctor: <Dpatients />,
   frontdesk: <FpatientsTable />,
   laboratory: <Labpatients />,

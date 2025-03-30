@@ -163,7 +163,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { sidebarRoutes } from "../../config/sidebarRoutes";
 import logo from "../../assets/logo-full.png";
 import logoSmall from "../../assets/logo-small.png";
-import { useAuth } from "../../store/AuthContext";
+import { useAuthStore } from "../../store/_auth/useAuthStore";
+// import { useAuth } from "../../store/AuthContext";
 
 interface SidebarProps {
   isMobileMenuOpen: boolean;
@@ -182,6 +183,7 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const collapseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { logout } = useAuthStore();
   const [menuItems, setMenuItems] = useState<MenuItems[]>([]);
 
   useEffect(() => {
@@ -216,7 +218,7 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
     };
   }, []);
 
-  const { logout } = useAuth();
+  // const { logout } = useAuth();
   return (
     <div className="font-jakarta h-full">
       {/* Mobile sidebar */}
@@ -317,10 +319,8 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
           ))}
         </div>
         {/*  */}
-        <div className=" absolute bottom-24 cursor-pointer">
-          <h1 className="" onClick={() => logout()}>
-            Log out
-          </h1>
+        <div className=" absolute bottom-4 cursor-pointer" onClick={logout}>
+          <h1 className="">Log out</h1>
           <ArrowLeftToLine />
         </div>
       </div>

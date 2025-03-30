@@ -1,41 +1,43 @@
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import Button from "./Button";
-import { useDoctorStore } from "../store/super-admin/useDoctorStore";
+import { useDoctorStore } from "../../../store/super-admin/useDoctorStore";
+import Button from "../../../Shared/Button";
+// import { useDoctorStore } from "../store/useDoctorStore";
 
-interface Doctor {
+interface Consultant {
   id: string;
   attributes: {
     first_name: string;
     last_name: string;
     phone: string;
-    details: {
-      age: number;
-      religion: string;
-      address: string;
-    };
+
+    age: number;
+    religion: string;
+    address: string;
   };
   gender: string;
 }
 
-const DoctorDetails = () => {
+const ConsultantDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { selectedDoctor, getDoctorById, isLoading } = useDoctorStore() as {
-    selectedDoctor: Doctor | null;
-    getDoctorById: (id: string) => void;
-    isLoading: boolean;
-  };
+  const { selectedConsultant, getConsultantById, isLoading } =
+    useDoctorStore() as {
+      selectedConsultant: Consultant | null;
+      getConsultantById: (id: string) => void;
+      isLoading: boolean;
+    };
 
   useEffect(() => {
     if (id) {
-      getDoctorById(id);
+      getConsultantById(id);
     }
-  }, [id, getDoctorById]);
+  }, [id, getConsultantById]);
+  console.log(selectedConsultant);
 
-  if (isLoading) return <p>Loading doctor details...</p>;
-  if (!selectedDoctor) return <p>Doctor not found</p>;
+  if (isLoading) return <p>Loading consultant details...</p>;
+  if (!selectedConsultant) return <p>Consultant not found</p>;
 
   return (
     <div className="bg-white rounded-lg shadow-md w-full">
@@ -61,22 +63,23 @@ const DoctorDetails = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <Info
             label="First Name"
-            value={selectedDoctor?.attributes?.first_name}
+            value={selectedConsultant.attributes.first_name}
           />
           <Info
             label="Last Name"
-            value={selectedDoctor?.attributes?.last_name}
+            value={selectedConsultant.attributes.last_name}
           />
-          <Info label="Age" value={selectedDoctor?.attributes?.details?.age} />
-          <Info label="Gender" value={selectedDoctor?.gender} />
+          {/* <Info label="Staff ID" value={selectedConsultant.staffId} /> */}
+          <Info label="Age" value={selectedConsultant.attributes.age} />
+          <Info label="Gender" value={selectedConsultant.gender} />
           <Info
             label="Religion"
-            value={selectedDoctor?.attributes?.details?.religion}
+            value={selectedConsultant.attributes.religion}
           />
-          <Info label="Phone" value={selectedDoctor?.attributes?.phone} />
+          <Info label="Phone" value={selectedConsultant.attributes.phone} />
           <Info
             label="House Address"
-            value={selectedDoctor?.attributes?.details?.address}
+            value={selectedConsultant.attributes.address}
           />
         </div>
       </div>
@@ -88,9 +91,9 @@ const Info = ({ label, value }: { label: string; value?: string | number }) => (
   <div className="mb-4">
     <p className="text-sm text-[#667085]">{label}</p>
     <p className="text-sm md:text-base font-medium text-custom-black">
-      {value ?? "N/A"}
+      {value || "N/A"}
     </p>
   </div>
 );
 
-export default DoctorDetails;
+export default ConsultantDetails;

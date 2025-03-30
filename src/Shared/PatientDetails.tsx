@@ -1,8 +1,9 @@
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { ChevronLeft, ChevronDown, ChevronUp, User } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import EditPatientModal from "./EditPatientModal";
 import Button from "./Button";
+import { usePatientStore } from "../store/super-admin/usePatientStore";
 
 const PatientDetails = () => {
   const [openSections, setOpenSections] = useState({
@@ -12,6 +13,12 @@ const PatientDetails = () => {
   });
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const { id } = useParams<{ id: string }>();
+  console.log(id);
+
+  const { selectedPatient, getPatientById } = usePatientStore();
+
+  console.log(selectedPatient);
 
   const toggleSection = (section: keyof typeof openSections) => {
     setOpenSections((prev) => ({
@@ -19,6 +26,16 @@ const PatientDetails = () => {
       [section]: !prev[section],
     }));
   };
+
+  useEffect(() => {
+    if (id) {
+      getPatientById(id);
+    }
+  }, [id, getPatientById]);
+
+  if (!selectedPatient) return <p>Patient not found</p>;
+
+  const patient = selectedPatient.attributes;
 
   const patientData: any = {
     firstName: "Philip",
@@ -128,51 +145,18 @@ const PatientDetails = () => {
 
           <div className="grid  gap-6">
             {/* Left column */}
-            <div>
-              <div className="grid grid-cols-4 gap-4 mb-6">
-                <div>
-                  <p className="text-xs text-gray-500">First Name</p>
-                  <p className="text-sm font-medium">{patientData.firstName}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Last Name</p>
-                  <p className="text-sm font-medium">{patientData.lastName}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Patient ID</p>
-                  <p className="text-sm font-medium">{patientData.patientId}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Age</p>
-                  <p className="text-sm font-medium">{patientData.age}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Gender</p>
-                  <p className="text-sm font-medium">{patientData.sex}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Religion</p>
-                  <p className="text-sm font-medium">{patientData.religion}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Occupation</p>
-                  <p className="text-sm font-medium">Student</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Marital</p>
-                  <p className="text-sm font-medium">Christian</p>
-                </div>
-                <div className="">
-                  <p className="text-xs text-gray-500">Phone</p>
-                  <div className="flex items-center">
-                    <p className="text-sm font-medium">{patientData.phone}</p>
-                  </div>
-                </div>
-                <div className="">
-                  <p className="text-xs text-gray-500">Address</p>
-                  <p className="text-sm font-medium">{patientData.address}</p>
-                </div>
-              </div>
+            {/* Patient Info */}
+            <div className="grid grid-cols-4 gap-4 mb-6">
+              <InfoRow label="First Name" value={patient.first_name} />
+              <InfoRow label="Last Name" value={patient.last_name} />
+              <InfoRow label="Patient ID" value={patient.card_id} />
+              <InfoRow label="Age" value={patient.age?.toString()} />
+              <InfoRow label="Gender" value={patient.gender} />
+              <InfoRow label="Branch" value={patient.branch} />
+              <InfoRow label="Occupation" value={patient.occupation} />
+              <InfoRow label="Religion" value={patient.religion} />
+              <InfoRow label="Phone" value={patient.phone_number} />
+              <InfoRow label="Address" value={patient.address} />
             </div>
             {/*  */}
             <hr className=" text-[#979797]" />
@@ -182,56 +166,18 @@ const PatientDetails = () => {
                 <h3 className="text-sm font-medium text-gray-800 mb-4">
                   Next of Kin
                 </h3>
-                <div className="grid  gap-6">
-                  <div>
-                    <div className="grid grid-cols-4 gap-6 mb-4">
-                      <div>
-                        <p className="text-xs text-gray-500">First Name</p>
-                        <p className="text-sm font-medium">
-                          {patientData.nextOfKin.firstName}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500">Last Name</p>
-                        <p className="text-sm font-medium">
-                          {patientData.nextOfKin.lastName}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500">Gender</p>
-                        <p className="text-sm font-medium">Sister</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500">
-                          Relationship with patient
-                        </p>
-                        <p className="text-sm font-medium">
-                          {patientData.nextOfKin.relationship}
-                        </p>
-                      </div>
-                      <div className="">
-                        <p className="text-xs text-gray-500">Phone</p>
-                        <div className="flex items-center">
-                          <p className="text-sm font-medium">
-                            {patientData.nextOfKin.phone}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="">
-                        <p className="text-xs text-gray-500">
-                          Relationship with Patient
-                        </p>
-                        <p className="text-sm font-medium">Sister</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500 w-full">Address</p>
-                        <p className="text-sm font-medium">
-                          {patientData.nextOfKin.address}
-                        </p>
-                      </div>
-                    </div>
+                {patient.next_of_kin?.map((kin: any, index: any) => (
+                  <div key={index} className="grid grid-cols-4 gap-4 mb-4">
+                    <InfoRow label="First Name" value={kin.name} />
+                    <InfoRow label="Last Name" value={kin.last_name} />
+                    <InfoRow label="Gender" value={kin.gender} />
+                    <InfoRow label="Occupation" value={kin.occupation} />
+                    <InfoRow label="Phone" value={kin.phone} />
+
+                    <InfoRow label="Relationship" value={kin.relationship} />
+                    <InfoRow label="Address" value={kin.address} />
                   </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
@@ -426,3 +372,16 @@ const PatientDetails = () => {
 };
 
 export default PatientDetails;
+// Reusable Component for Patient Info
+const InfoRow = ({
+  label,
+  value,
+}: {
+  label: string;
+  value?: string | null;
+}) => (
+  <div>
+    <p className="text-xs text-gray-500">{label}</p>
+    <p className="text-sm font-medium">{value || "N/A"}</p>
+  </div>
+);

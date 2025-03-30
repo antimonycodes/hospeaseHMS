@@ -1,39 +1,58 @@
 import { useState } from "react";
 import Input from "./Input";
 import { X } from "lucide-react";
+import { CreatePatientData } from "../store/super-admin/usePatientStore";
 
-const AddPatientModal = ({ onClose }: { onClose: () => void }) => {
+interface AddPatientModalProps {
+  onClose: () => void;
+  createPatient: (data: CreatePatientData) => any;
+}
+
+const AddPatientModal = ({ onClose, createPatient }: AddPatientModalProps) => {
   const [patient, setPatient] = useState({
-    firstName: "",
-    lastName: "",
-    patientId: "0010602",
-    gender: "Male",
-    branch: "Agodi",
-    phone: "",
+    first_name: "",
+    last_name: "",
+    card_id: "",
+    branch_id: "",
+    phone_number: "",
     occupation: "",
     religion: "",
     address: "",
+    gender: "",
+    patient_type: "",
   });
 
   const [nextOfKin, setNextOfKin] = useState({
-    firstName: "",
-    lastName: "",
-    gender: "Female",
+    name: "",
+    last_name: "",
+    gender: "",
     phone: "",
     occupation: "",
-    religion: "",
     address: "",
     relationship: "",
   });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    type: "patient" | "nextOfKin"
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    field: string
   ) => {
     const { name, value } = e.target;
-    type === "patient"
-      ? setPatient({ ...patient, [name]: value })
-      : setNextOfKin({ ...nextOfKin, [name]: value });
+    if (field === "patient") {
+      setPatient((prev) => ({ ...prev, [name]: value }));
+    } else {
+      setNextOfKin((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleSubmit = async () => {
+    const response = await createPatient({
+      ...patient,
+      next_of_kin: [nextOfKin],
+    });
+
+    if (response) {
+      onClose();
+    }
   };
 
   return (
@@ -46,35 +65,51 @@ const AddPatientModal = ({ onClose }: { onClose: () => void }) => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
-            name="firstName"
+            name="first_name"
             placeholder="First Name"
-            value={patient.firstName}
+            value={patient.first_name}
             onChange={(e) => handleChange(e, "patient")}
           />
           <Input
-            name="lastName"
+            name="last_name"
             placeholder="Last Name"
-            value={patient.lastName}
+            value={patient.last_name}
             onChange={(e) => handleChange(e, "patient")}
           />
           <Input
-            name="patientId"
-            value={patient.patientId}
-            onChange={() => {}}
-            className="bg-gray-100"
+            name="card_id"
+            placeholder="Card ID"
+            value={patient.card_id}
+            onChange={(e) => handleChange(e, "patient")}
           />
+
+          {/* Gender Select */}
+          <select
+            name="gender"
+            value={patient.gender}
+            onChange={(e) => handleChange(e, "patient")}
+            className="border p-2 rounded text-gray-400"
+          >
+            <option value="" disabled>
+              Select Gender
+            </option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+
           <Input
-            name="branch"
+            name="branch_id"
             placeholder="Branch"
-            value={patient.branch}
+            value={patient.branch_id}
             onChange={(e) => handleChange(e, "patient")}
           />
           <Input
-            name="phone"
+            name="phone_number"
             placeholder="Phone Number"
-            value={patient.phone}
+            value={patient.phone_number}
             onChange={(e) => handleChange(e, "patient")}
           />
           <Input
@@ -95,23 +130,39 @@ const AddPatientModal = ({ onClose }: { onClose: () => void }) => {
             value={patient.address}
             onChange={(e) => handleChange(e, "patient")}
           />
+
+          {/* Patient Type Select */}
+          <select
+            name="patient_type"
+            value={patient.patient_type}
+            onChange={(e) => handleChange(e, "patient")}
+            className="border p-2 rounded text-gray-400"
+          >
+            <option value="" disabled>
+              Select Patient Type
+            </option>
+            <option value="HMO">HMO</option>
+            <option value="Regular">Regular</option>
+            <option value="Other">Other</option>
+          </select>
         </div>
 
         <hr className="my-12 text-[#979797]" />
 
+        {/* Next of Kin */}
         <div>
           <h3 className="text-md font-semibold mb-2">Add Next of Kin</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <Input
-              name="firstName"
+              name="name"
               placeholder="First Name"
-              value={nextOfKin.firstName}
+              value={nextOfKin.name}
               onChange={(e) => handleChange(e, "nextOfKin")}
             />
             <Input
-              name="lastName"
+              name="last_name"
               placeholder="Last Name"
-              value={nextOfKin.lastName}
+              value={nextOfKin.last_name}
               onChange={(e) => handleChange(e, "nextOfKin")}
             />
             <Input
@@ -127,12 +178,6 @@ const AddPatientModal = ({ onClose }: { onClose: () => void }) => {
               onChange={(e) => handleChange(e, "nextOfKin")}
             />
             <Input
-              name="religion"
-              placeholder="Religion"
-              value={nextOfKin.religion}
-              onChange={(e) => handleChange(e, "nextOfKin")}
-            />
-            <Input
               name="address"
               placeholder="House Address"
               value={nextOfKin.address}
@@ -140,14 +185,32 @@ const AddPatientModal = ({ onClose }: { onClose: () => void }) => {
             />
             <Input
               name="relationship"
-              placeholder="Relationship with Patient"
+              placeholder="Relationship"
               value={nextOfKin.relationship}
               onChange={(e) => handleChange(e, "nextOfKin")}
             />
+
+            {/* Next of Kin Gender Select */}
+            <select
+              name="gender"
+              value={nextOfKin.gender}
+              onChange={(e) => handleChange(e, "nextOfKin")}
+              className="border p-2 rounded text-gray-400"
+            >
+              <option value="" disabled>
+                Select Gender
+              </option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
           </div>
         </div>
 
-        <button className="bg-primary w-fit text-white px-4 py-2 rounded  mt-4">
+        <button
+          onClick={handleSubmit}
+          className="bg-primary w-fit text-white px-4 py-2 rounded mt-4"
+        >
           Add Patient
         </button>
       </div>

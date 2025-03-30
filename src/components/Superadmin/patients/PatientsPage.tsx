@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import InformationTable from "./InformationTable";
 import AppointmentsTable from "./AppointmentsTable";
 import Button from "../../../Shared/Button";
 import { Plus, Search } from "lucide-react";
 import AddPatientModal from "../../../Shared/AddPatientModal";
 import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
+import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 // import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
 
 const PatientsPage = () => {
@@ -18,6 +19,18 @@ const PatientsPage = () => {
     setModalType(activeTab === 0 ? "patient" : "appointment");
     setOpenModal(true);
   };
+
+  const {
+    getAllPatients,
+    patients,
+    createPatient,
+    getPatientById,
+    selectedPatient,
+  } = usePatientStore();
+
+  useEffect(() => {
+    getAllPatients();
+  }, []);
 
   return (
     <div className=" bg-white custom-shadow p-4">
@@ -79,11 +92,18 @@ const PatientsPage = () => {
 
       {/* Table */}
       <div className=" mt-4">
-        {activeTab === 0 ? <InformationTable /> : <AppointmentsTable />}
+        {activeTab === 0 ? (
+          <InformationTable patients={patients} />
+        ) : (
+          <AppointmentsTable />
+        )}
       </div>
 
       {openModal && modalType === "patient" && (
-        <AddPatientModal onClose={() => setOpenModal(false)} />
+        <AddPatientModal
+          onClose={() => setOpenModal(false)}
+          createPatient={createPatient}
+        />
       )}
       {openModal && modalType === "appointment" && (
         <BookAppointmentModal onClose={() => setOpenModal(false)} />
