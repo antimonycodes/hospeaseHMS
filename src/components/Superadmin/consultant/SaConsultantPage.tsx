@@ -20,7 +20,7 @@ const SaConsultantPage = () => {
     phone: "",
     religion: "",
     houseAddress: "",
-    consultant_id: generateSixDigitId().toString(),
+    consultant_id: null,
   });
 
   useEffect(() => {
