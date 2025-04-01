@@ -3,6 +3,7 @@ import { Mail } from "lucide-react";
 import logo from "../assets/logo-full.png";
 import onboardingImg from "../assets/onboardingImg.png";
 import { useAuthStore } from "../store/_auth/useAuthStore";
+import toast from "react-hot-toast";
 
 const Signup = () => {
   const { signup, isLoading } = useAuthStore();
@@ -28,8 +29,14 @@ const Signup = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate if files exist
+    if (!formData.logo || !formData.cac_docs) {
+      toast.error("Logo and CAC documents are required.");
+      return;
+    }
     console.log(formData);
-    // signup(formData);
+    signup(formData);
   };
 
   return (

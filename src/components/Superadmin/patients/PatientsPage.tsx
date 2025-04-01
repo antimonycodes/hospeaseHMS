@@ -4,7 +4,7 @@ import AppointmentsTable from "./AppointmentsTable";
 import Button from "../../../Shared/Button";
 import { Plus, Search } from "lucide-react";
 import AddPatientModal from "../../../Shared/AddPatientModal";
-import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
+// import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 // import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
 
@@ -26,6 +26,8 @@ const PatientsPage = () => {
     createPatient,
     getPatientById,
     selectedPatient,
+    isLoading,
+    pagination,
   } = usePatientStore();
 
   useEffect(() => {
@@ -46,14 +48,18 @@ const PatientsPage = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1AA] size-4" />
           </div>
 
-          <div className="w-full md:w-auto">
+          <div
+            className={`w-full md:w-auto ${
+              activeTab === 1 ? "hidden" : "block"
+            }`}
+          >
             <Button
               variant="primary"
               size="md"
               onClick={handleOpenModal}
               className="flex items-center gap-2 px-4"
             >
-              {activeTab === 0 ? "Add new Patient" : "Book New Appointment"}
+              Add new Patient
               <Plus size={16} />
             </Button>
           </div>
@@ -93,7 +99,7 @@ const PatientsPage = () => {
       {/* Table */}
       <div className=" mt-4">
         {activeTab === 0 ? (
-          <InformationTable patients={patients} />
+          <InformationTable patients={patients} pagination={pagination} />
         ) : (
           <AppointmentsTable />
         )}
@@ -103,11 +109,12 @@ const PatientsPage = () => {
         <AddPatientModal
           onClose={() => setOpenModal(false)}
           createPatient={createPatient}
+          isLoading={isLoading}
         />
       )}
-      {openModal && modalType === "appointment" && (
+      {/* {openModal && modalType === "appointment" && (
         <BookAppointmentModal onClose={() => setOpenModal(false)} />
-      )}
+      )} */}
     </div>
   );
 };

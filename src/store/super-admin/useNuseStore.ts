@@ -41,6 +41,8 @@ export interface NurseAttributes {
   details: string | null;
   created_at: string;
   id: number;
+  is_active: boolean;
+  user_id: number;
 }
 
 // Interface for Nurse Data
@@ -65,7 +67,7 @@ export interface CreateNurseData {
   last_name: string;
   dob: string;
   email: string;
-  nurse_id: string;
+  nurse_id: null;
   religion: string;
   phone: string;
   address: string;

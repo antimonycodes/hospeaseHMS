@@ -11,7 +11,7 @@ const SaNursesPage = () => {
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
-    nurse_id: "",
+    nurse_id: null,
     email: "",
     phone: "",
     religion: "",

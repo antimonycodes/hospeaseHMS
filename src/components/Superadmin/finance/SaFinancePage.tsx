@@ -38,6 +38,7 @@ const SaFinancePage: React.FC = () => {
     amount: "",
     purpose: "",
     paymentMethod: "Bank Transfer",
+    paymentType: "",
   });
 
   // Expense form states

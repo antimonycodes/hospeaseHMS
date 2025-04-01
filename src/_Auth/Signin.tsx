@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { Mail } from "lucide-react";
+import { Loader2, Mail } from "lucide-react";
 import logo from "../assets/logo-full.png";
 import { useAuthStore } from "../store/_auth/useAuthStore";
 import { useNavigate } from "react-router-dom";
@@ -117,10 +117,18 @@ const Signin = () => {
           {/* Login Button */}
           <button
             type="submit"
-            disabled={isLoading}
-            className="w-full py-3 text-white font-medium text-lg bg-[#009952] rounded-md hover:bg-[#00783E] hover:shadow-md transition-all"
+            disabled={!!isLoading}
+            className={`w-full py-3 text-white font-medium text-lg bg-[#009952] rounded-md hover:bg-[#00783E] hover:shadow-md transition-all flex items-center justify-center
+               ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
           >
-            {isLoading ? "Logging in..." : "Login to Account"}
+            {isLoading ? (
+              <>
+                Logging in...
+                <Loader2 className=" size-6 mr-2 animate-spin" />
+              </>
+            ) : (
+              "Login to Account"
+            )}
           </button>
         </form>
       </div>

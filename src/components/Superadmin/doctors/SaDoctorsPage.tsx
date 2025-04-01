@@ -4,11 +4,13 @@ import AddDoctorModal from "../../../Shared/AddDoctorModal";
 import { Plus } from "lucide-react";
 import Button from "../../../Shared/Button";
 import { useDoctorStore } from "../../../store/super-admin/useDoctorStore";
+import { generateSixDigitId } from "../../../utils/randomNumber";
 
 const SaDoctorsPage = () => {
   const [showModal, setShowModal] = useState(false);
   const createDoctor = useDoctorStore((state) => state.createDoctor);
-  const { getAllDoctors, doctors, createConsultant } = useDoctorStore();
+  const { getAllDoctors, doctors, createConsultant, isLoading } =
+    useDoctorStore();
 
   const [formData, setFormData] = useState({
     first_name: "",
@@ -52,6 +54,7 @@ const SaDoctorsPage = () => {
       {showModal && (
         <AddDoctorModal
           formData={formData}
+          isLoading={isLoading}
           handleInputChange={handleInputChange}
           setShowModal={setShowModal}
           createDoctor={createDoctor} // Pass createDoctor function

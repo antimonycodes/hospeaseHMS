@@ -27,6 +27,9 @@ import Signin from "./_Auth/Signin";
 import ConsultantDetails from "./components/Superadmin/consultant/ConsultantDetails";
 import { Toaster } from "react-hot-toast";
 import NurseDetails from "./components/Superadmin/nurses/NurseDetails";
+import ProtectedRoutes from "./layout/ProtectedRoutes";
+import Branch from "./pages/Branch";
+import ClinicalDept from "./pages/ClinicalDept";
 
 function App() {
   return (
@@ -37,33 +40,37 @@ function App() {
         <Route path="/signin" element={<Signin />} />
         <Route path="/signup" element={<Signup />} />
 
-        <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route index element={<Navigate to="overview" />} />
-          <Route path="overview" element={<Overview />} />
-          <Route path="patients" element={<Patients />} />
-          <Route path="patients/:id" element={<PatientDetails />} />
-          <Route
-            path="appointments/:patientId"
-            element={<AppointmentDetails />}
-          />
-          <Route path="doctors" element={<Doctors />} />
-          <Route path="doctors/:id" element={<DoctorDetails />} />
-          <Route path="consultants" element={<Consultants />} />
-          <Route path="consultants/:id" element={<ConsultantDetails />} />
+        <Route element={<ProtectedRoutes />}>
+          <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route index element={<Navigate to="overview" />} />
+            <Route path="overview" element={<Overview />} />
+            <Route path="patients" element={<Patients />} />
+            <Route path="patients/:id" element={<PatientDetails />} />
+            <Route
+              path="appointments/:patientId"
+              element={<AppointmentDetails />}
+            />
+            <Route path="doctors" element={<Doctors />} />
+            <Route path="doctors/:id" element={<DoctorDetails />} />
+            <Route path="consultants" element={<Consultants />} />
+            <Route path="consultants/:id" element={<ConsultantDetails />} />
 
-          <Route path="finance" element={<Finance />} />
-          <Route path="laboratory" element={<Laboratory />} />
-          <Route path="appointments" element={<Appointments />} />
-          <Route path="nurses" element={<Nurses />} />
-          <Route path="nurses/:id" element={<NurseDetails />} />
-          <Route path="pharmacy" element={<Pharmacy />} />
-          <Route path="users" element={<Users />} />
-          <Route path="payment" element={<Payment />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="shifts" element={<Shift />} />
-          <Route path="inventory" element={<Inventory />} />
-          <Route path="stock" element={<Stocks />} />
-          <Route path="request" element={<Request />} />
+            <Route path="finance/info" element={<Finance />} />
+            <Route path="laboratory/info" element={<Laboratory />} />
+            <Route path="appointments" element={<Appointments />} />
+            <Route path="nurses" element={<Nurses />} />
+            <Route path="nurses/:id" element={<NurseDetails />} />
+            <Route path="pharmacy/info" element={<Pharmacy />} />
+            <Route path="users" element={<Users />} />
+            <Route path="payment" element={<Payment />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="shifts" element={<Shift />} />
+            <Route path="inventory" element={<Inventory />} />
+            <Route path="stock" element={<Stocks />} />
+            <Route path="request" element={<Request />} />
+            <Route path="branch" element={<Branch />} />
+            <Route path="clinical-department" element={<ClinicalDept />} />
+          </Route>
         </Route>
       </Routes>
       <Toaster />
