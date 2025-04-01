@@ -1,7 +1,6 @@
 import { JSX } from "react";
-import PatientsPage from "../components/Superadmin/patients/PatientsPage";
+import { useNavigate } from "react-router-dom";
 import { useRole } from "../hooks/useRole";
-import FpatientsTable from "../components/Frontdesk/patients/FpatientsTable";
 import FrontdeskAppointment from "../components/Frontdesk/appointment/FrontdeskAppointment";
 import DoctorsAppointment from "../components/Doctor/appointment/DoctorsAppointment";
 
@@ -12,10 +11,11 @@ const roleComponents: Record<string, JSX.Element> = {
 };
 
 const Appointments = () => {
+  const navigate = useNavigate();
   const role = useRole();
 
   // Default to 'Unauthorized' if role is not recognized
-  return role ? roleComponents[role] : <p>Unauthorized Access</p>;
+  return role ? roleComponents[role] : (navigate("/signin"), null);
 };
 
 export default Appointments;
