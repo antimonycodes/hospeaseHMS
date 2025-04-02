@@ -293,7 +293,7 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
         initial="closed"
         animate={isMobileMenuOpen ? "open" : "closed"}
         variants={sidebarVariants}
-        className="fixed top-0 left-0 h-screen w-72 bg-white z-50 md:hidden overflow-y-auto shadow-xl rounded-r-xl"
+        className="fixed top-0 left-0 h-screen w-72 bg-white z-50 md:hidden overflow-y-scroll shadow-xl rounded-r-xl"
       >
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <img
