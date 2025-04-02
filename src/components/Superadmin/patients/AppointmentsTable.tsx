@@ -1,7 +1,7 @@
-import { useState, JSX, useEffect, useMemo } from "react";
+// // AppointmentTable.tsx
+import { useState, JSX, useEffect } from "react";
 import Table from "../../../Shared/Table";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
-import Loader from "../../../Shared/Loader";
 
 // Define interfaces based on your API response
 interface AppointmentAttributes {
@@ -14,9 +14,9 @@ interface AppointmentAttributes {
   occupation: string;
   patient: string;
   date: string;
+  time: string;
   reason_if_rejected_or_rescheduled: string | null;
   assigned_by: string;
-  time: string;
   created_at: string;
 }
 
@@ -27,9 +27,6 @@ interface AppointmentData {
 }
 
 // Use the same Column interface structure that your Table component expects
-// Instead of defining a new Column interface, import it from your Table component
-// For this solution, I'll use a type that matches what the Table component expects
-// This is assuming your Table component expects a Column with keyof T as the key type
 type TableColumn<T> = {
   key: keyof T;
   label: string;
@@ -50,7 +47,7 @@ const formatStatus = (
     rescheduled: "Rescheduled",
   };
 
-  return statusMap[status] || "Pending";
+  return statusMap[status.toLowerCase()] || "Pending";
 };
 
 const statusStyles: Record<string, string> = {
@@ -75,6 +72,13 @@ type FlattenedAppointment = {
   gender: string;
   patient_contact: string;
   occupation: string;
+  date: string;
+  time: string;
+  created_at: string;
+  doctor_contact: string | null;
+  rescheduled_data: any | null;
+  reason_if_rejected_or_rescheduled: string | null;
+  assigned_by: string;
 };
 
 const AppointmentTable = () => {
@@ -86,23 +90,16 @@ const AppointmentTable = () => {
   }, [getAllAppointments]);
 
   // Function to flatten appointment data for table consumption
-  const flattenAppointments = useMemo(() => {
-    return (data: AppointmentData[]): FlattenedAppointment[] => {
-      return data.map((appointment) => ({
-        id: appointment.id,
-        type: appointment.type,
-        // Spread attributes properties to top level
-        patient: appointment.attributes.patient,
-        doctor: appointment.attributes.doctor,
-        status: appointment.attributes.status,
-        gender: appointment.attributes.gender,
-        patient_contact: appointment.attributes.patient_contact,
-        occupation: appointment.attributes.occupation,
-      }));
-    };
-  }, []);
-
-  if (isLoading) return <Loader />;
+  const flattenAppointments = (
+    data: AppointmentData[]
+  ): FlattenedAppointment[] => {
+    return data.map((appointment) => ({
+      id: appointment.id,
+      type: appointment.type,
+      // Spread attributes properties to top level
+      ...appointment.attributes,
+    }));
+  };
 
   // Define columns for the flattened appointment data
   const columns: TableColumn<FlattenedAppointment>[] = [
@@ -172,6 +169,16 @@ const AppointmentTable = () => {
 
   // Calculate status counts from API data
   const getStatusCounts = () => {
+    if (!appointments || !appointments.length) {
+      return {
+        All: 0,
+        Pending: 0,
+        Accepted: 0,
+        Declined: 0,
+        Rescheduled: 0,
+      } as Record<TabType, number>;
+    }
+
     return appointments.reduce(
       (acc, appointment) => {
         const status = formatStatus(appointment.attributes.status);
@@ -194,13 +201,21 @@ const AppointmentTable = () => {
   // Filter appointments based on selected tab
   const filteredAppointments =
     activeTab === "All"
-      ? appointments
-      : appointments.filter(
+      ? appointments || []
+      : (appointments || []).filter(
           (a) => formatStatus(a.attributes.status) === activeTab
         );
 
   // Flatten the filtered appointments for the table
   const flattenedAppointments = flattenAppointments(filteredAppointments);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        Loading appointments...
+      </div>
+    );
+  }
 
   return (
     <div className="mt-2">
@@ -216,16 +231,20 @@ const AppointmentTable = () => {
             }`}
           >
             {tab}
-            {activeTab === tab && (
-              <span className="text-xs bg-primary text-white py-0.5 px-3 rounded-xl ml-2">
-                {statusCounts[tab]}
-              </span>
-            )}
+            <span
+              className={`text-xs py-0.5 px-3 rounded-xl ml-2 ${
+                activeTab === tab
+                  ? "bg-primary text-white"
+                  : "bg-gray-100 text-gray-500"
+              }`}
+            >
+              {statusCounts[tab]}
+            </span>
           </button>
         ))}
       </div>
 
-      {appointments.length === 0 ? (
+      {flattenedAppointments.length === 0 ? (
         <div className="mt-10 text-center text-gray-500">
           No appointments found
         </div>
