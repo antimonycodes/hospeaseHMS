@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 import { useStatsStore } from "../../store/super-admin/useStatsStore";
-import QuickStats from "../Superadmin/QuickStats";
+import DoctorStats from "./DoctorStats";
 
 const DoctorCards = () => {
-  const { getStats } = useStatsStore();
+  const { getStats, stats, isLoading } = useStatsStore();
 
   useEffect(() => {
-    getStats("doctorStats", "/doctor/stats");
+    getStats("/doctor/stats");
   }, [getStats]);
 
   return (
@@ -14,7 +14,7 @@ const DoctorCards = () => {
       <h1 className="font-medium text-[20px] text-[#101828] pb-[21px]">
         Doctor's Dashboard
       </h1>
-      <QuickStats category="doctorStats" />
+      <DoctorStats stats={stats || {}} isLoading={isLoading} />
     </div>
   );
 };
