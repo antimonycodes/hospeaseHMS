@@ -49,13 +49,13 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       children: [
         {
           name: "Users",
-          path: "/dashboard/pharmacy/users",
+          path: "/dashboard/pharmacy/staffs",
           icon: getImageSrc("usericon.svg"),
           activeIcon: getImageSrc("usersWhite.svg"),
         },
         {
           name: "Info",
-          path: "/dashboard/pharmacy/info",
+          path: "/dashboard/info",
           icon: getImageSrc("patientsicon.svg"),
           activeIcon: getImageSrc("patienticonsLight.svg"),
         },
@@ -69,7 +69,7 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       children: [
         {
           name: "Users",
-          path: "/dashboard/laboratory/users",
+          path: "/dashboard/laboratory/staffs",
           icon: getImageSrc("usericon.svg"),
           activeIcon: getImageSrc("usersWhite.svg"),
         },
@@ -89,7 +89,7 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       children: [
         {
           name: "Users",
-          path: "/dashboard/finance/users",
+          path: "/dashboard/finance/staffs",
           icon: getImageSrc("usericon.svg"),
           activeIcon: getImageSrc("usersWhite.svg"),
         },

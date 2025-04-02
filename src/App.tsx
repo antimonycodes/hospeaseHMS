@@ -30,6 +30,7 @@ import NurseDetails from "./components/Superadmin/nurses/NurseDetails";
 import ProtectedRoutes from "./layout/ProtectedRoutes";
 import Branch from "./pages/Branch";
 import ClinicalDept from "./pages/ClinicalDept";
+import Staffs from "./pages/Staffs";
 
 function App() {
   return (
@@ -61,6 +62,19 @@ function App() {
             <Route path="nurses" element={<Nurses />} />
             <Route path="nurses/:id" element={<NurseDetails />} />
             <Route path="pharmacy/info" element={<Pharmacy />} />
+            {/* <Route path="staffs" element={<Staffs />} /> */}
+            <Route
+              path="/dashboard/pharmacy/staffs"
+              element={<Staffs department="pharmacy" />}
+            />
+            <Route
+              path="/dashboard/laboratory/staffs"
+              element={<Staffs department="laboratory" />}
+            />
+            <Route
+              path="/dashboard/finance/staffs"
+              element={<Staffs department="finance" />}
+            />
             <Route path="users" element={<Users />} />
             <Route path="payment" element={<Payment />} />
             <Route path="profile" element={<Profile />} />

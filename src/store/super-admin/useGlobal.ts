@@ -63,6 +63,12 @@ interface CreateBranchData {
 interface CreateClinicaldeptData {
   name: string;
 }
+export interface CreateStaff {
+  email: string;
+  department_id?: number;
+  role?: string;
+  name: string;
+}
 
 interface Globalstore {
   isLoading: boolean;
@@ -73,6 +79,7 @@ interface Globalstore {
   createBranch: (data: CreateBranchData) => Promise<any>;
   getClinicaldept: () => Promise<any>;
   createClinicaldept: (data: CreateClinicaldeptData) => Promise<any>;
+  createStaff: (data: CreateStaff) => Promise<any>;
 }
 
 export const useGlobalStore = create<Globalstore>((set, get) => ({
@@ -204,6 +211,24 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       );
       toast.error(error.response?.data?.message || "Failed");
       return null; // Indicate failure
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  createStaff: async (data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.post("/admin/department/head-dept", data);
+      if (response.status === 201) {
+        toast.success(response.data.message);
+        return true;
+      }
+      console.log(response.data.message);
+      return null;
+    } catch (error: any) {
+      console.error(error.response?.data);
+      toast.error(error.response.data.message);
+      return null;
     } finally {
       set({ isLoading: false });
     }
