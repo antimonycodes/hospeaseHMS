@@ -13,7 +13,7 @@ import ConsultantPatients from "../components/Consultant/ConsultantPatients";
 const roleComponents: Record<string, JSX.Element> = {
   admin: <PatientsPage />,
   doctor: <Dpatients />,
-  frontdesk: <FpatientsTable />,
+  "front-desk-manager": <FpatientsTable />,
   laboratory: <Labpatients />,
   pharmacy: <PharmPatients />,
   nurses: <NursePatients />,

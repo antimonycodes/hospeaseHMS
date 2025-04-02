@@ -10,12 +10,13 @@ const SuperAdminOverview = () => {
   const { getStats } = useStatsStore();
 
   useEffect(() => {
-    getStats();
-  }, []);
+    getStats("adminStats", "/admin/stats");
+  }, [getStats]);
+
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold">Dashboard</h2>
-      <QuickStats />
+      <QuickStats category="adminStats" />
       <div className="flex flex-col md:flex-row gap-4">
         <PatientBarChart />
         <DepartmentChart />

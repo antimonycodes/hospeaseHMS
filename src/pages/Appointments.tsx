@@ -7,7 +7,7 @@ import DoctorsAppointment from "../components/Doctor/appointment/DoctorsAppointm
 const roleComponents: Record<string, JSX.Element> = {
   //   superadmin: <PatientsPage />,
   doctor: <DoctorsAppointment />,
-  frontdesk: <FrontdeskAppointment />,
+  "front-desk-manager": <FrontdeskAppointment />,
 };
 
 const Appointments = () => {

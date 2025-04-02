@@ -15,14 +15,13 @@ import { JSX } from "react";
 const roleComponents: Record<string, JSX.Element> = {
   admin: <SuperAdminOverview />,
   doctor: <DoctorOverview />,
-  frontdesk: <FrontdeskOverview />,
+  "front-desk-manager": <FrontdeskOverview />,
   laboratory: <Laboverview />,
   finance: <Foverview />,
   pharmacy: <PharmDash />,
-  inventory: <InventoryDash/>,
+  inventory: <InventoryDash />,
   nurses: <NurseDash />,
-  matron:<MatronDash/>,
- 
+  matron: <MatronDash />,
 };
 
 const Overview = () => {

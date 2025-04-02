@@ -51,7 +51,7 @@ interface PatientStore {
   patients: any[];
   selectedPatient: any | null;
 
-  getAllPatients: () => Promise<void>;
+  getAllPatients: (endpoint?: string) => Promise<void>;
   getPatientById: (id: string) => Promise<void>;
   createPatient: (data: CreatePatientData) => Promise<any>;
 }
@@ -62,16 +62,16 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   selectedPatient: null,
 
   // Fetch all patient
-  getAllPatients: async () => {
+  getAllPatients: async (endpoint = "/admin/patient/fetch") => {
     set({ isLoading: true });
     try {
-      const response = await api.get("/admin/patient/fetch");
-      const fetchedPatients = response.data.data.data; // Extract doctor array
+      const response = await api.get(endpoint);
+      const fetchedPatients = response.data.data.data; // Extract patient array
       set({ patients: fetchedPatients });
       console.log(response.data.message);
     } catch (error: any) {
       console.error(error.response?.data);
-      // toast.error(error.message || "Failed to fetch doctors");
+      // toast.error(error.message || "Failed to fetch patients");
     } finally {
       set({ isLoading: false });
     }

@@ -103,7 +103,7 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       activeIcon: getImageSrc("appointmentLight.svg"),
     },
   ],
-  frontdesk: [
+  "front-desk-manager": [
     {
       name: "Overview",
       path: "/dashboard/overview",

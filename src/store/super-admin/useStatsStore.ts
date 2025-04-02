@@ -3,6 +3,7 @@ import axios, { AxiosResponse } from "axios";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
 
+// Create Axios instance
 const api = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_URL,
   headers: {
@@ -10,6 +11,7 @@ const api = axios.create({
   },
 });
 
+// Add authorization token to requests
 api.interceptors.request.use(
   (config) => {
     const token = Cookies.get("token");
@@ -21,31 +23,33 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Define store interface
 interface StatsStore {
-  isloading: boolean;
-  stats: {
-    total_patient: number;
-    total_doctor: number;
-    total_appointment: number;
-    total_consultant: number;
-  } | null;
-  getStats: () => Promise<void>;
+  isLoading: boolean;
+  stats: Record<string, Record<string, number>>; // Supports multiple categories
+  getStats: (category: string, endpoint: string) => Promise<void>;
 }
 
+// Zustand store
 export const useStatsStore = create<StatsStore>((set) => ({
-  isloading: false,
-  stats: null,
+  isLoading: false,
+  stats: {},
 
-  getStats: async () => {
-    set({ isloading: true });
+  getStats: async (category, endpoint) => {
+    set({ isLoading: true });
+
     try {
-      const response: AxiosResponse = await api.get("/admin/stats");
-      set({ stats: response.data.data });
+      const response: AxiosResponse = await api.get(endpoint);
+      set((state) => ({
+        stats: { ...state.stats, [category]: response.data.data },
+      }));
     } catch (error: any) {
-      console.error(error);
-      toast.error("Error fetching stats");
+      console.error(`Error fetching ${category} stats:`, error);
+      const message =
+        error.response?.data?.message || `Error fetching ${category} stats`;
+      toast.error(message);
     } finally {
-      set({ isloading: false });
+      set({ isLoading: false });
     }
   },
 }));
