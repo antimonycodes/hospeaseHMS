@@ -27,7 +27,7 @@ const PatientsPage = () => {
     getPatientById,
     selectedPatient,
     isLoading,
-    pagination,
+    // pagination,
   } = usePatientStore();
 
   useEffect(() => {
@@ -101,7 +101,7 @@ const PatientsPage = () => {
         {activeTab === 0 ? (
           <InformationTable
             patients={patients}
-            pagination={pagination}
+            // pagination={pagination}
             isLoading={isLoading}
           />
         ) : (
