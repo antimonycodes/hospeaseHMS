@@ -51,7 +51,7 @@ interface PatientStore {
   patients: any[];
   selectedPatient: any | null;
 
-  getAllPatients: () => Promise<void>;
+  getAllPatients: (endpoint?: string) => Promise<void>;
   getPatientById: (id: string) => Promise<void>;
   createPatient: (data: CreatePatientData) => Promise<any>;
 }
@@ -62,10 +62,11 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   selectedPatient: null,
 
   // Fetch all patient
-  getAllPatients: async () => {
+  getAllPatients: async (endpoint = "/admin/patient/fetch") => {
     set({ isLoading: true });
     try {
-      const response = await api.get("/admin/patient/fetch");
+      const response = await api.get(endpoint);
+
       const fetchedPatients = response.data.data.data; // Extract doctor array
       set({ patients: fetchedPatients });
       console.log(response.data.message);

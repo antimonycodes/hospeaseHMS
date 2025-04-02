@@ -33,7 +33,7 @@ interface StatsStore {
     total_consultant: number;
   } | null;
   clinicalStats: any[] | null;
-  getStats: () => Promise<void>;
+  getStats: (endpoint?: string) => Promise<void>;
   getClinicalStats: () => Promise<void>;
 }
 
@@ -43,10 +43,10 @@ export const useStatsStore = create<StatsStore>((set) => ({
   stats: null,
   clinicalStats: null,
 
-  getStats: async () => {
+  getStats: async (endpoint = "/admin/stats") => {
     set({ isLoading: true });
     try {
-      const response: AxiosResponse = await api.get("/admin/stats");
+      const response: AxiosResponse = await api.get(endpoint);
       set({ stats: response.data.data });
     } catch (error: any) {
       toast.error(error.response.message);

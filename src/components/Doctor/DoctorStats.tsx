@@ -1,32 +1,22 @@
-import getStatItems from "../../store/super-admin/getStatItems";
-import { useStatsStore } from "../../store/super-admin/useStatsStore";
+import React, { useEffect } from "react";
 import patientIcon from "../../assets/docstaticon.svg";
-import doctorIcon from "../../assets/statpatient.svg";
-import appointmentIcon from "../../assets/statappointment.svg";
-import inventoryIcon from "../../assets/statinventory.svg";
-
-const QuickStats = () => {
-  const { stats, isLoading } = useStatsStore();
-
-  type StatKey =
+import { useStatsStore } from "../../store/super-admin/useStatsStore";
+interface DoctorStatsProps {
+  stats: any;
+  isLoading: boolean;
+}
+const DoctorStats = ({ stats, isLoading }: DoctorStatsProps) => {
+  type doctorStats =
     | "total_patient"
-    | "total_doctor"
-    | "total_appointment"
-    | "total_consultant";
+    | "men_total_count"
+    | "ladies_total_count"
+    | "children_count";
 
-  const statItems: { title: string; key: StatKey; icon: string }[] = [
+  const doctorStatItems: { title: string; key: doctorStats; icon: string }[] = [
     { title: "TOTAL PATIENTS", key: "total_patient", icon: patientIcon },
-    { title: "TOTAL DOCTORS", key: "total_doctor", icon: doctorIcon },
-    {
-      title: "TOTAL APPOINTMENTS",
-      key: "total_appointment",
-      icon: appointmentIcon,
-    },
-    {
-      title: "TOTAL CONSULTANTS",
-      key: "total_consultant",
-      icon: inventoryIcon,
-    },
+    { title: "MEN PATIENTS", key: "men_total_count", icon: patientIcon },
+    { title: "LADIES PATIENTS", key: "ladies_total_count", icon: patientIcon },
+    { title: "CHILDREN PATIENTS", key: "children_count", icon: patientIcon },
   ];
 
   return (
@@ -40,7 +30,7 @@ const QuickStats = () => {
                 className="bg-gray-200 animate-pulse rounded-lg p-[10px] flex flex-col gap-2 px-8 py-4 h-24"
               />
             ))
-        : statItems.map(({ title, key, icon }, index) => (
+        : doctorStatItems.map(({ title, key, icon }, index) => (
             <div
               key={index}
               className="bg-white rounded-lg border-0 custom-shadow border-gray-200 p-[10px] flex flex-col gap-2 relative px-8 py-4"
@@ -61,4 +51,5 @@ const QuickStats = () => {
     </div>
   );
 };
-export default QuickStats;
+
+export default DoctorStats;
