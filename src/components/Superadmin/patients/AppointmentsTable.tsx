@@ -1,6 +1,7 @@
-import { useState, JSX, useEffect } from "react";
+import { useState, JSX, useEffect, useMemo } from "react";
 import Table from "../../../Shared/Table";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
+import Loader from "../../../Shared/Loader";
 
 // Define interfaces based on your API response
 interface AppointmentAttributes {
@@ -82,24 +83,26 @@ const AppointmentTable = () => {
 
   useEffect(() => {
     getAllAppointments();
-  }, []);
+  }, [getAllAppointments]);
 
   // Function to flatten appointment data for table consumption
-  const flattenAppointments = (
-    data: AppointmentData[]
-  ): FlattenedAppointment[] => {
-    return data.map((appointment) => ({
-      id: appointment.id,
-      type: appointment.type,
-      // Spread attributes properties to top level
-      patient: appointment.attributes.patient,
-      doctor: appointment.attributes.doctor,
-      status: appointment.attributes.status,
-      gender: appointment.attributes.gender,
-      patient_contact: appointment.attributes.patient_contact,
-      occupation: appointment.attributes.occupation,
-    }));
-  };
+  const flattenAppointments = useMemo(() => {
+    return (data: AppointmentData[]): FlattenedAppointment[] => {
+      return data.map((appointment) => ({
+        id: appointment.id,
+        type: appointment.type,
+        // Spread attributes properties to top level
+        patient: appointment.attributes.patient,
+        doctor: appointment.attributes.doctor,
+        status: appointment.attributes.status,
+        gender: appointment.attributes.gender,
+        patient_contact: appointment.attributes.patient_contact,
+        occupation: appointment.attributes.occupation,
+      }));
+    };
+  }, []);
+
+  if (isLoading) return <Loader />;
 
   // Define columns for the flattened appointment data
   const columns: TableColumn<FlattenedAppointment>[] = [
@@ -199,14 +202,6 @@ const AppointmentTable = () => {
   // Flatten the filtered appointments for the table
   const flattenedAppointments = flattenAppointments(filteredAppointments);
 
-  // if (isLoading) {
-  //   return (
-  //     <div className="flex justify-center items-center h-40">
-  //       Loading appointments...
-  //     </div>
-  //   );
-  // }
-
   return (
     <div className="mt-2">
       <div className="w-full flex space-x-2 md:space-x-6">
@@ -230,19 +225,19 @@ const AppointmentTable = () => {
         ))}
       </div>
 
-      {/* {appointments.length === 0 ? (
+      {appointments.length === 0 ? (
         <div className="mt-10 text-center text-gray-500">
           No appointments found
         </div>
-      ) : ( */}
-      <Table
-        columns={columns}
-        data={flattenedAppointments}
-        rowKey="id"
-        pagination={true}
-        rowsPerPage={5}
-      />
-      {/* )} */}
+      ) : (
+        <Table
+          columns={columns}
+          data={flattenedAppointments}
+          rowKey="id"
+          pagination={true}
+          rowsPerPage={5}
+        />
+      )}
     </div>
   );
 };

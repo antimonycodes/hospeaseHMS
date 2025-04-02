@@ -79,7 +79,7 @@ const Table = <T extends Record<string, any>>({
 
   return (
     <div
-      className={`overflow-hidden overflow-x-scroll border border-[#EAECF0] ${radius}`}
+      className={`overflow-hidden overflow-x-auto border border-[#EAECF0] ${radius}`}
     >
       <table className="min-w-full divide-y divide-[#EAECF0]">
         <thead className="bg-[#F9FAFB]">
@@ -96,7 +96,8 @@ const Table = <T extends Record<string, any>>({
         </thead>
         <tbody className="bg-white divide-y divide-[#EAECF0]">
           {showEmptyState ? (
-            <Loader />
+            // <Loader />
+            <div></div>
           ) : (
             data.map((row) => (
               <tr key={String(row[rowKey])}>

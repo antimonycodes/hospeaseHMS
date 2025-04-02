@@ -113,7 +113,7 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
         // Return the new status to confirm it was updated on server
         // toast.success(response.data.message);
         set({ branches: response.data.data });
-        console.log(response.data.data.attributes);
+        console.log(response.data.data);
         return true;
       }
       console.log(response.data.data?.data);

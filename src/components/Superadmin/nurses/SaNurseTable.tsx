@@ -8,6 +8,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useGlobalStore } from "../../../store/super-admin/useGlobal";
+import Loader from "../../../Shared/Loader";
 
 type Column<T> = {
   key: keyof T;
@@ -40,6 +41,8 @@ const SaNurseTable = ({ nurses, isLoading }: Props) => {
       }))
     );
   }, [nurses]);
+
+  if (isLoading) return <Loader />;
 
   const nursesColumn: Column<NurseAttributes>[] = [
     {

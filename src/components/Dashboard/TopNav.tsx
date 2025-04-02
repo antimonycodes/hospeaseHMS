@@ -11,7 +11,7 @@ const TopNav: React.FC<TopNavProps> = ({ setIsMobileMenuOpen }) => {
   console.log(user);
   // console.log(user.attributes.hospital.logo);
   return (
-    <div className="w-full relative">
+    <div className="w-full z">
       <div className="w-full py-2 px-4 flex justify-between items-center border-0 border-[#009952] bg-white z-20 h-[61px] custom-shadow">
         <button
           className="md:hidden mr-2"

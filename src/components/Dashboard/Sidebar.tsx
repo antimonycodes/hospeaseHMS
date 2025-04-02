@@ -1,14 +1,8 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useRole } from "../../hooks/useRole";
 import { useEffect, useState, useRef } from "react";
-import {
-  ArrowLeftToLine,
-  ChevronDown,
-  ChevronRight,
-  LogOut,
-  X,
-} from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown, ChevronRight, LogOut, X } from "lucide-react";
+import { motion } from "framer-motion";
 import { sidebarRoutes, SidebarRoute } from "../../config/sidebarRoutes";
 import logo from "../../assets/logo-full.png";
 import logoSmall from "../../assets/logo-small.png";
@@ -22,7 +16,7 @@ interface SidebarProps {
 const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
   const role = useRole();
   const location = useLocation();
-  const navigate = useNavigate(); // Add useNavigate hook
+  const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const collapseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { logout } = useAuthStore();
@@ -35,7 +29,6 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
     setMenuItems(role ? sidebarRoutes[role] : []);
   }, [role]);
 
-  // Debounced collapse handlers to prevent rapid state changes
   const handleMouseEnter = () => {
     if (collapseTimeoutRef.current) {
       clearTimeout(collapseTimeoutRef.current);
@@ -54,7 +47,6 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
     }, 300);
   };
 
-  // Clean up timeout on unmount
   useEffect(() => {
     return () => {
       if (collapseTimeoutRef.current) {
@@ -63,7 +55,6 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
     };
   }, []);
 
-  // Toggle dropdown
   const toggleDropdown = (itemName: string) => {
     setExpandedItems((prev) => ({
       ...prev,
@@ -71,7 +62,6 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
     }));
   };
 
-  // Check if a route or any of its children is active
   const isRouteActive = (route: SidebarRoute): boolean => {
     if (location.pathname === route.path) return true;
     if (route.children) {
@@ -80,13 +70,11 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
     return false;
   };
 
-  // Handle logout and navigate
   const handleLogout = async () => {
     await logout();
-    navigate("/signin"); // Navigate to sign in page after logout
+    navigate("/signin");
   };
 
-  // Render menu item
   const renderMenuItem = (item: SidebarRoute) => {
     const isActive = isRouteActive(item);
     const hasChildren = item.children && item.children.length > 0;
@@ -180,7 +168,6 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
     );
   };
 
-  // Mobile menu renderer
   const renderMobileMenuItem = (item: SidebarRoute) => {
     const isActive = isRouteActive(item);
     const hasChildren = item.children && item.children.length > 0;
@@ -270,94 +257,108 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
     );
   };
 
-  return (
-    <div className="font-jakarta h-full overflow-hidden">
-      {/* Mobile sidebar */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            className="fixed top-0 left-0 h-screen w-64 bg-white custom-shadow z-40 md:hidden overflow-y-auto overflow-x-hidden"
-            initial={{ x: -280 }}
-            animate={{ x: 0 }}
-            exit={{ x: -280 }}
-            transition={{ type: "spring", damping: 25, stiffness: 100 }}
-          >
-            <div className="p-4 flex justify-between items-center">
-              <div className="w-24">
-                <img src={logo} alt="HospEase Logo" className="w-full" />
-              </div>
-              <button
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="p-1 rounded-full hover:bg-gray-100"
-              >
-                <X size={24} />
-              </button>
-            </div>
-            <div className="flex flex-col p-2 mt-4 space-y-1">
-              {menuItems.map(renderMobileMenuItem)}
-              <div
-                className="flex items-center gap-3 p-3 rounded-lg transition-colors duration-200 hover:bg-primary/25 text-[#3F3F46] cursor-pointer mt-4"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  handleLogout(); // Use the new handler here
-                }}
-              >
-                <LogOut className="w-5 min-w-5" />
-                <span className="text-sm">Sign out</span>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+  // Animation variants for the mobile menu
+  const sidebarVariants = {
+    open: {
+      x: 0,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 300, damping: 24 },
+    },
+    closed: {
+      x: "-100%",
+      opacity: 0,
+      transition: { type: "spring", stiffness: 300, damping: 24 },
+    },
+  };
 
-      {/* Desktop sidebar */}
+  // Animation variants for the backdrop
+  const backdropVariants = {
+    open: { opacity: 0.5, display: "block" },
+    closed: { opacity: 0, display: "none", transition: { delay: 0.2 } },
+  };
+
+  return (
+    <>
+      {/* Mobile menu backdrop */}
+      <motion.div
+        initial="closed"
+        animate={isMobileMenuOpen ? "open" : "closed"}
+        variants={backdropVariants}
+        className="fixed inset-0 bg-black z-40 md:hidden"
+        onClick={() => setIsMobileMenuOpen(false)}
+      />
+
+      {/* Mobile menu */}
+      <motion.div
+        initial="closed"
+        animate={isMobileMenuOpen ? "open" : "closed"}
+        variants={sidebarVariants}
+        className="fixed top-0 left-0 h-screen w-72 bg-white z-50 md:hidden overflow-y-auto shadow-xl rounded-r-xl"
+      >
+        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+          <img
+            src={logo}
+            alt="Logo"
+            className="h-10 w-auto"
+            onClick={() => navigate("/")}
+          />
+          <div className="bg-gray-100 p-2 rounded-full cursor-pointer hover:bg-gray-200 transition-colors">
+            <X
+              size={20}
+              className="text-gray-600"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+          </div>
+        </div>
+
+        <div className="py-4 px-3 space-y-1">
+          {menuItems.map(renderMobileMenuItem)}
+        </div>
+
+        <div className=" bottom-0 left-0 right-0 border-t border-gray-100 p-4">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 w-full p-3 rounded-lg text-red-500 hover:bg-red-50 transition-colors duration-200"
+          >
+            <LogOut size={20} />
+            <span className="text-sm font-medium">Logout</span>
+          </button>
+        </div>
+      </motion.div>
+
+      {/* Desktop Sidebar */}
       <div
-        className={`hidden md:block h-screen bg-white mt-2 border-r border-gray-100 transition-all duration-300 ease-in-out overflow-x-hidden ${
+        className={`hidden md:block h-screen bg-white mt-2 border-r border-gray-100 transition-all duration-300 ease-in-out overflow-x-auto ${
           isCollapsed ? "w-20" : "w-64"
         }`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <div className="py-4">
-          {isCollapsed ? (
-            <div className="flex justify-center px-2">
-              <img src={logoSmall} alt="HospEase Logo" className="w-10" />
-            </div>
-          ) : (
-            <div className="px-6 mx-auto">
-              <img
-                src={logo}
-                alt="HospEase Logo"
-                className="w-full max-w-[140px]"
-              />
-            </div>
-          )}
+        <div className="flex items-center justify-between p-6">
+          <img
+            src={isCollapsed ? logoSmall : logo}
+            alt="Logo"
+            className="w-full h-auto cursor-pointer"
+            onClick={() => navigate("/")}
+          />
         </div>
-        <div className="flex flex-col p-2 mt-3 space-y-1 overflow-y-auto overflow-x-hidden hide-scroll">
-          {menuItems.map(renderMenuItem)}
-          <div
-            className={`flex items-center gap-3 p-3 rounded-lg transition-colors duration-200 hover:bg-primary/25 text-[#3F3F46] cursor-pointer mt-4 ${
+        <div className="p-2 space-y-1">{menuItems.map(renderMenuItem)}</div>
+
+        <div className=" bottom-0 left-0 right-0 border-t border-gray-100 p-2">
+          <button
+            onClick={handleLogout}
+            className={`flex items-center gap-3 w-full p-3 rounded-lg text-red-500 hover:bg-red-50 transition-colors duration-200 ${
               isCollapsed ? "justify-center" : ""
             }`}
-            onClick={handleLogout} // Use the new handler here
           >
-            <LogOut className="w-5 min-w-5" />
-            {!isCollapsed && <span className="text-sm">Sign out</span>}
-          </div>
+            <LogOut size={20} />
+            {!isCollapsed && (
+              <span className="text-sm font-medium">Logout</span>
+            )}
+          </button>
         </div>
       </div>
-
-      {/* Overlay for mobile menu */}
-      {isMobileMenuOpen && (
-        <motion.div
-          className="fixed inset-0 bg-black/20 z-30 md:hidden"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
-    </div>
+    </>
   );
 };
 

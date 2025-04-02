@@ -10,24 +10,24 @@ const ClinicalDept = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { isLoading, getClinicaldept, clinicaldepts, createClinicaldept } =
     useGlobalStore();
-  const clinicaldepNameRef = useRef<HTMLInputElement>(null); // Use ref to manage input field
+  const clinicaldepNameRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // if (!branches?.length) {
-    getClinicaldept(); // Fetch branches if they are not already fetched
+    getClinicaldept();
     // }
   }, [getClinicaldept]);
 
   const handleAddBranch = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent form from reloading the page
+    e.preventDefault();
 
     const branchName = clinicaldepNameRef.current?.value.trim();
     if (branchName) {
       const newBranchData = { name: branchName };
       const result = await createClinicaldept(newBranchData);
       if (result) {
-        clinicaldepNameRef.current!.value = ""; // Clear the input field after adding
-        setIsModalOpen(false); // Close the modal
+        clinicaldepNameRef.current!.value = "";
+        setIsModalOpen(false);
       }
       console.log(newBranchData);
     } else {

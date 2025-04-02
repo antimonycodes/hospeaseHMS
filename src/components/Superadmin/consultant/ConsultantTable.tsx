@@ -9,6 +9,7 @@ import {
 } from "../../../store/super-admin/useDoctorStore";
 import { useEffect, useState } from "react";
 import { useGlobalStore } from "../../../store/super-admin/useGlobal";
+import Loader from "../../../Shared/Loader";
 
 type Column<T> = {
   key: keyof T;
@@ -16,7 +17,13 @@ type Column<T> = {
   render: (value: any, row: T) => React.ReactNode;
 };
 
-const ConsultantTable = ({ consultants }: { consultants: Consultant[] }) => {
+const ConsultantTable = ({
+  consultants,
+  isLoading,
+}: {
+  consultants: Consultant[];
+  isLoading: boolean;
+}) => {
   const [formattedConsultants, setFormatteConsultants] = useState<
     ConsultantAttributes[]
   >([]);
@@ -167,6 +174,8 @@ const ConsultantTable = ({ consultants }: { consultants: Consultant[] }) => {
   //   const viewDoctorDetails = (doctor: Doctor) => {
   //     setSelectedDoctor(doctor);
   //   };
+
+  if (isLoading) return <Loader />;
 
   return (
     <div>

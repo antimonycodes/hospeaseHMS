@@ -61,7 +61,7 @@ const SaDoctorsPage = () => {
           <Plus size={16} />
         </Button>
       </div>
-      <DoctorsTable doctors={doctors} />
+      <DoctorsTable doctors={doctors} isLoading={isLoading} />
       {showModal && (
         <AddDoctorModal
           formData={formData}

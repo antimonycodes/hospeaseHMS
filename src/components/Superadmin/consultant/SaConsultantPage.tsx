@@ -60,7 +60,7 @@ const SaConsultantPage = () => {
         </div>
       </div>
 
-      <ConsultantTable consultants={consultants} />
+      <ConsultantTable consultants={consultants} isLoading={isLoading} />
 
       {/* Add Doctor Modal */}
       {showModal && (

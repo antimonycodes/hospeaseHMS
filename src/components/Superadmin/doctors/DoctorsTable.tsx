@@ -187,6 +187,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Table from "../../../Shared/Table";
 import { useGlobalStore } from "../../../store/super-admin/useGlobal";
+import Loader from "../../../Shared/Loader";
 
 type Column<T> = {
   key: keyof T;
@@ -210,7 +211,13 @@ interface Doctor {
   attributes: DoctorAttributes;
 }
 
-const DoctorsTable = ({ doctors }: { doctors: Doctor[] }) => {
+const DoctorsTable = ({
+  doctors,
+  isLoading,
+}: {
+  doctors: Doctor[];
+  isLoading: boolean;
+}) => {
   const navigate = useNavigate();
   const { togglestatus } = useGlobalStore();
 
@@ -220,7 +227,9 @@ const DoctorsTable = ({ doctors }: { doctors: Doctor[] }) => {
       ...doc.attributes,
       id: doc.id,
     }));
-  }, [doctors]); // Now properly depends on doctors
+  }, [doctors]);
+
+  if (isLoading) return <Loader />;
 
   const columns: Column<DoctorAttributes>[] = [
     {
@@ -344,13 +353,7 @@ const DoctorsTable = ({ doctors }: { doctors: Doctor[] }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-4">
-      {/* <div className="p-4 flex items-center gap-2">
-        <h1 className="font-medium text-lg text-[#101828]">Doctors</h1>
-        <span className="bg-[#F9F5FF] py-1 px-4 rounded-full text-[#6941C6] font-medium">
-          {formattedDoctors.length}
-        </span>
-      </div> */}
+    <div className="bg-white rounded-lg shadow p-4 ">
       <Table
         columns={columns}
         data={formattedDoctors}

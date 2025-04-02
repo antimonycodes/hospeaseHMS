@@ -9,24 +9,24 @@ import Loader from "../Shared/Loader";
 const Branch = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { isLoading, getBranches, createBranch, branches } = useGlobalStore();
-  const branchNameRef = useRef<HTMLInputElement>(null); // Use ref to manage input field
+  const branchNameRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // if (!branches?.length) {
-    getBranches(); // Fetch branches if they are not already fetched
+    getBranches();
     // }
   }, [getBranches]);
 
   const handleAddBranch = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent form from reloading the page
+    e.preventDefault();
 
     const branchName = branchNameRef.current?.value.trim();
     if (branchName) {
       const newBranchData = { name: branchName };
       const result = await createBranch(newBranchData);
       if (result) {
-        branchNameRef.current!.value = ""; // Clear the input field after adding
-        setIsModalOpen(false); // Close the modal
+        branchNameRef.current!.value = "";
+        setIsModalOpen(false);
       }
       console.log(newBranchData);
     } else {
@@ -61,37 +61,39 @@ const Branch = () => {
 
       {/* Modal for Adding Branch */}
       {isModalOpen && (
-        <Modal onClose={() => setIsModalOpen(false)}>
-          <div className="p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-800">
-                Add Branch
-              </h2>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                {/* <XIcon className="w-6 h-6" /> */}
-              </button>
+        <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center z-50 p-6">
+          <div className="bg-white rounded-lg custom-shadow overflow-y-auto w-full max-w-2xl h-fit">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-gray-800">
+                  Add Branch
+                </h2>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <XIcon className="w-6 h-6" />
+                </button>
+              </div>
+              <form onSubmit={handleAddBranch}>
+                <div className="mb-4">
+                  <input
+                    id="branchName"
+                    type="text"
+                    ref={branchNameRef} // Assign the ref to the input field
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                    placeholder="Enter branch name"
+                  />
+                </div>
+                <div className="flex justify-end">
+                  <Button variant="primary" type="submit" disabled={isLoading}>
+                    {isLoading ? "Adding..." : "Add Branch"}
+                  </Button>
+                </div>
+              </form>
             </div>
-            <form onSubmit={handleAddBranch}>
-              <div className="mb-4">
-                <input
-                  id="branchName"
-                  type="text"
-                  ref={branchNameRef} // Assign the ref to the input field
-                  className="w-full p-2 border border-gray-300 rounded-md"
-                  placeholder="Enter branch name"
-                />
-              </div>
-              <div className="flex justify-end">
-                <Button variant="primary" type="submit" disabled={isLoading}>
-                  {isLoading ? "Adding..." : "Add Branch"}
-                </Button>
-              </div>
-            </form>
           </div>
-        </Modal>
+        </div>
       )}
     </div>
   );

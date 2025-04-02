@@ -2,6 +2,7 @@ import { JSX, useEffect, useMemo, useState } from "react";
 import Table from "../../../Shared/Table";
 import { useNavigate } from "react-router-dom";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
+import Loader from "../../../Shared/Loader";
 
 type InformationData = {
   name: string;
@@ -43,9 +44,14 @@ type InformationTableProps = {
     from: number;
     to: number;
   } | null;
+  isLoading: boolean;
 };
 
-const InformationTable = ({ patients, pagination }: InformationTableProps) => {
+const InformationTable = ({
+  patients,
+  pagination,
+  isLoading,
+}: InformationTableProps) => {
   const navigate = useNavigate();
   const { getAllPatients } = usePatientStore();
   const [currentPage, setCurrentPage] = useState(0);
@@ -85,7 +91,6 @@ const InformationTable = ({ patients, pagination }: InformationTableProps) => {
 
     // Update UI page
     setCurrentPage(page);
-    // Convert UI page to backend page (0-based)
     await getAllPatients(page - 1);
   };
 
@@ -108,6 +113,8 @@ const InformationTable = ({ patients, pagination }: InformationTableProps) => {
   const handleViewMore = (id: string) => {
     navigate(`/dashboard/patients/${id}`);
   };
+
+  if (isLoading) return <Loader />;
 
   const columns: Columns[] = [
     {
