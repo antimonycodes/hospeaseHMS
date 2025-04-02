@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Button from "../Shared/Button";
 import ChangePasswordModal from "../components/Superadmin/profile/ChangePasswordModal";
 import { useProfileStore } from "../store/super-admin/useProfileStore";
+import Loader from "../Shared/Loader";
 
 const Profile = () => {
   const [showModal, setShowModal] = useState(false);
@@ -21,7 +22,7 @@ const Profile = () => {
   };
 
   if (isLoading && !profileData) {
-    return <div>Loading profile...</div>;
+    return <Loader />;
   }
 
   return (

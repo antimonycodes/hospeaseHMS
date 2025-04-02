@@ -39,12 +39,12 @@ const SaConsultantPage = () => {
     <div className="  rounded-lg custom-shadow bg-white p-4">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-xl font-semibold text-gray-900">
-          Consultants{" "}
-          <span className="text-[#6941C6] bg-[#F9F5FF] py-1 px-4 rounded-full text-sm">
-            {/* {doctors.length} */}
+        <div className="  flex items-center gap-">
+          <h1 className="text-xl font-semibold text-gray-900">Consultants</h1>
+          <span className="bg-[#F9F5FF] py-1 px-4 rounded-full text-[#6941C6] font-medium">
+            {consultants.length}
           </span>
-        </h1>
+        </div>
         {/* add button */}
         <div className=" md:w-auto">
           <Button

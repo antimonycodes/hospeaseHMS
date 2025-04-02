@@ -22,22 +22,25 @@ api.interceptors.request.use(
 );
 
 interface StatsStore {
-  isloading: boolean;
+  isLoading: boolean;
   stats: {
     total_patient: number;
     total_doctor: number;
     total_appointment: number;
     total_consultant: number;
   } | null;
+  clinicalStats: any[] | null;
   getStats: () => Promise<void>;
+  getClinicalStats: () => Promise<void>;
 }
 
 export const useStatsStore = create<StatsStore>((set) => ({
-  isloading: false,
+  isLoading: false,
   stats: null,
+  clinicalStats: null,
 
   getStats: async () => {
-    set({ isloading: true });
+    set({ isLoading: true });
     try {
       const response: AxiosResponse = await api.get("/admin/stats");
       set({ stats: response.data.data });
@@ -45,7 +48,22 @@ export const useStatsStore = create<StatsStore>((set) => ({
       console.error(error);
       toast.error("Error fetching stats");
     } finally {
-      set({ isloading: false });
+      set({ isLoading: false });
+    }
+  },
+  getClinicalStats: async () => {
+    set({ isLoading: true });
+    try {
+      const response: AxiosResponse = await api.get(
+        "/admin/patient/patient_type_stats"
+      );
+      set({ clinicalStats: response.data.data });
+      console.log(response.data.data);
+    } catch (error: any) {
+      console.error(error);
+      toast.error("Error fetching stats");
+    } finally {
+      set({ isLoading: false });
     }
   },
 }));

@@ -10,31 +10,6 @@ const api = axios.create({
   },
 });
 
-//  request interceptor to attach the bearer token
-
-// api.interceptors.request.use(
-//   (config) => {
-//     // const { authUser } = useAuthStore.getState();
-//     // console.log(authToken, "dfg");
-
-//     // if (authUser) {
-//     //   console.log(authUser, "dfg");
-//     //   config.headers.Authorization = `Bearer ${authUser}`;
-//     // }
-
-//     const token = Cookies.get("token");
-
-//     // If token exists, add it to the headers
-//     if (token) {
-//       config.headers.Authorization = `Bearer ${token}`;
-//     }
-//     return config;
-//   },
-//   (error) => {
-//     return Promise.reject(error);
-//   }
-// );
-
 // --- Data Payload Interfaces ---
 
 export interface LoginData {
@@ -46,14 +21,14 @@ export interface SignupData {
   phone: string;
   address: string;
   email: string;
-  logo: File | null; // Updated to File | null
-  cac_docs: File | null; // Updated to File | null
+  logo: File | null;
+  cac_docs: File | null;
 }
 
 interface AuthStore {
   isLoading: boolean;
   login: (data: LoginData) => Promise<any>;
-  signup: (data: SignupData) => Promise<void>;
+  signup: (data: SignupData) => Promise<any>;
   logout: () => Promise<void>;
   user: any[];
   role: string;
@@ -106,7 +81,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     set({ isLoading: true });
 
     try {
-      // Final validation before sending request
       if (
         !data.name ||
         !data.phone ||
@@ -126,24 +100,27 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       formData.append("phone", data.phone);
       formData.append("address", data.address);
       formData.append("email", data.email);
-      formData.append("logo", data.logo); // Append the logo file
-      formData.append("cac_docs", data.cac_docs); // Append the cac_docs file
+      formData.append("logo", data.logo);
+      formData.append("cac_docs", data.cac_docs);
 
-      // Make the API request with the FormData
       const response: AxiosResponse = await api.post(
         "/auth/onboard-hospitals",
         formData,
         {
           headers: {
-            "Content-Type": "multipart/form-data", // Important: Set the content type to multipart/form-data
+            "Content-Type": "multipart/form-data",
           },
         }
       );
-
-      toast.success("Signup successful!");
-      console.log("Response:", response.data);
+      if (response.status === 200) {
+        // console.log("Response:", response.data);
+        toast.success(response.data.message);
+        return true;
+      }
+      return null;
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Signup failed!");
+      return null;
     } finally {
       set({ isLoading: false });
     }

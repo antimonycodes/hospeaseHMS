@@ -4,8 +4,13 @@ import doctorIcon from "../../assets/statpatient.svg";
 import appointmentIcon from "../../assets/statappointment.svg";
 import inventoryIcon from "../../assets/statinventory.svg";
 
-const QuickStats = () => {
-  const { stats, isloading } = useStatsStore();
+interface QuickStatsProps {
+  stats: Record<string, number>;
+  isLoading: boolean;
+}
+
+const QuickStats: React.FC<QuickStatsProps> = ({ stats, isLoading }) => {
+  // const { stats, isloading } = useStatsStore();
 
   type StatKey =
     | "total_patient"
@@ -30,7 +35,7 @@ const QuickStats = () => {
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 lg:gap-10 xl:gap-12">
-      {isloading
+      {isLoading
         ? Array(4)
             .fill(null)
             .map((_, index) => (

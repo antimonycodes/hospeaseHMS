@@ -4,6 +4,7 @@ import { XIcon } from "lucide-react";
 import { useGlobalStore } from "../store/super-admin/useGlobal";
 import toast from "react-hot-toast";
 import Modal from "../Shared/Modal";
+import Loader from "../Shared/Loader";
 
 const Branch = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -54,7 +55,7 @@ const Branch = () => {
             </div>
           ))
         ) : (
-          <p>No branches found</p>
+          <Loader />
         )}
       </div>
 

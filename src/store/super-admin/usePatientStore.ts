@@ -2,6 +2,7 @@ import { create } from "zustand";
 import axios from "axios";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
+import { useStatsStore } from "./useStatsStore";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_URL,
@@ -148,6 +149,8 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       if (response.status === 201) {
         // Refresh the doctors list after creation
         await get().getAllPatients();
+        useStatsStore.getState().getStats();
+        useStatsStore.getState().getClinicalStats();
         toast.success(response.data.message);
         return true;
       }
@@ -171,7 +174,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
           appointments: response.data.data.data,
           // pagination: response.data.data.pagination,
         });
-        toast.success(response.data.message);
+        // toast.success(response.data.message);
         return true;
       }
       console.log(response.data.data.data);

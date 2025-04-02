@@ -101,12 +101,12 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
         },
       ],
     },
-    // {
-    //   name: "Users",
-    //   path: "/dashboard/users",
-    //   icon: getImageSrc("usericon.svg"),
-    //   activeIcon: getImageSrc("usersWhite.svg"),
-    // },
+    {
+      name: "Users",
+      path: "/dashboard/users",
+      icon: getImageSrc("usericon.svg"),
+      activeIcon: getImageSrc("usersWhite.svg"),
+    },
     // {
     //   name: "Payment",
     //   path: "/dashboard/payment",

@@ -199,13 +199,13 @@ const AppointmentTable = () => {
   // Flatten the filtered appointments for the table
   const flattenedAppointments = flattenAppointments(filteredAppointments);
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-40">
-        Loading appointments...
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="flex justify-center items-center h-40">
+  //       Loading appointments...
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="mt-2">
@@ -230,19 +230,19 @@ const AppointmentTable = () => {
         ))}
       </div>
 
-      {appointments.length === 0 ? (
+      {/* {appointments.length === 0 ? (
         <div className="mt-10 text-center text-gray-500">
           No appointments found
         </div>
-      ) : (
-        <Table
-          columns={columns}
-          data={flattenedAppointments}
-          rowKey="id"
-          pagination={true}
-          rowsPerPage={5}
-        />
-      )}
+      ) : ( */}
+      <Table
+        columns={columns}
+        data={flattenedAppointments}
+        rowKey="id"
+        pagination={true}
+        rowsPerPage={5}
+      />
+      {/* )} */}
     </div>
   );
 };

@@ -8,8 +8,7 @@ import { generateSixDigitId } from "../../../utils/randomNumber";
 
 const SaDoctorsPage = () => {
   const [showModal, setShowModal] = useState(false);
-  const createDoctor = useDoctorStore((state) => state.createDoctor);
-  const { getAllDoctors, doctors, createConsultant, isLoading } =
+  const { createDoctor, getAllDoctors, doctors, createConsultant, isLoading } =
     useDoctorStore();
 
   const [formData, setFormData] = useState({
@@ -23,8 +22,17 @@ const SaDoctorsPage = () => {
   });
 
   useEffect(() => {
+    // Fetch doctors data once on component mount
     getAllDoctors();
-  }, [getAllDoctors]);
+
+    // Optional: set up a reasonable refresh interval if needed
+    const intervalId = setInterval(() => {
+      getAllDoctors();
+    }, 60000); // Refresh every minute
+
+    // Clean up on component unmount
+    return () => clearInterval(intervalId);
+  }, [getAllDoctors]); // Only depend on the fetch function
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -36,8 +44,13 @@ const SaDoctorsPage = () => {
 
   return (
     <div className="rounded-lg custom-shadow bg-white p-4">
-      <div className="flex justify-between mb-6">
-        <h1 className="text-xl font-semibold text-gray-900">Doctors</h1>
+      <div className="flex items-center justify-between mb-6">
+        <div className="  flex items-center gap-3">
+          <h1 className="text-xl font-semibold text-gray-900">Doctors</h1>
+          <span className="bg-[#F9F5FF] py-1 px-4 rounded-full text-[#6941C6] font-medium">
+            {doctors.length}
+          </span>
+        </div>
         <Button
           onClick={() => setShowModal(true)}
           variant="primary"
@@ -48,17 +61,15 @@ const SaDoctorsPage = () => {
           <Plus size={16} />
         </Button>
       </div>
-
       <DoctorsTable doctors={doctors} />
-
       {showModal && (
         <AddDoctorModal
           formData={formData}
           isLoading={isLoading}
           handleInputChange={handleInputChange}
           setShowModal={setShowModal}
-          createDoctor={createDoctor} // Pass createDoctor function
-          createConsultant={createConsultant} // Pass createConsultant function
+          createDoctor={createDoctor}
+          createConsultant={createConsultant}
         />
       )}
     </div>

@@ -36,7 +36,7 @@ const PatientsPage = () => {
 
   return (
     <div className=" bg-white custom-shadow p-4">
-      <div className=" flex flex-col md:flex-row-reverse gap-4 md:gap-24">
+      <div className=" flex flex-col xl:flex-row-reverse gap-4 xl:gap-24">
         {/* Search and Button */}
         <div className=" w-full flex-1 flex flex-col md:flex-row items-center gap-2">
           <div className="relative w-full flex-1">

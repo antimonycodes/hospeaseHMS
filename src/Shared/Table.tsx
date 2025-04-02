@@ -1,4 +1,5 @@
 import React from "react";
+import Loader from "./Loader";
 
 interface Column<T> {
   key: keyof T;
@@ -95,14 +96,7 @@ const Table = <T extends Record<string, any>>({
         </thead>
         <tbody className="bg-white divide-y divide-[#EAECF0]">
           {showEmptyState ? (
-            <tr>
-              <td
-                colSpan={columns.length}
-                className="px-6 py-8 text-center text-sm text-[#667085]"
-              >
-                No data available
-              </td>
-            </tr>
+            <Loader />
           ) : (
             data.map((row) => (
               <tr key={String(row[rowKey])}>
