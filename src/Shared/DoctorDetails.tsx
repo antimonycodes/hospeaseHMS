@@ -1,8 +1,9 @@
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
 import Button from "./Button";
 import { useDoctorStore } from "../store/super-admin/useDoctorStore";
+import Loader from "./Loader";
+import { ArrowLeft } from "lucide-react";
 
 interface Doctor {
   id: string;
@@ -34,7 +35,7 @@ const DoctorDetails = () => {
     }
   }, [id, getDoctorById]);
 
-  if (isLoading) return <p>Loading doctor details...</p>;
+  if (isLoading) return <Loader />;
   if (!selectedDoctor) return <p>Doctor not found</p>;
 
   return (

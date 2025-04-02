@@ -11,12 +11,13 @@ interface AddDoctorModalProps {
     phone: string;
     religion: string;
     houseAddress: string;
-    consultant_id?: string | null;
+    consultant_id?: null;
   };
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   setShowModal: (show: boolean) => void;
   createDoctor: (data: any) => Promise<void>;
   createConsultant: (data: any) => Promise<void>;
+  isLoading: boolean;
 }
 
 const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
@@ -25,6 +26,7 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
   setShowModal,
   createDoctor,
   createConsultant,
+  isLoading,
 }) => {
   const location = useLocation();
   const isConsultant = location.pathname.includes("consultant");
@@ -32,9 +34,6 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
     e.preventDefault();
     await (isConsultant ? createConsultant : createDoctor)({
       ...formData,
-      ...(isConsultant
-        ? { consultant_id: formData.consultant_id ?? null }
-        : { doctor_id: formData.doctor_id ?? null }),
     });
     setShowModal(false);
   };
@@ -53,6 +52,20 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
           </div>
 
           <form onSubmit={handleSubmit}>
+            {/* Upload Picture */}
+            <div className="mb-4 flex gap-4">
+              <div className="mb-2 text-center">
+                <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center"></div>
+              </div>
+              <div className="space-y-2">
+                <p className="text-custom-black font-medium">Upload Picture</p>
+                <p className="text-xs md:text-sm text-[#667085] w-full md:max-w-2/3">
+                  Upload image with at least 6000px by 600px in jpg or png
+                  format.
+                </p>
+                <Button variant="primary">Upload</Button>
+              </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label
@@ -168,7 +181,15 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
               </div>
             </div>
 
-            <Button type="submit">Add Doctor</Button>
+            <Button
+              type="submit"
+              disabled={!!isLoading}
+              className={`
+               ${isLoading ? "opacity-50 cursor-not-allowed" : ""}
+              `}
+            >
+              {isConsultant ? "Add Consultant" : "Add Doctor"}
+            </Button>
           </form>
         </div>
       </div>

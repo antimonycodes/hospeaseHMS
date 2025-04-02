@@ -3,6 +3,7 @@ import { Mail } from "lucide-react";
 import logo from "../assets/logo-full.png";
 import onboardingImg from "../assets/onboardingImg.png";
 import { useAuthStore } from "../store/_auth/useAuthStore";
+import toast from "react-hot-toast";
 
 const Signup = () => {
   const { signup, isLoading } = useAuthStore();
@@ -26,10 +27,27 @@ const Signup = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate if files exist
+    if (!formData.logo || !formData.cac_docs) {
+      toast.error("Logo and CAC documents are required.");
+      return;
+    }
     console.log(formData);
-    // signup(formData);
+    const response = await signup(formData);
+    if (response) {
+      setFormData({
+        name: "",
+        phone: "",
+        address: "",
+        email: "",
+        logo: null,
+        cac_docs: null,
+      });
+      toast.success("You will be contacted by hospease for the next step");
+    }
   };
 
   return (
@@ -150,8 +168,10 @@ const Signup = () => {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full py-3 text-white font-medium text-lg bg-[#009952] rounded-md hover:bg-[#007a3e] transition-all"
-                disabled={isLoading}
+                className={`w-full py-3 text-white font-medium text-lg bg-[#009952] rounded-md hover:bg-[#007a3e] transition-all 
+                  ${isLoading ? "opacity-50 cursor-not-allowed" : ""}
+                  `}
+                disabled={!!isLoading}
               >
                 {isLoading ? "Registering..." : "Register"}
               </button>

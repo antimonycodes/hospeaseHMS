@@ -101,7 +101,7 @@ const AddNurseModal: React.FC<AddNurseModalProps> = ({
                 >
                   Nurse ID
                 </label>
-                <input
+                {/* <input
                   type="text"
                   id="nurse_id"
                   name="nurse_id"
@@ -110,7 +110,7 @@ const AddNurseModal: React.FC<AddNurseModalProps> = ({
                   className="w-full px-3 py-4 border border-[#D0D5DD] placeholder:text-[#98A2B3] rounded-md"
                   placeholder="HS23455"
                   required
-                />
+                /> */}
               </div>
 
               {/* Email */}

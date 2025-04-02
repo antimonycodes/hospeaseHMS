@@ -26,28 +26,47 @@ api.interceptors.request.use(
 // Define store interface
 interface StatsStore {
   isLoading: boolean;
-  stats: Record<string, Record<string, number>>; // Supports multiple categories
-  getStats: (category: string, endpoint: string) => Promise<void>;
+  stats: {
+    total_patient: number;
+    total_doctor: number;
+    total_appointment: number;
+    total_consultant: number;
+  } | null;
+  clinicalStats: any[] | null;
+  getStats: () => Promise<void>;
+  getClinicalStats: () => Promise<void>;
 }
 
 // Zustand store
 export const useStatsStore = create<StatsStore>((set) => ({
   isLoading: false,
-  stats: {},
+  stats: null,
+  clinicalStats: null,
 
-  getStats: async (category, endpoint) => {
+  getStats: async () => {
     set({ isLoading: true });
-
     try {
       const response: AxiosResponse = await api.get(endpoint);
-      set((state) => ({
-        stats: { ...state.stats, [category]: response.data.data },
-      }));
     } catch (error: any) {
       console.error(`Error fetching ${category} stats:`, error);
       const message =
         error.response?.data?.message || `Error fetching ${category} stats`;
       toast.error(message);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  getClinicalStats: async () => {
+    set({ isLoading: true });
+    try {
+      const response: AxiosResponse = await api.get(
+        "/admin/patient/patient_type_stats"
+      );
+      set({ clinicalStats: response.data.data });
+      console.log(response.data.data);
+    } catch (error: any) {
+      console.error(error);
+      toast.error("Error fetching stats");
     } finally {
       set({ isLoading: false });
     }

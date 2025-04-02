@@ -1,6 +1,8 @@
-import { JSX } from "react";
+import { JSX, useEffect, useMemo, useState } from "react";
 import Table from "../../../Shared/Table";
 import { useNavigate } from "react-router-dom";
+import { usePatientStore } from "../../../store/super-admin/usePatientStore";
+import Loader from "../../../Shared/Loader";
 
 type InformationData = {
   name: string;
@@ -11,6 +13,7 @@ type InformationData = {
   branch: string;
   occupation: string;
   viewMore: string;
+  id: number;
 };
 
 type Columns = {
@@ -29,104 +32,161 @@ type InformationTableProps = {
       phone_number: string;
       branch: string;
       occupation: string;
+      card_id: string;
     };
     id: number;
   }[];
+  pagination: {
+    total: number;
+    per_page: number;
+    current_page: number;
+    last_page: number;
+    from: number;
+    to: number;
+  } | null;
+  isLoading: boolean;
 };
 
-const InformationTable = ({ patients }: InformationTableProps) => {
-  console.log(patients);
-
+const InformationTable = ({
+  patients,
+  pagination,
+  isLoading,
+}: InformationTableProps) => {
   const navigate = useNavigate();
+  const { getAllPatients } = usePatientStore();
+  const [currentPage, setCurrentPage] = useState(0);
+  const [lastKnownPagination, setLastKnownPagination] = useState<{
+    total: number;
+    per_page: number;
+    current_page: number;
+    last_page: number;
+    from: number;
+    to: number;
+  } | null>(null);
 
-  const formattedPatients = patients.map((patient: any) => ({
-    name: `${patient.attributes.first_name} ${patient.attributes.last_name}`,
-    patientId: patient.id.toString(), // Convert ID to string if needed
-    age: patient.attributes.age,
-    gender: patient.attributes.gender,
-    phone: patient.attributes.phone_number,
-    branch: patient.attributes.branch,
-    occupation: patient.attributes.occupation,
-    viewMore: "View More",
-    id: patient.id,
-  }));
+  // Debug: Log current pagination state
+  useEffect(() => {
+    console.log("Current pagination:", pagination);
+    console.log("Current page state:", currentPage);
+  }, [pagination, currentPage]);
+
+  // Store pagination data whenever it's available
+  useEffect(() => {
+    if (pagination) {
+      setLastKnownPagination(pagination);
+      // Convert backend page to UI page consistently
+      setCurrentPage(pagination.current_page);
+    }
+  }, [pagination]);
+
+  // Handle page change
+  const handlePageChange = async (page: number) => {
+    console.log("Page change requested:", page);
+
+    const paginationInfo = pagination || lastKnownPagination;
+    // Don't allow navigating past the last page or before the first page
+    if (!paginationInfo || page < 1 || page > paginationInfo.last_page + 1) {
+      return;
+    }
+
+    // Update UI page
+    setCurrentPage(page);
+    await getAllPatients(page - 1);
+  };
+
+  const formattedPatients = useMemo(
+    () =>
+      patients.map((patient) => ({
+        name: `${patient.attributes.first_name} ${patient.attributes.last_name}`,
+        patientId: patient.attributes.card_id,
+        age: patient.attributes.age || 0,
+        gender: patient.attributes.gender || "",
+        phone: patient.attributes.phone_number || "",
+        branch: patient.attributes.branch || "",
+        occupation: patient.attributes.occupation || "",
+        viewMore: "View More",
+        id: patient.id,
+      })),
+    [patients]
+  );
+
   const handleViewMore = (id: string) => {
-    console.log("Navigating to patient ID:", id);
     navigate(`/dashboard/patients/${id}`);
   };
+
+  if (isLoading) return <Loader />;
 
   const columns: Columns[] = [
     {
       key: "name",
       label: "Name",
-      render: (_, patient) => (
-        <span className="font-medium text-[#101828]">{patient.name}</span>
-      ),
+      render: (_, patient) => <div>{patient.name}</div>,
     },
     {
       key: "patientId",
       label: "Patient ID",
-      render: (_, patient) => (
-        <span className="text-[#667085]">{patient.patientId}</span>
-      ),
+      render: (_, patient) => <div>{patient.patientId}</div>,
     },
     {
       key: "age",
       label: "Age",
-      render: (_, patient) => (
-        <span className="text-[#667085]">{patient.age}</span>
-      ),
+      render: (_, patient) => <div>{patient.age}</div>,
     },
     {
       key: "gender",
       label: "Gender",
-      render: (_, patient) => (
-        <span className="text-[#667085]">{patient.gender}</span>
-      ),
+      render: (_, patient) => <div>{patient.gender}</div>,
     },
     {
       key: "phone",
       label: "Phone",
-      render: (_, patient) => (
-        <span className="text-[#667085]">{patient.phone}</span>
-      ),
+      render: (_, patient) => <div>{patient.phone}</div>,
     },
     {
       key: "branch",
       label: "Branch",
-      render: (_, patient) => (
-        <span className="text-[#667085]">{patient.branch}</span>
-      ),
+      render: (_, patient) => <div>{patient.branch}</div>,
     },
     {
       key: "occupation",
       label: "Occupation",
-      render: (_, patient) => (
-        <span className="text-[#667085]">{patient.occupation}</span>
-      ),
+      render: (_, patient) => <div>{patient.occupation}</div>,
     },
     {
       key: "viewMore",
       label: "",
       render: (_, patient) => (
-        <span
-          className="text-primary text-sm font-medium cursor-pointer"
-          onClick={() => handleViewMore(patient.patientId)}
+        <button
+          className="text-primary font-medium"
+          onClick={() => handleViewMore(patient.id.toString())}
         >
           View More
-        </span>
+        </button>
       ),
     },
   ];
 
+  // Determine whether to show pagination and what values to use
+  const paginationInfo = pagination || lastKnownPagination;
+  const showPagination =
+    !!paginationInfo &&
+    (paginationInfo.last_page > 0 ||
+      paginationInfo.total > paginationInfo.per_page);
+
+  // Calculate total pages for display (adding 1 to account for 0-based pagination)
+  const totalPages = paginationInfo ? paginationInfo.last_page + 1 : 1;
+
   return (
-    <div className="w-full h-full">
+    <div className="w-full">
       <Table
-        data={formattedPatients}
         columns={columns}
-        rowKey="patientId"
-        pagination={formattedPatients.length > 10}
-        rowsPerPage={10}
+        data={formattedPatients}
+        rowKey="id"
+        pagination={showPagination}
+        rowsPerPage={paginationInfo?.per_page || 10}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
       />
     </div>
   );

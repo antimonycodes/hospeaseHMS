@@ -5,11 +5,13 @@ import Button from "../../../Shared/Button";
 import { Plus } from "lucide-react";
 import { useDoctorStore } from "../../../store/super-admin/useDoctorStore";
 import ConsultantTable from "./ConsultantTable";
+import { generateSixDigitId } from "../../../utils/randomNumber";
 
 const SaConsultantPage = () => {
   const [showModal, setShowModal] = useState(false);
   const createConsultant = useDoctorStore((state) => state.createConsultant);
-  const { getAllConsultants, consultants, createDoctor } = useDoctorStore();
+  const { getAllConsultants, consultants, createDoctor, isLoading } =
+    useDoctorStore();
 
   const [formData, setFormData] = useState({
     first_name: "",
@@ -18,7 +20,7 @@ const SaConsultantPage = () => {
     phone: "",
     religion: "",
     houseAddress: "",
-    consultant_id: "21",
+    consultant_id: null,
   });
 
   useEffect(() => {
@@ -37,12 +39,12 @@ const SaConsultantPage = () => {
     <div className="  rounded-lg custom-shadow bg-white p-4">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-xl font-semibold text-gray-900">
-          Consultants{" "}
-          <span className="text-[#6941C6] bg-[#F9F5FF] py-1 px-4 rounded-full text-sm">
-            {/* {doctors.length} */}
+        <div className="  flex items-center gap-">
+          <h1 className="text-xl font-semibold text-gray-900">Consultants</h1>
+          <span className="bg-[#F9F5FF] py-1 px-4 rounded-full text-[#6941C6] font-medium">
+            {consultants.length}
           </span>
-        </h1>
+        </div>
         {/* add button */}
         <div className=" md:w-auto">
           <Button
@@ -58,12 +60,13 @@ const SaConsultantPage = () => {
         </div>
       </div>
 
-      <ConsultantTable consultants={consultants} />
+      <ConsultantTable consultants={consultants} isLoading={isLoading} />
 
       {/* Add Doctor Modal */}
       {showModal && (
         <AddDoctorModal
           formData={formData}
+          isLoading={isLoading}
           handleInputChange={handleInputChange}
           setShowModal={setShowModal}
           createConsultant={createConsultant}

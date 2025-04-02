@@ -11,7 +11,7 @@ const SaNursesPage = () => {
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
-    nurse_id: "",
+    nurse_id: null,
     email: "",
     phone: "",
     religion: "",
@@ -38,10 +38,11 @@ const SaNursesPage = () => {
     <div className=" w-full rounded-lg custom-shadow bg-white p-4">
       {/* header */}
       <div className=" w-full flex items-center justify-between mb-8">
-        <div className=" flex gap-2">
-          {/* title */}
-          <h1>Nurses</h1>
-          <span>3000</span>
+        <div className="  flex items-center gap-3">
+          <h1 className="text-xl font-semibold text-gray-900">Nurses</h1>
+          <span className="bg-[#F9F5FF] py-1 px-4 rounded-full text-[#6941C6] font-medium">
+            {nurses.length}
+          </span>
         </div>
         {/* add button */}
         <div className=" md:w-auto">

@@ -1,196 +1,34 @@
-// import { Link, useLocation } from "react-router-dom";
-// import { useRole } from "../../hooks/useRole";
-// import { useEffect, useState } from "react";
-// import { X } from "lucide-react";
-// import { motion, AnimatePresence } from "framer-motion";
-// import { sidebarRoutes } from "../../config/sidebarRoutes";
-// import logo from "../../assets/logo-full.png";
-// import logoSmall from "../../assets/logo-small.png";
-
-// interface SidebarProps {
-//   isMobileMenuOpen: boolean;
-//   setIsMobileMenuOpen: (isOpen: boolean) => void;
-// }
-
-// const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
-//   const role = useRole();
-//   const location = useLocation();
-//   const [isCollapsed, setIsCollapsed] = useState(false);
-//   const [menuItems, setMenuItems] = useState<
-//     {
-//       activeIcon: string | undefined;
-//       icon: string | undefined;
-//       name: string;
-//       path: string;
-//     }[]
-//   >([]);
-
-//   useEffect(() => {
-//     setMenuItems(role ? sidebarRoutes[role] : []);
-//   }, [role]);
-
-//   return (
-//     <div className=" font-jakarta transition-all duration-500">
-//       {/* Mobile sidebar */}
-//       <AnimatePresence>
-//         {isMobileMenuOpen && (
-//           <motion.div
-//             className="fixed top-0 left-0 h-screen w-64 overflow-y-auto bg-white custom-shadow z-40 md:hidden"
-//             initial={{ x: -280 }}
-//             animate={{ x: 0 }}
-//             exit={{ x: -280 }}
-//             transition={{ type: "spring", damping: 25 }}
-//           >
-//             <div className="p-4 flex justify-between items-center ">
-//               {/* <h1 className="text-primary font-medium text-2xl">hospease</h1> */}
-//               <div className=" w-24">
-//                 <img src={logo} alt="" />
-//               </div>
-//               <button onClick={() => setIsMobileMenuOpen(false)}>
-//                 <X size={24} />
-//               </button>
-//             </div>
-//             <div className="flex flex-col p-2 mt-4">
-//               {menuItems.map((item) => (
-//                 <Link
-//                   key={item.path}
-//                   to={item.path}
-//                   className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ${
-//                     location.pathname === item.path
-//                       ? "bg-primary text-white"
-//                       : "hover:bg-primary/25 text-[#3F3F46]"
-//                   }`}
-//                   onClick={() => setIsMobileMenuOpen(false)}
-//                 >
-//                   <img
-//                     src={
-//                       location.pathname === item.path
-//                         ? item.activeIcon
-//                         : item.icon
-//                     }
-//                     className="w-[20px]"
-//                     alt={item.name}
-//                   />
-//                   <span className="text-sm">{item.name}</span>
-//                 </Link>
-//               ))}
-//             </div>
-//           </motion.div>
-//         )}
-//       </AnimatePresence>
-
-//       {/* Desktop sidebar */}
-//       <div
-//         className={`hidden md:block transition-all duration-1000 bg-white mt-6 ${
-//           isCollapsed ? "w-16" : "w-60"
-//         }`}
-//         onMouseEnter={() => setIsCollapsed(false)}
-//         onMouseLeave={() => setIsCollapsed(true)}
-//       >
-//         <div>
-//           {/* {!isCollapsed && "hospease"} */}
-//           {/* <div className=" w-[80%]">
-//             <img src={logo} alt="" />
-//           </div> */}
-//           {isCollapsed ? (
-//             <>
-//               <div className=" ]">
-//                 <img src={logoSmall} alt="" />
-//               </div>
-//             </>
-//           ) : (
-//             <>
-//               <div className=" px-6 w-[80%]">
-//                 <img src={logo} alt="" />
-//               </div>
-//             </>
-//           )}
-//         </div>
-//         <div className="flex flex-col p-2 mt-3">
-//           {menuItems.map((item) => (
-//             <Link
-//               key={item.path}
-//               to={item.path}
-//               className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-200 ${
-//                 location.pathname === item.path
-//                   ? "bg-primary text-white"
-//                   : "hover:bg-primary/25 text-[#3F3F46]"
-//               }`}
-//             >
-//               <img
-//                 src={
-//                   location.pathname === item.path ? item.activeIcon : item.icon
-//                 }
-//                 className="w-[20px]"
-//                 alt={item.name}
-//               />
-//               {!isCollapsed && (
-//                 <motion.span
-//                   initial={{ opacity: 0 }}
-//                   animate={{ opacity: 1 }}
-//                   exit={{ opacity: 0 }}
-//                   className="text-sm"
-//                 >
-//                   {item.name}
-//                 </motion.span>
-//               )}
-//             </Link>
-//           ))}
-//         </div>
-//       </div>
-
-//       {/* Overlay for mobile menu */}
-//       {isMobileMenuOpen && (
-//         <motion.div
-//           className="fixed inset-0 bg-black/20 z-30 md:hidden"
-//           initial={{ opacity: 0 }}
-//           animate={{ opacity: 1 }}
-//           exit={{ opacity: 0 }}
-//           onClick={() => setIsMobileMenuOpen(false)}
-//         />
-//       )}
-//     </div>
-//   );
-// };
-
-// export default Sidebar;
-
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useRole } from "../../hooks/useRole";
 import { useEffect, useState, useRef } from "react";
-import { ArrowLeftToLine, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { sidebarRoutes } from "../../config/sidebarRoutes";
+import { ChevronDown, ChevronRight, LogOut, X } from "lucide-react";
+import { motion } from "framer-motion";
+import { sidebarRoutes, SidebarRoute } from "../../config/sidebarRoutes";
 import logo from "../../assets/logo-full.png";
 import logoSmall from "../../assets/logo-small.png";
 import { useAuthStore } from "../../store/_auth/useAuthStore";
-// import { useAuth } from "../../store/AuthContext";
 
 interface SidebarProps {
   isMobileMenuOpen: boolean;
   setIsMobileMenuOpen: (isOpen: boolean) => void;
 }
 
-interface MenuItems {
-  activeIcon: string | undefined;
-  icon: string | undefined;
-  name: string;
-  path: string;
-}
-
 const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
   const role = useRole();
   const location = useLocation();
+  const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const collapseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { logout } = useAuthStore();
-  const [menuItems, setMenuItems] = useState<MenuItems[]>([]);
+  const [menuItems, setMenuItems] = useState<SidebarRoute[]>([]);
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>(
+    {}
+  );
 
   useEffect(() => {
     setMenuItems(role ? sidebarRoutes[role] : []);
   }, [role]);
 
-  // Debounced collapse handlers to prevent rapid state changes
   const handleMouseEnter = () => {
     if (collapseTimeoutRef.current) {
       clearTimeout(collapseTimeoutRef.current);
@@ -209,7 +47,6 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
     }, 300);
   };
 
-  // Clean up timeout on unmount
   useEffect(() => {
     return () => {
       if (collapseTimeoutRef.current) {
@@ -218,124 +55,310 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
     };
   }, []);
 
-  // const { logout } = useAuth();
-  return (
-    <div className="font-jakarta h-full">
-      {/* Mobile sidebar */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            className="fixed top-0 left-0 h-screen w-64 overflow-y-auto bg-white custom-shadow z-40 md:hidden"
-            initial={{ x: -280 }}
-            animate={{ x: 0 }}
-            exit={{ x: -280 }}
-            transition={{ type: "spring", damping: 25, stiffness: 100 }}
-          >
-            <div className="p-4 flex justify-between items-center">
-              <div className="w-24">
-                <img src={logo} alt="HospEase Logo" className="w-full" />
-              </div>
-              <button
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="p-1 rounded-full hover:bg-gray-100"
-              >
-                <X size={24} />
-              </button>
-            </div>
-            <div className="flex flex-col p-2 mt-4">
-              {menuItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center gap-3 p-3 rounded-lg transition-colors duration-200 ${
-                    location.pathname === item.path
-                      ? "bg-primary text-white"
-                      : "hover:bg-primary/25 text-[#3F3F46]"
-                  }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <img
-                    src={
-                      location.pathname === item.path
-                        ? item.activeIcon
-                        : item.icon
-                    }
-                    className="w-[20px]"
-                    alt={item.name}
-                  />
-                  <span className="text-sm">{item.name}</span>
-                </Link>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+  const toggleDropdown = (itemName: string) => {
+    setExpandedItems((prev) => ({
+      ...prev,
+      [itemName]: !prev[itemName],
+    }));
+  };
 
-      {/* Desktop sidebar*/}
+  const isRouteActive = (route: SidebarRoute): boolean => {
+    if (location.pathname === route.path) return true;
+    if (route.children) {
+      return route.children.some((child) => location.pathname === child.path);
+    }
+    return false;
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/signin");
+  };
+
+  const renderMenuItem = (item: SidebarRoute) => {
+    const isActive = isRouteActive(item);
+    const hasChildren = item.children && item.children.length > 0;
+    const isExpanded = expandedItems[item.name];
+
+    return (
+      <div key={item.path} className="w-full">
+        {hasChildren ? (
+          <>
+            <div
+              className={`flex items-center gap-3 p-3 rounded-lg transition-colors duration-200 cursor-pointer
+                ${
+                  isActive
+                    ? "bg-primary text-white"
+                    : "hover:bg-primary/25 text-[#3F3F46]"
+                }
+                ${isCollapsed ? "justify-center" : "justify-between"}`}
+              onClick={() => !isCollapsed && toggleDropdown(item.name)}
+            >
+              <div className="flex items-center gap-3">
+                <img
+                  src={isActive ? item.activeIcon : item.icon}
+                  className="w-5 min-w-5"
+                  alt={item.name}
+                />
+                {!isCollapsed && (
+                  <span className="text-sm truncate">{item.name}</span>
+                )}
+              </div>
+              {!isCollapsed && hasChildren && (
+                <div className="text-current flex-shrink-0">
+                  {isExpanded ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
+                </div>
+              )}
+            </div>
+
+            {!isCollapsed && isExpanded && (
+              <div className="ml-6 mt-1 border-l-2 border-gray-200 pl-2">
+                {item.children?.map((child) => (
+                  <Link
+                    key={child.path}
+                    to={child.path}
+                    className={`flex items-center gap-3 p-2 rounded-lg transition-colors duration-200 mt-1
+                      ${
+                        location.pathname === child.path
+                          ? "bg-primary text-white"
+                          : "hover:bg-primary/25 text-[#3F3F46]"
+                      }`}
+                  >
+                    <img
+                      src={
+                        location.pathname === child.path
+                          ? child.activeIcon
+                          : child.icon
+                      }
+                      className="w-4 min-w-4"
+                      alt={child.name}
+                    />
+                    <span className="text-sm truncate">{child.name}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <Link
+            to={item.path}
+            className={`flex items-center gap-3 p-3 rounded-lg transition-colors duration-200
+              ${
+                isActive
+                  ? "bg-primary text-white"
+                  : "hover:bg-primary/25 text-[#3F3F46]"
+              }
+              ${isCollapsed ? "justify-center" : ""}`}
+          >
+            <img
+              src={isActive ? item.activeIcon : item.icon}
+              className="w-5 min-w-5"
+              alt={item.name}
+            />
+            {!isCollapsed && (
+              <span className="text-sm truncate">{item.name}</span>
+            )}
+          </Link>
+        )}
+      </div>
+    );
+  };
+
+  const renderMobileMenuItem = (item: SidebarRoute) => {
+    const isActive = isRouteActive(item);
+    const hasChildren = item.children && item.children.length > 0;
+    const isExpanded = expandedItems[item.name];
+
+    return (
+      <div key={item.path} className="w-full">
+        {hasChildren ? (
+          <>
+            <div
+              className={`flex items-center justify-between gap-3 p-3 rounded-lg transition-colors duration-200 cursor-pointer
+                ${
+                  isActive
+                    ? "bg-primary text-white"
+                    : "hover:bg-primary/25 text-[#3F3F46]"
+                }`}
+              onClick={() => toggleDropdown(item.name)}
+            >
+              <div className="flex items-center gap-3">
+                <img
+                  src={isActive ? item.activeIcon : item.icon}
+                  className="w-5 min-w-5"
+                  alt={item.name}
+                />
+                <span className="text-sm truncate">{item.name}</span>
+              </div>
+              {hasChildren && (
+                <div className="text-current flex-shrink-0">
+                  {isExpanded ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
+                </div>
+              )}
+            </div>
+
+            {isExpanded && (
+              <div className="ml-6 mt-1 border-l-2 border-gray-200 pl-2">
+                {item.children?.map((child) => (
+                  <Link
+                    key={child.path}
+                    to={child.path}
+                    className={`flex items-center gap-3 p-2 rounded-lg transition-colors duration-200 mt-1
+                      ${
+                        location.pathname === child.path
+                          ? "bg-primary text-white"
+                          : "hover:bg-primary/25 text-[#3F3F46]"
+                      }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <img
+                      src={
+                        location.pathname === child.path
+                          ? child.activeIcon
+                          : child.icon
+                      }
+                      className="w-4 min-w-4"
+                      alt={child.name}
+                    />
+                    <span className="text-sm truncate">{child.name}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <Link
+            to={item.path}
+            className={`flex items-center gap-3 p-3 rounded-lg transition-colors duration-200
+              ${
+                isActive
+                  ? "bg-primary text-white"
+                  : "hover:bg-primary/25 text-[#3F3F46]"
+              }`}
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            <img
+              src={isActive ? item.activeIcon : item.icon}
+              className="w-5 min-w-5"
+              alt={item.name}
+            />
+            <span className="text-sm truncate">{item.name}</span>
+          </Link>
+        )}
+      </div>
+    );
+  };
+
+  // Animation variants for the mobile menu
+  const sidebarVariants = {
+    open: {
+      x: 0,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 300, damping: 24 },
+    },
+    closed: {
+      x: "-100%",
+      opacity: 0,
+      transition: { type: "spring", stiffness: 300, damping: 24 },
+    },
+  };
+
+  // Animation variants for the backdrop
+  const backdropVariants = {
+    open: { opacity: 0.5, display: "block" },
+    closed: { opacity: 0, display: "none", transition: { delay: 0.2 } },
+  };
+
+  return (
+    <>
+      {/* Mobile menu backdrop */}
+      <motion.div
+        initial="closed"
+        animate={isMobileMenuOpen ? "open" : "closed"}
+        variants={backdropVariants}
+        className="fixed inset-0 bg-black z-40 md:hidden"
+        onClick={() => setIsMobileMenuOpen(false)}
+      />
+
+      {/* Mobile menu */}
+      <motion.div
+        initial="closed"
+        animate={isMobileMenuOpen ? "open" : "closed"}
+        variants={sidebarVariants}
+        className="fixed top-0 left-0 h-screen w-72 bg-white z-50 md:hidden overflow-y-scroll shadow-xl rounded-r-xl"
+      >
+        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+          <img
+            src={logo}
+            alt="Logo"
+            className="h-10 w-auto"
+            onClick={() => navigate("/")}
+          />
+          <div className="bg-gray-100 p-2 rounded-full cursor-pointer hover:bg-gray-200 transition-colors">
+            <X
+              size={20}
+              className="text-gray-600"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+          </div>
+        </div>
+
+        <div className="py-4 px-3 space-y-1">
+          {menuItems.map(renderMobileMenuItem)}
+        </div>
+
+        <div className=" bottom-0 left-0 right-0 border-t border-gray-100 p-4">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 w-full p-3 rounded-lg text-red-500 hover:bg-red-50 transition-colors duration-200"
+          >
+            <LogOut size={20} />
+            <span className="text-sm font-medium">Logout</span>
+          </button>
+        </div>
+      </motion.div>
+
+      {/* Desktop Sidebar */}
       <div
-        className={`hidden md:block h-scree bg-white mt-6 border-r border-gray-100 transition-all duration-600 ease-in-out ${
-          isCollapsed ? "w-16" : "w-60"
+        className={`hidden md:block h-screen bg-white mt-2 border-r border-gray-100 transition-all duration-300 ease-in-out overflow-x-auto ${
+          isCollapsed ? "w-20" : "w-64"
         }`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <div className="py-4">
-          {isCollapsed ? (
-            <div className="flex justify-center px-2">
-              <img src={logoSmall} alt="HospEase Logo" className="w-10" />
-            </div>
-          ) : (
-            <div className="px-6 mx-auto">
-              <img
-                src={logo}
-                alt="HospEase Logo"
-                className="w-full max-w-[140px]"
-              />
-            </div>
-          )}
+        <div className="flex items-center justify-between p-6">
+          <img
+            src={isCollapsed ? logoSmall : logo}
+            alt="Logo"
+            className="w-full h-auto cursor-pointer"
+            onClick={() => navigate("/")}
+          />
         </div>
-        <div className="flex flex-col p-2 mt-3 overflow-hidden">
-          {menuItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex items-center gap-3 p-3 rounded-lg transition-colors duration-200 ${
-                location.pathname === item.path
-                  ? "bg-primary text-white"
-                  : "hover:bg-primary/25 text-[#3F3F46]"
-              } ${isCollapsed ? "justify-center" : ""}`}
-            >
-              <img
-                src={
-                  location.pathname === item.path ? item.activeIcon : item.icon
-                }
-                className="w-[20px]"
-                alt={item.name}
-              />
-              {!isCollapsed && (
-                <span className="text-sm whitespace-nowrap">{item.name}</span>
-              )}
-            </Link>
-          ))}
-        </div>
-        {/*  */}
-        <div className=" absolute bottom-4 cursor-pointer" onClick={logout}>
-          <h1 className="">Log out</h1>
-          <ArrowLeftToLine />
+        <div className="p-2 space-y-1">{menuItems.map(renderMenuItem)}</div>
+
+        <div className=" bottom-0 left-0 right-0 border-t border-gray-100 p-2">
+          <button
+            onClick={handleLogout}
+            className={`flex items-center gap-3 w-full p-3 rounded-lg text-red-500 hover:bg-red-50 transition-colors duration-200 ${
+              isCollapsed ? "justify-center" : ""
+            }`}
+          >
+            <LogOut size={20} />
+            {!isCollapsed && (
+              <span className="text-sm font-medium">Logout</span>
+            )}
+          </button>
         </div>
       </div>
-
-      {/* Overlay for mobile menu */}
-      {isMobileMenuOpen && (
-        <motion.div
-          className="fixed inset-0 bg-black/20 z-30 md:hidden"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
-    </div>
+    </>
   );
 };
 

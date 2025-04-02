@@ -6,6 +6,10 @@ import {
   NurseAttributes,
 } from "../../../store/super-admin/useNuseStore";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useGlobalStore } from "../../../store/super-admin/useGlobal";
+import Loader from "../../../Shared/Loader";
+
 type Column<T> = {
   key: keyof T;
   label: string;
@@ -18,18 +22,27 @@ interface Props {
 }
 
 const SaNurseTable = ({ nurses, isLoading }: Props) => {
+  const [transformedNurses, setTransformedNurses] = useState<NurseAttributes[]>(
+    []
+  );
   const navigate = useNavigate();
+  const { togglestatus } = useGlobalStore();
 
   const handleViewMore = (nurse: NurseAttributes) => {
     console.log("View more clicked for:", nurse);
     navigate(`/dashboard/nurses/${nurse.id}`);
   };
 
-  // Extract `attributes` and add `id` to each nurse
-  const transformedNurses: NurseAttributes[] = nurses.map((nurse) => ({
-    ...nurse.attributes,
-    id: nurse.id, // Add ID separately for rowKey
-  }));
+  useEffect(() => {
+    setTransformedNurses(
+      nurses.map((nurse) => ({
+        ...nurse.attributes,
+        id: nurse.id,
+      }))
+    );
+  }, [nurses]);
+
+  if (isLoading) return <Loader />;
 
   const nursesColumn: Column<NurseAttributes>[] = [
     {
@@ -63,18 +76,30 @@ const SaNurseTable = ({ nurses, isLoading }: Props) => {
       ),
     },
     {
-      key: "shift_status",
+      key: "is_active",
       label: "Status",
-      render: (value) => (
-        <span
-          className={`py-1.5 px-2.5 rounded-full text-sm ${
-            value === "Available"
-              ? "text-[#F83E41] bg-[#FCE9E9]"
-              : "text-[#009952] bg-[#CCFFE7]"
-          }`}
-        >
-          {value ?? "N/A"}
-        </span>
+      render: (value, row) => (
+        <div className="flex items-center">
+          <label className="inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              className="sr-only peer"
+              checked={row.is_active}
+              onChange={() => handleToggleStatus(row)} // Corrected here
+            />
+            <div
+              className={`relative w-10 h-5 rounded-full transition-colors ${
+                row.is_active ? "bg-primary" : "bg-gray-200"
+              }`}
+            >
+              <div
+                className={`absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform ${
+                  row.is_active ? "transform translate-x-5" : ""
+                }`}
+              ></div>
+            </div>
+          </label>
+        </div>
       ),
     },
     {
@@ -90,6 +115,30 @@ const SaNurseTable = ({ nurses, isLoading }: Props) => {
       ),
     },
   ];
+
+  const handleToggleStatus = async (nurse: NurseAttributes) => {
+    const newStatus = !nurse.is_active;
+
+    // 1. Immediate UI update
+    setTransformedNurses((prev) =>
+      prev.map((n) => (n.id === nurse.id ? { ...n, is_active: newStatus } : n))
+    );
+
+    // 2. API call
+    const serverStatus = await togglestatus({
+      is_active: newStatus,
+      user_id: nurse.user_id,
+    });
+
+    // If API failed, revert
+    if (serverStatus === null) {
+      setTransformedNurses((prev) =>
+        prev.map((n) =>
+          n.id === nurse.id ? { ...n, is_active: nurse.is_active } : n
+        )
+      );
+    }
+  };
 
   return (
     <div>

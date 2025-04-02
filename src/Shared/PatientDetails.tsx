@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import EditPatientModal from "./EditPatientModal";
 import Button from "./Button";
 import { usePatientStore } from "../store/super-admin/usePatientStore";
+import Loader from "./Loader";
 
 const PatientDetails = () => {
   const [openSections, setOpenSections] = useState({
@@ -33,7 +34,7 @@ const PatientDetails = () => {
     }
   }, [id, getPatientById]);
 
-  if (!selectedPatient) return <p>Patient not found</p>;
+  if (!selectedPatient) return <Loader />;
 
   const patient = selectedPatient.attributes;
 
@@ -111,42 +112,43 @@ const PatientDetails = () => {
   };
 
   return (
-    <div className="">
+    <div className="px-2 sm:px-0">
       <div className="bg-white rounded-lg shadow mb-6">
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {/*  */}
-          <div className=" flex justify-between items-center mb-12">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 sm:mb-12 gap-4">
             {/* Back button */}
-
             <Link
               to="/dashboard/patients"
-              className="flex items-center text-gray-600 mb-4 hover:text-primary"
+              className="flex items-center text-gray-600 hover:text-primary"
             >
               <ChevronLeft size={16} />
               <span className="ml-1">Patients</span>
             </Link>
             {/*  */}
-            <div className=" flex items-center gap-3">
-              {/* <button onClick={() => setIsEditModalOpen(true)}>
-                Edit Patient
-              </button> */}
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
               <Button
                 variant="edit"
                 rounded="lg"
                 onClick={() => setIsEditModalOpen(true)}
+                className="text-xs sm:text-sm flex-1 sm:flex-none"
               >
                 Edit Patient
               </Button>
               {/*  */}
-              <Button variant="delete">Delete Patient</Button>
+              <Button
+                variant="delete"
+                className="text-xs sm:text-sm flex-1 sm:flex-none"
+              >
+                Delete Patient
+              </Button>
             </div>
           </div>
           {/* Patient information card */}
 
-          <div className="grid  gap-6">
-            {/* Left column */}
+          <div className="grid gap-6">
             {/* Patient Info */}
-            <div className="grid grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
               <InfoRow label="First Name" value={patient.first_name} />
               <InfoRow label="Last Name" value={patient.last_name} />
               <InfoRow label="Patient ID" value={patient.card_id} />
@@ -156,10 +158,14 @@ const PatientDetails = () => {
               <InfoRow label="Occupation" value={patient.occupation} />
               <InfoRow label="Religion" value={patient.religion} />
               <InfoRow label="Phone" value={patient.phone_number} />
-              <InfoRow label="Address" value={patient.address} />
+              <InfoRow
+                className="sm:col-span-2 md:col-span-3 lg:col-span-4"
+                label="Address"
+                value={patient.address}
+              />
             </div>
             {/*  */}
-            <hr className=" text-[#979797]" />
+            <hr className="text-[#979797]" />
             {/* Next of Kin */}
             <div className="">
               <div className="">
@@ -167,15 +173,21 @@ const PatientDetails = () => {
                   Next of Kin
                 </h3>
                 {patient.next_of_kin?.map((kin: any, index: any) => (
-                  <div key={index} className="grid grid-cols-4 gap-4 mb-4">
+                  <div
+                    key={index}
+                    className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4"
+                  >
                     <InfoRow label="First Name" value={kin.name} />
                     <InfoRow label="Last Name" value={kin.last_name} />
                     <InfoRow label="Gender" value={kin.gender} />
                     <InfoRow label="Occupation" value={kin.occupation} />
                     <InfoRow label="Phone" value={kin.phone} />
-
                     <InfoRow label="Relationship" value={kin.relationship} />
-                    <InfoRow label="Address" value={kin.address} />
+                    <InfoRow
+                      className="sm:col-span-2 md:col-span-3 lg:col-span-4"
+                      label="Address"
+                      value={kin.address}
+                    />
                   </div>
                 ))}
               </div>
@@ -193,13 +205,13 @@ const PatientDetails = () => {
           <div className="p-4 flex items-center justify-between">
             <div className="flex gap-1 flex-col">
               <h3 className="text-sm font-medium">Doctor's Report</h3>
-              <div className=" flex items-center gap-2">
-                <div className=" size-12 rounded-full mr-2 bg-gray-200 flex items-center justify-center">
-                  <User size={24} className="text-gray-600" />
+              <div className="flex items-center gap-2">
+                <div className="size-10 sm:size-12 rounded-full mr-2 bg-gray-200 flex items-center justify-center">
+                  <User size={20} className="text-gray-600" />
                 </div>
-                <div className=" flex flex-col gap-2">
-                  <h1 className="text-sm ">Dr Omoge Peter</h1>
-                  <p className=" text-gray-500 text-xs">06/02/2025 11:00am</p>
+                <div className="flex flex-col gap-1">
+                  <h1 className="text-xs sm:text-sm">Dr Omoge Peter</h1>
+                  <p className="text-gray-500 text-xs">06/02/2025 11:00am</p>
                 </div>
               </div>
             </div>
@@ -215,8 +227,8 @@ const PatientDetails = () => {
           <div className="p-4">
             {patientData.doctorsReport.map((item: any, index: number) => (
               <div key={`doctor-${index}`} className="mb-2">
-                <div className="flex">
-                  <span className="text-sm font-medium text-gray-800 min-w-40">
+                <div className="flex flex-col sm:flex-row">
+                  <span className="text-sm font-medium text-gray-800 sm:min-w-40 mb-1 sm:mb-0">
                     {item.name}:
                   </span>
                   <span className="text-sm text-gray-600">{item.value}</span>
@@ -235,10 +247,10 @@ const PatientDetails = () => {
         >
           <div className="p-4 flex items-center justify-between">
             <div className="flex items-center">
-              <div className="size-12 rounded-full mr-2 bg-gray-200 flex items-center justify-center">
-                <User size={24} className="text-gray-600" />
+              <div className="size-10 sm:size-12 rounded-full mr-2 bg-gray-200 flex items-center justify-center">
+                <User size={20} className="text-gray-600" />
               </div>
-              <div className=" space-y-2">
+              <div className="space-y-1 sm:space-y-2">
                 <h3 className="text-sm font-medium">Medical Laboratory</h3>
                 <p className="text-gray-500 text-xs">06/02/2025 11:00am</p>
               </div>
@@ -253,10 +265,12 @@ const PatientDetails = () => {
 
         {openSections.medicalLaboratory && (
           <div className="p-4">
-            <div className=" flex items-center justify-between mb-6">
-              <div className="text-sm font-medium mb-2">Laboratory Note</div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+              <div className="text-sm font-medium mb-2 sm:mb-0">
+                Laboratory Note
+              </div>
 
-              <div className="bg-[#FEF3CD] text-[#B58A00] py-2 px-4  rounded-full text-xs inline-block">
+              <div className="bg-[#FEF3CD] text-[#B58A00] py-1 px-3 sm:py-2 sm:px-4 rounded-full text-xs inline-block w-fit">
                 ongoing
               </div>
             </div>
@@ -265,14 +279,14 @@ const PatientDetails = () => {
               {patientData.medicalLaboratory.map((item: any, index: number) => (
                 <div key={`lab-${index}`} className="mb-2 text-[#667085]">
                   {item.value ? (
-                    <div className="flex">
-                      <span className="text-sm font-medium min-w-40">
+                    <div className="flex flex-col sm:flex-row">
+                      <span className="text-sm font-medium sm:min-w-40 mb-1 sm:mb-0">
                         {item.name}:
                       </span>
-                      <span className="text-sm ">{item.value}</span>
+                      <span className="text-sm">{item.value}</span>
                     </div>
                   ) : (
-                    <div className="text-sm font-medium ">{item.name}</div>
+                    <div className="text-sm font-medium">{item.name}</div>
                   )}
                 </div>
               ))}
@@ -282,37 +296,37 @@ const PatientDetails = () => {
               <div className="text-sm font-medium mb-2">Lipid Profile:</div>
               {patientData.lipidProfile.map((item: any, index: number) => (
                 <div key={`lipid-${index}`} className="mb-2">
-                  <div className="flex">
-                    <span className="text-sm font-medium min-w-40">
+                  <div className="flex flex-col sm:flex-row">
+                    <span className="text-sm font-medium sm:min-w-40 mb-1 sm:mb-0">
                       {item.name}:
                     </span>
-                    <span className="text-sm ">{item.value}</span>
+                    <span className="text-sm">{item.value}</span>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className=" text-[#667085] mt-8">
+            <div className="text-[#667085] mt-8">
               <div className="text-sm font-medium mb-2">
                 Fasting Blood Sugar (FBS):
               </div>
               {patientData.fastingBloodSugar.map((item: any, index: number) => (
                 <div key={`fbs-${index}`} className="mb-2">
-                  <div className="flex">
-                    <span className="text-sm font-medium  min-w-40">
+                  <div className="flex flex-col sm:flex-row">
+                    <span className="text-sm font-medium sm:min-w-40 mb-1 sm:mb-0">
                       {item.name}:
                     </span>
-                    <span className="text-sm ">{item.value}</span>
+                    <span className="text-sm">{item.value}</span>
                   </div>
                 </div>
               ))}
             </div>
             {/*  */}
             <div className="flex items-center mt-8">
-              <div className="size-12 rounded-full mr-2 bg-gray-200 flex items-center justify-center">
-                <User size={24} className="text-gray-600" />
+              <div className="size-10 sm:size-12 rounded-full mr-2 bg-gray-200 flex items-center justify-center">
+                <User size={20} className="text-gray-600" />
               </div>
-              <div className=" space-y-2">
+              <div className="space-y-1 sm:space-y-2">
                 <h3 className="text-sm font-medium">Medical Laboratory</h3>
                 <p className="text-gray-500 text-xs">06/02/2025 11:00am</p>
               </div>
@@ -329,10 +343,10 @@ const PatientDetails = () => {
         >
           <div className="p-4 flex items-center justify-between">
             <div className="flex items-center">
-              <div className=" size-12 rounded-full mr-2 bg-gray-200 flex items-center justify-center">
-                <User size={24} className="text-gray-600" />
+              <div className="size-10 sm:size-12 rounded-full mr-2 bg-gray-200 flex items-center justify-center">
+                <User size={20} className="text-gray-600" />
               </div>
-              <div className=" space-y-2">
+              <div className="space-y-1 sm:space-y-2">
                 <h3 className="text-sm font-medium">Pharmacy</h3>
                 <p className="text-xs text-gray-500">06/02/2025 11:00am</p>
               </div>
@@ -349,8 +363,8 @@ const PatientDetails = () => {
           <div className="p-4">
             {patientData.pharmacy.map((item: any, index: number) => (
               <div key={`pharmacy-${index}`} className="mb-2">
-                <div className="flex">
-                  <span className="text-sm font-medium text-gray-800 min-w-40">
+                <div className="flex flex-col sm:flex-row">
+                  <span className="text-sm font-medium text-gray-800 sm:min-w-40 mb-1 sm:mb-0">
                     {item.name}:
                   </span>
                   <span className="text-sm text-gray-600">{item.value}</span>
@@ -372,15 +386,18 @@ const PatientDetails = () => {
 };
 
 export default PatientDetails;
+
 // Reusable Component for Patient Info
 const InfoRow = ({
   label,
   value,
+  className = "",
 }: {
   label: string;
   value?: string | null;
+  className?: string;
 }) => (
-  <div>
+  <div className={className}>
     <p className="text-xs text-gray-500">{label}</p>
     <p className="text-sm font-medium">{value || "N/A"}</p>
   </div>

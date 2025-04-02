@@ -1,101 +1,79 @@
-import { JSX } from "react";
-import img from "../../../assets/ribiero.png";
+import { useState, useEffect, useMemo } from "react";
 import Table from "../../../Shared/Table";
-
-type Doctor = {
-  id: string;
-  name: string;
-  username: string;
-  status: "Available" | "Absent";
-  avatar: string;
-};
 
 type Column<T> = {
   key: keyof T;
   label: string;
-  render: (value: any, row: T) => JSX.Element;
+  render: (value: any, row: T) => React.ReactNode;
 };
 
-const DoctorsTable = () => {
-  const doctors: Doctor[] = [
-    {
-      id: "1",
-      name: "Olivia Rhye",
-      username: "@olivia",
-      status: "Available",
-      avatar: img,
-    },
-    {
-      id: "2",
-      name: "Phoenix Baker",
-      username: "@phoenix",
-      status: "Absent",
-      avatar: img,
-    },
-    {
-      id: "3",
-      name: "Lana Steiner",
-      username: "@lana",
-      status: "Available",
-      avatar: img,
-    },
-  ];
+interface DoctorAttributes {
+  id: number;
+  first_name: string;
+  last_name: string;
+  is_active: boolean;
+}
 
-  const columns: Column<Doctor>[] = [
+interface Doctor {
+  id: number;
+  attributes: DoctorAttributes;
+}
+
+const DoctorsTable = ({ doctors }: { doctors: Doctor[] }) => {
+  // Use useMemo to avoid unnecessary re-calculations
+  const simplifiedDoctors = useMemo(() => {
+    return doctors.slice(0, 3).map((doc) => ({
+      id: doc.id,
+      first_name: doc.attributes.first_name,
+      last_name: doc.attributes.last_name,
+      is_active: doc.attributes.is_active,
+    }));
+  }, [doctors]); // Re-run this memoization only when `doctors` changes
+
+  const columns: Column<DoctorAttributes>[] = [
     {
-      key: "name",
+      key: "first_name",
       label: "Name",
-      render: (_, doctor: Doctor) => (
-        <div className="flex items-center">
-          <img
-            src={doctor.avatar}
-            alt={doctor.name}
-            className="w-8 h-8 rounded-full mr-3"
-          />
-          <div>
-            <div className="font-medium text-sm text-[#101828]">
-              {doctor.name}
-            </div>
-            <div className="text-[#667085] text-sm">{doctor.username}</div>
-          </div>
+      render: (_, doctor: DoctorAttributes) => (
+        <div className="font-medium text-sm text-[#101828]">
+          {doctor.first_name} {doctor.last_name}
         </div>
       ),
     },
     {
-      key: "status",
+      key: "is_active",
       label: "Status",
-      render: (_, doctor: Doctor) => {
+      render: (_, doctor: DoctorAttributes) => {
         const bgColor =
-          doctor.status === "Available" ? "bg-[#CCFFE7]" : "bg-[#FBE1E1]";
+          doctor.is_active === true ? "bg-[#CCFFE7]" : "bg-[#FBE1E1]";
         const textColor =
-          doctor.status === "Available" ? "text-[#009952]" : "text-[#F83E41]";
+          doctor.is_active === true ? "text-[#009952]" : "text-[#F83E41]";
 
         return (
           <span
             className={`px-2 py-1 rounded-full text-xs font-medium ${bgColor} ${textColor}`}
           >
-            {doctor.status}
+            {doctor.is_active ? "Available" : "Absent"}
           </span>
         );
       },
     },
   ];
-  // box-shadow: 0px 2px 4px -2px #1018280F;
-
-  // box-shadow: 0px 4px 8px -2px #1018281A;
 
   return (
-    <div
-      className="w-full h-full md:basis-[40%]  rounded-lg  bg-white custom-shadow"
-      // style={{ boxShadow: " 0px 4px 8px -2px #1018281A" }}
-    >
-      <h1 className=" font-medium text-lg text-[#101828] p-4">Doctors</h1>
+    <div className="basis-[40%] w-full h-full rounded-lg custom-shadow bg-white">
+      <div className="p-4 flex items-center gap-2">
+        <h1 className="font-medium text-lg text-[#101828]">Doctors</h1>
+        <span className="bg-[#F9F5FF] py-1 px-4 rounded-full text-[#6941C6] font-medium">
+          {doctors.length}
+        </span>
+      </div>
       <Table
-        data={doctors}
         columns={columns}
+        data={simplifiedDoctors}
         rowKey="id"
-        // className="doctors-table"
-        // emptyMessage="No doctors available"
+        pagination={true}
+        rowsPerPage={3}
       />
     </div>
   );

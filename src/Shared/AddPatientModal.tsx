@@ -1,15 +1,36 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Input from "./Input";
 import { X } from "lucide-react";
 import { CreatePatientData } from "../store/super-admin/usePatientStore";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { useGlobalStore } from "../store/super-admin/useGlobal";
 
 interface AddPatientModalProps {
   onClose: () => void;
   createPatient: (data: CreatePatientData) => any;
+  isLoading: boolean;
 }
 
-const AddPatientModal = ({ onClose, createPatient }: AddPatientModalProps) => {
-  const [patient, setPatient] = useState({
+const AddPatientModal = ({
+  onClose,
+  createPatient,
+  isLoading,
+}: AddPatientModalProps) => {
+  const [patient, setPatient] = useState<{
+    first_name: string;
+    last_name: string;
+    card_id: string;
+    branch_id: string;
+    phone_number: string;
+    occupation: string;
+    religion: string;
+    address: string;
+    gender: string;
+    patient_type: string;
+    dob: Date | null;
+    clinical_patient_type: number;
+  }>({
     first_name: "",
     last_name: "",
     card_id: "",
@@ -20,6 +41,8 @@ const AddPatientModal = ({ onClose, createPatient }: AddPatientModalProps) => {
     address: "",
     gender: "",
     patient_type: "",
+    dob: null,
+    clinical_patient_type: 0,
   });
 
   const [nextOfKin, setNextOfKin] = useState({
@@ -30,7 +53,16 @@ const AddPatientModal = ({ onClose, createPatient }: AddPatientModalProps) => {
     occupation: "",
     address: "",
     relationship: "",
+    clinical_patient_type: "",
   });
+
+  const { branches, getBranches, clinicaldepts, getClinicaldept } =
+    useGlobalStore();
+
+  useEffect(() => {
+    getBranches();
+    getClinicaldept();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -47,6 +79,11 @@ const AddPatientModal = ({ onClose, createPatient }: AddPatientModalProps) => {
   const handleSubmit = async () => {
     const response = await createPatient({
       ...patient,
+      dob: patient.dob
+        ? `${patient.dob.getFullYear()}-${String(
+            patient.dob.getMonth() + 1
+          ).padStart(2, "0")}-${String(patient.dob.getDate()).padStart(2, "0")}`
+        : "",
       next_of_kin: [nextOfKin],
     });
 
@@ -55,9 +92,13 @@ const AddPatientModal = ({ onClose, createPatient }: AddPatientModalProps) => {
     }
   };
 
+  const handleDateChange = (date: any) => {
+    setPatient((prev) => ({ ...prev, dob: date }));
+  };
+
   return (
     <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg w-full max-w-3xl p-6  shadow-lg h-[90%] overflow-y-auto">
+      <div className="bg-white rounded-lg w-full max-w-3xl p-6 shadow-lg h-[90%] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">Add new Patient</h2>
           <button onClick={onClose} className="hover:text-gray-200">
@@ -78,6 +119,7 @@ const AddPatientModal = ({ onClose, createPatient }: AddPatientModalProps) => {
             value={patient.last_name}
             onChange={(e) => handleChange(e, "patient")}
           />
+
           <Input
             name="card_id"
             placeholder="Card ID"
@@ -85,12 +127,37 @@ const AddPatientModal = ({ onClose, createPatient }: AddPatientModalProps) => {
             onChange={(e) => handleChange(e, "patient")}
           />
 
+          {/* Patient Type Select */}
+          <select
+            name="patient_type"
+            value={patient.patient_type}
+            onChange={(e) => handleChange(e, "patient")}
+            className="border p-2 rounded text-gray-400 outline-none focus:border-primary focus:ring-1 focus:ring-primary "
+          >
+            <option value="" disabled>
+              Select Patient Type
+            </option>
+            <option value="Insurance">Insurance</option>
+            <option value="Organised Private Scheme">
+              Organised Private Scheme
+            </option>
+            <option value="Regular Private">Regular Private</option>
+          </select>
+
+          <DatePicker
+            selected={patient.dob}
+            onChange={handleDateChange}
+            placeholderText="Date of birth"
+            className="border border-[#D0D5DD]  p-4 rounded w-full"
+            dateFormat="yyyy-MM-dd"
+          />
+
           {/* Gender Select */}
           <select
             name="gender"
             value={patient.gender}
             onChange={(e) => handleChange(e, "patient")}
-            className="border p-2 rounded text-gray-400"
+            className="border p-2 rounded text-gray-400 outline-none focus:border-primary focus:ring-1 focus:ring-primary "
           >
             <option value="" disabled>
               Select Gender
@@ -100,12 +167,23 @@ const AddPatientModal = ({ onClose, createPatient }: AddPatientModalProps) => {
             <option value="other">Other</option>
           </select>
 
-          <Input
+          {/* Branch Select */}
+          <select
             name="branch_id"
-            placeholder="Branch"
             value={patient.branch_id}
             onChange={(e) => handleChange(e, "patient")}
-          />
+            className="border p-2 rounded text-gray-400 outline-none focus:border-primary focus:ring-1 focus:ring-primary "
+          >
+            <option value="" disabled>
+              Select Branch
+            </option>
+            {branches?.map((branch) => (
+              <option key={branch.id} value={branch.id}>
+                {branch.attributes.name}
+              </option>
+            ))}
+          </select>
+
           <Input
             name="phone_number"
             placeholder="Phone Number"
@@ -118,6 +196,22 @@ const AddPatientModal = ({ onClose, createPatient }: AddPatientModalProps) => {
             value={patient.occupation}
             onChange={(e) => handleChange(e, "patient")}
           />
+          {/* Clinical Department Select */}
+          <select
+            name="clinical_patient_type"
+            value={patient.clinical_patient_type}
+            onChange={(e) => handleChange(e, "patient")}
+            className="border p-2 rounded text-gray-400 outline-none focus:border-primary focus:ring-1 focus:ring-primary "
+          >
+            <option value="" disabled>
+              Select Clinical Department
+            </option>
+            {clinicaldepts?.map((dept) => (
+              <option key={dept.id} value={dept.id}>
+                {dept.attributes.name}
+              </option>
+            ))}
+          </select>
           <Input
             name="religion"
             placeholder="Religion"
@@ -130,21 +224,6 @@ const AddPatientModal = ({ onClose, createPatient }: AddPatientModalProps) => {
             value={patient.address}
             onChange={(e) => handleChange(e, "patient")}
           />
-
-          {/* Patient Type Select */}
-          <select
-            name="patient_type"
-            value={patient.patient_type}
-            onChange={(e) => handleChange(e, "patient")}
-            className="border p-2 rounded text-gray-400"
-          >
-            <option value="" disabled>
-              Select Patient Type
-            </option>
-            <option value="HMO">HMO</option>
-            <option value="Regular">Regular</option>
-            <option value="Other">Other</option>
-          </select>
         </div>
 
         <hr className="my-12 text-[#979797]" />
@@ -183,19 +262,12 @@ const AddPatientModal = ({ onClose, createPatient }: AddPatientModalProps) => {
               value={nextOfKin.address}
               onChange={(e) => handleChange(e, "nextOfKin")}
             />
-            <Input
-              name="relationship"
-              placeholder="Relationship"
-              value={nextOfKin.relationship}
-              onChange={(e) => handleChange(e, "nextOfKin")}
-            />
-
             {/* Next of Kin Gender Select */}
             <select
               name="gender"
               value={nextOfKin.gender}
               onChange={(e) => handleChange(e, "nextOfKin")}
-              className="border p-2 rounded text-gray-400"
+              className="border p-2 rounded text-gray-400 outline-none focus:border-primary focus:ring-1 focus:ring-primary "
             >
               <option value="" disabled>
                 Select Gender
@@ -204,14 +276,23 @@ const AddPatientModal = ({ onClose, createPatient }: AddPatientModalProps) => {
               <option value="female">Female</option>
               <option value="other">Other</option>
             </select>
+            <Input
+              name="relationship"
+              placeholder="Relationship"
+              value={nextOfKin.relationship}
+              onChange={(e) => handleChange(e, "nextOfKin")}
+            />
           </div>
         </div>
 
         <button
           onClick={handleSubmit}
-          className="bg-primary w-fit text-white px-4 py-2 rounded mt-4"
+          disabled={!!isLoading}
+          className={`bg-primary w-fit text-white px-4 py-2 rounded mt-4
+            ${isLoading ? "opacity-50 cursor-not-allowed" : ""}
+            `}
         >
-          Add Patient
+          {isLoading ? "Adding Patient..." : "Add Patient"}
         </button>
       </div>
     </div>

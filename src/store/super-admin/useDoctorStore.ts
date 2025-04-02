@@ -42,12 +42,13 @@ export interface DoctorAttributes {
   doctor_id?: string;
   shift_status: "Available" | "Out-of-work";
   details: null | DoctorDetails;
-  picture?: string;
+  picture?: string | undefined;
   religion?: string;
   gender?: string;
   age?: number;
   houseAddress?: string;
-  active: boolean;
+  is_active: boolean;
+  user_id: number;
 }
 export interface ConsultantAttributes {
   first_name: string;
@@ -58,12 +59,13 @@ export interface ConsultantAttributes {
   consultant_id?: string;
   shift_status: "Available" | "Out-of-work";
   details: null | DoctorDetails;
-  picture?: string;
+  picture?: string | undefined;
   religion?: string;
   gender?: string;
   age?: number;
   houseAddress?: string;
-  active: boolean;
+  is_active: boolean;
+  user_id: number;
 }
 export interface DoctorDetails {
   dob: string;
@@ -124,10 +126,10 @@ export const useDoctorStore = create<DoctorStore>((set, get) => ({
       const response = await api.get("/admin/doctor/fetch");
       const fetchedDoctors = response.data.data.data; // Extract doctor array
       set({ doctors: fetchedDoctors });
-      toast.success("Doctors retrieved successfully!");
+      // toast.success("Doctors retrieved successfully!");
     } catch (error: any) {
       console.error(error.response?.data);
-      toast.error(error.message || "Failed to fetch doctors");
+      // toast.error(error.response.message || "Failed to fetch doctors");
     } finally {
       set({ isLoading: false });
     }
@@ -139,10 +141,12 @@ export const useDoctorStore = create<DoctorStore>((set, get) => ({
     try {
       const response = await api.get(`/admin/doctor/fetch/${id}`);
       set({ selectedDoctor: response.data.data }); // Store fetched doctor in state
-      toast.success("Doctor details retrieved successfully!");
+      // toast.success(response.data.message);
     } catch (error: any) {
       console.error(error.response?.data);
-      toast.error(error.message || "Failed to fetch doctor details");
+      // toast.error(
+      //   error.response.data.message || "Failed to fetch doctor details"
+      // );
     } finally {
       set({ isLoading: false });
     }
@@ -156,13 +160,13 @@ export const useDoctorStore = create<DoctorStore>((set, get) => ({
         ...data,
         doctor_id: data.doctor_id ?? null,
       };
-      await api.post("/admin/doctor/create", payload);
+      const response = await api.post("/admin/doctor/create", payload);
       // Refresh the doctors list after creation
       await get().getAllDoctors();
-      toast.success("Doctor added successfully!");
+      toast.success(response.data.message);
     } catch (error: any) {
       console.error(error.response?.data);
-      toast.error(error.message || "Failed to add doctor");
+      toast.error(error.response.data.message);
     } finally {
       set({ isLoading: false });
     }
@@ -175,10 +179,10 @@ export const useDoctorStore = create<DoctorStore>((set, get) => ({
       const response = await api.get("/admin/consultant/fetch");
       const fetchedConsultants = response.data.data.data; // Extract doctor array
       set({ consultants: fetchedConsultants });
-      toast.success("Doctors retrieved successfully!");
+      // toast.success(response.data.message);
     } catch (error: any) {
       console.error(error.response?.data);
-      toast.error(error.message || "Failed to fetch doctors");
+      // toast.error(error.response.data.message);
     } finally {
       set({ isLoading: false });
     }
@@ -190,10 +194,10 @@ export const useDoctorStore = create<DoctorStore>((set, get) => ({
     try {
       const response = await api.get(`/admin/consultant/fetch/${id}`);
       set({ selectedConsultant: response.data.data }); // Store fetched doctor in state
-      toast.success(response.data.message);
+      // toast.success(response.data.message);
     } catch (error: any) {
       console.error(error.response?.data);
-      toast.error(error.message || "Failed to fetch doctor details");
+      // toast.error(error.response.data.message);
     } finally {
       set({ isLoading: false });
     }
@@ -213,7 +217,7 @@ export const useDoctorStore = create<DoctorStore>((set, get) => ({
       toast.success(response.data.message);
     } catch (error: any) {
       console.error(error.response?.data);
-      toast.error(error.message || "Failed to add doctor");
+      toast.error(error.response.data.message);
     } finally {
       set({ isLoading: false });
     }
