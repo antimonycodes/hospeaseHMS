@@ -46,12 +46,10 @@ export const useStatsStore = create<StatsStore>((set) => ({
   getStats: async () => {
     set({ isLoading: true });
     try {
-      const response: AxiosResponse = await api.get(endpoint);
+      const response: AxiosResponse = await api.get("/admin/stats");
+      set({ stats: response.data.data });
     } catch (error: any) {
-      console.error(`Error fetching ${category} stats:`, error);
-      const message =
-        error.response?.data?.message || `Error fetching ${category} stats`;
-      toast.error(message);
+      toast.error(error.response.message);
     } finally {
       set({ isLoading: false });
     }
