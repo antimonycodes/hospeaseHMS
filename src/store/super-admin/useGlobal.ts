@@ -38,6 +38,7 @@ interface BranchAttributes {
   name: string;
   hospital: Hospital;
   created_at: string;
+  total_patient: number;
 }
 
 interface Branch {
@@ -48,6 +49,7 @@ interface Branch {
 
 interface ClinicaldeptAttributes {
   name: string;
+  total_patient: number;
 }
 
 interface Clinicaldept {

@@ -154,6 +154,11 @@ const PatientDetails = () => {
               <InfoRow label="Patient ID" value={patient.card_id} />
               <InfoRow label="Age" value={patient.age?.toString()} />
               <InfoRow label="Gender" value={patient.gender} />
+              <InfoRow label="Patient type" value={patient.patient_type} />
+              <InfoRow
+                label="CLinical Department"
+                value={patient.clinical_department.name}
+              />
               <InfoRow label="Branch" value={patient.branch} />
               <InfoRow label="Occupation" value={patient.occupation} />
               <InfoRow label="Religion" value={patient.religion} />
