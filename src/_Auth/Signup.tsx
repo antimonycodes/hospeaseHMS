@@ -51,9 +51,9 @@ const Signup = () => {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-y-auto">
-      {/* Banner Image */}
-      <div className="basis-1/2 h-full">
+    <div className="flex flex-col md:flex-row min-h-screen w-full">
+      {/* Banner Image - Hidden on smaller screens, visible on medium and up */}
+      <div className="hidden md:block md:w-1/2 md:h-screen">
         <img
           src={onboardingImg}
           alt="Onboarding"
@@ -62,26 +62,29 @@ const Signup = () => {
       </div>
 
       {/* Form Section */}
-      <div className="basis-1/2 w-full h-full bg-[#E3FFF2] flex items-center justify-center overflow-y-auto">
-        <div className="flex flex-col items-center gap-6 w-full max-w-lg h-full p-6">
+      <div className="w-full md:w-1/2 min-h-screen bg-[#E3FFF2] flex items-center justify-center py-8 px-4">
+        <div className="flex flex-col items-center gap-4 w-full max-w-md">
           {/* Logo */}
-          <div className="w-56">
-            <img src={logo} alt="Logo" />
+          <div className="w-48 sm:w-56 mb-2">
+            <img src={logo} alt="Logo" className="w-full" />
           </div>
 
           {/* Form Container */}
-          <div className="bg-white py-8 px-7 border border-[#D0D5DD] rounded-[10px] mt-4 flex flex-col items-center w-full">
-            <h1 className="text-center text-[#101928] text-3xl font-semibold mb-2">
+          <div className="bg-white py-6 px-4 sm:py-8 sm:px-7 border border-[#D0D5DD] rounded-[10px] w-full shadow-sm">
+            <h1 className="text-center text-[#101928] text-2xl sm:text-3xl font-semibold mb-2">
               Welcome Onboard
             </h1>
-            <p className="text-sm md:text-base text-[#667185]">
+            <p className="text-sm text-center text-[#667185]">
               Enter your credentials to get registered
             </p>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="mt-6 space-y-4 w-full">
+            <form
+              onSubmit={handleSubmit}
+              className="mt-6 space-y-3 sm:space-y-4 w-full"
+            >
               {/* Hospital Name */}
-              <div className="mb-4">
+              <div className="mb-3 sm:mb-4">
                 <label className="block text-[#101928] font-semibold text-xs">
                   HOSPITAL NAME
                 </label>
@@ -90,13 +93,13 @@ const Signup = () => {
                   name="name"
                   placeholder="Enter Hospital Name"
                   onChange={handleChange}
-                  className="w-full mt-1 p-3 border border-[#009952] rounded-md outline-none"
+                  className="w-full mt-1 p-2 sm:p-3 border border-[#009952] rounded-md outline-none text-sm"
                   required
                 />
               </div>
 
               {/* Phone number */}
-              <div className="mb-4">
+              <div className="mb-3 sm:mb-4">
                 <label className="block text-[#101928] font-semibold text-xs">
                   Phone
                 </label>
@@ -105,12 +108,12 @@ const Signup = () => {
                   name="phone"
                   placeholder="Enter Phone Number"
                   onChange={handleChange}
-                  className="w-full mt-1 p-3 border border-[#009952] rounded-md outline-none"
+                  className="w-full mt-1 p-2 sm:p-3 border border-[#009952] rounded-md outline-none text-sm"
                 />
               </div>
 
               {/* Address */}
-              <div className="mb-4">
+              <div className="mb-3 sm:mb-4">
                 <label className="block text-[#101928] font-semibold text-xs">
                   Address
                 </label>
@@ -119,12 +122,12 @@ const Signup = () => {
                   name="address"
                   placeholder="Enter Address"
                   onChange={handleChange}
-                  className="w-full mt-1 p-3 border border-[#009952] rounded-md outline-none"
+                  className="w-full mt-1 p-2 sm:p-3 border border-[#009952] rounded-md outline-none text-sm"
                 />
               </div>
 
               {/* Email Address */}
-              <div className="mb-4">
+              <div className="mb-3 sm:mb-4">
                 <label className="block text-[#101928] font-semibold text-xs">
                   EMAIL ADDRESS
                 </label>
@@ -133,12 +136,12 @@ const Signup = () => {
                   name="email"
                   placeholder="Enter Email"
                   onChange={handleChange}
-                  className="w-full mt-1 p-3 border border-[#009952] rounded-md outline-none"
+                  className="w-full mt-1 p-2 sm:p-3 border border-[#009952] rounded-md outline-none text-sm"
                 />
               </div>
 
               {/* Hospital Logo */}
-              <div className="mb-4">
+              <div className="mb-3 sm:mb-4">
                 <label className="block text-[#101928] font-semibold text-xs">
                   HOSPITAL LOGO
                 </label>
@@ -147,12 +150,12 @@ const Signup = () => {
                   name="logo"
                   accept="image/*"
                   onChange={handleFileChange}
-                  className="w-full mt-1 p-3 border border-[#009952] rounded-md outline-none"
+                  className="w-full mt-1 p-2 sm:p-3 border border-[#009952] rounded-md outline-none text-sm"
                 />
               </div>
 
               {/* Hospital CAC */}
-              <div className="mb-4">
+              <div className="mb-3 sm:mb-4">
                 <label className="block text-[#101928] font-semibold text-xs">
                   HOSPITAL CAC
                 </label>
@@ -161,14 +164,14 @@ const Signup = () => {
                   name="cac_docs"
                   accept=".pdf,.doc,.docx"
                   onChange={handleFileChange}
-                  className="w-full mt-1 p-3 border border-[#009952] rounded-md outline-none"
+                  className="w-full mt-1 p-2 sm:p-3 border border-[#009952] rounded-md outline-none text-sm"
                 />
               </div>
 
               {/* Submit Button */}
               <button
                 type="submit"
-                className={`w-full py-3 text-white font-medium text-lg bg-[#009952] rounded-md hover:bg-[#007a3e] transition-all 
+                className={`w-full py-2.5 sm:py-3 text-white font-medium text-base sm:text-lg bg-[#009952] rounded-md hover:bg-[#007a3e] transition-all 
                   ${isLoading ? "opacity-50 cursor-not-allowed" : ""}
                   `}
                 disabled={!!isLoading}
