@@ -109,13 +109,16 @@ const PatientsPage = () => {
         )}
       </div>
 
-      {openModal && modalType === "patient" && (
+      {openModal && (
         <AddPatientModal
           onClose={() => setOpenModal(false)}
           createPatient={createPatient}
           isLoading={isLoading}
+          endpoint="/admin/patient/create"
+          refreshendpoint="/admin/patient/fetch"
         />
       )}
+
       {/* {openModal && modalType === "appointment" && (
         <BookAppointmentModal onClose={() => setOpenModal(false)} />
       )} */}

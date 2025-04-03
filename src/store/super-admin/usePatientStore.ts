@@ -56,7 +56,11 @@ interface PatientStore {
 
   getAllPatients: (endpoint?: string) => Promise<void>;
   getPatientById: (id: string) => Promise<void>;
-  createPatient: (data: CreatePatientData) => Promise<boolean | null>;
+  createPatient: (
+    data: CreatePatientData,
+    endpoint?: string,
+    refreshendpoint?: string
+  ) => Promise<boolean | null>;
   getAllAppointments: () => Promise<void>;
 }
 
@@ -101,17 +105,21 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   },
 
   // Create a new Patient
-  createPatient: async (data) => {
+  createPatient: async (
+    data,
+    endpoint = "/admin/patient/create",
+    refreshendpoint
+  ) => {
     set({ isLoading: true });
     try {
       const payload = {
         ...data,
         branch_id: data.branch_id ?? null,
       };
-      const response = await api.post("/admin/patient/create", payload);
+      const response = await api.post(endpoint, payload);
       if (response.status === 201) {
         // Refresh the doctors list after creation
-        await get().getAllPatients();
+        await get().getAllPatients(refreshendpoint);
         toast.success(response.data.message);
         return true;
       }
