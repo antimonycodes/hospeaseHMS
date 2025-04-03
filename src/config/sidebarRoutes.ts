@@ -55,7 +55,7 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
         },
         {
           name: "Info",
-          path: "/dashboard/info",
+          path: "/dashboard/pharmacy/info",
           icon: getImageSrc("patientsicon.svg"),
           activeIcon: getImageSrc("patienticonsLight.svg"),
         },

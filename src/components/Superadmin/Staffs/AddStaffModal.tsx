@@ -10,6 +10,7 @@ interface AddStaffModalProps {
   setShowModal: (value: boolean) => void;
   isLoading: boolean;
   createStaff: (data: any) => Promise<void>;
+  department?: any;
 }
 
 const AddStaffModal: React.FC<AddStaffModalProps> = ({
@@ -18,18 +19,31 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({
   setShowModal,
   isLoading,
   createStaff,
+  department,
 }) => {
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Set default values for department and role (hidden from users)
-    const newStaffData = {
-      ...formData,
-      department_id: 5,
-      role: "laboratory",
+  // Define department ID and role mappings
+  const getDepartmentDetails = (dept: string) => {
+    const departmentMapping: Record<string, { id: number; role: string }> = {
+      laboratory: { id: 5, role: "laboratory" },
+      pharmacy: { id: 7, role: "pharmacist" },
+      finance: { id: 11, role: "finance" },
     };
 
-    console.log(newStaffData); // Check the final data before sending
+    return departmentMapping[dept.toLowerCase()] || { id: 0, role: "staff" };
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    // Get department ID and role based on department prop
+    const { id, role } = getDepartmentDetails(department);
+    e.preventDefault();
+
+    const newStaffData = {
+      ...formData,
+      department_id: id,
+      role: role,
+    };
+
+    console.log(newStaffData);
 
     await createStaff(newStaffData);
     setShowModal(false);

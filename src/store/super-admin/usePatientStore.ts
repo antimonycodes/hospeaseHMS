@@ -45,6 +45,7 @@ export interface CreatePatientData {
   address: string;
   patient_type: string;
   next_of_kin: NextOfKin[];
+  dob: string;
 }
 
 interface PatientStore {

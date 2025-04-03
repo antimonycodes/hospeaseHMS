@@ -59,6 +59,7 @@ const StaffsPage: React.FC<StaffsPageProps> = ({ department }) => {
           setShowModal={setShowModal}
           createStaff={createStaff}
           isLoading={isLoading}
+          department={department}
         />
       )}
     </div>
