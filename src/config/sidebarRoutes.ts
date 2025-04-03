@@ -41,72 +41,72 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       icon: getImageSrc("nursesicon.svg"),
       activeIcon: getImageSrc("nurseWhite.svg"),
     },
-    {
-      name: "Pharmacy",
-      path: "/dashboard/pharmacy",
-      icon: getImageSrc("pharmacyicon.svg"),
-      activeIcon: getImageSrc("pharmacyWhite.svg"),
-      children: [
-        {
-          name: "Users",
-          path: "/dashboard/pharmacy/staffs",
-          icon: getImageSrc("usericon.svg"),
-          activeIcon: getImageSrc("usersWhite.svg"),
-        },
-        {
-          name: "Info",
-          path: "/dashboard/pharmacy/info",
-          icon: getImageSrc("patientsicon.svg"),
-          activeIcon: getImageSrc("patienticonsLight.svg"),
-        },
-      ],
-    },
-    {
-      name: "Laboratory",
-      path: "/dashboard/laboratory",
-      icon: getImageSrc("labicon.svg"),
-      activeIcon: getImageSrc("labWhite.svg"),
-      children: [
-        {
-          name: "Users",
-          path: "/dashboard/laboratory/staffs",
-          icon: getImageSrc("usericon.svg"),
-          activeIcon: getImageSrc("usersWhite.svg"),
-        },
-        {
-          name: "Info",
-          path: "/dashboard/laboratory/info",
-          icon: getImageSrc("patientsicon.svg"),
-          activeIcon: getImageSrc("patienticonsLight.svg"),
-        },
-      ],
-    },
-    {
-      name: "Finance",
-      path: "/dashboard/finance",
-      icon: getImageSrc("financeicon.svg"),
-      activeIcon: getImageSrc("financeWhite.svg"),
-      children: [
-        {
-          name: "Users",
-          path: "/dashboard/finance/staffs",
-          icon: getImageSrc("usericon.svg"),
-          activeIcon: getImageSrc("usersWhite.svg"),
-        },
-        {
-          name: "Info",
-          path: "/dashboard/finance/info",
-          icon: getImageSrc("patientsicon.svg"),
-          activeIcon: getImageSrc("patienticonsLight.svg"),
-        },
-      ],
-    },
-    {
-      name: "Users",
-      path: "/dashboard/users",
-      icon: getImageSrc("usericon.svg"),
-      activeIcon: getImageSrc("usersWhite.svg"),
-    },
+    // {
+    //   name: "Pharmacy",
+    //   path: "/dashboard/pharmacy",
+    //   icon: getImageSrc("pharmacyicon.svg"),
+    //   activeIcon: getImageSrc("pharmacyWhite.svg"),
+    //   children: [
+    //     {
+    //       name: "Users",
+    //       path: "/dashboard/pharmacy/staffs",
+    //       icon: getImageSrc("usericon.svg"),
+    //       activeIcon: getImageSrc("usersWhite.svg"),
+    //     },
+    //     {
+    //       name: "Info",
+    //       path: "/dashboard/pharmacy/info",
+    //       icon: getImageSrc("patientsicon.svg"),
+    //       activeIcon: getImageSrc("patienticonsLight.svg"),
+    //     },
+    //   ],
+    // },
+    // {
+    //   name: "Laboratory",
+    //   path: "/dashboard/laboratory",
+    //   icon: getImageSrc("labicon.svg"),
+    //   activeIcon: getImageSrc("labWhite.svg"),
+    //   children: [
+    //     {
+    //       name: "Staffs",
+    //       path: "/dashboard/laboratory/staffs",
+    //       icon: getImageSrc("staffs.svg"),
+    //       activeIcon: getImageSrc("usersWhite.svg"),
+    //     },
+    //     {
+    //       name: "Info",
+    //       path: "/dashboard/laboratory/info",
+    //       icon: getImageSrc("patientsicon.svg"),
+    //       activeIcon: getImageSrc("patienticonsLight.svg"),
+    //     },
+    //   ],
+    // },
+    // {
+    //   name: "Finance",
+    //   path: "/dashboard/finance",
+    //   icon: getImageSrc("financeicon.svg"),
+    //   activeIcon: getImageSrc("financeWhite.svg"),
+    //   children: [
+    //     {
+    //       name: "Users",
+    //       path: "/dashboard/finance/staffs",
+    //       icon: getImageSrc("staffs.svg"),
+    //       activeIcon: getImageSrc("usersWhite.svg"),
+    //     },
+    //     {
+    //       name: "Info",
+    //       path: "/dashboard/finance/info",
+    //       icon: getImageSrc("patientsicon.svg"),
+    //       activeIcon: getImageSrc("patienticonsLight.svg"),
+    //     },
+    //   ],
+    // },
+    // {
+    //   name: "Users",
+    //   path: "/dashboard/users",
+    //   icon: getImageSrc("usericon.svg"),
+    //   activeIcon: getImageSrc("usersWhite.svg"),
+    // },
     // {
     //   name: "Payment",
     //   path: "/dashboard/payment",
@@ -116,20 +116,20 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
     {
       name: "Profile",
       path: "/dashboard/profile",
-      icon: getImageSrc("usericon.svg"),
-      activeIcon: getImageSrc("usersWhite.svg"),
+      icon: getImageSrc("profile.svg"),
+      activeIcon: getImageSrc("profile.svg"),
     },
     {
       name: "Branch",
       path: "/dashboard/branch",
-      icon: getImageSrc("usericon.svg"),
-      activeIcon: getImageSrc("usersWhite.svg"),
+      icon: getImageSrc("branches.svg"),
+      activeIcon: getImageSrc("branches.svg"),
     },
     {
       name: "Clinical Dept",
       path: "/dashboard/clinical-department",
-      icon: getImageSrc("usericon.svg"),
-      activeIcon: getImageSrc("usersWhite.svg"),
+      icon: getImageSrc("clinical-dept.svg"),
+      activeIcon: getImageSrc("clinical-dept.svg"),
     },
   ],
   doctor: [
