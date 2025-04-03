@@ -29,7 +29,7 @@ const AddPatientModal = ({
     gender: string;
     patient_type: string;
     dob: Date | null;
-    clinical_patient_type: number;
+    clinical_patient_type: any;
   }>({
     first_name: "",
     last_name: "",
@@ -42,7 +42,7 @@ const AddPatientModal = ({
     gender: "",
     patient_type: "",
     dob: null,
-    clinical_patient_type: 0,
+    clinical_patient_type: "",
   });
 
   const [nextOfKin, setNextOfKin] = useState({
