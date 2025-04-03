@@ -8,14 +8,21 @@ import { useGlobalStore } from "../store/super-admin/useGlobal";
 
 interface AddPatientModalProps {
   onClose: () => void;
-  createPatient: (data: CreatePatientData) => any;
+  createPatient: (
+    data: CreatePatientData,
+    endpoint: string,
+    refreshendpoint: string
+  ) => any; // Add endpoint as a parameter
   isLoading: boolean;
+  endpoint: string;
+  refreshendpoint: string;
 }
-
 const AddPatientModal = ({
   onClose,
   createPatient,
   isLoading,
+  endpoint,
+  refreshendpoint, // Add the endpoint here
 }: AddPatientModalProps) => {
   const [patient, setPatient] = useState<{
     first_name: string;
@@ -77,21 +84,27 @@ const AddPatientModal = ({
   };
 
   const handleSubmit = async () => {
-    const response = await createPatient({
-      ...patient,
-      dob: patient.dob
-        ? `${patient.dob.getFullYear()}-${String(
-            patient.dob.getMonth() + 1
-          ).padStart(2, "0")}-${String(patient.dob.getDate()).padStart(2, "0")}`
-        : "",
-      next_of_kin: [nextOfKin],
-    });
+    const response = await createPatient(
+      {
+        ...patient,
+        dob: patient.dob
+          ? `${patient.dob.getFullYear()}-${String(
+              patient.dob.getMonth() + 1
+            ).padStart(2, "0")}-${String(patient.dob.getDate()).padStart(
+              2,
+              "0"
+            )}`
+          : "",
+        next_of_kin: [nextOfKin],
+      },
+      endpoint,
+      refreshendpoint
+    );
 
     if (response) {
       onClose();
     }
   };
-
   const handleDateChange = (date: any) => {
     setPatient((prev) => ({ ...prev, dob: date }));
   };
