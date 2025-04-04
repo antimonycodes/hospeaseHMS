@@ -51,7 +51,7 @@ const FrontdeskInfo = ({ patients, isLoading }: FrondeskPatientDataProps) => {
     phone: patient.attributes.phone_number,
     branch: patient.attributes.branch,
     occupation: patient.attributes.occupation,
-    editpatients: "Editpatients",
+    editpatients: "editpatients",
     id: patient.id,
   }));
   const handleViewMore = (id: string) => {

@@ -79,6 +79,8 @@ const FrondeskAppointmentTable = () => {
         tableTitle="Appointments"
         showButton={true}
         showSearchBar={true}
+        typebutton="Book an Appointment"
+        tableCount={filteredAppointments.length}
         showControls={true}
         onButtonClick={openModal}
       />
