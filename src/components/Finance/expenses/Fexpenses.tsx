@@ -14,7 +14,7 @@ const Fexpenses = () => {
       <Tablehead
         tableTitle="Expenses"
         showButton={true}
-        typebutton="true"
+        typebutton="Add New"
         onButtonClick={openModal}
       />
       {isModalOpen && (
