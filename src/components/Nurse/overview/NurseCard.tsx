@@ -51,6 +51,7 @@ const NurseCard = () => {
   return (
     <div>
       <Tablehead
+        typebutton="Add New"
         tableTitle="Recent Patients"
         showControls={false}
         showSearchBar={false}
