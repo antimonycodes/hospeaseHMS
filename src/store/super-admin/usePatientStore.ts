@@ -47,6 +47,7 @@ export interface CreatePatientData {
   next_of_kin: NextOfKin[];
   dob: string;
 }
+// export interface BookAppointment{}
 
 interface PatientStore {
   isLoading: boolean;
@@ -62,6 +63,7 @@ interface PatientStore {
     refreshendpoint?: string
   ) => Promise<boolean | null>;
   getAllAppointments: (endpoint?: string) => Promise<void>;
+  // bookAppointment:(data:BookAppointment)
 }
 
 export const usePatientStore = create<PatientStore>((set, get) => ({
@@ -154,4 +156,32 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
+  // Book Appointment
+  // bookAppointment: async (
+  //   data,
+  //   endpoint = "/front-desk/appointment/book",
+  //   refreshendpoint
+  // ) => {
+  //   set({ isLoading: true });
+  //   try {
+  //     const payload = {
+  //       ...data,
+  //       branch_id: data.branch_id ?? null,
+  //     };
+  //     const response = await api.post(endpoint, payload);
+  //     if (response.status === 201) {
+  //       // Refresh the doctors list after creation
+  //       await get().getAllAppointments(refreshendpoint);
+  //       toast.success(response.data.message);
+  //       return true;
+  //     }
+  //     return null;
+  //   } catch (error: any) {
+  //     console.error(error.response?.data);
+  //     toast.error(error.response?.data?.message || "Failed to add patient");
+  //     return null;
+  //   } finally {
+  //     set({ isLoading: false });
+  //   }
+  // },
 }));

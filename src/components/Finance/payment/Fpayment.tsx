@@ -35,6 +35,7 @@ const Fpayment = () => {
   return (
     <div>
       <Tablehead
+        typebutton="true"
         tableTitle="Payments"
         showButton={true}
         onButtonClick={openModal}

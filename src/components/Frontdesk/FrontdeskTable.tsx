@@ -75,6 +75,7 @@ const FrontdeskTable = () => {
         tableTitle="Recent Patients"
         showSearchBar={false}
         showControls={false}
+        typebutton="Add New"
       />
       {isLoading ? (
         <div className="p-4 text-center">Loading patients...</div>

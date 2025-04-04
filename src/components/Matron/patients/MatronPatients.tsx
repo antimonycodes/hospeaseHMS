@@ -25,7 +25,11 @@ const MatronPatients = () => {
   const filteredPatients = patients.filter((p) => p.status === activeTab);
   return (
     <div>
-      <Tablehead tableTitle="Patients" tableCount={patients.length} />
+      <Tablehead
+        typebutton="Add New"
+        tableTitle="Patients"
+        tableCount={patients.length}
+      />
       <Tabs<"Pending" | "Completed">
         activeTab={activeTab}
         setActiveTab={setActiveTab}

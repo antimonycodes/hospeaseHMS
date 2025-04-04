@@ -88,6 +88,7 @@ const LaboverviewTable = () => {
       <div className="w-1/2">
         <Tablehead
           showSearchBar={false}
+          typebutton="Add New"
           tableTitle="Pending Tests"
           tableCount={pendingPatients.length}
           showControls={false}
@@ -106,6 +107,7 @@ const LaboverviewTable = () => {
       {/* Ongoing Tests */}
       <div className="flex-grow">
         <Tablehead
+          typebutton="Add New"
           tableTitle="Ongoing Tests"
           tableCount={ongoingPatients.length}
           showControls={false}
