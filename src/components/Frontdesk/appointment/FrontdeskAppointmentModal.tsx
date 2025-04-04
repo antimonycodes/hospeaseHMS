@@ -8,11 +8,11 @@ interface Props {
 const FrontdeskAppointmentModal = ({ isOpen, onClose }: Props) => {
   return (
     <div
-      className={`fixed left-0 top-0 w-full bg-black/50 min-h-screen z-[100] items-center p-4 justify-center ${
+      className={`fixed inset-0 flex items-center justify-center bg-[#1E1E1E40] px-6 ${
         isOpen ? "flex" : "hidden"
       }`}
     >
-      <div className="bg-white px-[18px] msm:px-[59px] py-[18px] rounded-[10px] w-[980px] overflow-y-scroll hide-scroll h-[900px]">
+      <div className="bg-white w-full max-w-3xl p-6 shadow-lg h-[90%] overflow-y-auto">
         <div>
           {/* head section */}
           <div className="flex items-center justify-between w-full">

@@ -1,4 +1,4 @@
-import { JSX } from "react";
+import { JSX, useState } from "react";
 import Table from "../../../Shared/Table";
 import { useNavigate } from "react-router-dom";
 import Loader from "../../../Shared/Loader";
@@ -39,6 +39,7 @@ type FrondeskPatientDataProps = {
 const FrontdeskInfo = ({ patients, isLoading }: FrondeskPatientDataProps) => {
   console.log(patients);
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(0);
 
   const formattedPatients = patients.map((patient: any) => ({
     name: `${patient.attributes.first_name} ${patient.attributes.last_name}`,
@@ -119,7 +120,8 @@ const FrontdeskInfo = ({ patients, isLoading }: FrondeskPatientDataProps) => {
       <Table
         data={formattedPatients}
         columns={columns}
-        rowKey="patientId"
+        rowKey="id"
+        currentPage={currentPage}
         pagination={formattedPatients.length > 10}
         rowsPerPage={10}
       />

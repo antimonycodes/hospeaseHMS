@@ -61,7 +61,7 @@ interface PatientStore {
     endpoint?: string,
     refreshendpoint?: string
   ) => Promise<boolean | null>;
-  getAllAppointments: () => Promise<void>;
+  getAllAppointments: (endpoint?: string) => Promise<void>;
 }
 
 export const usePatientStore = create<PatientStore>((set, get) => ({
@@ -133,10 +133,10 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
     }
   },
 
-  getAllAppointments: async () => {
+  getAllAppointments: async (endpoint = "/admin/appointment/all-records") => {
     set({ isLoading: true });
     try {
-      const response = await api.get("/admin/appointment/all-records");
+      const response = await api.get(endpoint);
       if (response.data && response.data.data) {
         set({ appointments: response.data.data.data });
         console.log("Appointments loaded successfully");

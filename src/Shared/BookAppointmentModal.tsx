@@ -28,7 +28,7 @@
 //         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
 //           <div>
 //             <label className="text-sm text-gray-600">Patient ID</label>
-//             <Input
+//             <input
 //               name="patientId"
 //               placeholder="0010602"
 //               onChange={handleChange}
@@ -37,7 +37,7 @@
 //           </div>
 //           <div>
 //             <label className="text-sm text-gray-600">First Name</label>
-//             <Input
+//             <input
 //               name="firstName"
 //               placeholder="Philip"
 //               onChange={handleChange}
@@ -46,7 +46,7 @@
 //           </div>
 //           <div>
 //             <label className="text-sm text-gray-600">Last Name</label>
-//             <Input
+//             <input
 //               name="lastName"
 //               placeholder="Ikiriko"
 //               onChange={handleChange}
@@ -62,7 +62,7 @@
 //           </div>
 //           <div>
 //             <label className="text-sm text-gray-600">Phone Number</label>
-//             <Input
+//             <input
 //               name="phone"
 //               placeholder="+234 708 823 2411"
 //               onChange={handleChange}
@@ -71,7 +71,7 @@
 //           </div>
 //           <div>
 //             <label className="text-sm text-gray-600">Occupation</label>
-//             <Input
+//             <input
 //               name="occupation"
 //               placeholder="Banker"
 //               onChange={handleChange}
@@ -80,7 +80,7 @@
 //           </div>
 //           <div>
 //             <label className="text-sm text-gray-600">Religion</label>
-//             <Input
+//             <input
 //               name="religion"
 //               placeholder="Christian"
 //               onChange={handleChange}
@@ -89,7 +89,7 @@
 //           </div>
 //           <div>
 //             <label className="text-sm text-gray-600">House Address</label>
-//             <Input
+//             <input
 //               name="address"
 //               placeholder="5, John Ayanfe Close, Apodi, Ibadan"
 //               onChange={handleChange}
@@ -105,7 +105,7 @@
 //           <div className="grid grid-cols-1 gap-4">
 //             <div>
 //               <label className="text-sm text-gray-600">Choose Date</label>
-//               <Input
+//               <input
 //                 name="date"
 //                 type="date"
 //                 placeholder=""

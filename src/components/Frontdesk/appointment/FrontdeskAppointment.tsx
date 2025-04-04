@@ -1,3 +1,4 @@
+import AppointmentTable from "../../Superadmin/patients/AppointmentsTable";
 import FrondeskAppointmentTable from "./FrondeskAppointmentTable";
 
 const FrontdeskAppointment = () => {

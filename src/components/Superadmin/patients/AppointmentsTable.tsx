@@ -4,7 +4,7 @@ import Table from "../../../Shared/Table";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 
 // Define interfaces based on your API response
-interface AppointmentAttributes {
+export interface AppointmentAttributes {
   doctor: string;
   status: string; // This is "pending", "approved", etc. from your API
   rescheduled_data: any | null;
@@ -86,7 +86,7 @@ const AppointmentTable = () => {
   const { appointments, isLoading, getAllAppointments } = usePatientStore();
 
   useEffect(() => {
-    getAllAppointments();
+    getAllAppointments("/admin/appointment/all-records");
   }, [getAllAppointments]);
 
   // Function to flatten appointment data for table consumption

@@ -1,149 +1,192 @@
-import { ChevronLeft } from "lucide-react";
-import React from "react";
-import { Link } from "react-router-dom";
+import { JSX } from "react";
+import { useNavigate } from "react-router-dom";
+import Table from "../../../Shared/Table";
 
-const AppointmentDetails = () => {
+// Define the structure of appointment data from the API
+interface AppointmentFromAPI {
+  id: number;
+  attributes: {
+    doctor: string;
+    status?: string;
+    rescheduled_data: string;
+    doctor_contact: string;
+    gender: string;
+    patient_contact: string;
+    occupation: string;
+    patient: string;
+    date: string;
+    reason_if_rejected_or_rescheduled: string;
+    assigned_by: string;
+    time: string;
+    created_at: string;
+  };
+}
+
+// Define the structure for the formatted data used in the table
+export type AppointmentData = {
+  name: string;
+  status?: string;
+
+  gender: string;
+  phone: string;
+
+  occupation: string;
+  viewMore: string;
+  id: number;
+  doctor: string;
+};
+
+type Columns = {
+  key: keyof AppointmentData | "viewMore";
+  label: string;
+  render?: (value: any, appointment: AppointmentData) => JSX.Element;
+};
+
+type AppointmentDetailsProps = {
+  isLoading?: boolean;
+  appointments: AppointmentFromAPI[];
+};
+
+const AppointmentDetails = ({
+  appointments = [],
+  isLoading = false,
+}: AppointmentDetailsProps) => {
+  const navigate = useNavigate();
+
+  // Handle case where appointments is undefined or not an array
+  const appointmentsArray = Array.isArray(appointments) ? appointments : [];
+
+  const formattedAppointments: AppointmentData[] = appointmentsArray.map(
+    (appointment) => ({
+      name: appointment.attributes?.patient || "",
+
+      gender: appointment.attributes?.gender || "",
+      phone: appointment.attributes?.patient_contact || "",
+      occupation: appointment.attributes?.occupation || "",
+      doctor: appointment.attributes?.doctor || "",
+      status: appointment.attributes?.status || "",
+
+      viewMore: "View More",
+      id: appointment.id,
+    })
+  );
+
+  const handleViewMore = (id: string) => {
+    console.log("Navigating to patient ID:", id);
+    navigate(`/dashboard/patients/${id}`);
+  };
+
+  const columns: Columns[] = [
+    {
+      key: "name",
+      label: "Name",
+      render: (_, appointment) => (
+        <span className="font-medium text-[#101828]">{appointment.name}</span>
+      ),
+    },
+
+    {
+      key: "gender",
+      label: "Gender",
+      render: (_, appointment) => (
+        <span className="text-[#667085]">{appointment.gender}</span>
+      ),
+    },
+    {
+      key: "phone",
+      label: "Phone",
+      render: (_, appointment) => (
+        <span className="text-[#667085]">{appointment.phone}</span>
+      ),
+    },
+    {
+      key: "occupation",
+      label: "Occupation",
+      render: (_, appointment) => (
+        <span className="text-[#667085]">{appointment.occupation}</span>
+      ),
+    },
+    {
+      key: "doctor",
+      label: "Doctor Assigned",
+      render: (_, appointment) => (
+        <span className="text-[#667085]">{appointment.doctor}</span>
+      ),
+    },
+    {
+      key: "status",
+      label: "Status",
+      render: (_, appointment) => {
+        let bgColor = "";
+        let textColor = "";
+
+        switch (appointment.status?.toLowerCase()) {
+          case "pending":
+            bgColor = "#FFEBAA";
+            textColor = "#B58A00";
+            break;
+          case "declined":
+            bgColor = "#FBE1E1";
+            textColor = "#F83E41";
+            break;
+          case "rescheduled":
+            bgColor = "#BED4FF";
+            textColor = "#101828";
+            break;
+          case "accepted":
+            bgColor = "#CFFFE9";
+            textColor = "#009952";
+            break;
+          default:
+            bgColor = "#E5E7EB"; // Default gray background
+            textColor = "#374151"; // Default gray text
+        }
+
+        return (
+          <span
+            className="text-sm px-2 py-1 rounded-full"
+            style={{
+              backgroundColor: bgColor,
+              color: textColor,
+            }}
+          >
+            {appointment.status}
+          </span>
+        );
+      },
+    },
+
+    {
+      key: "viewMore",
+      label: "",
+      render: (_, appointment) => (
+        <span
+          className="text-primary text-sm font-medium cursor-pointer"
+          onClick={() => handleViewMore(appointment.id.toString())}
+        >
+          View More
+        </span>
+      ),
+    },
+  ];
+
+  if (isLoading) {
+    return <div className="p-4 text-center">Loading appointments...</div>;
+  }
+
+  if (formattedAppointments.length === 0) {
+    return <div className="p-4 text-center">No appointments found</div>;
+  }
+
   return (
-    <div className="">
-      <div className="bg-white rounded-lg shadow mb-6">
-        <div className="p-6">
-          {/*  */}
-          <div className=" flex justify-between items-center mb-12">
-            {/* Back button */}
-
-            <Link
-              to="/dashboard/appointments"
-              className="flex items-center text-gray-600 mb-4 hover:text-primary"
-            >
-              <ChevronLeft size={16} />
-              <span className="ml-1">Patients</span>
-            </Link>
-          </div>
-          {/* Patient information card */}
-
-          <div className="grid font-medium gap-6">
-            {/* Left column */}
-            <div>
-              <div className="grid grid-cols-4 gap-6 mb-6">
-                {/* first name */}
-                <div>
-                  <p className=" text-[#667085]">First Name</p>
-                  <p className="text-[20px] text-[#3E3E3E]">Philip</p>
-                </div>
-                {/* last name */}
-                <div>
-                  <p className=" text-[#667085]">Last Name</p>
-                  <p className="text-[20px] text-[#3E3E3E]">Ikiko</p>
-                </div>
-                {/* patient id */}
-                <div>
-                  <p className=" text-[#667085]">Patient ID</p>
-                  <p className="text-[20px] text-[#3E3E3E]">001602</p>
-                </div>
-                {/* age */}
-                <div>
-                  <p className=" text-[#667085]">Age</p>
-                  <p className="text-[20px] text-[#3E3E3E]">32</p>
-                </div>
-                {/* gender */}
-                <div>
-                  <p className=" text-[#667085]">Gender</p>
-                  <p className="text-[20px] text-[#3E3E3E]">Male</p>
-                </div>
-                {/* branch */}
-                <div>
-                  <p className=" text-[#667085]">Branch</p>
-                  <p className="text-[20px] text-[#3E3E3E]">Agodi</p>
-                </div>
-                {/* occupation */}
-                <div>
-                  <p className=" text-[#667085]">Occupation</p>
-                  <p className="text-[20px] text-[#3E3E3E]">Student</p>
-                </div>
-                {/* religion */}
-                <div>
-                  <p className=" text-[#667085]">Religion</p>
-                  <p className="text-[20px] text-[#3E3E3E]">Christian</p>
-                </div>
-                {/* phone */}
-                <div className="">
-                  <p className=" text-[#667085]">Phone</p>
-                  <div className="flex items-center">
-                    <p className="text-[20px] text-[#3E3E3E]">+2347098765435</p>
-                  </div>
-                </div>
-                {/* details */}
-                <div className="">
-                  <p className=" text-[#667085]">Address</p>
-                  <p className="text-[20px] text-[#3E3E3E]">
-                    3, John Ajayi's Close, Agodi, Ibadan Oyo State
-                  </p>
-                </div>
-              </div>
-            </div>
-            {/*  */}
-            <hr className=" text-[#979797]" />
-            {/* Next of Kin */}
-            <div className="">
-              <div className="">
-                <h3 className="text-[18px] text-[#3E3E3E] mb-4">Next of Kin</h3>
-                <div className="grid gap-6">
-                  <div>
-                    <div className="grid grid-cols-4 gap-6 mb-4">
-                      {/* first name */}
-                      <div>
-                        <p className=" text-[#667085]">First Name</p>
-                        <p className="text-[20px] text-[#3E3E3E]">Philip</p>
-                      </div>
-                      {/* last name */}
-                      <div>
-                        <p className=" text-[#667085]">Last Name</p>
-                        <p className="text-[20px] text-[#3E3E3E]">Ikiko</p>
-                      </div>
-                      {/* gender */}
-                      <div>
-                        <p className=" text-[#667085]">Gender</p>
-                        <p className="text-[20px] text-[#3E3E3E]">Sister</p>
-                      </div>
-                      {/* relationship */}
-                      <div>
-                        <p className=" text-[#667085]">
-                          Relationship with patient
-                        </p>
-                        <p className="text-[20px] text-[#3E3E3E]">Uncle</p>
-                      </div>
-
-                      {/* next of kin */}
-                      <div className="">
-                        <p className=" text-[#667085]">Phone</p>
-                        <div className="flex items-center">
-                          <p className="text-[20px] text-[#3E3E3E]">
-                            +2347098765435
-                          </p>
-                        </div>
-                      </div>
-                      <div className="">
-                        <p className=" text-[#667085]">
-                          Relationship with Patient
-                        </p>
-                        <p className="text-[20px] text-[#3E3E3E]">Sister</p>
-                      </div>
-
-                      {/* address */}
-                      <div>
-                        <p className=" text-[#667085] w-full">Address</p>
-                        <p className="text-[20px] text-[#3E3E3E]">
-                          3, John Ajayi's Close, Agodi, Ibadan Oyo State
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div>
+      <Table
+        data={formattedAppointments}
+        columns={columns}
+        rowKey="id"
+        pagination={formattedAppointments.length > 10}
+        rowsPerPage={10}
+      />
     </div>
   );
 };
