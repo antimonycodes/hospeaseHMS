@@ -32,6 +32,7 @@ import {
   Staffs,
   ConsultantDetails,
   NurseDetails,
+  Expenses,
 } from "./pages";
 
 function App() {
@@ -83,6 +84,7 @@ function App() {
               <Route path="inventory" element={<Inventory />} />
               <Route path="stock" element={<Stocks />} />
               <Route path="request" element={<Request />} />
+              <Route path="expenses" element={<Expenses />} />
               <Route path="branch" element={<Branch />} />
               <Route path="clinical-department" element={<ClinicalDept />} />
             </Route>

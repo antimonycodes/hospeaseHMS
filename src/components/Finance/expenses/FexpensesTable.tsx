@@ -1,57 +1,81 @@
-import React from "react";
-import { Expenses } from "../../../data/expensesData";
+import { JSX, useEffect } from "react";
 import Table from "../../../Shared/Table";
+import { useFinanceStore } from "../../../store/staff/useFinanceStore";
 
-interface FexpensesTableProps {
-  expenseData: Expenses[];
-}
+type ExpenseApiData = {
+  item: string;
+  purchased: string;
+  amount: string;
+  purchasedBy: string;
+  // paymentMethod: number;
+  date: string;
+  id: number;
+};
 
-const FexpensesTable = ({ expenseData }: FexpensesTableProps) => {
+const FexpensesTable = () => {
+  const { expenses, getAllExpenses, isLoading } = useFinanceStore();
+
+  useEffect(() => {
+    getAllExpenses("/finance/all-expenses"); // Fetch the data
+  }, [getAllExpenses]);
+
+  // Transform API data into the correct format
+  const formattedExpenses: ExpenseApiData[] =
+    expenses?.map((expense: any) => ({
+      item: expense.attributes.item,
+
+      purchased: expense.attributes.from,
+      amount: expense.attributes.amount,
+      purchasedBy: expense.attributes.by,
+      date: expense.attributes.created_at,
+      id: expense.id,
+    })) || [];
+
   const columns: {
-    key: keyof Expenses;
+    key: keyof ExpenseApiData;
     label: string;
-    render: (value: string | number, row: Expenses) => React.ReactNode;
+    render: (_: any, expense: ExpenseApiData) => JSX.Element;
   }[] = [
     {
       key: "item",
       label: "Item",
-      render: (value) => (
-        <span className="text-dark font-medium text-sm">{value}</span>
+      render: (_: any, expense: ExpenseApiData) => (
+        <span className="text-dark font-medium text-sm">{expense.item}</span>
       ),
     },
     {
       key: "purchased",
-      label: "Purchased",
-      render: (value) => (
-        <span className="text-[#667085] text-sm">{value}</span>
+      label: "Purchased From",
+      render: (_: any, expense: ExpenseApiData) => (
+        <span className="text-[#667085] text-sm">{expense.purchased}</span>
       ),
     },
     {
       key: "amount",
       label: "Amount",
-      render: (value) => (
-        <span className="text-[#667085] text-sm">{value}</span>
+      render: (_: any, expense: ExpenseApiData) => (
+        <span className="text-[#667085] text-sm">{expense.amount}</span>
       ),
     },
     {
       key: "purchasedBy",
       label: "Purchased By",
-      render: (value) => (
-        <span className="text-[#667085] text-sm">{value}</span>
+      render: (_: any, expense: ExpenseApiData) => (
+        <span className="text-[#667085] text-sm">{expense.purchasedBy}</span>
       ),
     },
-    {
-      key: "paymentMethod",
-      label: "Payment Method",
-      render: (value) => (
-        <span className="text-[#667085] text-sm">{value}</span>
-      ),
-    },
+    // {
+    //   key: "paymentMethod",
+    //   label: "Payment Method",
+    //   render: (_: any, expense: ExpenseApiData) => (
+    //     <span className="text-[#667085] text-sm">{expense.item}</span>
+    //   ),
+    // },
     {
       key: "date",
       label: "Date",
-      render: (value) => (
-        <span className="text-[#667085] text-sm">{value}</span>
+      render: (_: any, expense: ExpenseApiData) => (
+        <span className="text-[#667085] text-sm">{expense.date}</span>
       ),
     },
   ];
@@ -59,10 +83,9 @@ const FexpensesTable = ({ expenseData }: FexpensesTableProps) => {
   return (
     <div className="w-full bg-white rounded-[10px] shadow-table  ">
       <Table
-        data={expenseData}
+        data={formattedExpenses}
         columns={columns}
         rowKey="id"
-        pagination={expenseData.length > 10}
         rowsPerPage={10}
         radius="rounded-none"
       />

@@ -11,6 +11,7 @@ export const Finance = lazy(() => import("./Finance"));
 export const Laboratory = lazy(() => import("./Laboratory"));
 export const Consultants = lazy(() => import("./Consultants"));
 export const Appointments = lazy(() => import("./Appointments"));
+export const Expenses = lazy(() => import("./Expenses"));
 export const Users = lazy(() => import("./Users"));
 export const Nurses = lazy(() => import("./Nurses"));
 export const Pharmacy = lazy(() => import("./Pharmacy"));
