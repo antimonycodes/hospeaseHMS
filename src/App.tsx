@@ -49,10 +49,10 @@ function App() {
               <Route path="overview" element={<Overview />} />
               <Route path="patients" element={<Patients />} />
               <Route path="patients/:id" element={<PatientDetails />} />
-              <Route
+              {/* <Route
                 path="appointments/:patientId"
                 element={<AppointmentDetails />}
-              />
+              /> */}
               <Route path="doctors" element={<Doctors />} />
               <Route path="doctors/:id" element={<DoctorDetails />} />
               <Route path="consultants" element={<Consultants />} />
