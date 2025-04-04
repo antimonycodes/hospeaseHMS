@@ -1,8 +1,9 @@
 import { JSX, useState } from "react";
-import Table from "../../../Shared/Table";
+
 import { useNavigate } from "react-router-dom";
 import Loader from "../../../Shared/Loader";
 import EditIcon from "../../../assets/EditIcon.png";
+import Table from "../../../Shared/Table";
 type FrondeskPatientData = {
   name: string;
   patientId: string;
