@@ -47,22 +47,41 @@ export interface CreatePatientData {
   next_of_kin: NextOfKin[];
   dob: string;
 }
-// export interface BookAppointment{}
+export interface Pagination {
+  total: number;
+  per_page: number;
+  current_page: number;
+  last_page: number;
+  from: number;
+  to: number;
+}
 
+export interface BookAppointmentData {
+  patient_id: number;
+  user_id: number; // staff selcted to attend to the patient
+  date: string;
+  time: string;
+}
 interface PatientStore {
   isLoading: boolean;
   patients: any[];
+  pagination: Pagination | null;
   selectedPatient: any | null;
   appointments: any[];
+  selectedAppointment: any | null;
 
   getAllPatients: (endpoint?: string) => Promise<void>;
   getPatientById: (id: string) => Promise<void>;
+  getPatientByIdDoc: (id: string) => Promise<any>;
   createPatient: (
     data: CreatePatientData,
     endpoint?: string,
     refreshendpoint?: string
   ) => Promise<boolean | null>;
   getAllAppointments: (endpoint?: string) => Promise<void>;
+  bookAppointment: (data: BookAppointmentData) => Promise<any>;
+  getAppointmentById: (id: string) => Promise<void>;
+  searchPatients: (query: string) => Promise<any[]>;
   // bookAppointment:(data:BookAppointment)
 }
 
@@ -71,14 +90,17 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   patients: [],
   selectedPatient: null,
   appointments: [],
+  pagination: null,
+  selectedAppointment: null,
 
   // Fetch all patient
   getAllPatients: async (endpoint = "/admin/patient/fetch") => {
     set({ isLoading: true });
     try {
       const response = await api.get(endpoint);
-
-      const fetchedPatients = response.data.data.data; // Extract doctor array
+      set({ pagination: response.data.data.pagination });
+      console.log(response.data.data.pagination, "pagination");
+      const fetchedPatients = response.data.data.data;
       set({ patients: fetchedPatients });
       console.log(response.data.message);
     } catch (error: any) {
@@ -122,6 +144,21 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
+  getPatientByIdDoc: async (id) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(`/doctor/patient/${id}`);
+      console.log(response.data.data);
+      set({ selectedPatient: response.data.data }); // Store fetched doctor in state
+    } catch (error: any) {
+      console.error(error.response?.data);
+      toast.error(
+        error.response?.data?.message || "Failed to fetch patient details"
+      );
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 
   // Create a new Patient
   createPatient: async (
@@ -151,6 +188,15 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
+  searchPatients: async (query: string) => {
+    try {
+      const response = await api.get(`/admin/patient/fetch?search=${query}`);
+      return response.data.data.data; // returns an array of matching patients
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Search failed");
+      return [];
+    }
+  },
 
   getAllAppointments: async (endpoint = "/admin/appointment/all-records") => {
     set({ isLoading: true });
@@ -169,6 +215,40 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
         error.response?.data?.message || "Failed to fetch appointments"
       );
       set({ appointments: [] });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  bookAppointment: async (data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.post("/admin/appointment/assign", data);
+      if (response.status === 201) {
+        console.log(response.data.message);
+        toast.success(response.data.message);
+        await get().getAllAppointments();
+        return true;
+      }
+      return null;
+    } catch (error: any) {
+      console.error(error.response?.data);
+      toast.error(
+        error.response?.data?.message || "Failed to book appointment"
+      );
+      return null;
+    }
+  },
+  getAppointmentById: async (id) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(`/doctor/my-appointments/${id}`);
+      set({ selectedAppointment: response.data.data });
+      console.log(response.data.data, "selectedAppointment");
+    } catch (error: any) {
+      console.error(error.response?.data);
+      toast.error(
+        error.response?.data?.message || "Failed to fetch appointment details"
+      );
     } finally {
       set({ isLoading: false });
     }

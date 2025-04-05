@@ -4,9 +4,14 @@ import patientIcon from "../../assets/docstaticon.svg";
 import doctorIcon from "../../assets/statpatient.svg";
 import appointmentIcon from "../../assets/statappointment.svg";
 import inventoryIcon from "../../assets/statinventory.svg";
+import { useEffect } from "react";
 
 const QuickStats = () => {
-  const { stats, isLoading } = useStatsStore();
+  const { stats, isLoading, getStats } = useStatsStore();
+
+  useEffect(() => {
+    getStats();
+  }, []);
 
   type StatKey =
     | "total_patient"

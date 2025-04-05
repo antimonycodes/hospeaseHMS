@@ -51,7 +51,7 @@ const DpatientsInfo = ({ patients, isLoading }: DpatientsDataProps) => {
   }));
   const handleViewMore = (id: string) => {
     console.log("Navigating to patient ID:", id);
-    navigate(`/dashboard/patients/${id}`);
+    navigate(`/dashboard/doctor/patients/${id}`);
   };
 
   const columns: Columns[] = [

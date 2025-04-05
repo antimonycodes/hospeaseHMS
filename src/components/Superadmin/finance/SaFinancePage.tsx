@@ -6,6 +6,7 @@ import ExpenseTable from "./ExpenseTable";
 import PaymentTable from "./PaymentTable";
 import AddPaymentModal from "../../../Shared/AddPaymentModal";
 import AddExpenseModal from "../../../Shared/AddExpenseModal";
+import FinanceOverview from "./FinanceOverview";
 
 // interface Expense {
 //   id: string;
@@ -17,9 +18,9 @@ import AddExpenseModal from "../../../Shared/AddExpenseModal";
 // }
 
 const SaFinancePage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"Payments" | "Expenses">(
-    "Payments"
-  );
+  const [activeTab, setActiveTab] = useState<
+    "Overview" | "Payments" | "Expenses"
+  >("Overview");
   const [openModal, setOpenModal] = useState(false);
   const [modalType, setModalType] = useState<"Payments" | "Expenses">(
     "Payments"
@@ -51,12 +52,22 @@ const SaFinancePage: React.FC = () => {
   });
 
   return (
-    <div className="rounded-lg custom-shadow bg-white p-4">
+    <div className="rounded-lg ">
       <div className="">
         {/* Tab Navigation */}
-        <div className="flex flex-col-reverse md:flex-row  mb-4">
+        <div className="bg-white flex flex-col-reverse md:flex-row custom-shadow  p-4 mb-4">
           {/* btns */}
           <div className=" flex">
+            <button
+              className={`px-4 py-2 mr-2 font-semibold ${
+                activeTab === "Overview"
+                  ? "text-primary border-b-2 border-primary"
+                  : "text-[#667185]"
+              }`}
+              onClick={() => setActiveTab("Overview")}
+            >
+              Overview
+            </button>
             <button
               className={`px-4 py-2 mr-2 font-semibold ${
                 activeTab === "Payments"
@@ -90,21 +101,24 @@ const SaFinancePage: React.FC = () => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1AA] size-4" />
             </div>
 
-            <div className=" md:w-auto">
-              <Button
-                variant="primary"
-                size="md"
-                onClick={handleOpenModal}
-                className="flex items-center gap-2 px-4"
-              >
-                Add new
-                <Plus size={16} />
-              </Button>
-            </div>
+            {activeTab !== "Overview" && (
+              <div className=" md:w-auto">
+                <Button
+                  variant="primary"
+                  size="md"
+                  onClick={handleOpenModal}
+                  className="flex items-center gap-2 px-4"
+                >
+                  Add new
+                  <Plus size={16} />
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Table */}
+        {activeTab === "Overview" && <FinanceOverview />}
         {activeTab === "Payments" && <PaymentTable />}
 
         {activeTab === "Expenses" && <ExpenseTable />}

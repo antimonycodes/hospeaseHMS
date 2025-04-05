@@ -182,7 +182,6 @@
 //   );
 // };
 
-// export default DoctorsTable;
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Table from "../../../Shared/Table";

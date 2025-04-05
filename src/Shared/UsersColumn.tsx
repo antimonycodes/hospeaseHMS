@@ -98,7 +98,7 @@ export const getUserColumns = (
     render: (_, data) => (
       <button
         className="cursor-pointer text-[#009952] text-sm font-medium"
-        onClick={() => details(data.patientId)}
+        onClick={() => details(data.id)}
       >
         View more
       </button>

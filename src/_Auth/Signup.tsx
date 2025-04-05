@@ -14,7 +14,7 @@ const Signup = () => {
     address: "",
     email: "",
     logo: null as File | null, // Store as File
-    cac_docs: null as File | null, // Store as File
+    // cac_docs: null as File | null, // Store as File
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,10 +31,10 @@ const Signup = () => {
     e.preventDefault();
 
     // Validate if files exist
-    if (!formData.logo || !formData.cac_docs) {
-      toast.error("Logo and CAC documents are required.");
-      return;
-    }
+    // if (!formData.logo || !formData.cac_docs) {
+    //   toast.error("Logo and CAC documents are required.");
+    //   return;
+    // }
     console.log(formData);
     const response = await signup(formData);
     if (response) {
@@ -44,7 +44,7 @@ const Signup = () => {
         address: "",
         email: "",
         logo: null,
-        cac_docs: null,
+        // cac_docs: null,
       });
       toast.success("You will be contacted by hospease for the next step");
     }
@@ -52,7 +52,7 @@ const Signup = () => {
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen w-full">
-      {/* Banner Image - Hidden on smaller screens, visible on medium and up */}
+      {/* Banner Image */}
       <div className="hidden md:block md:w-1/2 md:h-screen">
         <img
           src={onboardingImg}
@@ -62,15 +62,15 @@ const Signup = () => {
       </div>
 
       {/* Form Section */}
-      <div className="w-full md:w-1/2 min-h-screen bg-[#E3FFF2] flex items-center justify-center py-8 px-4">
+      <div className="w-full md:w-1/2 min-h-screen bg-[#E3FFF2] flex items-center justify-center py-4 px-4">
         <div className="flex flex-col items-center gap-4 w-full max-w-md">
           {/* Logo */}
-          <div className="w-48 sm:w-56 mb-2">
+          <div className="w-48 sm:w-32 mb-2">
             <img src={logo} alt="Logo" className="w-full" />
           </div>
 
           {/* Form Container */}
-          <div className="bg-white py-6 px-4 sm:py-8 sm:px-7 border border-[#D0D5DD] rounded-[10px] w-full shadow-sm">
+          <div className="bg-white py-6 px-4 sm:py-4 sm:px-7 border border-[#D0D5DD] rounded-[10px] w-full shadow-sm overflow-y-auto">
             <h1 className="text-center text-[#101928] text-2xl sm:text-3xl font-semibold mb-2">
               Welcome Onboard
             </h1>
@@ -155,7 +155,7 @@ const Signup = () => {
               </div>
 
               {/* Hospital CAC */}
-              <div className="mb-3 sm:mb-4">
+              {/* <div className="mb-3 sm:mb-4">
                 <label className="block text-[#101928] font-semibold text-xs">
                   HOSPITAL CAC
                 </label>
@@ -166,7 +166,7 @@ const Signup = () => {
                   onChange={handleFileChange}
                   className="w-full mt-1 p-2 sm:p-3 border border-[#009952] rounded-md outline-none text-sm"
                 />
-              </div>
+              </div> */}
 
               {/* Submit Button */}
               <button

@@ -36,22 +36,22 @@ type InformationTableProps = {
     };
     id: number;
   }[];
-  // pagination: {
-  //   total: number;
-  //   per_page: number;
-  //   current_page: number;
-  //   last_page: number;
-  //   from: number;
-  //   to: number;
-  // } | null;
+  pagination: {
+    total: number;
+    per_page: number;
+    current_page: number;
+    last_page: number;
+    from: number;
+    to: number;
+  } | null;
   isLoading: boolean;
 };
 
 const InformationTable = ({
   patients,
   isLoading,
-}: // pagination,
-InformationTableProps) => {
+  pagination,
+}: InformationTableProps) => {
   const navigate = useNavigate();
   const { getAllPatients } = usePatientStore();
   const [currentPage, setCurrentPage] = useState(0);

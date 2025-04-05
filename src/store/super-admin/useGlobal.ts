@@ -235,4 +235,22 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       set({ isLoading: false });
     }
   },
+  getDeptStaffs: async (id: number) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(`/admin/department/get-user-dept/${id}`);
+      if (response.status === 200) {
+        toast.success(response.data.message);
+        return response.data.data;
+      }
+      console.log(response.data.message);
+      return null;
+    } catch (error: any) {
+      console.error(error.response?.data);
+      toast.error(error.response.data.message);
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 }));

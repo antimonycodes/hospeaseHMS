@@ -72,7 +72,7 @@ const DoctorsTable = ({ doctors }: { doctors: Doctor[] }) => {
         columns={columns}
         data={simplifiedDoctors}
         rowKey="id"
-        pagination={true}
+        pagination={false}
         rowsPerPage={3}
       />
     </div>
