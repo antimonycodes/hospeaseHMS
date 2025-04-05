@@ -16,7 +16,7 @@ const roleComponents: Record<string, JSX.Element> = {
   "front-desk-manager": <FpatientsTable />,
   laboratory: <Labpatients />,
   pharmacy: <PharmPatients />,
-  nurses: <NursePatients />,
+  nurse: <NursePatients />,
   matron: <MatronPatients />,
   consultant: <ConsultantPatients />,
 };

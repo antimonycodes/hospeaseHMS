@@ -7,146 +7,79 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from "recharts";
+import { useChartStore } from "../../../store/staff/useChartStore";
 
 type DataPoint = {
   month: string;
-  value1: number;
-  value2: number;
-  value3: number;
-  value4: number;
-  value5: number;
-  value6: number;
+  earnings: number; // Single value for simplicity
 };
-
-const data: DataPoint[] = [
-  {
-    month: "Jan",
-    value1: 650,
-    value2: 450,
-    value3: 390,
-    value4: 350,
-    value5: 280,
-    value6: 380,
-  },
-  {
-    month: "Feb",
-    value1: 650,
-    value2: 450,
-    value3: 390,
-    value4: 350,
-    value5: 280,
-    value6: 380,
-  },
-  {
-    month: "Mar",
-    value1: 650,
-    value2: 450,
-    value3: 390,
-    value4: 350,
-    value5: 280,
-    value6: 380,
-  },
-  {
-    month: "Apr",
-    value1: 650,
-    value2: 450,
-    value3: 390,
-    value4: 350,
-    value5: 280,
-    value6: 380,
-  },
-  {
-    month: "May",
-    value1: 650,
-    value2: 450,
-    value3: 390,
-    value4: 350,
-    value5: 280,
-    value6: 380,
-  },
-  {
-    month: "Jun",
-    value1: 650,
-    value2: 450,
-    value3: 390,
-    value4: 350,
-    value5: 280,
-    value6: 380,
-  },
-  {
-    month: "Jul",
-    value1: 650,
-    value2: 450,
-    value3: 390,
-    value4: 350,
-    value5: 280,
-    value6: 380,
-  },
-  {
-    month: "Aug",
-    value1: 650,
-    value2: 450,
-    value3: 390,
-    value4: 350,
-    value5: 280,
-    value6: 380,
-  },
-  {
-    month: "Sep",
-    value1: 650,
-    value2: 450,
-    value3: 390,
-    value4: 350,
-    value5: 280,
-    value6: 380,
-  },
-  {
-    month: "Oct",
-    value1: 650,
-    value2: 450,
-    value3: 390,
-    value4: 350,
-    value5: 280,
-    value6: 380,
-  },
-  {
-    month: "Nov",
-    value1: 650,
-    value2: 450,
-    value3: 390,
-    value4: 350,
-    value5: 280,
-    value6: 380,
-  },
-  {
-    month: "Dec",
-    value1: 650,
-    value2: 450,
-    value3: 390,
-    value4: 350,
-    value5: 280,
-    value6: 380,
-  },
-];
 
 const FinanceCharts = () => {
   const [isMobile, setIsMobile] = useState(false);
+  const [chartType, setChartType] = useState<"income" | "expenses">("income");
+  const {
+    incomeData,
+    expensesData,
+    getIncomeData,
+    getExpensesData,
+    isLoading,
+  } = useChartStore();
 
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-
-    // Initial check
     checkMobile();
-
     window.addEventListener("resize", checkMobile);
-
-    // Cleanup
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
+
+  useEffect(() => {
+    getIncomeData();
+    getExpensesData();
+  }, [getIncomeData, getExpensesData]);
+
+  // Define the ChartData type
+  type ChartData = {
+    monthly_earnings: string[]; // Array of earnings as strings
+    months: string[]; // Array of month names
+  };
+
+  const transformData = (data: ChartData | null): DataPoint[] => {
+    if (!data || !data.monthly_earnings || !data.months) {
+      return Array(12)
+        .fill(0)
+        .map((_, i) => ({
+          month: [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+          ][i],
+          earnings: 0,
+        }));
+    }
+    return data.months.map((month: string, index: number) => ({
+      month: month.slice(0, 3), // Shorten to "Jan", "Feb", etc.
+      earnings: parseFloat(
+        data.monthly_earnings[index].replace(",", "") || "0"
+      ),
+    }));
+  };
+
+  const chartData =
+    chartType === "income"
+      ? transformData(incomeData)
+      : transformData(expensesData);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -163,110 +96,72 @@ const FinanceCharts = () => {
     }
     return null;
   };
+
   return (
     <div className="w-full bg-white rounded-lg p-10 font-jakarta">
       <div className="flex items-center justify-between pb-10">
-        <h1>Patients visit by Gender</h1>
-        <button>Guess</button>
+        <select
+          value={chartType}
+          onChange={(e) =>
+            setChartType(e.target.value as "income" | "expenses")
+          }
+          className="w-[80px] px-[8px] py-[7px] border border-[#D0D5DD] text-[11px] rounded-[5px]"
+        >
+          <option value="income">Income</option>
+          <option value="expenses">Expenses</option>
+        </select>
+        <select className="w-[80px] px-[8px] py-[7px] border border-[#D0D5DD] text-[11px] rounded-[5px]">
+          <option>2025</option>
+          <option>2024</option>
+        </select>
       </div>
       <div className="h-[350px] md:h-[400px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={data}
-            margin={{
-              top: 20,
-              right: isMobile ? 10 : 10,
-              left: isMobile ? 0 : 0,
-              bottom: 5,
-            }}
-            barSize={6}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="month"
-              tick={{ fontSize: isMobile ? 12 : 14, fill: "black" }}
-              interval={isMobile ? 0 : 0}
-            />
-            <YAxis
-              domain={[100, 800]} // Set the Y-axis domain to start from 100 and end at 800
-              ticks={[100, 200, 300, 400, 500, 600, 700, 800]} // Explicitly define the tick values
-              tick={{ fontSize: isMobile ? 12 : 14, fill: "black" }}
-              width={isMobile ? 30 : 40}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            {/* <Legend
-                    wrapperStyle={{
-                      fontSize: isMobile ? "12px" : "14px",
-                      paddingTop: "10px",
-                    }}
-                  /> */}
-            <Bar
-              dataKey="value1"
-              name="Value 1"
-              fill="#3354F4"
-              //   radius={[4, 4, 0, 0]}
-            />
-            <Bar
-              dataKey="value2"
-              name="Value 2"
-              fill="#7D33F4"
-              //   radius={[4, 4, 0, 0]}
-            />
-            <Bar
-              dataKey="value3"
-              name="Value 3"
-              fill="#F61F3C"
-              //   radius={[4, 4, 0, 0]}
-            />
-            <Bar
-              dataKey="value4"
-              name="Value 4"
-              fill="#F61FEB"
-              //   radius={[4, 4, 0, 0]}
-            />
-            <Bar
-              dataKey="value5"
-              name="Value 5"
-              fill="#F68A1F"
-              //   radius={[4, 4, 0, 0]}
-            />{" "}
-            <Bar
-              dataKey="value6"
-              name="Value 6"
-              fill="#8EAA03"
-              //   radius={[4, 4, 0, 0]}
-            />
-          </BarChart>
-        </ResponsiveContainer>
+        {isLoading ? (
+          <div>Loading chart data...</div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={chartData}
+              margin={{
+                top: 20,
+                right: isMobile ? 10 : 10,
+                left: isMobile ? 0 : 0,
+                bottom: 5,
+              }}
+              barSize={6}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                dataKey="month"
+                tick={{ fontSize: isMobile ? 12 : 14, fill: "black" }}
+                interval={isMobile ? 0 : 0}
+              />
+              <YAxis
+                domain={[0, "auto"]} // Dynamic range based on data
+                tick={{ fontSize: isMobile ? 12 : 14, fill: "black" }}
+                width={isMobile ? 30 : 40}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar
+                dataKey="earnings"
+                name={chartType === "income" ? "Income" : "Expenses"}
+                fill={chartType === "income" ? "#3354F4" : "#F61F3C"}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </div>
-      <div className="flex w-full mt-[30px] justify-center items-center space-x-7 ">
-        <span className="flex items-center gap-1">
-          <span className="rounded-full h-[10px]  w-[10px] bg-[#3354F4] "></span>
-          <p className="text-[10px] ">Registration fee</p>
-        </span>
+      {/* Simplified legend for single-bar chart */}
+      <div className="flex w-full mt-[30px] justify-center items-center">
         <span className="flex items-center gap-2">
-          <span className="rounded-full h-[10px]  w-[10px] bg-[#7D33F4] "></span>
-          <p className="text-[10px] ">Consultation </p>
-        </span>
-        <span className="flex items-center gap-2">
-          <span className="rounded-full h-[10px]  w-[10px] bg-[#F61F3C] "></span>
-          <p className="text-[10px] ">Specialist fee</p>
-        </span>
-        <span className="flex items-center gap-2">
-          <span className="rounded-full h-[10px]  w-[10px] bg-[#F64A1F] "></span>
-          <p className="text-[10px] ">Nursing Care</p>
-        </span>
-        <span className="flex items-center gap-2">
-          <span className="rounded-full h-[10px]  w-[10px] bg-[#F61FEB] "></span>
-          <p className="text-[10px] ">Blood</p>
-        </span>
-        <span className="flex items-center gap-2">
-          <span className="rounded-full h-[10px]  w-[10px] bg-[#F68A1F] "></span>
-          <p className="text-[10px] ">Bed fee</p>
-        </span>
-        <span className="flex items-center gap-2">
-          <span className="rounded-full h-[10px]  w-[10px] bg-[#8EAA03] "></span>
-          <p className="text-[10px] ">Bed fee</p>
+          <span
+            className={`rounded-full h-[10px] w-[10px] ${
+              chartType === "income" ? "bg-[#3354F4]" : "bg-[#F61F3C]"
+            }`}
+          ></span>
+          <p className="text-[10px]">
+            {chartType === "income" ? "Income" : "Expenses"}
+          </p>
         </span>
       </div>
     </div>

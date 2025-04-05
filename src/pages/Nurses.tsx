@@ -6,6 +6,7 @@ import MatronNurse from "../components/Matron/nurse/MatronNurse";
 const roleComponents: Record<string, JSX.Element> = {
   matron: <MatronNurse />,
   admin: <SaNursesPage />,
+
   //   doctor:  ,
   // frontdesk:
 };

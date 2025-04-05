@@ -9,7 +9,7 @@ import { JSX } from "react";
 const roleComponents: Record<string, JSX.Element> = {
   //   superadmin: <SuperAdminOverview />,
   doctor: <ShiftTable />,
-  nurses: <NurseShifts />,
+  nurse: <NurseShifts />,
 
   //   frontdesk: <FrontdeskOverview />,
 };

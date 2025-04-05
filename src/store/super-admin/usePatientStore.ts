@@ -89,6 +89,23 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
     }
   },
 
+  // Fetch all  Nurses
+  getAllNurses: async (endpoint = "/admin/patient/fetch") => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(endpoint);
+
+      const fetchedNurses = response.data.data.data; // Extract doctor array
+      set({ patients: fetchedNurses });
+      console.log(response.data.message);
+    } catch (error: any) {
+      console.error(error.response?.data);
+      toast.error(error.response?.data?.message || "Failed to fetch patients");
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
   // Fetch a single patient by ID
   getPatientById: async (id) => {
     set({ isLoading: true });

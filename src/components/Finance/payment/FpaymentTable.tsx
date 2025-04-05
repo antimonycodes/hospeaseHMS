@@ -1,164 +1,122 @@
-import { useState, useEffect } from "react";
+import { JSX } from "react";
 import Table from "../../../Shared/Table";
 
-interface Payment {
+interface PaymentFromAPI {
+  id: number;
+  attributes: {
+    patient: string;
+    amount: string;
+    purpose: string;
+    payment_method: string;
+    payment_type?: string;
+    is_active?: boolean;
+    user_id: string;
+    created_at: string;
+  };
+}
+
+export type PaymentData = {
   id: string;
+  user_id: string;
   patient: string;
   amount: string;
   purpose: string;
-  paymentMethod: string;
-  date: string;
-  status: "All" | "Full Payment" | "Half Payment";
+  payment_method: string;
+  payment_type?: string;
+  is_active?: boolean;
+  created_at: string;
+  status: string;
   active: boolean;
-}
+};
 
-interface FpaymentTableProps {
-  payments: Payment[];
-}
+type Columns = {
+  key: keyof PaymentData;
+  label: string;
+  render?: (value: any, payment: PaymentData) => JSX.Element;
+};
 
-const FpaymentTable = ({ payments }: FpaymentTableProps) => {
-  const [paymentData, setPaymentData] = useState<Payment[]>([]);
-  const [filterStatus] = useState<"All" | "Full Payment" | "Half Payment">(
-    "All"
-  );
+type FpaymentTableProps = {
+  isLoading?: boolean;
+  payments: PaymentFromAPI[];
+};
 
-  useEffect(() => {
-    let filteredPayments = payments;
-    if (filterStatus !== "All") {
-      filteredPayments = payments.filter(
-        (payment) => payment.status === filterStatus
-      );
-    }
-    setPaymentData(filteredPayments);
-  }, [payments, filterStatus]);
+const FpaymentTable = ({
+  payments = [],
+  isLoading = false,
+}: FpaymentTableProps) => {
+  // Ensure payments is always an array
+  const paymentsArray = Array.isArray(payments) ? payments : [];
 
-  const togglePaymentStatus = (id: string) => {
-    setPaymentData((prevPayments) =>
-      prevPayments.map((payment) =>
-        payment.id === id
-          ? {
-              ...payment,
-              active: !payment.active,
-              status: !payment.active ? "Full Payment" : "Half Payment",
-            }
-          : payment
-      )
-    );
-  };
+  const formattedPayments: PaymentData[] = paymentsArray.map((payment) => ({
+    id: payment.id.toString(),
+    user_id: payment.attributes?.user_id || "N/A",
+    patient: payment.attributes?.patient || "Unknown",
+    amount: payment.attributes?.amount || "0",
+    purpose: payment.attributes?.purpose || "N/A",
+    payment_method: payment.attributes?.payment_method || "N/A",
+    payment_type: payment.attributes?.payment_type || "",
+    created_at: payment.attributes?.created_at || "N/A",
+    is_active: payment.attributes?.is_active || false,
+    status: payment.attributes?.is_active ? "Full Payment" : "Half Payment",
+    active: payment.attributes?.is_active || false,
+  }));
 
-  const columns: {
-    key: keyof Payment;
-    label: string;
-    render: (value: string | number | boolean, row: Payment) => React.ReactNode;
-  }[] = [
+  const columns: Columns[] = [
     {
-      key: "id",
-      label: "Patient ID",
-      render: (value) => (
-        <span className="text-dark font-medium text-sm">{value}</span>
+      key: "user_id",
+      label: "User ID",
+      render: (_, payment) => (
+        <span className="text-dark font-medium text-sm">{payment.user_id}</span>
       ),
     },
     {
       key: "patient",
       label: "Patient Name",
-      render: (value) => (
-        <span className="text-[#667085] text-sm">{value}</span>
+      render: (_, payment) => (
+        <span className="text-[#667085] text-sm">{payment.patient}</span>
       ),
     },
     {
       key: "amount",
       label: "Amount",
-      render: (value) => (
-        <span className="text-[#667085] text-sm">{value}</span>
+      render: (_, payment) => (
+        <span className="text-[#667085] text-sm">{payment.amount}</span>
       ),
     },
     {
       key: "purpose",
       label: "Purpose",
-      render: (value) => (
-        <span className="text-[#667085] text-sm">{value}</span>
+      render: (_, payment) => (
+        <span className="text-[#667085] text-sm">{payment.purpose}</span>
       ),
     },
     {
-      key: "paymentMethod",
+      key: "payment_method",
       label: "Payment Method",
-      render: (value) => (
-        <span className="text-[#667085] text-sm">{value}</span>
+      render: (_, payment) => (
+        <span className="text-[#667085] text-sm">{payment.payment_method}</span>
       ),
     },
     {
-      key: "status",
-      label: "Payment Type",
-      render: (value) => (
-        <span className="text-[#667085] text-sm">{value}</span>
-      ),
-    },
-    {
-      key: "active",
-      label: "Payment Status",
-      render: (_, row) => (
-        <div className="flex items-center">
-          <label className="inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              className="sr-only"
-              checked={row.active}
-              onChange={() => togglePaymentStatus(row.id)}
-            />
-            <div
-              className={`relative w-10 h-5 rounded-full transition-colors ${
-                row.active ? "bg-primary" : "bg-gray-200"
-              }`}
-            >
-              <div
-                className={`absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform ${
-                  row.active ? "transform translate-x-5" : ""
-                }`}
-              ></div>
-            </div>
-          </label>
-        </div>
-      ),
-    },
-    {
-      key: "date",
+      key: "created_at",
       label: "Date",
-      render: (value) => (
-        <span className="text-[#667085] text-sm">{value}</span>
+      render: (_, payment) => (
+        <span className="text-[#667085] text-sm">{payment.created_at}</span>
       ),
     },
   ];
 
+  if (isLoading) return <div>Loading payments...</div>;
+  if (!formattedPayments.length) return <div>No payments found</div>;
+
   return (
-    <div className="w-full bg-white rounded-b-[8px] shadow-table">
-      <Table
-        data={paymentData}
-        columns={columns}
-        rowKey="id"
-        pagination={paymentData.length > 10}
-        rowsPerPage={10}
-        radius="rounded-none"
-      />
-    </div>
+    <Table
+      data={formattedPayments}
+      columns={columns}
+      rowKey="id"
+      rowsPerPage={10}
+    />
   );
 };
 
 export default FpaymentTable;
-
-{
-  /* <div className="flex justify-end p-4">
-<select
-  value={filterStatus}
-  onChange={(e) =>
-    setFilterStatus(
-      e.target.value as "All" | "Full Payment" | "Half Payment"
-    )
-  }
-  className="border border-gray-300 rounded p-2"
->
-  <option value="All">All</option>
-  <option value="Full Payment">Full Payment</option>
-  <option value="Half Payment">Half Payment</option>
-</select>
-</div> */
-}

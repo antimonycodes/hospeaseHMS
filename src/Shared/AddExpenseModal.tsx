@@ -1,10 +1,14 @@
 import { X } from "lucide-react";
-import { CreateExpenseData } from "../store/staff/useFinanceStore";
 import { useState } from "react";
+import { CreateExpenseData } from "../store/staff/useFinanceStore";
 
 interface AddExpenseModalProps {
   onClose: () => void;
-  createExpense: (data: CreateExpenseData, endpoint: string) => any; // Add endpoint as a parameter
+  createExpense: (
+    data: CreateExpenseData,
+    endpoint?: string,
+    refreshEndpoint?: string
+  ) => Promise<boolean | null>;
   isLoading: boolean;
   endpoint: string;
 }
@@ -15,54 +19,53 @@ const AddExpenseModal = ({
   isLoading,
   endpoint,
 }: AddExpenseModalProps) => {
-  const [expense, setExpense] = useState<{
-    item: string;
-    amount: string;
-    from: string;
-    by: string;
-  }>({
+  const [expense, setExpense] = useState<CreateExpenseData>({
     item: "",
-    amount: "",
+    amount: 0,
     from: "",
     by: "",
+    payment_method: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setExpense((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: name === "amount" ? parseFloat(value) || 0 : value,
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate form fields
-    if (!expense.item || !expense.amount || !expense.from || !expense.by) {
+    if (
+      !expense.item ||
+      !expense.amount ||
+      !expense.from ||
+      !expense.by ||
+      !expense.payment_method
+    ) {
       alert("Please fill in all required fields.");
       return;
     }
 
-    // Call the createExpense function
-    createExpense(
-      {
-        item: expense.item,
-        amount: expense.amount,
-        from: expense.from,
-        by: expense.by,
-      },
-      endpoint
+    const success = await createExpense(
+      expense,
+      endpoint,
+      "/finance/all-expenses"
     );
-
-    // Reset form and close modal
-    setExpense({
-      item: "",
-      amount: "",
-      from: "",
-      by: "",
-    });
-    onClose();
+    if (success) {
+      setExpense({
+        item: "",
+        amount: 0,
+        from: "",
+        by: "",
+        payment_method: "",
+      });
+      onClose();
+    }
   };
 
   return (
@@ -86,6 +89,7 @@ const AddExpenseModal = ({
                 name="item"
                 value={expense.item}
                 onChange={handleChange}
+                disabled={isLoading}
                 className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
               />
             </div>
@@ -99,6 +103,7 @@ const AddExpenseModal = ({
                 name="from"
                 value={expense.from}
                 onChange={handleChange}
+                disabled={isLoading}
                 className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
               />
             </div>
@@ -112,6 +117,7 @@ const AddExpenseModal = ({
                 name="amount"
                 value={expense.amount}
                 onChange={handleChange}
+                disabled={isLoading}
                 className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
               />
             </div>
@@ -125,8 +131,27 @@ const AddExpenseModal = ({
                 name="by"
                 value={expense.by}
                 onChange={handleChange}
+                disabled={isLoading}
                 className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-custom-black mb-1">
+                Payment Method
+              </label>
+              <select
+                name="payment_method"
+                value={expense.payment_method}
+                onChange={handleChange}
+                disabled={isLoading}
+                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
+              >
+                <option value="">Select Payment Method</option>
+                <option value="cash">Cash</option>
+                <option value="cheque">Cheque</option>
+                <option value="transfer">Transfer</option>
+              </select>
             </div>
           </div>
 
@@ -136,7 +161,7 @@ const AddExpenseModal = ({
               className="bg-primary text-white px-4 py-2 rounded-md text-sm"
               disabled={isLoading}
             >
-              {isLoading ? "Adding..." : "Add payment"}
+              {isLoading ? "Adding..." : "Add Expense"}
             </button>
           </div>
         </form>

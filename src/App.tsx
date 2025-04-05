@@ -58,7 +58,6 @@ function App() {
               <Route path="doctors/:id" element={<DoctorDetails />} />
               <Route path="consultants" element={<Consultants />} />
               <Route path="consultants/:id" element={<ConsultantDetails />} />
-
               <Route path="finance/info" element={<Finance />} />
               <Route path="laboratory/info" element={<Laboratory />} />
               <Route path="appointments" element={<Appointments />} />
