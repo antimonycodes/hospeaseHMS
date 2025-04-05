@@ -3,7 +3,7 @@ import { useRole } from "../hooks/useRole";
 import { useNavigate } from "react-router-dom";
 import PharmInventory from "../components/Pharmacy/Inventory/PharmInventory";
 const roleComponents: Record<string, JSX.Element> = {
-  pharmacy: <PharmInventory />,
+  pharmacist: <PharmInventory />,
 
   //   doctor:  ,
   // frontdesk: ,

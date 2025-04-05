@@ -212,7 +212,7 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       activeIcon: getImageSrc("patienticonsLight.svg"),
     },
   ],
-  pharmacy: [
+  pharmacist: [
     {
       name: "Overview",
       path: "/dashboard/overview",

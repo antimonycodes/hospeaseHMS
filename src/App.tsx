@@ -43,7 +43,6 @@ function App() {
           <Route path="/" element={<Navigate to="/dashboard" />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/signup" element={<Signup />} />
-
           <Route element={<ProtectedRoutes />}>
             <Route path="/dashboard" element={<DashboardLayout />}>
               <Route index element={<Navigate to="overview" />} />
@@ -61,7 +60,7 @@ function App() {
               <Route path="finance/info" element={<Finance />} />
               <Route path="laboratory/info" element={<Laboratory />} />
               <Route path="appointments" element={<Appointments />} />
-              <Route path="nurses" element={<Nurses />} />
+              <Route path="nurse" element={<Nurses />} />
               <Route path="nurses/:id" element={<NurseDetails />} />
               <Route path="pharmacy/info" element={<Pharmacy />} />
               <Route
