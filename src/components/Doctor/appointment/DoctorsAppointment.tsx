@@ -3,84 +3,82 @@ import Table from "../../../Shared/Table";
 import { getUserColumns } from "../../../Shared/UsersColumn";
 import { getImageSrc } from "../../../utils/imageUtils";
 import FrontdeskAppointmentModal from "../../Frontdesk/appointment/FrontdeskAppointmentModal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAppointmentStore } from "../../../store/staff/useAppointmentStore";
 
 interface Patient {
+  id: number;
   name: string;
   patientId: string;
   gender: string;
   phone: string;
   occupation: string;
   doctor: string;
-  status: "Accepted" | "Completed";
+  status:
+    | "Pending"
+    | "Accepted"
+    | "Declined"
+    | "Rescheduled"
+    | "Completed"
+    | undefined;
 }
 
-const patients: Patient[] = [
-  {
-    name: "Philip Ikiriko",
-    patientId: "0010602",
-    gender: "Male",
-    phone: "+234 709 823 2411",
-    occupation: "Banker",
-    doctor: "Dr Omogpe Peter",
-    status: "Accepted",
-  },
-  {
-    name: "John Diongoli",
-    patientId: "0020602",
-    gender: "Female",
-    phone: "+234 802 987 8543",
-    occupation: "Tailor",
-    doctor: "Dr Mary Omisore",
-    status: "Accepted",
-  },
-  {
-    name: "Mary Durusaiye",
-    patientId: "0030602",
-    gender: "Male",
-    phone: "+234 805 804 5130",
-    occupation: "Farmer",
-    doctor: "Dr Michael Saidu",
-    status: "Completed",
-  },
-  {
-    name: "Martha Taribo",
-    patientId: "0040602",
-    gender: "Female",
-    phone: "+234 803 800 1111",
-    occupation: "Teacher",
-    doctor: "Dr Andrew Oyeleke",
-    status: "Accepted",
-  },
-];
-
-const tabs = ["New", "Accepted", "Completed"] as const;
+const tabs = ["Pending", "Accepted", "Declined"] as const;
 type TabType = (typeof tabs)[number];
 
 // **Calculate the count for each status**
-const getStatusCounts = () => {
+const getStatusCounts = (patients: Patient[]) => {
   return patients.reduce(
     (acc, patient) => {
-      acc[patient.status]++;
-      acc.New++;
+      if (patient.status) {
+        acc[patient.status]++;
+      }
       return acc;
     },
-    { New: 0, Accepted: 0, Completed: 0 }
+    { Pending: 0, Accepted: 0, Declined: 0, Rescheduled: 0, Completed: 0 }
   );
 };
+
 const DoctorsAppointment = () => {
-  const [activeTab, setActiveTab] = useState<TabType>("New");
-  const statusCounts = getStatusCounts();
+  const [activeTab, setActiveTab] = useState<TabType>("Pending");
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const { getAllAppointments, appointments } = useAppointmentStore();
+
+  // Map API response to patients array
+  const transformedPatients: Patient[] = appointments.map((item: any) => ({
+    id: item.id,
+    name: `${item.attributes.patient.attributes.first_name} ${item.attributes.patient.attributes.last_name}`,
+    patientId: item.attributes.patient.attributes.card_id,
+    gender: item.attributes.patient.attributes.gender ?? "N/A",
+    phone: item.attributes.patient.attributes.phone_number,
+    occupation: item.attributes.patient.attributes.occupation ?? "N/A",
+    doctor: `Dr ${item.attributes.doctor.attributes.last_name}`,
+    status: (item.attributes.status.charAt(0).toUpperCase() +
+      item.attributes.status
+        .slice(1)
+        .toLowerCase()
+        .replace("rejected", "declined")) as
+      | "Pending"
+      | "Accepted"
+      | "Declined",
+  }));
+  // console.log(id, "transformedPatients");
+
+  const statusCounts = getStatusCounts(transformedPatients);
+
+  useEffect(() => {
+    getAllAppointments("/doctor/my-appointments");
+  }, [getAllAppointments]);
 
   const navigate = useNavigate();
 
-  const details = (patientId: string) => {
-    navigate(`/dashboard/appointments/${patientId}`);
+  const details = (id: string) => {
+    navigate(`/dashboard/appointment/doctor/${id}`);
   };
 
   // Dynamically generate columns based on the data
-  const columns = getUserColumns(details, patients, false);
+  const columns = getUserColumns(details, transformedPatients, false);
 
   // Function to open modal
   const openModal = () => {
@@ -93,26 +91,23 @@ const DoctorsAppointment = () => {
   };
 
   const filteredPatients =
-    activeTab === "New"
-      ? patients
-      : patients.filter((p) => p.status === activeTab);
+    activeTab === "Pending"
+      ? transformedPatients
+      : transformedPatients.filter((p) => p.status === activeTab);
+
   return (
     <div className="w-full h-full bg-white rounded-[8px] shadow overflow-hidden">
       <div className="p-6 flex items-center justify-between">
         <h1 className="text-[18px] w-[160px] font-medium">
           Patients{" "}
           <span className="bg-[#F9F5FF] py-[2px] px-[8px] rounded-[16px] text-[#6941C6] font-medium text-[12px]">
-            {patients.length}
+            {transformedPatients.length}
           </span>
         </h1>
 
-        {/* search / filter / add button
-         */}
-        {/* search */}
+        {/* search / filter / add button */}
         <div className="flex w-full items-center gap-2 border border-gray-200 py-2 px-4 rounded-[10px] md:w-[70%]">
-          {/* icon */}
           <img src={getImageSrc("search.svg")} alt="" />
-          {/* input */}
           <input
             type="search"
             name=""
@@ -123,9 +118,7 @@ const DoctorsAppointment = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          {/* filter and add button */}
           <div className="flex items-center gap-4">
-            {/* filter */}
             <button className="cursor-pointer">
               <img src={getImageSrc("filter.svg")} alt="" />
             </button>

@@ -7,7 +7,7 @@ const DoctorOverview = () => (
     <div className=" flex flex-col gap-4">
       <DoctorCards />
       <FrontdeskChart />
-      <FrontdeskTable />
+      {/* <FrontdeskTable /> */}
     </div>
   </div>
 );

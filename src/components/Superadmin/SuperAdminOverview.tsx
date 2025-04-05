@@ -13,7 +13,7 @@ const SuperAdminOverview = () => {
   const { getStats, getClinicalStats, clinicalStats, stats, isLoading } =
     useStatsStore();
   const { getAllDoctors, doctors } = useDoctorStore();
-  const { getAllPatients, patients } = usePatientStore();
+  const { getAllPatients, patients, pagination } = usePatientStore();
 
   useEffect(() => {
     // Only fetch data if it's not already available
@@ -63,14 +63,17 @@ const SuperAdminOverview = () => {
         ) : (
           <div className="w-full h-64 flex items-center justify-center">
             <span className="text-gray-400 text-sm">
-              Loading Department Data...
+              No stats available for this department yet.
             </span>
           </div>
         )}
       </div>
       <div className="w-full gap-4 h-full flex flex-col md:flex-row">
         <DoctorsTable doctors={doctors} />
-        <PatientsTable patients={patients} />
+        <PatientsTable
+          patients={patients}
+          pagination={pagination || undefined}
+        />
       </div>
     </div>
   );

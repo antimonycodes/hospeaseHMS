@@ -22,7 +22,7 @@ export interface SignupData {
   address: string;
   email: string;
   logo: File | null;
-  cac_docs: File | null;
+  // cac_docs: File | null;
 }
 
 interface AuthStore {
@@ -86,8 +86,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         !data.phone ||
         !data.address ||
         !data.email ||
-        !data.logo ||
-        !data.cac_docs
+        !data.logo
+        // !data.cac_docs
       ) {
         toast.error("All fields are required!");
         set({ isLoading: false });
@@ -101,7 +101,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       formData.append("address", data.address);
       formData.append("email", data.email);
       formData.append("logo", data.logo);
-      formData.append("cac_docs", data.cac_docs);
+      // formData.append("cac_docs", data.cac_docs);
 
       const response: AxiosResponse = await api.post(
         "/auth/onboard-hospitals",

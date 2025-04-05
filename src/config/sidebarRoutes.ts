@@ -62,6 +62,12 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       ],
     },
     {
+      name: "Inventory",
+      path: "/dashboard/Inventory",
+      icon: getImageSrc("inventory-active.svg"),
+      activeIcon: getImageSrc("inventory-default.svg"),
+    },
+    {
       name: "Laboratory",
       path: "/dashboard/laboratory",
       icon: getImageSrc("labicon.svg"),
@@ -122,14 +128,14 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
     {
       name: "Branch",
       path: "/dashboard/branch",
-      icon: getImageSrc("branches.svg"),
-      activeIcon: getImageSrc("branches.svg"),
+      icon: getImageSrc("branch-default.svg"),
+      activeIcon: getImageSrc("branch-active.svg"),
     },
     {
       name: "Clinical Dept",
       path: "/dashboard/clinical-department",
-      icon: getImageSrc("clinical-dept.svg"),
-      activeIcon: getImageSrc("clinical-dept.svg"),
+      icon: getImageSrc("clinical-defualt.svg"),
+      activeIcon: getImageSrc("clinical-active.svg"),
     },
   ],
   doctor: [

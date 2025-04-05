@@ -34,49 +34,57 @@ const Table = <T extends Record<string, any>>({
   // Handle edge case where data is empty
   const showEmptyState = data.length === 0;
 
-  // Generate an array of page numbers, but limited to prevent too many buttons
-  const getPageNumbers = () => {
-    // Always include the first page, last page, and pages around the current page
-    const pageNumbers = new Set<number>();
-    pageNumbers.add(1); // First page
-
-    if (totalPages > 1) {
-      pageNumbers.add(totalPages); // Last page
-    }
-
-    // Add current page and neighbors
-    for (
-      let i = Math.max(1, currentPage - 1);
-      i <= Math.min(totalPages, currentPage + 1);
-      i++
-    ) {
-      pageNumbers.add(i);
-    }
-
-    // Convert to sorted array
-    return Array.from(pageNumbers).sort((a, b) => a - b);
-  };
-
-  const pageNumbers = getPageNumbers();
-
-  // Add ellipsis indicators between non-consecutive page numbers
+  // Generate page numbers with proper ellipses
   const getPageItems = () => {
     const items: (number | string)[] = [];
 
-    pageNumbers.forEach((page, index) => {
-      // Add the page number
-      items.push(page);
+    // Always show first page
+    items.push(1);
 
-      // Check if we need to add an ellipsis
-      if (index < pageNumbers.length - 1 && pageNumbers[index + 1] > page + 1) {
-        items.push("...");
+    if (totalPages <= 7) {
+      // If total pages is small, show all pages
+      for (let i = 2; i <= totalPages; i++) {
+        items.push(i);
       }
-    });
+    } else {
+      // For large page counts, show ellipses intelligently
+
+      // Show ellipsis after first page if current page is far enough
+      if (currentPage > 3) {
+        items.push("ellipsis-1");
+      }
+
+      // Pages around current page
+      const startPage = Math.max(2, currentPage - 1);
+      const endPage = Math.min(totalPages - 1, currentPage + 1);
+
+      for (let i = startPage; i <= endPage; i++) {
+        if (i > 1 && i < totalPages) {
+          items.push(i);
+        }
+      }
+
+      // Show ellipsis before last page if needed
+      if (currentPage < totalPages - 2) {
+        items.push("ellipsis-2");
+      }
+
+      // Always show last page if more than one page
+      if (totalPages > 1) {
+        items.push(totalPages);
+      }
+    }
 
     return items;
   };
 
-  const pageItems = getPageItems();
+  // Calculate display info (from/to/total)
+  const startItem = (currentPage - 1) * rowsPerPage + 1;
+  const endItem = Math.min(
+    currentPage * rowsPerPage,
+    data.length + (currentPage - 1) * rowsPerPage
+  );
+  const totalItems = totalPages * rowsPerPage;
 
   return (
     <div
@@ -97,8 +105,14 @@ const Table = <T extends Record<string, any>>({
         </thead>
         <tbody className="bg-white divide-y divide-[#EAECF0]">
           {showEmptyState ? (
-            // <Loader />
-            <div></div>
+            <tr>
+              <td
+                colSpan={columns.length}
+                className="px-6 py-4 text-center text-sm text-[#667085]"
+              >
+                No data available
+              </td>
+            </tr>
           ) : (
             data.map((row) => (
               <tr key={String(row[rowKey])}>
@@ -118,76 +132,88 @@ const Table = <T extends Record<string, any>>({
         </tbody>
       </table>
 
-      {pagination && totalPages > 1 && (
-        <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-[#EAECF0]">
-          {/* Previous Button */}
-          <button
-            onClick={() => onPageChange?.(currentPage - 1)}
-            disabled={currentPage <= 1}
-            className={`px-4 py-2 border border-[#D0D5DD] rounded-lg flex items-center gap-2 text-[#344054] font-semibold 
-              ${
-                currentPage <= 1
-                  ? "opacity-50 cursor-not-allowed"
-                  : "cursor-pointer"
-              }`}
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path
-                d="M12.5 15L7.5 10L12.5 5"
-                stroke="#667085"
-                strokeWidth="1.67"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Previous
-          </button>
+      {pagination && totalPages > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 bg-white border-t border-[#EAECF0]">
+          {/* Showing entries info */}
+          <div className="text-sm text-[#667085] mb-2 sm:mb-0">
+            Showing {startItem} to {endItem} of {totalItems} entries
+          </div>
 
-          {/* Page Numbers with Ellipsis */}
-          {/* <div className="flex items-center gap-1">
-            {pageItems.map((item, index) =>
-              typeof item === "number" ? (
-                <button
-                  key={index}
-                  onClick={() => onPageChange?.(item)}
-                  className={`w-6 h-6 flex items-center justify-center rounded-lg text-sm font-medium ${
-                    item === currentPage
-                      ? "bg-[#F9F5FF] text-[#7F56D9]"
-                      : "text-[#667085]"
-                  }`}
-                >
-                  {item}
-                </button>
-              ) : (
-                <span key={index} className="text-[#667085] mx-1">
-                  ...
-                </span>
-              )
-            )}
-          </div> */}
+          <div className="flex items-center gap-2">
+            {/* Previous Button */}
+            <button
+              onClick={() => onPageChange?.(currentPage - 1)}
+              disabled={currentPage <= 1}
+              className={`px-4 py-2 border border-[#D0D5DD] rounded-lg flex items-center gap-2 text-[#344054] font-semibold 
+                ${
+                  currentPage <= 1
+                    ? "opacity-50 cursor-not-allowed"
+                    : "cursor-pointer"
+                }`}
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path
+                  d="M12.5 15L7.5 10L12.5 5"
+                  stroke="#667085"
+                  strokeWidth="1.67"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Previous
+            </button>
 
-          {/* Next Button */}
-          <button
-            onClick={() => onPageChange?.(currentPage + 1)}
-            disabled={currentPage >= totalPages}
-            className={`px-4 py-2 border border-[#D0D5DD] rounded-lg flex items-center gap-2 text-[#344054] font-semibold 
-              ${
-                currentPage >= totalPages
-                  ? "opacity-50 cursor-not-allowed"
-                  : "cursor-pointer"
-              }`}
-          >
-            Next
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path
-                d="M7.5 5L12.5 10L7.5 15"
-                stroke="#667085"
-                strokeWidth="1.67"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
+            {/* Page Numbers with Ellipsis */}
+            <div className="hidden sm:flex items-center gap-1">
+              {getPageItems().map((item, index) =>
+                typeof item === "number" ? (
+                  <button
+                    key={index}
+                    onClick={() => onPageChange?.(item)}
+                    className={`w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium ${
+                      item === currentPage
+                        ? "bg-[#F9F5FF] text-[#7F56D9] border border-[#7F56D9]"
+                        : "text-[#667085] hover:bg-[#F9FAFB]"
+                    }`}
+                  >
+                    {item}
+                  </button>
+                ) : (
+                  <span key={item.toString()} className="text-[#667085] px-2">
+                    ...
+                  </span>
+                )
+              )}
+            </div>
+
+            {/* Current page indicator for mobile */}
+            <div className="sm:hidden text-sm font-medium text-[#667085]">
+              Page {currentPage} of {totalPages}
+            </div>
+
+            {/* Next Button */}
+            <button
+              onClick={() => onPageChange?.(currentPage + 1)}
+              disabled={currentPage >= totalPages}
+              className={`px-4 py-2 border border-[#D0D5DD] rounded-lg flex items-center gap-2 text-[#344054] font-semibold 
+                ${
+                  currentPage >= totalPages
+                    ? "opacity-50 cursor-not-allowed"
+                    : "cursor-pointer"
+                }`}
+            >
+              Next
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path
+                  d="M7.5 5L12.5 10L7.5 15"
+                  stroke="#667085"
+                  strokeWidth="1.67"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       )}
     </div>

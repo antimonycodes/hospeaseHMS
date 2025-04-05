@@ -33,6 +33,8 @@ import {
   ConsultantDetails,
   NurseDetails,
 } from "./pages";
+import DoctorPatientDetails from "./components/Doctor/DoctorPatientDetails";
+import DoctorAppointmentDetails from "./components/Doctor/appointment/DoctorAppointmentDetails";
 
 function App() {
   return (
@@ -50,6 +52,10 @@ function App() {
               <Route path="patients" element={<Patients />} />
               <Route path="patients/:id" element={<PatientDetails />} />
               <Route
+                path="doctor/patients/:id"
+                element={<DoctorPatientDetails />}
+              />
+              <Route
                 path="appointments/:patientId"
                 element={<AppointmentDetails />}
               />
@@ -61,6 +67,10 @@ function App() {
               <Route path="finance/info" element={<Finance />} />
               <Route path="laboratory/info" element={<Laboratory />} />
               <Route path="appointments" element={<Appointments />} />
+              <Route
+                path="appointment/doctor/:id"
+                element={<DoctorAppointmentDetails />}
+              />
               <Route path="nurses" element={<Nurses />} />
               <Route path="nurses/:id" element={<NurseDetails />} />
               <Route path="pharmacy/info" element={<Pharmacy />} />

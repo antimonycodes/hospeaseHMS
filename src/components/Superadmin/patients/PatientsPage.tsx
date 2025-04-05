@@ -6,6 +6,7 @@ import { Plus, Search } from "lucide-react";
 import AddPatientModal from "../../../Shared/AddPatientModal";
 // import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
+import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
 // import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
 
 const PatientsPage = () => {
@@ -27,7 +28,7 @@ const PatientsPage = () => {
     getPatientById,
     selectedPatient,
     isLoading,
-    // pagination,
+    pagination,
   } = usePatientStore();
 
   useEffect(() => {
@@ -60,6 +61,22 @@ const PatientsPage = () => {
               className="flex items-center gap-2 px-4"
             >
               Add new Patient
+              <Plus size={16} />
+            </Button>
+          </div>
+
+          <div
+            className={`w-full md:w-auto ${
+              activeTab === 0 ? "hidden" : "block"
+            }`}
+          >
+            <Button
+              variant="primary"
+              size="md"
+              onClick={handleOpenModal}
+              className="flex items-center gap-2 px-4"
+            >
+              Book new appointment
               <Plus size={16} />
             </Button>
           </div>
@@ -101,7 +118,7 @@ const PatientsPage = () => {
         {activeTab === 0 ? (
           <InformationTable
             patients={patients}
-            // pagination={pagination}
+            pagination={pagination}
             isLoading={isLoading}
           />
         ) : (
@@ -119,9 +136,9 @@ const PatientsPage = () => {
         />
       )}
 
-      {/* {openModal && modalType === "appointment" && (
+      {openModal && modalType === "appointment" && (
         <BookAppointmentModal onClose={() => setOpenModal(false)} />
-      )} */}
+      )}
     </div>
   );
 };

@@ -33,6 +33,12 @@ interface StatsStore {
     total_consultant: number;
   } | null;
   clinicalStats: any[] | null;
+  doctorStats: {
+    total_patient: number;
+    total_doctor: number;
+    total_appointment: number;
+    total_consultant: number;
+  } | null;
   getStats: (endpoint?: string) => Promise<void>;
   getClinicalStats: () => Promise<void>;
 }
@@ -42,12 +48,14 @@ export const useStatsStore = create<StatsStore>((set) => ({
   isLoading: false,
   stats: null,
   clinicalStats: null,
+  doctorStats: null,
 
   getStats: async (endpoint = "/admin/stats") => {
     set({ isLoading: true });
     try {
       const response: AxiosResponse = await api.get(endpoint);
       set({ stats: response.data.data });
+      set({ doctorStats: response.data });
     } catch (error: any) {
       toast.error(error.response.message);
     } finally {
