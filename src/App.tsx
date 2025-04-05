@@ -56,7 +56,6 @@ function App() {
                 path="doctor/patients/:id"
                 element={<DoctorPatientDetails />}
               />
-              <Route
               {/* <Route
                 path="appointments/:patientId"
                 element={<AppointmentDetails />}
