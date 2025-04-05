@@ -1,7 +1,10 @@
 import { JSX, useState } from "react";
-import Table from "../../../Shared/Table";
+
 import { useNavigate } from "react-router-dom";
 import Loader from "../../../Shared/Loader";
+import EditIcon from "../../../assets/EditIcon.png";
+import Table from "../../../Shared/Table";
+
 type FrondeskPatientData = {
   name: string;
   patientId: string;
@@ -10,11 +13,12 @@ type FrondeskPatientData = {
   phone: string;
   branch: string;
   occupation: string;
-  viewMore: string;
+  editpatients: string;
+  id: string; // Added 'id' to match the rowKey
 };
 
 type Columns = {
-  key: keyof FrondeskPatientData | "viewMore";
+  key: keyof FrondeskPatientData | "editpatients";
   label: string;
   render?: (value: any, patient: FrondeskPatientData) => JSX.Element;
 };
@@ -49,12 +53,12 @@ const FrontdeskInfo = ({ patients, isLoading }: FrondeskPatientDataProps) => {
     phone: patient.attributes.phone_number,
     branch: patient.attributes.branch,
     occupation: patient.attributes.occupation,
-    viewMore: "View More",
+    editpatients: "editpatients",
     id: patient.id,
   }));
   const handleViewMore = (id: string) => {
     console.log("Navigating to patient ID:", id);
-    navigate(`/dashboard/patients/${id}`);
+    navigate(` `);
   };
   if (isLoading) return <Loader />;
   const columns: Columns[] = [
@@ -101,14 +105,14 @@ const FrontdeskInfo = ({ patients, isLoading }: FrondeskPatientDataProps) => {
       ),
     },
     {
-      key: "viewMore",
+      key: "editpatients",
       label: "",
       render: (_, patient) => (
         <span
           className="text-primary text-sm font-medium cursor-pointer"
           onClick={() => handleViewMore(patient.patientId)}
         >
-          View More
+          <img src={EditIcon} alt="" />
         </span>
       ),
     },

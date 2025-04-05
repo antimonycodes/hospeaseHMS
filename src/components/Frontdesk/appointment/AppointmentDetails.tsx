@@ -1,6 +1,7 @@
 import { JSX } from "react";
 import { useNavigate } from "react-router-dom";
 import Table from "../../../Shared/Table";
+ 
 
 // Define the structure of appointment data from the API
 interface AppointmentFromAPI {

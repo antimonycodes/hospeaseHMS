@@ -1,117 +1,170 @@
 import { X } from "lucide-react";
-
-interface formDataData {
-  //   id: string;
-  item: string;
-  amount: string;
-  purchasedFrom: string;
-  purchasedBy: string;
-  paymentMethod: string;
-}
+import { useState } from "react";
+import { CreateExpenseData } from "../store/staff/useFinanceStore";
 
 interface AddExpenseModalProps {
   onClose: () => void;
-  formData: formDataData;
+  createExpense: (
+    data: CreateExpenseData,
+    endpoint?: string,
+    refreshEndpoint?: string
+  ) => Promise<boolean | null>;
+  isLoading: boolean;
+  endpoint: string;
 }
 
-const AddExpenseModal: React.FC<AddExpenseModalProps> = ({ onClose }) => {
+const AddExpenseModal = ({
+  onClose,
+  createExpense,
+  isLoading,
+  endpoint,
+}: AddExpenseModalProps) => {
+  const [expense, setExpense] = useState<CreateExpenseData>({
+    item: "",
+    amount: 0,
+    from: "",
+    by: "",
+    payment_method: "",
+  });
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setExpense((prev) => ({
+      ...prev,
+      [name]: name === "amount" ? parseFloat(value) || 0 : value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (
+      !expense.item ||
+      !expense.amount ||
+      !expense.from ||
+      !expense.by ||
+      !expense.payment_method
+    ) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    const success = await createExpense(
+      expense,
+      endpoint,
+      "/finance/all-expenses"
+    );
+    if (success) {
+      setExpense({
+        item: "",
+        amount: 0,
+        from: "",
+        by: "",
+        payment_method: "",
+      });
+      onClose();
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center z-50 p-6">
       <div className="bg-white rounded-lg p-12 w-full max-w-2xl">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-medium">Add New </h2>
-          <button onClick={onClose}>
-            <X />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-custom-black mb-1">
-              Item
-            </label>
-            <input
-              type="text"
-              name="item"
-              //   value={expenseForm.item}
-              className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
-            />
+        <form onSubmit={handleSubmit}>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-medium">Add New Expense</h2>
+            <button type="button" onClick={onClose}>
+              <X />
+            </button>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-custom-black mb-1">
-              Purchased from
-            </label>
-            <input
-              type="text"
-              name="purchasedFrom"
-              //   value={expenseForm.purchasedFrom}
-              className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
-            />
-          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-custom-black mb-1">
+                Item
+              </label>
+              <input
+                type="text"
+                name="item"
+                value={expense.item}
+                onChange={handleChange}
+                disabled={isLoading}
+                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-custom-black mb-1">
-              Amount
-            </label>
-            <input
-              type="text"
-              name="amount"
-              //   value={expenseForm.amount}
-              className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-custom-black mb-1">
+                Purchased from
+              </label>
+              <input
+                type="text"
+                name="from"
+                value={expense.from}
+                onChange={handleChange}
+                disabled={isLoading}
+                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-custom-black mb-1">
-              Purchased by
-            </label>
-            <input
-              type="text"
-              name="purchasedBy"
-              //   value={expenseForm.purchasedBy}
-              className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-custom-black mb-1">
+                Amount
+              </label>
+              <input
+                type="text"
+                name="amount"
+                value={expense.amount}
+                onChange={handleChange}
+                disabled={isLoading}
+                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
+              />
+            </div>
 
-          <div className="col-span-1">
-            <label className="block text-sm font-medium text-custom-black mb-1">
-              Payment Method
-            </label>
-            <div className="relative">
+            <div>
+              <label className="block text-sm font-medium text-custom-black mb-1">
+                Purchased by
+              </label>
+              <input
+                type="text"
+                name="by"
+                value={expense.by}
+                onChange={handleChange}
+                disabled={isLoading}
+                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-custom-black mb-1">
+                Payment Method
+              </label>
               <select
-                name="paymentMethod"
-                // value={formData.paymentMethod}
-                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm appearance-none"
+                name="payment_method"
+                value={expense.payment_method}
+                onChange={handleChange}
+                disabled={isLoading}
+                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
               >
-                <option value="Bank Transfer">Bank Transfer</option>
-                <option value="Cash">Cash</option>
-                <option value="Card">Card</option>
+                <option value="">Select Payment Method</option>
+                <option value="cash">Cash</option>
+                <option value="cheque">Cheque</option>
+                <option value="transfer">Transfer</option>
               </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 9l-7 7-7-7"
-                  ></path>
-                </svg>
-              </div>
             </div>
           </div>
-        </div>
 
-        <div className="mt-6">
-          <button className="bg-primary text-white px-4 py-2 rounded-md text-sm">
-            Add payment
-          </button>
-        </div>
+          <div className="mt-6">
+            <button
+              type="submit"
+              className="bg-primary text-white px-4 py-2 rounded-md text-sm"
+              disabled={isLoading}
+            >
+              {isLoading ? "Adding..." : "Add Expense"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

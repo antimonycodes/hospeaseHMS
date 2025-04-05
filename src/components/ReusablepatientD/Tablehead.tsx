@@ -9,11 +9,13 @@ interface TableheadProps {
   showControls?: boolean;
   showSearchBar?: boolean;
   showButton?: boolean;
+  typebutton: string;
   onButtonClick?: () => void;
 }
 
 const Tablehead: React.FC<TableheadProps> = ({
   tableTitle,
+  typebutton,
   tableCount,
   showControls = true,
   showSearchBar = true,
@@ -54,7 +56,8 @@ const Tablehead: React.FC<TableheadProps> = ({
                 className=" flex items-center gap-2  "
                 onClick={onButtonClick}
               >
-                Add New <Plus size={16} />
+                {typebutton}
+                <Plus size={16} />
               </Button>
             </div>
           )}

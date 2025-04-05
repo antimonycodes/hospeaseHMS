@@ -114,6 +114,7 @@ const MatronNurse = () => {
   return (
     <div>
       <Tablehead
+        typebutton="Add New"
         tableTitle="Nurses"
         showButton={true}
         showSearchBar={false}

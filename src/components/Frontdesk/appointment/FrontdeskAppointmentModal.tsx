@@ -1,4 +1,5 @@
 import { HiX } from "react-icons/hi";
+import SearchBar from "../../ReusablepatientD/SearchBar";
 
 interface Props {
   isOpen: any;
@@ -26,134 +27,10 @@ const FrontdeskAppointmentModal = ({ isOpen, onClose }: Props) => {
 
           {/* forms */}
           <form className="text-[#101928] text-sm mt-7">
-            {/* patients details */}
-            <div className="flex flex-col gap-[29px]">
-              {/* patient id / first name */}
-              <div className="grid gap-5 mmd:grid-cols-2">
-                {/* patient id */}
-                <div>
-                  <label className="font-medium" htmlFor="firstName">
-                    Patient ID
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      className="p-[16px] border border-[#D0D5DD] outline-primary w-full rounded-[6px] placeholder:text-[#98A2B3] text-[#98A2B3]"
-                      placeholder=""
-                    />
-                  </div>
-                </div>
-
-                {/* first name */}
-                <div>
-                  <label className="font-medium" htmlFor="firstName">
-                    First Name
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      className="p-[16px] border border-[#D0D5DD] outline-primary w-full rounded-[6px] placeholder:text-[#98A2B3] text-[#98A2B3]"
-                      placeholder=""
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* last name / gender */}
-              <div className="grid gap-5 mmd:grid-cols-2">
-                {/* last name */}
-                <div>
-                  <label className="font-medium" htmlFor="firstName">
-                    Last Name
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      className="p-[16px] border border-[#D0D5DD] outline-primary w-full rounded-[6px] placeholder:text-[#98A2B3] text-[#98A2B3]"
-                      placeholder=""
-                    />
-                  </div>
-                </div>
-
-                {/* gender */}
-                <div>
-                  <label className="font-medium" htmlFor="gender">
-                    Gender
-                  </label>
-                  <div className="mt-1">
-                    <select
-                      name=""
-                      id=""
-                      className="p-[16px] border border-[#D0D5DD] outline-primary w-full rounded-[6px] placeholder:text-[#98A2B3] text-[#98A2B3]"
-                    >
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* phone number / Ocuppation */}
-              <div className="grid gap-5 mmd:grid-cols-2">
-                {/* phone number */}
-                <div>
-                  <label className="font-medium" htmlFor="phoneNumber">
-                    Phone Number
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      className="p-[16px] border border-[#D0D5DD] outline-primary w-full rounded-[6px] placeholder:text-[#98A2B3] text-[#98A2B3]"
-                      placeholder=""
-                    />
-                  </div>
-                </div>
-
-                {/* occupation */}
-                <div>
-                  <label className="font-medium" htmlFor="occupation">
-                    Occupation
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      className="p-[16px] border border-[#D0D5DD] outline-primary w-full rounded-[6px] placeholder:text-[#98A2B3] text-[#98A2B3]"
-                      placeholder=""
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* religion / house address */}
-              <div className="grid gap-5 mmd:grid-cols-2">
-                {/* religion */}
-                <div>
-                  <label className="font-medium" htmlFor="religion">
-                    Religion
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      className="p-[16px] border border-[#D0D5DD] outline-primary w-full rounded-[6px] placeholder:text-[#98A2B3] text-[#98A2B3]"
-                      placeholder=""
-                    />
-                  </div>
-                </div>
-
-                {/* House Address */}
-                <div>
-                  <label className="font-medium" htmlFor="houseAddress">
-                    House Address
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      className="p-[16px] border border-[#D0D5DD] outline-primary w-full rounded-[6px] placeholder:text-[#98A2B3] text-[#98A2B3]"
-                      placeholder=""
-                    />
-                  </div>
-                </div>
-              </div>
+            <div>
+              <SearchBar />
+              {/* options from search */}
+              <div className=""></div>
             </div>
 
             {/* Appointment Booking Section */}

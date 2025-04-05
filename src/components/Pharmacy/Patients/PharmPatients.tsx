@@ -26,7 +26,11 @@ const PharmPatients = () => {
 
   return (
     <div>
-      <Tablehead tableTitle="Patients" tableCount={patients.length} />
+      <Tablehead
+        typebutton="Add New"
+        tableTitle="Patients"
+        tableCount={patients.length}
+      />
       <Tabs<"Pending" | "Completed">
         activeTab={activeTab}
         setActiveTab={setActiveTab}

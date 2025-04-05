@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import { patients } from "../../../data/patientsData";
 import Tabs from "../../ReusablepatientD/Tabs";
@@ -23,9 +23,16 @@ const NursePatients = () => {
   const statusCounts = getStatusCounts();
   const filteredPatients = patients.filter((p) => p.status === activeTab);
 
+  // useEffect(() => {
+  //   getAllNurses("");
+  // }, [getAllNurses]);
   return (
     <div>
-      <Tablehead tableTitle="Patients" tableCount={patients.length} />
+      <Tablehead
+        typebutton="Add New"
+        tableTitle="Patients"
+        tableCount={patients.length}
+      />
       <Tabs<"Pending" | "Completed">
         activeTab={activeTab}
         setActiveTab={setActiveTab}

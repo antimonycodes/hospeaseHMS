@@ -28,6 +28,7 @@ const FpatientsTable = () => {
         showButton={true}
         showControls={true}
         showSearchBar={true}
+        typebutton="Add New"
         onButtonClick={handleOpenModal}
       />
       <FrontdeskInfo patients={patients} isLoading={isLoading} />

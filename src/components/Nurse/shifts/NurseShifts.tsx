@@ -62,7 +62,7 @@ const NurseShifts = () => {
 
   return (
     <div>
-      <Tablehead tableTitle="Shifts" />
+      <Tablehead typebutton="Add New" tableTitle="Shifts" />
       <Table
         data={ShiftData}
         columns={columns}

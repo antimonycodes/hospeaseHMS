@@ -56,6 +56,7 @@ const FinanceCard = () => {
   return (
     <div>
       <Tablehead
+        typebutton="Add New"
         tableTitle="Recent Payments "
         showSearchBar={false}
         showControls={false}

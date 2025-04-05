@@ -61,6 +61,7 @@ const InventoryRequest = () => {
   return (
     <div>
       <Tablehead
+        typebutton="Add New"
         tableTitle="Requests"
         onButtonClick={openModal}
         showButton={true}

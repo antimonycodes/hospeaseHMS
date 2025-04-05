@@ -30,16 +30,16 @@ const FrondeskAppointmentTable = () => {
     if (!appointments || appointments.length === 0) {
       return { All: 0, Pending: 0, Accepted: 0, Declined: 0, Rescheduled: 0 };
     }
+
     return appointments.reduce(
       (acc, appointment) => {
         const status =
           appointment.attributes?.status?.toLowerCase() || "pending"; // Normalize case
 
-        if (
-          ["pending", "accepted", "declined", "rescheduled"].includes(status)
-        ) {
-          acc[status.charAt(0).toUpperCase() + status.slice(1)]++; // Convert "pending" to "Pending"
-        }
+        if (status === "pending") acc.Pending++;
+        else if (status === "accepted") acc.Accepted++;
+        else if (status === "declined") acc.Declined++;
+        else if (status === "rescheduled") acc.Rescheduled++;
 
         acc.All++; // Always increase the 'All' count
         return acc;
@@ -47,7 +47,6 @@ const FrondeskAppointmentTable = () => {
       { All: 0, Pending: 0, Accepted: 0, Declined: 0, Rescheduled: 0 }
     );
   };
-
   const statusCounts = getStatusCounts();
 
   // Functions to handle modal
@@ -79,6 +78,8 @@ const FrondeskAppointmentTable = () => {
         tableTitle="Appointments"
         showButton={true}
         showSearchBar={true}
+        typebutton="Book an Appointment"
+        tableCount={filteredAppointments.length}
         showControls={true}
         onButtonClick={openModal}
       />

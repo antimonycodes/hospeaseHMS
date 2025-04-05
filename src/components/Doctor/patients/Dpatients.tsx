@@ -13,6 +13,7 @@ const Dpatients = () => {
   return (
     <div className="w-full font-inter h-full bg-white rounded-[8px] shadow overflow-hidden">
       <Tablehead
+        typebutton="Add New"
         tableTitle="Patients"
         tableCount={patients.length}
         showSearchBar={true}

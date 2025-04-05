@@ -14,6 +14,7 @@ const InventoryStocks = () => {
       <Tablehead
         tableTitle="Stocks"
         showButton={true}
+        typebutton="Add New"
         onButtonClick={openModal}
       />
       {isModalOpen && (

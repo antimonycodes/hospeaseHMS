@@ -32,6 +32,7 @@ import {
   Staffs,
   ConsultantDetails,
   NurseDetails,
+  Expenses,
 } from "./pages";
 import DoctorPatientDetails from "./components/Doctor/DoctorPatientDetails";
 import DoctorAppointmentDetails from "./components/Doctor/appointment/DoctorAppointmentDetails";
@@ -56,14 +57,14 @@ function App() {
                 element={<DoctorPatientDetails />}
               />
               <Route
+              {/* <Route
                 path="appointments/:patientId"
                 element={<AppointmentDetails />}
-              />
+              /> */}
               <Route path="doctors" element={<Doctors />} />
               <Route path="doctors/:id" element={<DoctorDetails />} />
               <Route path="consultants" element={<Consultants />} />
               <Route path="consultants/:id" element={<ConsultantDetails />} />
-
               <Route path="finance/info" element={<Finance />} />
               <Route path="laboratory/info" element={<Laboratory />} />
               <Route path="appointments" element={<Appointments />} />
@@ -93,6 +94,7 @@ function App() {
               <Route path="inventory" element={<Inventory />} />
               <Route path="stock" element={<Stocks />} />
               <Route path="request" element={<Request />} />
+              <Route path="expenses" element={<Expenses />} />
               <Route path="branch" element={<Branch />} />
               <Route path="clinical-department" element={<ClinicalDept />} />
             </Route>
