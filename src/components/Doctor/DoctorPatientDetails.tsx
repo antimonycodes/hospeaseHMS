@@ -264,7 +264,7 @@ const DoctorPatientDetails = () => {
       <EditPatientModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        // patientData={patientData}
+        patientData={patient}
         // onSave={handleSavePatient}
       />
     </div>

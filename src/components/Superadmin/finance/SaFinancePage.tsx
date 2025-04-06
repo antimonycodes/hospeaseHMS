@@ -7,6 +7,7 @@ import PaymentTable from "./PaymentTable";
 import AddPaymentModal from "../../../Shared/AddPaymentModal";
 import AddExpenseModal from "../../../Shared/AddExpenseModal";
 import FinanceOverview from "./FinanceOverview";
+import { CreateExpenseData } from "../../../store/staff/useFinanceStore";
 
 // interface Expense {
 //   id: string;
@@ -127,7 +128,7 @@ const SaFinancePage: React.FC = () => {
         {openModal && modalType === "Payments" && (
           <AddPaymentModal
             onClose={() => setOpenModal(false)}
-            formData={paymentForm}
+            // formData={paymentForm}
           />
         )}
 
@@ -135,7 +136,15 @@ const SaFinancePage: React.FC = () => {
         {openModal && modalType === "Expenses" && (
           <AddExpenseModal
             onClose={() => setOpenModal(false)}
-            formData={expenseForm}
+            createExpense={function (
+              data: CreateExpenseData,
+              endpoint?: string,
+              refreshEndpoint?: string
+            ): Promise<boolean | null> {
+              throw new Error("Function not implemented.");
+            }}
+            isLoading={false}
+            endpoint={""} // formData={expenseForm}
           />
         )}
       </div>

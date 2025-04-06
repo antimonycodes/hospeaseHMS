@@ -6,7 +6,6 @@ import SaInventoryPage from "../components/Superadmin/Inventory/SaInventoryPage"
 const roleComponents: Record<string, JSX.Element> = {
   pharmacist: <PharmInventory />,
   admin: <SaInventoryPage />,
-  pharmacist: <PharmInventory />,
 
   //   doctor:  ,
   // frontdesk: ,
