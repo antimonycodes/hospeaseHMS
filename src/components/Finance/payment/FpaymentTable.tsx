@@ -1,5 +1,6 @@
 import { JSX } from "react";
 import Table from "../../../Shared/Table";
+import Loader from "../../../Shared/Loader";
 
 interface PaymentFromAPI {
   id: number;
@@ -106,7 +107,7 @@ const FpaymentTable = ({
     },
   ];
 
-  if (isLoading) return <div>Loading payments...</div>;
+  if (isLoading) return <Loader />;
   if (!formattedPayments.length) return <div>No payments found</div>;
 
   return (

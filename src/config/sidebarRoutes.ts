@@ -238,7 +238,7 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       activeIcon: getImageSrc("pharmacyWhite.svg"),
     },
   ],
-  inventory: [
+  "inventory-manager": [
     {
       name: "Overview",
       path: "/dashboard/overview",
@@ -296,6 +296,12 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       path: "/dashboard/patients",
       icon: getImageSrc("patientsicon.svg"),
       activeIcon: getImageSrc("patienticonsLight.svg"),
+    },
+    {
+      name: "Shifts",
+      path: "/dashboard/shifts",
+      icon: getImageSrc("pharmacyicon.svg"),
+      activeIcon: getImageSrc("pharmacyWhite.svg"),
     },
   ],
   consultant: [

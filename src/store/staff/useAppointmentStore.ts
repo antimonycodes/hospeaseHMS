@@ -22,6 +22,16 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// export interface NextOfKin {
+//   name: string;
+//   last_name: string;
+//   gender: string;
+//   phone: string;
+//   occupation: string;
+//   address: string;
+//   relationship: string;
+// }
+
 interface AppointmentStore {
   isLoading: boolean;
   appointments: any[];
@@ -56,10 +66,12 @@ export const useAppointmentStore = create<AppointmentStore>((set) => ({
     }
   },
 
-  getAppointmentById: async (id: string) => {
+  getAppointmentById: async (id) => {
     set({ isLoading: true });
     try {
-      const response = await api.get(`/appointments/${id}`);
+      const response = await api.get(
+        `/front-desk/appointment/all-records/${id}`
+      );
       set({ selectedAppointment: response.data.data });
     } catch (error: any) {
       toast.error(error.response.message);

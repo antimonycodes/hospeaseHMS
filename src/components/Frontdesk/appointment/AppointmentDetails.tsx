@@ -1,40 +1,17 @@
-import { JSX } from "react";
+import { JSX, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Table from "../../../Shared/Table";
- 
+import { useAppointmentStore } from "../../../store/staff/useAppointmentStore";
 
-// Define the structure of appointment data from the API
-interface AppointmentFromAPI {
-  id: number;
-  attributes: {
-    doctor: string;
-    status?: string;
-    rescheduled_data: string;
-    doctor_contact: string;
-    gender: string;
-    patient_contact: string;
-    occupation: string;
-    patient: string;
-    date: string;
-    reason_if_rejected_or_rescheduled: string;
-    assigned_by: string;
-    time: string;
-    created_at: string;
-  };
-}
-
-// Define the structure for the formatted data used in the table
 export type AppointmentData = {
   name: string;
   status?: string;
-
   gender: string;
   phone: string;
-
   occupation: string;
+  doctor: string;
   viewMore: string;
   id: number;
-  doctor: string;
 };
 
 type Columns = {
@@ -45,7 +22,24 @@ type Columns = {
 
 type AppointmentDetailsProps = {
   isLoading?: boolean;
-  appointments: AppointmentFromAPI[];
+  appointments: {
+    id: number;
+    attributes: {
+      doctor: string;
+      status?: string;
+      rescheduled_data: string | null;
+      doctor_contact: string;
+      gender: string;
+      patient_contact: string;
+      occupation: string;
+      patient: string;
+      date: string;
+      reason_if_rejected_or_rescheduled: string;
+      assigned_by: string;
+      time: string;
+      created_at: string;
+    };
+  }[];
 };
 
 const AppointmentDetails = ({
@@ -53,28 +47,26 @@ const AppointmentDetails = ({
   isLoading = false,
 }: AppointmentDetailsProps) => {
   const navigate = useNavigate();
+  const { getAllAppointments } = useAppointmentStore();
+  useEffect(() => {
+    getAllAppointments("/front-desk/appointment/all-records");
+  }, [getAllAppointments]);
 
-  // Handle case where appointments is undefined or not an array
-  const appointmentsArray = Array.isArray(appointments) ? appointments : [];
-
-  const formattedAppointments: AppointmentData[] = appointmentsArray.map(
+  const formattedAppointments: AppointmentData[] = appointments.map(
     (appointment) => ({
-      name: appointment.attributes?.patient || "",
-
-      gender: appointment.attributes?.gender || "",
-      phone: appointment.attributes?.patient_contact || "",
-      occupation: appointment.attributes?.occupation || "",
-      doctor: appointment.attributes?.doctor || "",
-      status: appointment.attributes?.status || "",
-
+      name: appointment.attributes.patient || "",
+      gender: appointment.attributes.gender || "",
+      phone: appointment.attributes.patient_contact || "",
+      occupation: appointment.attributes.occupation || "",
+      doctor: appointment.attributes.doctor || "",
+      status: appointment.attributes.status || "Pending",
       viewMore: "View More",
       id: appointment.id,
     })
   );
 
-  const handleViewMore = (id: string) => {
-    console.log("Navigating to patient ID:", id);
-    navigate(`/dashboard/patients/${id}`);
+  const handleViewMore = (id: number) => {
+    navigate(`/dashboard/appointment/frontdesk/${id}`);
   };
 
   const columns: Columns[] = [
@@ -85,7 +77,6 @@ const AppointmentDetails = ({
         <span className="font-medium text-[#101828]">{appointment.name}</span>
       ),
     },
-
     {
       key: "gender",
       label: "Gender",
@@ -127,6 +118,7 @@ const AppointmentDetails = ({
             textColor = "#B58A00";
             break;
           case "declined":
+          case "rejected": // Handle "rejected" status from API
             bgColor = "#FBE1E1";
             textColor = "#F83E41";
             break;
@@ -139,31 +131,27 @@ const AppointmentDetails = ({
             textColor = "#009952";
             break;
           default:
-            bgColor = "#E5E7EB"; // Default gray background
-            textColor = "#374151"; // Default gray text
+            bgColor = "#E5E7EB";
+            textColor = "#374151";
         }
 
         return (
           <span
             className="text-sm px-2 py-1 rounded-full"
-            style={{
-              backgroundColor: bgColor,
-              color: textColor,
-            }}
+            style={{ backgroundColor: bgColor, color: textColor }}
           >
             {appointment.status}
           </span>
         );
       },
     },
-
     {
       key: "viewMore",
       label: "",
       render: (_, appointment) => (
         <span
           className="text-primary text-sm font-medium cursor-pointer"
-          onClick={() => handleViewMore(appointment.id.toString())}
+          onClick={() => handleViewMore(appointment.id)}
         >
           View More
         </span>

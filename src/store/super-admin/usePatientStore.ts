@@ -23,7 +23,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-interface NextOfKin {
+export interface NextOfKin {
   name: string;
   last_name: string;
   gender: string;
@@ -79,12 +79,13 @@ interface PatientStore {
     refreshendpoint?: string
   ) => Promise<boolean | null>;
   getAllAppointments: (endpoint?: string) => Promise<void>;
-  bookAppointment: (data: BookAppointmentData) => Promise<any>;
+  bookAppointment: (
+    data: BookAppointmentData,
+    endpoint?: string
+  ) => Promise<boolean>; // Updated signature
   getAppointmentById: (id: string) => Promise<void>;
   searchPatients: (query: string) => Promise<any[]>;
-  // bookAppointment:(data:BookAppointment)
 }
-
 export const usePatientStore = create<PatientStore>((set, get) => ({
   isLoading: true,
   patients: [],
@@ -188,6 +189,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
+
   searchPatients: async (query: string) => {
     try {
       const response = await api.get(`/admin/patient/fetch?search=${query}`);
@@ -219,23 +221,29 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
-  bookAppointment: async (data) => {
+
+  bookAppointment: async (
+    data: BookAppointmentData,
+    endpoint = "/admin/appointment/assign"
+  ) => {
     set({ isLoading: true });
     try {
-      const response = await api.post("/admin/appointment/assign", data);
+      const response = await api.post(endpoint, data);
       if (response.status === 201) {
         console.log(response.data.message);
         toast.success(response.data.message);
-        await get().getAllAppointments();
+        await get().getAllAppointments("/front-desk/appointment/all-records"); // Refresh with front desk endpoint
         return true;
       }
-      return null;
+      return false;
     } catch (error: any) {
       console.error(error.response?.data);
       toast.error(
         error.response?.data?.message || "Failed to book appointment"
       );
-      return null;
+      return false;
+    } finally {
+      set({ isLoading: false });
     }
   },
   getAppointmentById: async (id) => {
@@ -253,6 +261,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
+
   // Book Appointment
   // bookAppointment: async (
   //   data,

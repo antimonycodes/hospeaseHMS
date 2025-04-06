@@ -9,7 +9,7 @@ interface TableheadProps {
   showControls?: boolean;
   showSearchBar?: boolean;
   showButton?: boolean;
-  typebutton: string;
+  typebutton?: string;
   onButtonClick?: () => void;
 }
 

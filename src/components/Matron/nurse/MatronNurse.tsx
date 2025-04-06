@@ -1,142 +1,77 @@
-import Tablehead from "../../ReusablepatientD/Tablehead";
-import Table from "../../../Shared/Table";
-import { nurses as nursesData } from "../../../data/nurseData";
-import AddNurseModal from "../../Superadmin/nurses/AddNurseModal";
-import { useState } from "react";
-import MatronNurseModal from "./MatronNurseModal";
+import { Plus } from "lucide-react";
+import Button from "../../../Shared/Button";
 
-interface Nurse {
-  name: string;
-  id: string;
-  phone: string;
-  email: string;
-  status: string;
-  picture: string;
-}
+import { useEffect, useState } from "react";
+import { useMatronNurse } from "./useMatronNurse";
+import AddNurseModal from "../../Superadmin/nurses/AddNurseModal";
+import MatronNurseTable from "./MatronNurseTable";
 
 const MatronNurse = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    nurseId: "",
+    first_name: "",
+    last_name: "",
+    nurse_id: "",
     email: "",
     phone: "",
     religion: "",
-    houseAddress: "",
-    password: "",
+    address: "",
+    dob: "",
   });
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+
+  useEffect(() => {
+    getNurses();
+  }, []);
+
+  const { isLoading, getNurses, nurses, createNurse } = useMatronNurse();
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
+    setFormData({
+      ...formData,
       [name]: value,
-    }));
+    });
   };
-
-  const handleViewMore = (nurse: Nurse) => {
-    console.log("View more clicked for:", nurse);
-  };
-
-  const columns: {
-    key: keyof Nurse;
-    label: string;
-    render: (value: string | number, row: Nurse) => React.ReactNode;
-  }[] = [
-    {
-      key: "name",
-      label: "Name",
-      render: (value, row) => (
-        <div className="flex items-center gap-2">
-          <img
-            src={row.picture}
-            alt="Nurse"
-            className="h-10 w-10 border rounded-full object-cover border-gray-300"
-          />
-          <span className="text-sm text-custom-black font-medium">{value}</span>
-        </div>
-      ),
-    },
-    {
-      key: "id",
-      label: "Nurse ID",
-      render: (value) => (
-        <span className="text-sm text-[#667085]">{value}</span>
-      ),
-    },
-    {
-      key: "phone",
-      label: "Phone",
-      render: (value) => (
-        <span className="text-sm text-[#667085]">{value}</span>
-      ),
-    },
-    {
-      key: "email",
-      label: "Email",
-      render: (value) => (
-        <span className="text-sm text-[#667085]">{value}</span>
-      ),
-    },
-    {
-      key: "status",
-      label: "Status",
-      render: (value) => (
-        <span
-          className={`py-1.5 px-2.5 rounded-full text-sm ${
-            value === "Available"
-              ? "text-[#F83E41] bg-[#FCE9E9]"
-              : "text-[#009952] bg-[#CCFFE7]"
-          }`}
-        >
-          {value}
-        </span>
-      ),
-    },
-    {
-      key: "id",
-      label: "Action",
-      render: (value, row) => (
-        <span
-          onClick={() => handleViewMore(row)}
-          className="text-[#009952] font-medium text-sm cursor-pointer"
-        >
-          View More
-        </span>
-      ),
-    },
-  ];
 
   return (
-    <div>
-      <Tablehead
-        typebutton="Add New"
-        tableTitle="Nurses"
-        showButton={true}
-        showSearchBar={false}
-        showControls={false}
-        onButtonClick={openModal}
-      />
-      {/* Add Nurse Modal */}
-      {isModalOpen && (
-        <MatronNurseModal
-          handleInputChange={handleInputChange}
-          onClose={closeModal}
+    <div className=" w-full rounded-lg custom-shadow bg-white p-4">
+      {/* header */}
+      <div className=" w-full flex items-center justify-between mb-8">
+        <div className="  flex items-center gap-3">
+          <h1 className="text-xl font-semibold text-gray-900">Nurses</h1>
+          <span className="bg-[#F9F5FF] py-1 px-4 rounded-full text-[#6941C6] font-medium">
+            {nurses.length}
+          </span>
+        </div>
+        {/* add button */}
+        <div className=" md:w-auto">
+          <Button
+            onClick={() => setShowModal(true)}
+            variant="primary"
+            size="md"
+            // onClick={handleOpenModal}
+            className="flex items-center gap-2 px-4"
+          >
+            Add new
+            <Plus size={16} />
+          </Button>
+        </div>
+      </div>
+
+      {/* table */}
+      <MatronNurseTable nurses={nurses} isLoading={isLoading} />
+
+      {/* Add Doctor Modal */}
+      {showModal && (
+        <AddNurseModal
           formData={formData}
+          handleInputChange={handleInputChange}
+          setShowModal={setShowModal}
+          createNurse={createNurse}
         />
       )}
-
-      <Table
-        data={nursesData}
-        columns={columns}
-        rowKey="id"
-        pagination={true}
-        rowsPerPage={10}
-      />
     </div>
   );
 };

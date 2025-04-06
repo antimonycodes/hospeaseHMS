@@ -1,7 +1,8 @@
 import { JSX, useEffect } from "react";
-import Tablehead from "../../ReusablepatientD/Tablehead";
-import Table from "../../../Shared/Table";
-import { usePatientStore } from "../../../store/super-admin/usePatientStore";
+
+import Table from "../../Shared/Table";
+import Tablehead from "../ReusablepatientD/Tablehead";
+import { usePatientStore } from "../../store/super-admin/usePatientStore";
 
 type PatientData = {
   name: string;
@@ -10,11 +11,12 @@ type PatientData = {
   phone: string;
   id: number;
 };
-const MatronCard = () => {
+
+const DoctorRecents = () => {
   const { patients, getAllPatients, isLoading } = usePatientStore();
 
   useEffect(() => {
-    getAllPatients("/matron/all-patients"); // Fetch the data
+    getAllPatients("/doctor/patient"); // Fetch the data
   }, [getAllPatients]);
 
   const formattedPatients: PatientData[] =
@@ -27,7 +29,6 @@ const MatronCard = () => {
     })) || [];
 
   const displayedPatients = formattedPatients.slice(0, 3);
-
   const columns: {
     key: keyof PatientData;
     label: string;
@@ -64,8 +65,9 @@ const MatronCard = () => {
       ),
     },
   ];
+
   return (
-    <div>
+    <div className="w-full h-full bg-white rounded-[8px] shadow overflow-hidden">
       <Tablehead
         tableTitle="Recent Patients"
         showSearchBar={false}
@@ -87,4 +89,4 @@ const MatronCard = () => {
   );
 };
 
-export default MatronCard;
+export default DoctorRecents;

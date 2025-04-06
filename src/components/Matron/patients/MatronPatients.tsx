@@ -1,42 +1,24 @@
-import React, { useState } from "react";
+import React, { JSX, useEffect } from "react";
 import Tablehead from "../../ReusablepatientD/Tablehead";
-import { patients } from "../../../data/patientsData";
-import Tabs from "../../ReusablepatientD/Tabs";
-
-import PatientTable from "../../ReusablepatientD/PatientTable";
-
-const getStatusCounts = () => {
-  return patients.reduce(
-    (acc: { Pending: number; Completed: number }, patient) => {
-      if (patient.status === "Pending" || patient.status === "Completed") {
-        acc[patient.status] = (acc[patient.status] || 0) + 1;
-      }
-      return acc;
-    },
-    { Pending: 0, Completed: 0 }
-  );
-};
+import MatronPatientTable from "./MatronPatientTable";
+import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 
 const MatronPatients = () => {
-  const [activeTab, setActiveTab] = useState<"Pending" | "Completed">(
-    "Pending"
-  );
-  const statusCounts = getStatusCounts();
-  const filteredPatients = patients.filter((p) => p.status === activeTab);
+  const { getAllPatients, patients, isLoading } = usePatientStore();
+
+  useEffect(() => {
+    getAllPatients("/matron/all-patients"); // Fetch patients from front-desk endpoint
+  }, [getAllPatients]);
+
   return (
     <div>
       <Tablehead
-        typebutton="Add New"
         tableTitle="Patients"
         tableCount={patients.length}
+        showControls={true}
+        showSearchBar={true}
       />
-      <Tabs<"Pending" | "Completed">
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        statusCounts={statusCounts}
-        tabs={["Pending", "Completed"]}
-      />
-      <PatientTable patients={filteredPatients} />
+      <MatronPatientTable patients={patients} isLoading={isLoading} />
     </div>
   );
 };
