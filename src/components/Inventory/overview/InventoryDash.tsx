@@ -5,10 +5,23 @@ import InventoryCard from "./InventoryCard";
 import patientIcon from "../../../assets/hugeicons.png";
 import { useInventoryStore } from "../overview/useInventoryStore"; // Verify path
 
+type InventoryStockData = {
+  name: string;
+  patientId: string;
+  age: number;
+  gender: string;
+  phone: string;
+  branch: string;
+  occupation: string;
+  editpatients: string;
+  id: string;
+};
+
 const InventoryDash = () => {
   const { stats, getInventoryStats, isLoading } = useInventoryStore();
 
   useEffect(() => {
+    console.log("Fetching stats...");
     getInventoryStats();
   }, [getInventoryStats]);
 
@@ -16,7 +29,7 @@ const InventoryDash = () => {
     ? [
         {
           title: "Total Inventories",
-          number: stats.total_inventories?.toString() || "0",
+          number: stats.total_inventories?.toString() ?? "0",
           icon: patientIcon,
           category: "lab",
         },
@@ -48,7 +61,7 @@ const InventoryDash = () => {
               cardTitle="Inventory Dashboard"
               category="inventory"
               limit={2}
-              data={InventoryStatsData} // Ensure this matches OverviewCard's prop
+              data={InventoryStatsData}
             />
             <InventoryChart />
             <InventoryCard />

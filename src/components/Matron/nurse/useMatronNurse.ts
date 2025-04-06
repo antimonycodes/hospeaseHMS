@@ -56,15 +56,28 @@ export interface NurseAttributes {
 
 // Patient interfaces
 export interface PatientAttributes {
-  id: number;
+  id?: number;
   first_name: string;
   last_name: string;
   card_id: string;
-  phone_number: string;
+  phone_number: string | null;
   occupation: string;
   gender: string;
   address: string;
-  patient_type: string;
+  age: number;
+  branch: string | null;
+  patient_type?: string;
+  hospital?: {
+    id: number;
+    name: string;
+    logo: string;
+  };
+  clinical_department?: {
+    id: number;
+    name: string;
+  };
+  next_of_kin: NextOfKin[];
+  created_at?: string;
 }
 export interface Patient {
   id: number;
@@ -176,10 +189,14 @@ export const useMatronNurse = create<MatronStore>((set, get) => ({
     set({ isLoading: true });
     try {
       const response = await api.get(`/matron/all-patients/${id}`);
-      console.log(response.data.data);
-      set({ selectedPatient: response.data.data }); // Store fetched doctor in state
+      console.log("API Response:", response.data); // Log full response
+      set({ selectedPatient: response.data.data });
+      console.log("Selected Patient Set:", response.data.data);
     } catch (error: any) {
-      console.error(error.response?.data);
+      console.error(
+        "Error fetching patient:",
+        error.response?.data || error.message
+      );
       toast.error(
         error.response?.data?.message || "Failed to fetch patient details"
       );
@@ -205,9 +222,14 @@ export const useMatronNurse = create<MatronStore>((set, get) => ({
   },
 
   createNurse: async (data: CreateNurseData) => {
-    set({ isLoading: true }); // Should be true when starting
+    set({ isLoading: true });
     try {
-      const response = await api.post("/admin/nurse/create", data);
+      // Transform empty string to null if needed by the API
+      const payload = {
+        ...data,
+        nurse_id: data.nurse_id === "" ? null : data.nurse_id,
+      };
+      const response = await api.post("/matron/nurse/create", payload);
       if (response.status === 201) {
         await get().getNurses();
         toast.success(response.data.message);
@@ -222,7 +244,6 @@ export const useMatronNurse = create<MatronStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
-
   // New function to fetch matron stats
   getMatronStats: async () => {
     set({ isLoading: true });
