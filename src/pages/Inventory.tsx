@@ -5,7 +5,7 @@ import PharmInventory from "../components/Pharmacy/Inventory/PharmInventory";
 import SaInventoryPage from "../components/Superadmin/Inventory/SaInventoryPage";
 const roleComponents: Record<string, JSX.Element> = {
   admin: <SaInventoryPage />,
-  pharmacy: <PharmInventory />,
+  pharmacist: <PharmInventory />,
 
   //   doctor:  ,
   // frontdesk: ,

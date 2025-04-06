@@ -36,6 +36,7 @@ import {
 } from "./pages";
 import DoctorPatientDetails from "./components/Doctor/DoctorPatientDetails";
 import DoctorAppointmentDetails from "./components/Doctor/appointment/DoctorAppointmentDetails";
+import StaffsDetail from "./components/Superadmin/Staffs/StaffsDetail";
 
 function App() {
   return (
@@ -86,6 +87,15 @@ function App() {
                 path="finance/staffs"
                 element={<Staffs department="finance" />}
               />
+              <Route
+                path="frontdesk/staffs"
+                element={<Staffs department="front-desk-manager" />}
+              />
+              <Route
+                path="inventory/staffs"
+                element={<Staffs department="inventory-manager" />}
+              />
+              <Route path="staff-detail/:id" element={<StaffsDetail />} />
               <Route path="users" element={<Users />} />
               <Route path="payment" element={<Payment />} />
               <Route path="profile" element={<Profile />} />

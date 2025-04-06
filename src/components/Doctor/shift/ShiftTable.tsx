@@ -1,6 +1,6 @@
-import React, { JSX } from "react";
+import React, { useEffect, useState, JSX } from "react";
 import Table from "../../../Shared/Table";
-import { ShiftData } from "../../../data/nurseData";
+import { useGlobalStore } from "../../../store/super-admin/useGlobal";
 
 interface ShiftItem {
   id: string;
@@ -9,53 +9,70 @@ interface ShiftItem {
   start: string;
   end: string;
   department: string;
-  selected?: boolean;
 }
 
 const ShiftTable = () => {
-  const [selectedItems, setSelectedItems] = React.useState<string[]>([]);
+  const userId = sessionStorage.getItem("userId");
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const { getStaffShifts, staffShift } = useGlobalStore();
 
-  // Toggle selection for a single item
+  useEffect(() => {
+    if (userId) {
+      getStaffShifts(userId, `/doctor/my-shifts/${userId}`);
+    }
+  }, [getStaffShifts, userId]);
+
+  // Convert API data to table structure
+  const mappedShifts: ShiftItem[] = (staffShift || []).map((shift: any) => ({
+    id: String(shift.id),
+    day: shift.attributes.date,
+    shift: shift.attributes.shift_type,
+    start: shift.attributes.start_time,
+    end: shift.attributes.end_time,
+    department: shift.attributes.status,
+  }));
+
+  // Toggle selection for one
   const toggleItemSelection = (id: string) => {
     setSelectedItems((prev) =>
       prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id]
     );
   };
 
-  // Toggle selection for all items
+  // Toggle all
   const toggleAllSelection = () => {
-    if (selectedItems.length === ShiftData.length) {
+    if (selectedItems.length === mappedShifts.length) {
       setSelectedItems([]);
     } else {
-      setSelectedItems(ShiftData.map((item) => item.id));
+      setSelectedItems(mappedShifts.map((item) => item.id));
     }
   };
 
   const ShiftColumns: {
-    key: keyof ShiftItem | "selected";
-    label: string | JSX.Element;
-    render: (value: any, row: ShiftItem) => JSX.Element;
+    key: keyof ShiftItem;
+    label: React.ReactNode;
+    render: (_: any, row: ShiftItem) => JSX.Element;
   }[] = [
     {
-      key: "selected",
+      key: "day", // using 'day' as key since it's a real field
       label: (
         <div className="flex items-center gap-2">
           <div
             onClick={toggleAllSelection}
             className={`h-[20px] w-[20px] rounded-[6px] border border-[#D0D5DD] flex items-center justify-center cursor-pointer ${
-              selectedItems.length === ShiftData.length && ShiftData.length > 0
+              selectedItems.length === mappedShifts.length &&
+              mappedShifts.length > 0
                 ? "bg-[#7F56D9] border-[#7F56D9]"
                 : "bg-white"
             }`}
           >
-            {selectedItems.length === ShiftData.length &&
-              ShiftData.length > 0 && (
+            {selectedItems.length === mappedShifts.length &&
+              mappedShifts.length > 0 && (
                 <svg
                   className="w-3 h-3 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
                     strokeLinecap="round"
@@ -85,7 +102,6 @@ const ShiftTable = () => {
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
               >
                 <path
                   strokeLinecap="round"
@@ -102,22 +118,29 @@ const ShiftTable = () => {
     },
     {
       key: "shift",
-      label: "Shift Time",
-      render: (_, data) => (
+      label: "Shift Type",
+      render: (_: any, data: ShiftItem) => (
         <span className="text-[#667085] text-sm">{data.shift}</span>
+      ),
+    },
+    {
+      key: "start",
+      label: "Start Time",
+      render: (_: any, data: ShiftItem) => (
+        <span className="text-[#667085] text-sm">{data.start}</span>
       ),
     },
     {
       key: "end",
       label: "End Time",
-      render: (_, data) => (
+      render: (_: any, data: ShiftItem) => (
         <span className="text-[#667085] text-sm">{data.end}</span>
       ),
     },
     {
       key: "department",
-      label: "Department",
-      render: (_, data) => (
+      label: "Status",
+      render: (_: any, data: ShiftItem) => (
         <span className="text-[#667085] text-sm">{data.department}</span>
       ),
     },
@@ -130,7 +153,7 @@ const ShiftTable = () => {
       </div>
       <Table
         columns={ShiftColumns}
-        data={ShiftData}
+        data={mappedShifts}
         rowKey="id"
         pagination={true}
         rowsPerPage={10}

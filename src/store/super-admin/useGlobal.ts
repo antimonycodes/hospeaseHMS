@@ -69,25 +69,55 @@ export interface CreateStaff {
   email: string;
   department_id?: number;
   role?: string;
-  name: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+}
+
+export interface AssignShift {
+  user_id: number;
+  shifts: ShiftData[];
+}
+
+export interface ShiftData {
+  date: string;
+  shift_type: string;
+  start_time: string;
+  end_time: string;
+  department_id: number;
 }
 
 interface Globalstore {
   isLoading: boolean;
+  isStaffLoading: boolean;
   branches: Branch[];
   clinicaldepts: Clinicaldept[];
+  staffs: any[];
+  selectedStaff: any | null;
+  staffShift: any[];
+  setSelectedStaff: (staff: any) => void;
   togglestatus: (data: Togglestatus) => Promise<any>;
   getBranches: () => Promise<any>;
   createBranch: (data: CreateBranchData) => Promise<any>;
   getClinicaldept: () => Promise<any>;
   createClinicaldept: (data: CreateClinicaldeptData) => Promise<any>;
-  createStaff: (data: CreateStaff) => Promise<any>;
+  createStaff: (data: CreateStaff, role: string) => Promise<any>;
+  getDeptStaffs: (data: string) => Promise<any>;
+  assignShifts: (data: AssignShift) => Promise<any>;
+  getStaffShifts: (id: any, endpoint: string) => Promise<any>;
+  updateShift: (id: any, data: any) => Promise<any>;
+  deleteShift: (id: any) => Promise<any>;
 }
 
 export const useGlobalStore = create<Globalstore>((set, get) => ({
   isLoading: false,
   branches: [],
   clinicaldepts: [],
+  staffs: [],
+  isStaffLoading: false,
+  selectedStaff: null,
+  staffShift: [],
+  setSelectedStaff: (staff) => set({ selectedStaff: staff }),
 
   togglestatus: async (data) => {
     set({ isLoading: true });
@@ -144,7 +174,6 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
     try {
       const response = await api.post("/admin/branches/create", data);
       if (response.status === 201) {
-        // Return the new status to confirm it was updated on server
         toast.success(response.data.message);
         await get().getBranches();
         return true;
@@ -217,12 +246,13 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       set({ isLoading: false });
     }
   },
-  createStaff: async (data) => {
+  createStaff: async (data, role) => {
     set({ isLoading: true });
     try {
       const response = await api.post("/admin/department/head-dept", data);
       if (response.status === 201) {
         toast.success(response.data.message);
+        await get().getDeptStaffs(role);
         return true;
       }
       console.log(response.data.message);
@@ -235,12 +265,16 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       set({ isLoading: false });
     }
   },
-  getDeptStaffs: async (id: number) => {
-    set({ isLoading: true });
+  getDeptStaffs: async (role) => {
+    set({ isStaffLoading: true });
     try {
-      const response = await api.get(`/admin/department/get-user-dept/${id}`);
+      const response = await api.post("/admin/department/get-users-dept", {
+        role,
+      });
       if (response.status === 200) {
-        toast.success(response.data.message);
+        // toast.success(response.data.message);
+        set({ staffs: response.data.data.data });
+        // console.log(response.data.data.data, "staffs");
         return response.data.data;
       }
       console.log(response.data.message);
@@ -249,6 +283,71 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       console.error(error.response?.data);
       toast.error(error.response.data.message);
       return null;
+    } finally {
+      set({ isStaffLoading: false });
+    }
+  },
+  assignShifts: async (data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.post("/admin/shift/assign", data);
+      if (response.status === 201) {
+        toast.success(response.data.message);
+        console.log(response.data.message);
+        return true;
+      }
+      return null;
+    } catch (error: any) {
+      console.error(error.response?.data);
+      toast.error(error.response.message);
+      return null;
+    }
+  },
+  getStaffShifts: async (id, endpoint = `/admin/shift/user-records/${id}`) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(endpoint);
+      if (response.status === 200) {
+        set({ staffShift: response.data.data.data });
+        toast.success(response.data.message);
+        console.log(response.data.data.data);
+        return true;
+      }
+    } catch (error: any) {
+      toast.error(error.response?.message);
+      console.log(error.response.message);
+      return null;
+    } finally {
+      set({ isLoading: false });
+      return null;
+    }
+  },
+  updateShift: async (id, data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.put(`/admin/shift/update/${id}`, data);
+      if (response.status === 200) {
+        toast.success(response.data.message);
+        console.log(response.data.message);
+        return true;
+      }
+    } catch (error: any) {
+      console.error(error.response?.data);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  deleteShift: async (id) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.delete(`/admin/shift/delete/${id}`);
+      if (response.status === 200) {
+        toast.success(response.data.message);
+        console.log(response.data.message);
+        return true;
+      }
+    } catch (error: any) {
+      console.error(error.response?.data);
     } finally {
       set({ isLoading: false });
     }

@@ -22,10 +22,15 @@ const InfoRow = ({
 
 const DoctorAppointmentDetails = () => {
   const { id } = useParams<{ id: string }>();
-  const { selectedAppointment, getAppointmentById } = usePatientStore();
+  const { selectedAppointment, getAppointmentById, manageAppointment } =
+    usePatientStore();
   const [isLoading, setIsLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
+  const [reason, setReason] = useState("");
   const [showRescheduleForm, setShowRescheduleForm] = useState(false);
+  const [showDeclineForm, setShowDeclineForm] = useState(false);
 
   const timeOptions = generateTimeOptions();
 
@@ -40,6 +45,85 @@ const DoctorAppointmentDetails = () => {
     }
   }, [id, getAppointmentById]);
 
+  // Handle approval directly without reason
+  const handleApprove = async () => {
+    if (!id) return;
+    setActionLoading(true);
+
+    try {
+      await manageAppointment(id, { status: "accepted" });
+    } catch (error) {
+      console.error("Error approving appointment:", error);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Handle decline with reason
+  const handleDecline = async () => {
+    if (!id || !reason) return;
+    setActionLoading(true);
+
+    try {
+      const result = await manageAppointment(id, {
+        status: "rejected",
+        reason: reason,
+      });
+
+      if (result) {
+        setReason("");
+        setShowDeclineForm(false);
+      }
+    } catch (error) {
+      console.error("Error declining appointment:", error);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Handle reschedule
+  const handleReschedule = async () => {
+    if (!id || !selectedDate || !selectedTime) return;
+    setActionLoading(true);
+
+    try {
+      const result = await manageAppointment(id, {
+        status: "reschedule",
+        reason: reason || undefined,
+        reschedule_data: {
+          date: selectedDate,
+          time: selectedTime,
+        },
+      });
+
+      if (result) {
+        setSelectedDate("");
+        setSelectedTime("");
+        setReason("");
+        setShowRescheduleForm(false);
+      }
+    } catch (error) {
+      console.error("Error rescheduling appointment:", error);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Toggle form displays - ensure only one is shown at a time
+  const toggleDeclineForm = () => {
+    setShowDeclineForm(!showDeclineForm);
+    if (!showDeclineForm) {
+      setShowRescheduleForm(false);
+    }
+  };
+
+  const toggleRescheduleForm = () => {
+    setShowRescheduleForm(!showRescheduleForm);
+    if (!showRescheduleForm) {
+      setShowDeclineForm(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -50,6 +134,7 @@ const DoctorAppointmentDetails = () => {
 
   const attributes = selectedAppointment.attributes || {};
   const patient = attributes.patient?.attributes || {};
+  const status = selectedAppointment.attributes.status || {};
   const doctor = attributes.doctor?.attributes || {};
   const nextOfKin =
     patient.next_of_kin && patient.next_of_kin.length > 0
@@ -58,6 +143,8 @@ const DoctorAppointmentDetails = () => {
 
   const formattedDate = formatDate(attributes.date);
   const formattedTime = formatTime(attributes.time);
+
+  console.log(selectedAppointment.attributes.status, "selectedAppointment");
 
   return (
     <div className="">
@@ -114,60 +201,120 @@ const DoctorAppointmentDetails = () => {
       </div>
 
       {/* Appointment Details */}
-      <div className="bg-white rounded-lg shadow-sm p-6 text-[#667085]">
-        <h3 className="font-semibold mb-4">Appointment Details</h3>
-        <div className="mb-4">
-          <p className="mb-1">Date: {formattedDate}</p>
-          <p>Time: {formattedTime}</p>
-        </div>
+      {status !== "accepted" && (
+        <div className="bg-white rounded-lg shadow-sm p-6 text-[#667085]">
+          <h3 className="font-semibold mb-4">Appointment Details</h3>
+          <div className="mb-4">
+            <p className="mb-1">Date: {formattedDate}</p>
+            <p>Time: {formattedTime}</p>
+          </div>
 
-        <div className="flex flex-wrap gap-3 mb-6">
-          <button className="bg-primary text-white px-6 py-2 rounded-lg">
-            Approve
-          </button>
-          <button className="bg-[#B20003] text-white px-6 py-2 rounded-lg">
-            Decline
-          </button>
-          <button
-            className="text-primary border border-primary px-6 py-2 rounded-lg"
-            onClick={() => setShowRescheduleForm(!showRescheduleForm)}
-          >
-            {showRescheduleForm
-              ? "Cancel Reschedule"
-              : "Reschedule Appointment"}
-          </button>
-        </div>
-
-        {/* Reschedule Form */}
-        {showRescheduleForm && (
-          <div className="w-full max-w-sm space-y-4">
-            <div>
-              <label className="block mb-1 font-medium">Preferred Date</label>
-              <input type="date" className="w-full border rounded px-4 py-2" />
-            </div>
-            <div>
-              <label className="block mb-1 font-medium">Preferred Time</label>
-              <select
-                className="w-full border rounded px-4 py-2"
-                value={selectedTime}
-                onChange={(e) => setSelectedTime(e.target.value)}
-              >
-                <option value="" disabled>
-                  -- Select Time --
-                </option>
-                {timeOptions.map((time, index) => (
-                  <option key={index} value={time}>
-                    {time}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <button className="mt-4 bg-primary text-white px-6 py-2 rounded-lg">
-              Submit Reschedule
+          <div className="flex flex-wrap gap-3 mb-6">
+            <button
+              className="bg-primary text-white px-6 py-2 rounded-lg"
+              onClick={handleApprove}
+              disabled={actionLoading}
+            >
+              {actionLoading ? "Processing..." : "Approve"}
+            </button>
+            <button
+              className="bg-[#B20003] text-white px-6 py-2 rounded-lg"
+              onClick={toggleDeclineForm}
+              disabled={actionLoading}
+            >
+              {showDeclineForm ? "Cancel Decline" : "Decline"}
+            </button>
+            <button
+              className="text-primary border border-primary px-6 py-2 rounded-lg"
+              onClick={toggleRescheduleForm}
+              disabled={actionLoading}
+            >
+              {showRescheduleForm
+                ? "Cancel Reschedule"
+                : "Reschedule Appointment"}
             </button>
           </div>
-        )}
-      </div>
+
+          {/* Decline Form */}
+          {showDeclineForm && (
+            <div className="w-full max-w-sm space-y-4 mb-6">
+              <div>
+                <label className="block mb-1 font-medium">
+                  Reason for Declining
+                </label>
+                <textarea
+                  className="w-full border rounded px-4 py-2"
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  placeholder="Provide a reason for declining"
+                  rows={3}
+                  required
+                />
+              </div>
+              <button
+                className="bg-[#B20003] text-white px-6 py-2 rounded-lg"
+                onClick={handleDecline}
+                disabled={actionLoading || !reason}
+              >
+                {actionLoading ? "Processing..." : "Submit Decline"}
+              </button>
+            </div>
+          )}
+
+          {/* Reschedule Form */}
+          {showRescheduleForm && (
+            <div className="w-full max-w-sm space-y-4">
+              <div>
+                <label className="block mb-1 font-medium">Preferred Date</label>
+                <input
+                  type="date"
+                  className="w-full border rounded px-4 py-2"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block mb-1 font-medium">Preferred Time</label>
+                <select
+                  className="w-full border rounded px-4 py-2"
+                  value={selectedTime}
+                  onChange={(e) => setSelectedTime(e.target.value)}
+                  required
+                >
+                  <option value="" disabled>
+                    -- Select Time --
+                  </option>
+                  {timeOptions.map((time, index) => (
+                    <option key={index} value={time}>
+                      {time}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block mb-1 font-medium">
+                  Reason (Optional)
+                </label>
+                <textarea
+                  className="w-full border rounded px-4 py-2"
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  placeholder="Provide a reason for rescheduling"
+                  rows={3}
+                />
+              </div>
+              <button
+                className="mt-4 bg-primary text-white px-6 py-2 rounded-lg"
+                onClick={handleReschedule}
+                disabled={actionLoading || !selectedDate || !selectedTime}
+              >
+                {actionLoading ? "Processing..." : "Submit Reschedule"}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

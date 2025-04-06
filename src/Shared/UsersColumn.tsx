@@ -1,6 +1,7 @@
 import { JSX } from "react";
 
 interface Patient {
+  id: any;
   name: string;
   patientId: string;
   gender: string;
@@ -21,7 +22,7 @@ const statusStyles: Record<NonNullable<Patient["status"]>, string> = {
   Accepted: "bg-[#CFFFE9] text-[#009952]",
   Declined: "bg-[#FBE1E1] text-[#F83E41]",
   Rescheduled: "bg-[#BED4FF] text-[#101828]",
-  Completed: "bg-[#BED4FF] text-[#101828]", // Add styles for "Completed" if needed
+  Completed: "bg-[#BED4FF] text-[#101828]",
 };
 
 export const getUserColumns = (

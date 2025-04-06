@@ -1,11 +1,19 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import { patients } from "../../../data/patientsData";
 import Tabs from "../../ReusablepatientD/Tabs";
 
 import PatientTable from "../../ReusablepatientD/PatientTable";
+import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 
 const getStatusCounts = () => {
+  // const { getAllPatients, patients } = usePatientStore();
+
+  // useEffect(() => {
+  //   getAllPatients("pharmacy/patient/all");
+  // }, []);
+
+  console.log(patients, "pharmacy");
   return patients.reduce(
     (acc: { Pending: number; Completed: number }, patient) => {
       if (patient.status === "Pending" || patient.status === "Completed") {

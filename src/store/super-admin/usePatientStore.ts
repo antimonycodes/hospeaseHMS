@@ -1,4 +1,3 @@
-// // usePatientStore.ts
 import { create } from "zustand";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -81,6 +80,7 @@ interface PatientStore {
   getAllAppointments: (endpoint?: string) => Promise<void>;
   bookAppointment: (data: BookAppointmentData) => Promise<any>;
   getAppointmentById: (id: string) => Promise<void>;
+  manageAppointment: (id: string, data: any) => Promise<any>;
   searchPatients: (query: string) => Promise<any[]>;
   // bookAppointment:(data:BookAppointment)
 }
@@ -253,32 +253,27 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
-  // Book Appointment
-  // bookAppointment: async (
-  //   data,
-  //   endpoint = "/front-desk/appointment/book",
-  //   refreshendpoint
-  // ) => {
-  //   set({ isLoading: true });
-  //   try {
-  //     const payload = {
-  //       ...data,
-  //       branch_id: data.branch_id ?? null,
-  //     };
-  //     const response = await api.post(endpoint, payload);
-  //     if (response.status === 201) {
-  //       // Refresh the doctors list after creation
-  //       await get().getAllAppointments(refreshendpoint);
-  //       toast.success(response.data.message);
-  //       return true;
-  //     }
-  //     return null;
-  //   } catch (error: any) {
-  //     console.error(error.response?.data);
-  //     toast.error(error.response?.data?.message || "Failed to add patient");
-  //     return null;
-  //   } finally {
-  //     set({ isLoading: false });
-  //   }
-  // },
+  manageAppointment: async (id, data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.patch(
+        `/doctor/manage-appointment/${id}`,
+        data
+      );
+      if (response.status === 200) {
+        toast.success(response.data.message);
+        await get().getAllAppointments();
+        return true;
+      }
+      return null;
+    } catch (error: any) {
+      console.error(error.response?.data);
+      toast.error(
+        error.response?.data?.message || "Failed to manage appointment"
+      );
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 }));

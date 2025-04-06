@@ -1,15 +1,19 @@
 import { X } from "lucide-react";
 import Button from "../../../Shared/Button";
+import { CreateStaff } from "../../../store/super-admin/useGlobal";
 
 interface AddStaffModalProps {
   formData: {
-    name: string;
     email: string;
+    phone: string;
+    last_name: string;
+    first_name: string;
   };
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   setShowModal: (value: boolean) => void;
   isLoading: boolean;
-  createStaff: (data: any) => Promise<void>;
+  createStaff: (data: CreateStaff, department: string) => Promise<any>;
+
   department?: any;
 }
 
@@ -27,6 +31,8 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({
       laboratory: { id: 5, role: "laboratory" },
       pharmacy: { id: 7, role: "pharmacist" },
       finance: { id: 11, role: "finance" },
+      "front-desk-manager": { id: 8, role: "front-desk-manager" },
+      "inventory-manager": { id: 13, role: "inventory-manager" },
     };
 
     return departmentMapping[dept.toLowerCase()] || { id: 0, role: "staff" };
@@ -45,7 +51,7 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({
 
     console.log(newStaffData);
 
-    await createStaff(newStaffData);
+    await createStaff(newStaffData, role);
     setShowModal(false);
   };
 
@@ -67,16 +73,34 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({
               {/* Full Name */}
               <div>
                 <label
-                  htmlFor="name"
+                  htmlFor="last_name"
                   className="block text-sm font-medium text-custom-black mb-1"
                 >
-                  Full Name
+                  Last Name
                 </label>
                 <input
                   type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
+                  id="last_name"
+                  name="last_name"
+                  value={formData.last_name}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-4 border border-[#D0D5DD] placeholder:text-[#98A2B3] rounded-md"
+                  placeholder="John Doe"
+                  required
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="first_name"
+                  className="block text-sm font-medium text-custom-black mb-1"
+                >
+                  First Name
+                </label>
+                <input
+                  type="text"
+                  id="first_name"
+                  name="first_name"
+                  value={formData.first_name}
                   onChange={handleInputChange}
                   className="w-full px-3 py-4 border border-[#D0D5DD] placeholder:text-[#98A2B3] rounded-md"
                   placeholder="John Doe"
@@ -100,6 +124,24 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({
                   onChange={handleInputChange}
                   className="w-full px-3 py-4 border border-[#D0D5DD] placeholder:text-[#98A2B3] rounded-md"
                   placeholder="johndoe@example.com"
+                  required
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="phone"
+                  className="block text-sm font-medium text-custom-black mb-1"
+                >
+                  Phone
+                </label>
+                <input
+                  type="text"
+                  id="phone"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-4 border border-[#D0D5DD] placeholder:text-[#98A2B3] rounded-md"
+                  placeholder="+234 123 456 7890"
                   required
                 />
               </div>

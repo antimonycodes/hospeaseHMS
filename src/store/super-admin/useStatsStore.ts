@@ -38,9 +38,18 @@ interface StatsStore {
     total_doctor: number;
     total_appointment: number;
     total_consultant: number;
+    graph_appointment_representation?: Record<string, number>;
   } | null;
+  incomeStats: {
+    monthly_earnings: string[]; // Adjust this to match your actual data format
+  };
+  expenseStats: {
+    monthly_earnings: string[]; // Adjust this to match your actual data format
+  };
   getStats: (endpoint?: string) => Promise<void>;
   getClinicalStats: () => Promise<void>;
+  getIncomeStats: () => Promise<any>;
+  getExpenseStats: () => Promise<any>;
 }
 
 // Zustand store
@@ -49,6 +58,8 @@ export const useStatsStore = create<StatsStore>((set) => ({
   stats: null,
   clinicalStats: null,
   doctorStats: null,
+  incomeStats: { monthly_earnings: [] },
+  expenseStats: { monthly_earnings: [] },
 
   getStats: async (endpoint = "/admin/stats") => {
     set({ isLoading: true });
@@ -73,6 +84,46 @@ export const useStatsStore = create<StatsStore>((set) => ({
     } catch (error: any) {
       console.error(error);
       toast.error("Error fetching stats");
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  getIncomeStats: async () => {
+    set({ isLoading: true });
+    try {
+      const response: AxiosResponse = await api.get(
+        "/admin/finances/income-graphical-representation"
+      );
+      if (response.status === 201) {
+        set({ incomeStats: response.data.data });
+        console.log(response.data.data.monthly_earnings, "fghjk");
+        return true;
+      }
+      return null;
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.response.message);
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  getExpenseStats: async () => {
+    set({ isLoading: true });
+    try {
+      const response: AxiosResponse = await api.get(
+        "/admin/finances/expenses-graphical-representation"
+      );
+      if (response.status === 201) {
+        set({ expenseStats: response.data.data });
+        console.log(response.data.data);
+        return true;
+      }
+      return null;
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.response.message);
+      return null;
     } finally {
       set({ isLoading: false });
     }

@@ -217,15 +217,27 @@ const DoctorsTable = ({
   doctors: Doctor[];
   isLoading: boolean;
 }) => {
+  const [transformedDoctors, setTransformedDoctors] = useState<
+    DoctorAttributes[]
+  >([]);
   const navigate = useNavigate();
   const { togglestatus } = useGlobalStore();
 
   // Use useMemo to avoid unnecessary re-calculations
-  const formattedDoctors = useMemo(() => {
-    return doctors.map((doc) => ({
-      ...doc.attributes,
-      id: doc.id,
-    }));
+  // const formattedDoctors = useMemo(() => {
+  //   return doctors.map((doc) => ({
+  //     ...doc.attributes,
+  //     id: doc.id,
+  //   }));
+  // }, [doctors, togglestatus]);
+
+  useMemo(() => {
+    setTransformedDoctors(
+      doctors.map((doc) => ({
+        ...doc.attributes,
+        id: doc.id,
+      }))
+    );
   }, [doctors]);
 
   if (isLoading) return <Loader />;
@@ -333,21 +345,21 @@ const DoctorsTable = ({
   const handleToggleStatus = async (doc: DoctorAttributes) => {
     const newStatus = !doc.is_active;
 
-    try {
-      // API call first, then update UI only if successful
-      const serverStatus = await togglestatus({
-        is_active: newStatus,
-        user_id: doc.user_id,
-      });
+    setTransformedDoctors((prev) =>
+      prev.map((d) => (d.id == doc.id ? { ...d, is_active: newStatus } : d))
+    );
 
-      // Only update UI if API call succeeded
-      if (serverStatus !== null) {
-        // No need to set state as the parent component should handle refreshing the data
-        // The parent component should be responsible for refreshing the doctors list
-      }
-    } catch (error) {
-      console.error("Failed to update doctor status:", error);
-      // Handle error (maybe show toast notification)
+    const serverStatus = await togglestatus({
+      is_active: newStatus,
+      user_id: doc.user_id,
+    });
+
+    if (serverStatus === null) {
+      setTransformedDoctors((prev) =>
+        prev.map((n) =>
+          doc.id === doc.id ? { ...doc, is_active: doc.is_active } : n
+        )
+      );
     }
   };
 
@@ -355,7 +367,7 @@ const DoctorsTable = ({
     <div className="bg-white rounded-lg shadow p-4 ">
       <Table
         columns={columns}
-        data={formattedDoctors}
+        data={transformedDoctors}
         rowKey="id"
         pagination={true}
         rowsPerPage={10}

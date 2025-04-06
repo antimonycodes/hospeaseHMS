@@ -42,9 +42,12 @@ const formatStatus = (
     "Pending" | "Accepted" | "Declined" | "Rescheduled"
   > = {
     pending: "Pending",
-    approved: "Accepted",
+    approved: "Accepted", // still keep for legacy
+    accepted: "Accepted", // <-- add this
     rejected: "Declined",
+    declined: "Declined", // optional fallback
     rescheduled: "Rescheduled",
+    reschedule: "Rescheduled", // <-- add this
   };
 
   return statusMap[status.toLowerCase()] || "Pending";

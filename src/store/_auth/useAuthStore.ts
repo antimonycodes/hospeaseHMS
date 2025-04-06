@@ -54,16 +54,18 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
           isAuthenticated: true,
         });
         const token = response.data.data.token;
+        sessionStorage.setItem("userId", response.data.data.user.id);
+        console.log(response.data.data.user.id, "idd");
+        console.log(response.data.data.user.id, "idd");
         // Cookies.set("token", token, { expires: 1, secure: true });
         Cookies.set("token", token, { secure: true });
-
         localStorage.setItem("role", response.data.data.user.attributes.role);
         toast.success(response.data.message);
         return true;
       }
       return false;
     } catch (error: any) {
-      console.log(error.response.data);
+      console.log(error.response.data.message);
       const errorMessage =
         error.response?.data?.message || "Login failed! Please try again.";
       toast.error(errorMessage);

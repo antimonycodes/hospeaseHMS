@@ -113,7 +113,7 @@ const PatientDetails = () => {
 
   return (
     <div className="px-2 sm:px-0">
-      <div className="bg-white rounded-lg shadow mb-6">
+      <div className="bg-white rounded-lg custom-shadow mb-6">
         <div className="p-4 sm:p-6">
           {/*  */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 sm:mb-12 gap-4">

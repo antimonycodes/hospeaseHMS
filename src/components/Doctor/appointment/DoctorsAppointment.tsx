@@ -23,10 +23,9 @@ interface Patient {
     | undefined;
 }
 
-const tabs = ["Pending", "Accepted", "Declined"] as const;
+const tabs = ["Pending", "Accepted", "Rescheduled", "Completed"] as const;
 type TabType = (typeof tabs)[number];
 
-// **Calculate the count for each status**
 const getStatusCounts = (patients: Patient[]) => {
   return patients.reduce(
     (acc, patient) => {
@@ -35,7 +34,13 @@ const getStatusCounts = (patients: Patient[]) => {
       }
       return acc;
     },
-    { Pending: 0, Accepted: 0, Declined: 0, Rescheduled: 0, Completed: 0 }
+    {
+      Pending: 0,
+      Accepted: 0,
+      Rescheduled: 0,
+      Declined: 0,
+      Completed: 0,
+    }
   );
 };
 
@@ -45,25 +50,41 @@ const DoctorsAppointment = () => {
 
   const { getAllAppointments, appointments } = useAppointmentStore();
 
-  // Map API response to patients array
-  const transformedPatients: Patient[] = appointments.map((item: any) => ({
-    id: item.id,
-    name: `${item.attributes.patient.attributes.first_name} ${item.attributes.patient.attributes.last_name}`,
-    patientId: item.attributes.patient.attributes.card_id,
-    gender: item.attributes.patient.attributes.gender ?? "N/A",
-    phone: item.attributes.patient.attributes.phone_number,
-    occupation: item.attributes.patient.attributes.occupation ?? "N/A",
-    doctor: `Dr ${item.attributes.doctor.attributes.last_name}`,
-    status: (item.attributes.status.charAt(0).toUpperCase() +
-      item.attributes.status
-        .slice(1)
-        .toLowerCase()
-        .replace("rejected", "declined")) as
-      | "Pending"
-      | "Accepted"
-      | "Declined",
-  }));
-  // console.log(id, "transformedPatients");
+  const transformedPatients: Patient[] = appointments.map((item: any) => {
+    const rawStatus = item.attributes.status.toLowerCase();
+    let status: Patient["status"];
+
+    switch (rawStatus) {
+      case "pending":
+        status = "Pending";
+        break;
+      case "accepted":
+        status = "Accepted";
+        break;
+      case "reschedule":
+        status = "Rescheduled";
+        break;
+      case "completed":
+        status = "Completed";
+        break;
+      case "rejected":
+        status = "Declined";
+        break;
+      default:
+        status = undefined;
+    }
+
+    return {
+      id: item.id,
+      name: `${item.attributes.patient.attributes.first_name} ${item.attributes.patient.attributes.last_name}`,
+      patientId: item.attributes.patient.attributes.card_id,
+      gender: item.attributes.patient.attributes.gender ?? "N/A",
+      phone: item.attributes.patient.attributes.phone_number,
+      occupation: item.attributes.patient.attributes.occupation ?? "N/A",
+      doctor: `Dr ${item.attributes.doctor.attributes.last_name}`,
+      status,
+    };
+  });
 
   const statusCounts = getStatusCounts(transformedPatients);
 
@@ -77,22 +98,19 @@ const DoctorsAppointment = () => {
     navigate(`/dashboard/appointment/doctor/${id}`);
   };
 
-  // Dynamically generate columns based on the data
   const columns = getUserColumns(details, transformedPatients, false);
 
-  // Function to open modal
   const openModal = () => {
     setIsModalOpen(true);
   };
 
-  // Function to close modal
   const closeModal = () => {
     setIsModalOpen(false);
   };
 
   const filteredPatients =
     activeTab === "Pending"
-      ? transformedPatients
+      ? transformedPatients.filter((p) => p.status === "Pending")
       : transformedPatients.filter((p) => p.status === activeTab);
 
   return (
@@ -105,29 +123,24 @@ const DoctorsAppointment = () => {
           </span>
         </h1>
 
-        {/* search / filter / add button */}
         <div className="flex w-full items-center gap-2 border border-gray-200 py-2 px-4 rounded-[10px] md:w-[70%]">
           <img src={getImageSrc("search.svg")} alt="" />
           <input
             type="search"
-            name=""
-            id=""
             placeholder="Type to search"
             className="outline-none font-medium placeholder:text-xs text-xs"
           />
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-4">
-            <button className="cursor-pointer">
-              <img src={getImageSrc("filter.svg")} alt="" />
-            </button>
-          </div>
+          <button className="cursor-pointer">
+            <img src={getImageSrc("filter.svg")} alt="Filter" />
+          </button>
         </div>
       </div>
 
-      {/* table tabs */}
-      <div className=" px-4 w-full flex space-x-2 md:space-x-6">
+      {/* Tabs */}
+      <div className="px-4 w-full flex space-x-2 md:space-x-6">
         {tabs.map((tab) => (
           <button
             key={tab}
@@ -139,8 +152,8 @@ const DoctorsAppointment = () => {
             }`}
           >
             {tab}
-            {activeTab === tab && (
-              <span className="  text-xs bg-primary text-white py-0.5 px-3 rounded-xl">
+            {statusCounts[tab] > 0 && (
+              <span className="text-xs bg-primary text-white py-0.5 px-3 rounded-xl">
                 {statusCounts[tab]}
               </span>
             )}
@@ -156,7 +169,6 @@ const DoctorsAppointment = () => {
         rowsPerPage={5}
       />
 
-      {/* modal */}
       <FrontdeskAppointmentModal isOpen={isModalOpen} onClose={closeModal} />
     </div>
   );

@@ -1,11 +1,12 @@
 import { Plus } from "lucide-react";
 import Button from "../../../Shared/Button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AddStaffModal from "./AddStaffModal";
 import {
   useGlobalStore,
   CreateStaff,
 } from "../../../store/super-admin/useGlobal";
+import StaffsList from "./StaffsList";
 
 interface StaffsPageProps {
   department: string;
@@ -13,12 +14,23 @@ interface StaffsPageProps {
 
 const StaffsPage: React.FC<StaffsPageProps> = ({ department }) => {
   const [showModal, setShowModal] = useState(false);
-  const { createStaff, isLoading } = useGlobalStore();
+  const { createStaff, isLoading, isStaffLoading, getDeptStaffs, staffs } =
+    useGlobalStore();
 
   const [formData, setFormData] = useState<CreateStaff>({
-    name: "",
+    first_name: "",
     email: "",
+    last_name: "",
+    phone: "",
   });
+
+  useEffect(() => {
+    getDeptStaffs(
+      department.toLowerCase() === "pharmacy"
+        ? "Pharmacist"
+        : department.toString().toLowerCase()
+    );
+  }, [getDeptStaffs, department]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -50,6 +62,9 @@ const StaffsPage: React.FC<StaffsPageProps> = ({ department }) => {
           </Button>
         </div>
       </div>
+
+      {/* table */}
+      <StaffsList staffs={staffs} isStaffLoading={isStaffLoading} />
 
       {/* Add Staff Modal */}
       {showModal && (
