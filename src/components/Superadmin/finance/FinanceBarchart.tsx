@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -32,6 +32,12 @@ const CustomTooltip = ({ active, payload }: any) => {
 };
 
 const FinanceBarchart = () => {
+  const { getExpenseStats, getIncomeStats } = useStatsStore();
+
+  useEffect(() => {
+    getExpenseStats();
+    getIncomeStats();
+  }, [getExpenseStats, getIncomeStats]);
   const incomeStats = useStatsStore((state) => state.incomeStats);
   const expenseStats = useStatsStore((state) => state.expenseStats);
 

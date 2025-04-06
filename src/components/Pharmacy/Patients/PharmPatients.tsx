@@ -7,15 +7,18 @@ import PatientTable from "../../ReusablepatientD/PatientTable";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 
 const getStatusCounts = () => {
-  // const { getAllPatients, patients } = usePatientStore();
+  const { getAllPatients, patients } = usePatientStore();
 
-  // useEffect(() => {
-  //   getAllPatients("pharmacy/patient/all");
-  // }, []);
+  useEffect(() => {
+    getAllPatients("pharmacy/patient/all");
+  }, []);
 
   console.log(patients, "pharmacy");
   return patients.reduce(
-    (acc: { Pending: number; Completed: number }, patient) => {
+    (
+      acc: { Pending: number; Completed: number },
+      patient: { status: "Pending" | "Completed" }
+    ) => {
       if (patient.status === "Pending" || patient.status === "Completed") {
         acc[patient.status] = (acc[patient.status] || 0) + 1;
       }
