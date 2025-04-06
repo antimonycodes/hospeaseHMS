@@ -1,10 +1,10 @@
-import InventoryStocks from "../components/Inventory/stocks/InventoryStocks";
 import { useRole } from "../hooks/useRole";
 import { JSX } from "react";
 import { useNavigate } from "react-router-dom";
+import InventoryStocks from "../components/Inventory/stocks/InventoryStocks";
 const roleComponents: Record<string, JSX.Element> = {
   //   superadmin: <SuperAdminOverview />,
-  inventory: <InventoryStocks />,
+  "inventory-manager": <InventoryStocks />,
 
   //   frontdesk: <FrontdeskOverview />,
 };

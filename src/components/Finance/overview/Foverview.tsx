@@ -17,13 +17,13 @@ const Foverview = () => {
   const financeStatsData = stats
     ? [
         {
-          title: "Balance ",
+          title: "Income ",
           number: stats.total_income_balance || "0",
           icon: patientIcon,
           category: "finance",
         },
         {
-          title: "Income",
+          title: "Expenses",
           number: stats.total_expenses_balance || "0",
           icon: patientIcon,
           category: "finance",

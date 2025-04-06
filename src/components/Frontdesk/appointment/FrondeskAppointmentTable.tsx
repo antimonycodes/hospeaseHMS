@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
-
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import Tabs from "../../ReusablepatientD/Tabs";
 import AppointmentDetails from "../../Frontdesk/appointment/AppointmentDetails";
-import FrontdeskAppointmentModal from "./FrontdeskAppointmentModal";
+import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
 
 const FrondeskAppointmentTable = () => {
   const {
@@ -12,14 +11,12 @@ const FrondeskAppointmentTable = () => {
     getAllAppointments,
     isLoading,
   } = usePatientStore();
-  console.log("Appointments fetched:", appointments);
 
   const [activeTab, setActiveTab] = useState<
     "All" | "Pending" | "Accepted" | "Declined" | "Rescheduled"
   >("All");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
 
-  // Calculate the count for each status
   const getStatusCounts = (): {
     All: number;
     Pending: number;
@@ -34,14 +31,13 @@ const FrondeskAppointmentTable = () => {
     return appointments.reduce(
       (acc, appointment) => {
         const status =
-          appointment.attributes?.status?.toLowerCase() || "pending"; // Normalize case
-
+          appointment.attributes?.status?.toLowerCase() || "pending";
         if (status === "pending") acc.Pending++;
         else if (status === "accepted") acc.Accepted++;
-        else if (status === "declined") acc.Declined++;
+        else if (status === "declined" || status === "rejected")
+          acc.Declined++; // Handle "rejected"
         else if (status === "rescheduled") acc.Rescheduled++;
-
-        acc.All++; // Always increase the 'All' count
+        acc.All++;
         return acc;
       },
       { All: 0, Pending: 0, Accepted: 0, Declined: 0, Rescheduled: 0 }
@@ -49,20 +45,10 @@ const FrondeskAppointmentTable = () => {
   };
   const statusCounts = getStatusCounts();
 
-  // Functions to handle modal
-  const openModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
-
   useEffect(() => {
     getAllAppointments("/front-desk/appointment/all-records");
   }, [getAllAppointments]);
 
-  // Filter appointments based on active tab
   const filteredAppointments =
     activeTab === "All"
       ? appointments
@@ -81,7 +67,7 @@ const FrondeskAppointmentTable = () => {
         typebutton="Book an Appointment"
         tableCount={filteredAppointments.length}
         showControls={true}
-        onButtonClick={openModal}
+        onButtonClick={() => setOpenModal(true)}
       />
 
       <Tabs<"All" | "Pending" | "Accepted" | "Declined" | "Rescheduled">
@@ -96,7 +82,12 @@ const FrondeskAppointmentTable = () => {
         isLoading={isLoading}
       />
 
-      <FrontdeskAppointmentModal isOpen={isModalOpen} onClose={closeModal} />
+      {openModal && (
+        <BookAppointmentModal
+          onClose={() => setOpenModal(false)}
+          endpoint="/front-desk/appointment/book"
+        />
+      )}
     </div>
   );
 };

@@ -67,12 +67,11 @@ export interface CreateNurseData {
   last_name: string;
   dob: string;
   email: string;
-  nurse_id: null;
+  nurse_id: string | null; // Allow null if that's the intended behavior
   religion: string;
   phone: string;
   address: string;
 }
-
 // Zustand Store for Nurses
 interface NurseStore {
   isLoading: boolean;
@@ -119,12 +118,11 @@ export const useNurseStore = create<NurseStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
-  createNurse: async (data) => {
-    set({ isLoading: false });
+  createNurse: async (data: CreateNurseData) => {
+    set({ isLoading: true }); // Should be true when starting
     try {
       const response = await api.post("/admin/nurse/create", data);
       if (response.status === 201) {
-        // Refresh the doctors list after creation
         await get().getNurses();
         toast.success(response.data.message);
         return true;
@@ -132,7 +130,7 @@ export const useNurseStore = create<NurseStore>((set, get) => ({
       return false;
     } catch (error: any) {
       console.error(error.response?.data);
-      toast.error(error.response.data.message || "Failed to add doctor");
+      toast.error(error.response.data.message || "Failed to add nurse");
       return null;
     } finally {
       set({ isLoading: false });

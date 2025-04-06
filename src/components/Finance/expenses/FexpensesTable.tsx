@@ -7,7 +7,7 @@ type ExpenseApiData = {
   purchased: string;
   amount: string;
   purchasedBy: string;
-  // paymentMethod: number;
+  paymentMethod: string;
   date: string;
   id: number;
 };
@@ -23,7 +23,7 @@ const FexpensesTable = () => {
   const formattedExpenses: ExpenseApiData[] =
     expenses?.map((expense: any) => ({
       item: expense.attributes.item,
-
+      paymentMethod: expense.attributes.payment_method,
       purchased: expense.attributes.from,
       amount: expense.attributes.amount,
       purchasedBy: expense.attributes.by,
@@ -64,13 +64,13 @@ const FexpensesTable = () => {
         <span className="text-[#667085] text-sm">{expense.purchasedBy}</span>
       ),
     },
-    // {
-    //   key: "paymentMethod",
-    //   label: "Payment Method",
-    //   render: (_: any, expense: ExpenseApiData) => (
-    //     <span className="text-[#667085] text-sm">{expense.item}</span>
-    //   ),
-    // },
+    {
+      key: "paymentMethod",
+      label: "Payment Method",
+      render: (_: any, expense: ExpenseApiData) => (
+        <span className="text-[#667085] text-sm">{expense.paymentMethod}</span>
+      ),
+    },
     {
       key: "date",
       label: "Date",

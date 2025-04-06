@@ -1,27 +1,28 @@
 import { X } from "lucide-react";
+import { CreateNurseData } from "./useMatronNurse";
+import Button from "../../../Shared/Button";
 
-interface FormData {
-  firstName: string;
-  lastName: string;
-  nurseId: string;
-  email: string;
-  phone: string;
-  religion: string;
-  houseAddress: string;
-  password: string;
-}
-
-interface MatronNurseModalProps {
-  onClose: () => void;
-  formData: FormData;
+interface AddNurseModalProps {
+  formData: CreateNurseData; // Use the same interface as Zustand
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  setShowModal: (show: boolean) => void;
+  createNurse: (data: CreateNurseData) => any;
 }
 
-const MatronNurseModal: React.FC<MatronNurseModalProps> = ({
-  onClose,
+const MatronNurseModal: React.FC<AddNurseModalProps> = ({
   formData,
   handleInputChange,
+  setShowModal,
+  createNurse,
 }) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log(formData);
+    const response = await createNurse(formData);
+    if (response) {
+      setShowModal(false);
+    }
+  };
   return (
     <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center z-50 p-6">
       <div className="bg-white rounded-lg custom-shadow overflow-y-auto w-full max-w-2xl h-[90%]">
@@ -30,12 +31,12 @@ const MatronNurseModal: React.FC<MatronNurseModalProps> = ({
             <h2 className="text-custom-black text-lg font-semibold">
               Add New Nurse
             </h2>
-            <button onClick={onClose}>
+            <button onClick={() => setShowModal(false)} className="">
               <X className="text-black" />
             </button>
           </div>
 
-          <form>
+          <form onSubmit={handleSubmit}>
             {/* Upload Picture */}
             <div className="mb-4 flex gap-4">
               <div className="mb-2 text-center">
@@ -44,33 +45,27 @@ const MatronNurseModal: React.FC<MatronNurseModalProps> = ({
               <div className="space-y-2">
                 <p className="text-custom-black font-medium">Upload Picture</p>
                 <p className="text-xs md:text-sm text-[#667085] w-full md:max-w-2/3">
-                  Upload image with at least 600px by 600px in jpg or png
+                  Upload image with at least 6000px by 600px in jpg or png
                   format.
                 </p>
-                <button
-                  type="button"
-                  className="mt-2 bg-primary text-white rounded-md px-4 py-2 text-sm"
-                >
-                  Upload
-                </button>
+                <Button variant="primary">Upload</Button>
               </div>
             </div>
 
-            {/* Form Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* First Name */}
               <div>
                 <label
-                  htmlFor="firstName"
+                  htmlFor="first_name"
                   className="block text-sm font-medium text-custom-black mb-1"
                 >
                   First Name
                 </label>
                 <input
                   type="text"
-                  id="firstName"
-                  name="firstName"
-                  value={formData.firstName}
+                  id="first_name"
+                  name="first_name"
+                  value={formData.first_name}
                   onChange={handleInputChange}
                   className="w-full px-3 py-4 border border-[#D0D5DD] placeholder:text-[#98A2B3] rounded-md"
                   placeholder="John"
@@ -81,16 +76,16 @@ const MatronNurseModal: React.FC<MatronNurseModalProps> = ({
               {/* Last Name */}
               <div>
                 <label
-                  htmlFor="lastName"
+                  htmlFor="last_name"
                   className="block text-sm font-medium text-custom-black mb-1"
                 >
                   Last Name
                 </label>
                 <input
                   type="text"
-                  id="lastName"
-                  name="lastName"
-                  value={formData.lastName}
+                  id="last_name"
+                  name="last_name"
+                  value={formData.last_name}
                   onChange={handleInputChange}
                   className="w-full px-3 py-4 border border-[#D0D5DD] placeholder:text-[#98A2B3] rounded-md"
                   placeholder="Doe"
@@ -101,16 +96,16 @@ const MatronNurseModal: React.FC<MatronNurseModalProps> = ({
               {/* Nurse ID */}
               <div>
                 <label
-                  htmlFor="nurseId"
+                  htmlFor="nurse_id"
                   className="block text-sm font-medium text-custom-black mb-1"
                 >
                   Nurse ID
                 </label>
                 <input
                   type="text"
-                  id="nurseId"
-                  name="nurseId"
-                  value={formData.nurseId}
+                  id="nurse_id"
+                  name="nurse_id"
+                  value={formData.nurse_id || ""}
                   onChange={handleInputChange}
                   className="w-full px-3 py-4 border border-[#D0D5DD] placeholder:text-[#98A2B3] rounded-md"
                   placeholder="HS23455"
@@ -138,7 +133,7 @@ const MatronNurseModal: React.FC<MatronNurseModalProps> = ({
                 />
               </div>
 
-              {/* Phone */}
+              {/* Phone Number */}
               <div>
                 <label
                   htmlFor="phone"
@@ -154,6 +149,25 @@ const MatronNurseModal: React.FC<MatronNurseModalProps> = ({
                   onChange={handleInputChange}
                   className="w-full px-3 py-4 border border-[#D0D5DD] placeholder:text-[#98A2B3] rounded-md"
                   placeholder="+23470xxxxxxxx"
+                  required
+                />
+              </div>
+
+              {/* Date of Birth */}
+              <div>
+                <label
+                  htmlFor="dob"
+                  className="block text-sm font-medium text-custom-black mb-1"
+                >
+                  Date of Birth
+                </label>
+                <input
+                  type="date"
+                  id="dob"
+                  name="dob"
+                  value={formData.dob}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-4 border border-[#D0D5DD] placeholder:text-[#98A2B3] rounded-md"
                   required
                 />
               </div>
@@ -180,50 +194,26 @@ const MatronNurseModal: React.FC<MatronNurseModalProps> = ({
               {/* House Address */}
               <div>
                 <label
-                  htmlFor="houseAddress"
+                  htmlFor="address"
                   className="block text-sm font-medium text-custom-black mb-1"
                 >
                   House Address
                 </label>
                 <input
                   type="text"
-                  id="houseAddress"
-                  name="houseAddress"
-                  value={formData.houseAddress}
+                  id="address"
+                  name="address"
+                  value={formData.address}
                   onChange={handleInputChange}
                   className="w-full px-3 py-4 border border-[#D0D5DD] placeholder:text-[#98A2B3] rounded-md"
                   placeholder="10, Road George close, Surulere, Ibadan"
                 />
               </div>
-
-              {/* Password */}
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-custom-black mb-1"
-                >
-                  Password
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-4 border border-[#D0D5DD] placeholder:text-[#98A2B3] rounded-md"
-                  placeholder="Enter a secure password"
-                  required
-                />
-              </div>
             </div>
 
+            {/* Submit Button */}
             <div className="mt-6">
-              <button
-                type="submit"
-                className="bg-primary text-white px-4 py-2 rounded-md text-sm"
-              >
-                Add Nurse
-              </button>
+              <Button type="submit">Add Nurse</Button>
             </div>
           </form>
         </div>

@@ -5,11 +5,13 @@ import { useNavigate } from "react-router-dom";
 // import SuperAdminOverview from "../components/Superadmin/Overview";
 import { useRole } from "../hooks/useRole";
 import { JSX } from "react";
+import MatronShifts from "../components/Matron/shifts/MatronShifts";
 
 const roleComponents: Record<string, JSX.Element> = {
   //   superadmin: <SuperAdminOverview />,
   doctor: <ShiftTable />,
   nurse: <NurseShifts />,
+  matron: <MatronShifts />,
 
   //   frontdesk: <FrontdeskOverview />,
 };

@@ -1,10 +1,18 @@
 import { useState, useEffect } from "react";
-import { usePatientStore } from "../store/super-admin/usePatientStore";
-import { useDoctorStore } from "../store/super-admin/useDoctorStore";
+import { usePatientStore } from "../store/super-admin/usePatientStore"; // Adjust path
+import { useDoctorStore } from "../store/super-admin/useDoctorStore"; // Adjust path
 import { X } from "lucide-react";
-import debounce from "lodash.debounce"; // optional debounce to limit API calls
+import debounce from "lodash.debounce";
 
-const BookAppointmentModal = ({ onClose }: { onClose: () => void }) => {
+interface BookAppointmentModalProps {
+  onClose: () => void;
+  endpoint?: string; // Add optional endpoint prop
+}
+
+const BookAppointmentModal = ({
+  onClose,
+  endpoint = "/admin/appointment/assign",
+}: BookAppointmentModalProps) => {
   const { searchPatients, bookAppointment } = usePatientStore();
   const { getAllDoctors, doctors } = useDoctorStore();
 
@@ -20,11 +28,11 @@ const BookAppointmentModal = ({ onClose }: { onClose: () => void }) => {
 
   useEffect(() => {
     getAllDoctors();
-  }, []);
+  }, [getAllDoctors]);
 
   const handleSearch = debounce(async (val: string) => {
     const results = await searchPatients(val);
-    setPatientOptions(results);
+    setPatientOptions(results || []);
   }, 300);
 
   const handleChange = (
@@ -48,12 +56,11 @@ const BookAppointmentModal = ({ onClose }: { onClose: () => void }) => {
     setQuery(
       `${patient.attributes.first_name} ${patient.attributes.last_name}`
     );
-
-    setPatientOptions([]); // close dropdown
+    setPatientOptions([]); // Close dropdown
   };
 
   const handleSubmit = async () => {
-    const success = await bookAppointment(appointmentData);
+    const success = await bookAppointment(appointmentData, endpoint); // Pass custom endpoint
     if (success) {
       onClose();
     }

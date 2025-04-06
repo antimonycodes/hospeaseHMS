@@ -7,6 +7,9 @@ export const Patients = lazy(() => import("./Patients"));
 export const PatientDetails = lazy(() => import("../Shared/PatientDetails"));
 export const Doctors = lazy(() => import("./Doctors"));
 export const DoctorDetails = lazy(() => import("../Shared/DoctorDetails"));
+export const FrontdeskDetails = lazy(
+  () => import("../components/Frontdesk/appointment/FrontdeskDetails")
+);
 export const Finance = lazy(() => import("./Finance"));
 export const Laboratory = lazy(() => import("./Laboratory"));
 export const Consultants = lazy(() => import("./Consultants"));

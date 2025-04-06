@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { JSX } from "react";
 const roleComponents: Record<string, JSX.Element> = {
   //   superadmin: <SuperAdminOverview />,
-  inventory: <InventoryRequest />,
+  "inventory-manager": <InventoryRequest />,
   //   frontdesk: <FrontdeskOverview />,
 };
 const Request = () => {

@@ -58,20 +58,7 @@ const Fpayment = () => {
         typebutton="Add New"
         onButtonClick={openModal}
       />
-      {isModalOpen && (
-        <AddPaymentModal
-          showSearchBar={true}
-          showPaymentType={true}
-          onClose={closeModal}
-          formData={{
-            patient_id: "",
-            amount: "",
-            purpose: "",
-            payment_method: "",
-            payment_type: "",
-          }}
-        />
-      )}
+      {isModalOpen && <AddPaymentModal onClose={closeModal} />}
 
       <Tabs<"All" | "Full Payment" | "Half Payment">
         activeTab={activeTab}

@@ -144,7 +144,6 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
     endpoint = "/finance/save-revenue",
     refreshEndpoint = "/finance/all-revenues"
   ) => {
-    console.log("Payment Payload:", data);
     set({ isLoading: true });
     try {
       const response = await api.post(endpoint, data);
@@ -164,7 +163,6 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
       set({ isLoading: false });
     }
   },
-
   getFinanceStats: async (endpoint = "/finance/stats") => {
     set({ isLoading: true });
     try {

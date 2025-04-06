@@ -37,6 +37,9 @@ import {
 import DoctorPatientDetails from "./components/Doctor/DoctorPatientDetails";
 import DoctorAppointmentDetails from "./components/Doctor/appointment/DoctorAppointmentDetails";
 import StaffsDetail from "./components/Superadmin/Staffs/StaffsDetail";
+import FrontdeskDetails from "./components/Frontdesk/appointment/FrontdeskDetails";
+import MatronPatientDetails from "./components/Matron/patients/MatronPatientDetails";
+import MatronNurseDetails from "./components/Matron/nurse/MatronNurseDetails";
 
 function App() {
   return (
@@ -46,7 +49,6 @@ function App() {
           <Route path="/" element={<Navigate to="/dashboard" />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/signup" element={<Signup />} />
-
           <Route element={<ProtectedRoutes />}>
             <Route path="/dashboard" element={<DashboardLayout />}>
               <Route index element={<Navigate to="overview" />} />
@@ -57,20 +59,31 @@ function App() {
                 path="doctor/patients/:id"
                 element={<DoctorPatientDetails />}
               />
-              {/* <Route
-                path="appointments/:patientId"
-                element={<AppointmentDetails />}
-              /> */}
               <Route path="doctors" element={<Doctors />} />
               <Route path="doctors/:id" element={<DoctorDetails />} />
+
+              {/* Add this route */}
               <Route path="consultants" element={<Consultants />} />
               <Route path="consultants/:id" element={<ConsultantDetails />} />
               <Route path="finance/info" element={<Finance />} />
               <Route path="laboratory/info" element={<Laboratory />} />
               <Route path="appointments" element={<Appointments />} />
+              <Route path="nurse" element={<Nurses />} />
               <Route
                 path="appointment/doctor/:id"
                 element={<DoctorAppointmentDetails />}
+              />
+              <Route
+                path="appointment/frontdesk/:id"
+                element={<FrontdeskDetails />}
+              />
+              <Route
+                path="matron/patients/:id"
+                element={<MatronPatientDetails />}
+              />
+              <Route
+                path="matron/nurses/:id"
+                element={<MatronNurseDetails />}
               />
               <Route path="nurses" element={<Nurses />} />
               <Route path="nurses/:id" element={<NurseDetails />} />
@@ -101,7 +114,7 @@ function App() {
               <Route path="profile" element={<Profile />} />
               <Route path="shifts" element={<Shift />} />
               <Route path="inventory" element={<Inventory />} />
-              <Route path="stock" element={<Stocks />} />
+              <Route path="stocks" element={<Stocks />} />
               <Route path="request" element={<Request />} />
               <Route path="expenses" element={<Expenses />} />
               <Route path="branch" element={<Branch />} />
