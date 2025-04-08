@@ -169,7 +169,7 @@ const DoctorsAppointment = () => {
         rowsPerPage={5}
       />
 
-      <FrontdeskAppointmentModal isOpen={isModalOpen} onClose={closeModal} />
+      {/* <FrontdeskAppointmentModal isOpen={isModalOpen} onClose={closeModal} /> */}
     </div>
   );
 };

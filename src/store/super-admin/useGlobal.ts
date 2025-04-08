@@ -104,10 +104,10 @@ interface Globalstore {
   createClinicaldept: (data: CreateClinicaldeptData) => Promise<any>;
   createStaff: (data: CreateStaff, role: string) => Promise<any>;
   getDeptStaffs: (data: string) => Promise<any>;
-  assignShifts: (data: AssignShift) => Promise<any>;
+  assignShifts: (data: AssignShift, endpoint: any) => Promise<any>;
   getStaffShifts: (id: any, endpoint: string) => Promise<any>;
-  updateShift: (id: any, data: any) => Promise<any>;
-  deleteShift: (id: any) => Promise<any>;
+  updateShift: (id: any, data: any, update: any) => Promise<any>;
+  deleteShift: (id: any, endpoint: any) => Promise<any>;
   getAllRoles: () => Promise<any>;
 }
 
