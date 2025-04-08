@@ -81,7 +81,8 @@ interface PatientStore {
   getAllAppointments: (endpoint?: string) => Promise<void>;
   bookAppointment: (
     data: BookAppointmentData,
-    endpoint?: string
+    endpoint?: string,
+    refreshEndpoint?: string
   ) => Promise<boolean>; // Updated signature
   getAppointmentById: (id: string) => Promise<void>;
   manageAppointment: (id: string, data: any) => Promise<any>;
@@ -241,7 +242,8 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
 
   bookAppointment: async (
     data: BookAppointmentData,
-    endpoint = "/admin/appointment/assign"
+    endpoint = "/admin/appointment/assign",
+    refreshEndpoint = "/admin/appointment/all-records"
   ) => {
     set({ isLoading: true });
     try {
@@ -249,7 +251,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       if (response.status === 201) {
         console.log(response.data.message);
         toast.success(response.data.message);
-        await get().getAllAppointments("/front-desk/appointment/all-records"); // Refresh with front desk endpoint
+        await get().getAllAppointments(refreshEndpoint); // Refresh with front desk endpoint
         return true;
       }
       return false;

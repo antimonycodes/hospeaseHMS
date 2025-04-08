@@ -1,92 +1,52 @@
-import { useState, useEffect } from "react";
+import { JSX, useState, useEffect } from "react";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
-import Tablehead from "../../ReusablepatientD/Tablehead";
-import Tabs from "../../ReusablepatientD/Tabs";
-import AppointmentDetails from "../../Frontdesk/appointment/AppointmentDetails";
+import Table from "../../../Shared/Table";
 import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
-import FrontdeskAppointmentModal from "./FrontdeskAppointmentModal";
+import Tablehead from "../../ReusablepatientD/Tablehead";
+import FrontdeskDetails from "./FrontdeskDetails";
+import AppointmentDetails from "./AppointmentDetails";
 
 const FrondeskAppointmentTable = () => {
+  const [activeTab, setActiveTab] = useState(0);
+  const [openModal, setOpenModal] = useState(false);
+  const [modalType, setModalType] = useState<"patient" | "appointment">(
+    "patient"
+  );
+
+  const handleOpenModal = () => {
+    setModalType(activeTab === 0 ? "patient" : "appointment");
+    setOpenModal(true);
+  };
+
   const {
-    appointments = [],
-    getAllAppointments,
+    getAllPatients,
+    patients,
+    createPatient,
+    getPatientById,
+    selectedPatient,
     isLoading,
+    pagination,
   } = usePatientStore();
 
-  const [activeTab, setActiveTab] = useState<
-    "All" | "Pending" | "Accepted" | "Declined" | "Rescheduled"
-  >("All");
-  const [openModal, setOpenModal] = useState(false);
-
-  const getStatusCounts = (): {
-    All: number;
-    Pending: number;
-    Accepted: number;
-    Declined: number;
-    Rescheduled: number;
-  } => {
-    if (!appointments || appointments.length === 0) {
-      return { All: 0, Pending: 0, Accepted: 0, Declined: 0, Rescheduled: 0 };
-    }
-
-    return appointments.reduce(
-      (acc, appointment) => {
-        const status =
-          appointment.attributes?.status?.toLowerCase() || "pending";
-        if (status === "pending") acc.Pending++;
-        else if (status === "accepted") acc.Accepted++;
-        else if (status === "declined" || status === "rejected")
-          acc.Declined++; // Handle "rejected"
-        else if (status === "rescheduled") acc.Rescheduled++;
-        acc.All++;
-        return acc;
-      },
-      { All: 0, Pending: 0, Accepted: 0, Declined: 0, Rescheduled: 0 }
-    );
-  };
-  const statusCounts = getStatusCounts();
-
   useEffect(() => {
-    getAllAppointments("/front-desk/appointment/all-records");
-  }, [getAllAppointments]);
-
-  const filteredAppointments =
-    activeTab === "All"
-      ? appointments
-      : appointments.filter(
-          (appointment) =>
-            appointment.attributes?.status?.toLowerCase() ===
-            activeTab.toLowerCase()
-        );
-
+    getAllPatients();
+  }, []);
   return (
-    <div className="w-full h-full bg-white rounded-[8px] shadow overflow-hidden">
+    <div>
       <Tablehead
-        tableTitle="Appointments"
+        tableTitle="Appointment"
         showButton={true}
+        typebutton="Book Appointment"
+        onButtonClick={handleOpenModal}
         showSearchBar={true}
-        typebutton="Book an Appointment"
-        tableCount={filteredAppointments.length}
         showControls={true}
-        onButtonClick={() => setOpenModal(true)}
       />
-
-      <Tabs<"All" | "Pending" | "Accepted" | "Declined" | "Rescheduled">
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        statusCounts={statusCounts}
-        tabs={["All", "Pending", "Accepted", "Declined", "Rescheduled"]}
-      />
-
-      <AppointmentDetails
-        appointments={filteredAppointments}
-        isLoading={isLoading}
-      />
-
-      {openModal && (
-        <FrontdeskAppointmentModal
+      <AppointmentDetails />
+      {openModal && modalType === "appointment" && (
+        <BookAppointmentModal
           onClose={() => setOpenModal(false)}
           endpoint="/front-desk/appointment/book"
+          refreshEndpoint="/front-desk/appointment/all-records"
         />
       )}
     </div>

@@ -108,7 +108,7 @@ interface DoctorStore {
   getDoctorById: (id: string) => Promise<void>;
   createDoctor: (data: any) => Promise<void>;
   getAllConsultants: () => Promise<void>;
-  getConsultantById: (id: string, endpoint: string) => Promise<void>;
+  getConsultantById: (id: string, endpoint?: string) => Promise<void>;
   createConsultant: (data: any) => Promise<void>;
 }
 

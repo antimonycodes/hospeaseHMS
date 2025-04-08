@@ -7,11 +7,13 @@ import debounce from "lodash.debounce";
 interface BookAppointmentModalProps {
   onClose: () => void;
   endpoint?: string; // Add optional endpoint prop
+  refreshEndpoint?: string;
 }
 
 const BookAppointmentModal = ({
   onClose,
   endpoint = "/admin/appointment/assign",
+  refreshEndpoint = "/admin/appointment/all-records",
 }: BookAppointmentModalProps) => {
   const { searchPatients, bookAppointment } = usePatientStore();
   const { getAllDoctors, doctors } = useDoctorStore();

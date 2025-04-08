@@ -1,181 +1,262 @@
-import { JSX, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { JSX, useEffect, useState } from "react";
+import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import Table from "../../../Shared/Table";
-import { useAppointmentStore } from "../../../store/staff/useAppointmentStore";
 
-export type AppointmentData = {
-  name: string;
-  status?: string;
-  gender: string;
-  phone: string;
-  occupation: string;
+interface AppointmentAttributes {
   doctor: string;
-  viewMore: string;
+  status: string; // This is "pending", "approved", etc. from your API
+  rescheduled_data: any | null;
+  doctor_contact: string | null;
+  gender: string;
+  patient_contact: string;
+  occupation: string;
+  patient: string;
+  date: string;
+  time: string;
+  reason_if_rejected_or_rescheduled: string | null;
+  assigned_by: string;
+  created_at: string;
+}
+
+interface AppointmentData {
+  type: string;
   id: number;
-};
+  attributes: AppointmentAttributes;
+}
 
-type Columns = {
-  key: keyof AppointmentData | "viewMore";
+type TableColumn<T> = {
+  key: keyof T;
   label: string;
-  render?: (value: any, appointment: AppointmentData) => JSX.Element;
+  render?: (value: any, row: T) => JSX.Element;
 };
 
-type AppointmentDetailsProps = {
-  isLoading?: boolean;
-  appointments: {
-    id: number;
-    attributes: {
-      doctor: string;
-      status?: string;
-      rescheduled_data: string | null;
-      doctor_contact: string;
-      gender: string;
-      patient_contact: string;
-      occupation: string;
-      patient: string;
-      date: string;
-      reason_if_rejected_or_rescheduled: string;
-      assigned_by: string;
-      time: string;
-      created_at: string;
-    };
-  }[];
+const formatStatus = (
+  status: string
+): "Pending" | "Accepted" | "Declined" | "Rescheduled" => {
+  const statusMap: Record<
+    string,
+    "Pending" | "Accepted" | "Declined" | "Rescheduled"
+  > = {
+    pending: "Pending",
+    approved: "Accepted", // still keep for legacy
+    accepted: "Accepted", // <-- add this
+    rejected: "Declined",
+    declined: "Declined", // optional fallback
+    rescheduled: "Rescheduled",
+    reschedule: "Rescheduled", // <-- add this
+  };
+
+  return statusMap[status.toLowerCase()] || "Pending";
 };
 
-const AppointmentDetails = ({
-  appointments = [],
-  isLoading = false,
-}: AppointmentDetailsProps) => {
-  const navigate = useNavigate();
-  const { getAllAppointments } = useAppointmentStore();
+const statusStyles: Record<string, string> = {
+  Pending: "bg-[#FFEBAA] text-[#B58A00]",
+  Accepted: "bg-[#CFFFE9] text-[#009952]",
+  Declined: "bg-[#FBE1E1] text-[#F83E41]",
+  Rescheduled: "bg-[#BED4FF] text-[#101828]",
+};
+
+const tabs = ["All", "Pending", "Accepted", "Declined", "Rescheduled"] as const;
+type TabType = (typeof tabs)[number];
+
+// Create a flattened type that includes both top-level properties and attributes properties
+// This will allow us to use dot notation for accessing nested properties
+type FlattenedAppointment = {
+  id: number;
+  type: string;
+  // Add all attributes as direct properties
+  patient: string;
+  doctor: string;
+  status: string;
+  gender: string;
+  patient_contact: string;
+  occupation: string;
+  date: string;
+  time: string;
+  created_at: string;
+  doctor_contact: string | null;
+  rescheduled_data: any | null;
+  reason_if_rejected_or_rescheduled: string | null;
+  assigned_by: string;
+};
+
+const AppointmentDetails = () => {
+  const [activeTab, setActiveTab] = useState<TabType>("All");
+  const { appointments, isLoading, getAllAppointments } = usePatientStore();
+
   useEffect(() => {
     getAllAppointments("/front-desk/appointment/all-records");
   }, [getAllAppointments]);
 
-  const formattedAppointments: AppointmentData[] = appointments.map(
-    (appointment) => ({
-      name: appointment.attributes.patient || "",
-      gender: appointment.attributes.gender || "",
-      phone: appointment.attributes.patient_contact || "",
-      occupation: appointment.attributes.occupation || "",
-      doctor: appointment.attributes.doctor || "",
-      status: appointment.attributes.status || "Pending",
-      viewMore: "View More",
+  // Function to flatten appointment data for table consumption
+  const flattenAppointments = (
+    data: AppointmentData[]
+  ): FlattenedAppointment[] => {
+    return data.map((appointment) => ({
       id: appointment.id,
-    })
-  );
-
-  const handleViewMore = (id: number) => {
-    navigate(`/dashboard/appointment/frontdesk/${id}`);
+      type: appointment.type,
+      // Spread attributes properties to top level
+      ...appointment.attributes,
+    }));
   };
 
-  const columns: Columns[] = [
+  const columns: TableColumn<FlattenedAppointment>[] = [
     {
-      key: "name",
+      key: "patient",
       label: "Name",
-      render: (_, appointment) => (
-        <span className="font-medium text-[#101828]">{appointment.name}</span>
+      render: (_, data) => (
+        <span className="font-medium text-[#101828]">{data.patient}</span>
+      ),
+    },
+    {
+      key: "id",
+      label: "Appointment ID",
+      render: (_, data) => (
+        <span className="text-[#667085]">
+          #{data.id.toString().padStart(6, "0")}
+        </span>
       ),
     },
     {
       key: "gender",
       label: "Gender",
-      render: (_, appointment) => (
-        <span className="text-[#667085]">{appointment.gender}</span>
+      render: (_, data) => (
+        <span className="text-[#667085]">
+          {data.gender
+            ? data.gender.charAt(0).toUpperCase() + data.gender.slice(1)
+            : "N/A"}
+        </span>
       ),
     },
     {
-      key: "phone",
+      key: "patient_contact",
       label: "Phone",
-      render: (_, appointment) => (
-        <span className="text-[#667085]">{appointment.phone}</span>
+      render: (_, data) => (
+        <span className="text-[#667085]">{data.patient_contact || "N/A"}</span>
       ),
     },
     {
       key: "occupation",
       label: "Occupation",
-      render: (_, appointment) => (
-        <span className="text-[#667085]">{appointment.occupation}</span>
+      render: (_, data) => (
+        <span className="text-[#667085]">{data.occupation || "N/A"}</span>
       ),
     },
     {
       key: "doctor",
       label: "Doctor Assigned",
-      render: (_, appointment) => (
-        <span className="text-[#667085]">{appointment.doctor}</span>
+      render: (_, data) => (
+        <span className="text-[#667085]">{data.doctor || "N/A"}</span>
       ),
     },
     {
       key: "status",
       label: "Status",
-      render: (_, appointment) => {
-        let bgColor = "";
-        let textColor = "";
-
-        switch (appointment.status?.toLowerCase()) {
-          case "pending":
-            bgColor = "#FFEBAA";
-            textColor = "#B58A00";
-            break;
-          case "declined":
-          case "rejected": // Handle "rejected" status from API
-            bgColor = "#FBE1E1";
-            textColor = "#F83E41";
-            break;
-          case "rescheduled":
-            bgColor = "#BED4FF";
-            textColor = "#101828";
-            break;
-          case "accepted":
-            bgColor = "#CFFFE9";
-            textColor = "#009952";
-            break;
-          default:
-            bgColor = "#E5E7EB";
-            textColor = "#374151";
-        }
-
+      render: (_, data) => {
+        const displayStatus = formatStatus(data.status);
         return (
           <span
-            className="text-sm px-2 py-1 rounded-full"
-            style={{ backgroundColor: bgColor, color: textColor }}
+            className={`px-3 py-1 rounded-full text-sm font-medium ${statusStyles[displayStatus]}`}
           >
-            {appointment.status}
+            {displayStatus}
           </span>
         );
       },
     },
-    {
-      key: "viewMore",
-      label: "",
-      render: (_, appointment) => (
-        <span
-          className="text-primary text-sm font-medium cursor-pointer"
-          onClick={() => handleViewMore(appointment.id)}
-        >
-          View More
-        </span>
-      ),
-    },
   ];
 
-  if (isLoading) {
-    return <div className="p-4 text-center">Loading appointments...</div>;
-  }
+  const getStatusCounts = () => {
+    if (!appointments || !appointments.length) {
+      return {
+        All: 0,
+        Pending: 0,
+        Accepted: 0,
+        Declined: 0,
+        Rescheduled: 0,
+      } as Record<TabType, number>;
+    }
 
-  if (formattedAppointments.length === 0) {
-    return <div className="p-4 text-center">No appointments found</div>;
+    return appointments.reduce(
+      (acc, appointment) => {
+        const status = formatStatus(appointment.attributes.status);
+        acc[status]++;
+        acc.All++;
+        return acc;
+      },
+      {
+        All: 0,
+        Pending: 0,
+        Accepted: 0,
+        Declined: 0,
+        Rescheduled: 0,
+      } as Record<TabType, number>
+    );
+  };
+
+  const statusCounts = getStatusCounts();
+
+  // Filter appointments based on selected tab
+  const filteredAppointments =
+    activeTab === "All"
+      ? appointments || []
+      : (appointments || []).filter(
+          (a) => formatStatus(a.attributes.status) === activeTab
+        );
+
+  // Flatten the filtered appointments for the table
+  const flattenedAppointments = flattenAppointments(filteredAppointments);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        Loading appointments...
+      </div>
+    );
   }
 
   return (
     <div>
-      <Table
-        data={formattedAppointments}
-        columns={columns}
-        rowKey="id"
-        pagination={formattedAppointments.length > 10}
-        rowsPerPage={10}
-      />
+      {" "}
+      <div className="mt-2">
+        <div className="w-full flex space-x-2 md:space-x-6">
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`pb-2 text-xs md:text-sm font-medium ${
+                activeTab === tab
+                  ? "text-green-600 border-b-2 border-green-600"
+                  : "text-gray-500"
+              }`}
+            >
+              {tab}
+              <span
+                className={`text-xs py-0.5 px-3 rounded-xl ml-2 ${
+                  activeTab === tab
+                    ? "bg-primary text-white"
+                    : "bg-gray-100 text-gray-500"
+                }`}
+              >
+                {statusCounts[tab]}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {flattenedAppointments.length === 0 ? (
+          <div className="mt-10 text-center text-gray-500">
+            No appointments found
+          </div>
+        ) : (
+          <Table
+            columns={columns}
+            data={flattenedAppointments}
+            rowKey="id"
+            pagination={true}
+            rowsPerPage={5}
+          />
+        )}
+      </div>
     </div>
   );
 };
