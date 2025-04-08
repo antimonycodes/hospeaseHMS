@@ -290,10 +290,10 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       set({ isStaffLoading: false });
     }
   },
-  assignShifts: async (data) => {
+  assignShifts: async (data, endpoint = "/admin/shift/assign") => {
     set({ isLoading: true });
     try {
-      const response = await api.post("/admin/shift/assign", data);
+      const response = await api.post(endpoint, data);
       if (response.status === 201) {
         toast.success(response.data.message);
         console.log(response.data.message);
@@ -325,10 +325,10 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       return null;
     }
   },
-  updateShift: async (id, data) => {
+  updateShift: async (id, data, endpoint = `/admin/shift/update/${id}`) => {
     set({ isLoading: true });
     try {
-      const response = await api.put(`/admin/shift/update/${id}`, data);
+      const response = await api.put(endpoint, data);
       if (response.status === 200) {
         toast.success(response.data.message);
         console.log(response.data.message);
@@ -340,10 +340,10 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       set({ isLoading: false });
     }
   },
-  deleteShift: async (id) => {
+  deleteShift: async (id, endpoint = `/admin/shift/delete/${id}`) => {
     set({ isLoading: true });
     try {
-      const response = await api.delete(`/admin/shift/delete/${id}`);
+      const response = await api.delete(endpoint);
       if (response.status === 200) {
         toast.success(response.data.message);
         console.log(response.data.message);

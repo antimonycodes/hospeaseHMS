@@ -52,19 +52,35 @@ export interface NurseAttributes {
   id: number;
   is_active: boolean;
   user_id: number;
+  age: number;
+  religion: string;
+  address: string;
 }
 
 // Patient interfaces
 export interface PatientAttributes {
-  id: number;
+  id?: number;
   first_name: string;
   last_name: string;
   card_id: string;
-  phone_number: string;
+  phone_number: string | null;
   occupation: string;
   gender: string;
   address: string;
-  patient_type: string;
+  age: number;
+  branch: string | null;
+  patient_type?: string;
+  hospital?: {
+    id: number;
+    name: string;
+    logo: string;
+  };
+  clinical_department?: {
+    id: number;
+    name: string;
+  };
+  next_of_kin: NextOfKin[];
+  created_at?: string;
 }
 export interface Patient {
   id: number;
@@ -108,10 +124,11 @@ export interface CreateNurseData {
   last_name: string;
   dob: string;
   email: string;
-  nurse_id: string | null; // Allow null if that's the intended behavior
+  nurse_id: string;
   religion: string;
   phone: string;
   address: string;
+  age: any;
 }
 
 // Zustand Store for Matron
@@ -176,10 +193,14 @@ export const useMatronNurse = create<MatronStore>((set, get) => ({
     set({ isLoading: true });
     try {
       const response = await api.get(`/matron/all-patients/${id}`);
-      console.log(response.data.data);
-      set({ selectedPatient: response.data.data }); // Store fetched doctor in state
+      console.log("API Response:", response.data); // Log full response
+      set({ selectedPatient: response.data.data });
+      console.log("Selected Patient Set:", response.data.data);
     } catch (error: any) {
-      console.error(error.response?.data);
+      console.error(
+        "Error fetching patient:",
+        error.response?.data || error.message
+      );
       toast.error(
         error.response?.data?.message || "Failed to fetch patient details"
       );
@@ -205,9 +226,17 @@ export const useMatronNurse = create<MatronStore>((set, get) => ({
   },
 
   createNurse: async (data: CreateNurseData) => {
-    set({ isLoading: true }); // Should be true when starting
+    set({ isLoading: true });
     try {
-      const response = await api.post("/admin/nurse/create", data);
+      // Transform empty string to null if needed by the API
+      const payload = {
+        ...data,
+        nurse_id: data.nurse_id === "" ? null : data.nurse_id,
+        age: data.age, // Include age
+        religion: data.religion, // Include religion
+        address: data.address, // Include address
+      };
+      const response = await api.post("/matron/nurse/create", payload);
       if (response.status === 201) {
         await get().getNurses();
         toast.success(response.data.message);
@@ -222,7 +251,6 @@ export const useMatronNurse = create<MatronStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
-
   // New function to fetch matron stats
   getMatronStats: async () => {
     set({ isLoading: true });

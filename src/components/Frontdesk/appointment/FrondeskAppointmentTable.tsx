@@ -4,6 +4,7 @@ import Tablehead from "../../ReusablepatientD/Tablehead";
 import Tabs from "../../ReusablepatientD/Tabs";
 import AppointmentDetails from "../../Frontdesk/appointment/AppointmentDetails";
 import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
+import FrontdeskAppointmentModal from "./FrontdeskAppointmentModal";
 
 const FrondeskAppointmentTable = () => {
   const {
@@ -83,7 +84,7 @@ const FrondeskAppointmentTable = () => {
       />
 
       {openModal && (
-        <BookAppointmentModal
+        <FrontdeskAppointmentModal
           onClose={() => setOpenModal(false)}
           endpoint="/front-desk/appointment/book"
         />

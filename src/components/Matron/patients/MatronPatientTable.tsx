@@ -10,6 +10,7 @@ type MatronPatientData = {
   phone: string;
   occupation: string;
   viewmore: string;
+  status: string;
   id: number;
 };
 
@@ -28,7 +29,7 @@ type MatronPatientDataProps = {
       card_id: string;
       gender: string;
       phone_number: string;
-
+      status: string;
       occupation: string;
     };
     id: number;
@@ -48,6 +49,8 @@ const MatronPatientTable = ({
     gender: patient.attributes.gender,
     phone: patient.attributes.phone_number,
     occupation: patient.attributes.occupation,
+    status: patient.attributes.status || "Pending",
+
     viewmore: "viewmore",
     id: patient.id,
   }));
@@ -95,6 +98,13 @@ const MatronPatientTable = ({
       label: "Occupation",
       render: (_, patient) => (
         <span className="text-[#667085]">{patient.occupation}</span>
+      ),
+    },
+    {
+      key: "status",
+      label: "Status",
+      render: (_, patient) => (
+        <span className="text-[#667085]">{patient.status}</span>
       ),
     },
     {

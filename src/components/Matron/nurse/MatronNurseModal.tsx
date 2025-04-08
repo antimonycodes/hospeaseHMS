@@ -3,10 +3,10 @@ import { CreateNurseData } from "./useMatronNurse";
 import Button from "../../../Shared/Button";
 
 interface AddNurseModalProps {
-  formData: CreateNurseData; // Use the same interface as Zustand
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  setShowModal: (show: boolean) => void;
-  createNurse: (data: CreateNurseData) => any;
+  formData: CreateNurseData;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void; // Add this
+  setShowModal: (show: boolean) => void; // Add this
+  createNurse: (data: CreateNurseData) => Promise<any>; // Add this
 }
 
 const MatronNurseModal: React.FC<AddNurseModalProps> = ({
@@ -23,6 +23,7 @@ const MatronNurseModal: React.FC<AddNurseModalProps> = ({
       setShowModal(false);
     }
   };
+
   return (
     <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center z-50 p-6">
       <div className="bg-white rounded-lg custom-shadow overflow-y-auto w-full max-w-2xl h-[90%]">
@@ -105,7 +106,7 @@ const MatronNurseModal: React.FC<AddNurseModalProps> = ({
                   type="text"
                   id="nurse_id"
                   name="nurse_id"
-                  value={formData.nurse_id || ""}
+                  value={formData.nurse_id ?? ""}
                   onChange={handleInputChange}
                   className="w-full px-3 py-4 border border-[#D0D5DD] placeholder:text-[#98A2B3] rounded-md"
                   placeholder="HS23455"
