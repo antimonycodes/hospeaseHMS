@@ -68,7 +68,7 @@ export const useStatsStore = create<StatsStore>((set) => ({
       set({ stats: response.data.data });
       set({ doctorStats: response.data });
     } catch (error: any) {
-      toast.error(error.response.message);
+      // toast.error(error.response.message);
     } finally {
       set({ isLoading: false });
     }
@@ -83,7 +83,7 @@ export const useStatsStore = create<StatsStore>((set) => ({
       console.log(response.data.data);
     } catch (error: any) {
       console.error(error);
-      toast.error("Error fetching stats");
+      // toast.error("Error fetching stats");
     } finally {
       set({ isLoading: false });
     }
@@ -102,7 +102,7 @@ export const useStatsStore = create<StatsStore>((set) => ({
       return null;
     } catch (error: any) {
       console.error(error);
-      toast.error(error.response.message);
+      // toast.error(error.response.message);
       return null;
     } finally {
       set({ isLoading: false });
@@ -122,7 +122,7 @@ export const useStatsStore = create<StatsStore>((set) => ({
       return null;
     } catch (error: any) {
       console.error(error);
-      toast.error(error.response.message);
+      // toast.error(error.response.message);
       return null;
     } finally {
       set({ isLoading: false });
