@@ -95,6 +95,7 @@ interface Globalstore {
   staffs: any[];
   selectedStaff: any | null;
   staffShift: any[];
+  roles: Record<string, { id: number; role: string }>;
   setSelectedStaff: (staff: any) => void;
   togglestatus: (data: Togglestatus) => Promise<any>;
   getBranches: () => Promise<any>;
@@ -107,6 +108,7 @@ interface Globalstore {
   getStaffShifts: (id: any, endpoint: string) => Promise<any>;
   updateShift: (id: any, data: any) => Promise<any>;
   deleteShift: (id: any) => Promise<any>;
+  getAllRoles: () => Promise<any>;
 }
 
 export const useGlobalStore = create<Globalstore>((set, get) => ({
@@ -114,6 +116,7 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
   branches: [],
   clinicaldepts: [],
   staffs: [],
+  roles: {},
   isStaffLoading: false,
   selectedStaff: null,
   staffShift: [],
@@ -350,6 +353,41 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       console.error(error.response?.data);
     } finally {
       set({ isLoading: false });
+    }
+  },
+  getAllRoles: async () => {
+    try {
+      const response = await api.get("/medical-report/dept-fetch");
+      const departments = response.data.data;
+
+      // Define custom name mappings
+      const customMap: Record<string, string> = {
+        pharmacy: "pharmacist",
+        inventory: "inventory-manager",
+        "medical director": "medical-director",
+        "front desk": "front-desk-manager", // optional: if you have this department
+      };
+
+      // Prepare the roleVariables object
+      const roleVariables: Record<string, { id: number; role: string }> = {};
+
+      departments.forEach((item: any) => {
+        const rawName = item.attributes.name.toLowerCase(); // Normalize the name
+        const id = item.id;
+
+        // Map using customMap if available, else use the rawName
+        const roleName = customMap[rawName] || rawName;
+
+        roleVariables[roleName] = {
+          id,
+          role: roleName,
+        };
+      });
+
+      console.log("Mapped Roles:", roleVariables);
+      set({ roles: roleVariables });
+    } catch (error: any) {
+      console.log(error.response?.data || error.message);
     }
   },
 }));

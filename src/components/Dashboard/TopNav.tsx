@@ -1,15 +1,19 @@
 import { Bell, Menu } from "lucide-react";
 import hospitalLogo from "../../assets/ribiero.png";
 import { useAuthStore } from "../../store/_auth/useAuthStore";
+import { useProfileStore } from "../../store/super-admin/useProfileStore";
+import { useEffect } from "react";
 
 interface TopNavProps {
   setIsMobileMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const TopNav: React.FC<TopNavProps> = ({ setIsMobileMenuOpen }) => {
-  const { user } = useAuthStore();
-  console.log(user);
-  // console.log(user.attributes.hospital.logo);
+  const { profileData, isLoading, getProfileData } = useProfileStore();
+
+  useEffect(() => {
+    getProfileData();
+  }, [getProfileData]);
   return (
     <div className="w-full z">
       <div className="w-full py-2 px-4 flex justify-between items-center border-0 border-[#009952] bg-white z-20 h-[61px] custom-shadow">
@@ -30,7 +34,7 @@ const TopNav: React.FC<TopNavProps> = ({ setIsMobileMenuOpen }) => {
           <Bell className="text-gray-700 w-5" />
           <div className="size-8">
             <img
-              src={""}
+              src={profileData?.attributes?.logo}
               className="w-full h-full border border-primary rounded-full"
             />
           </div>

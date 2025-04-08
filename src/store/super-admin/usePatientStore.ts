@@ -71,6 +71,7 @@ interface PatientStore {
 
   getAllPatients: (endpoint?: string) => Promise<void>;
   getPatientById: (id: string) => Promise<void>;
+  getPharPatientById: (id: string) => Promise<any>;
   getPatientByIdDoc: (id: string) => Promise<any>;
   createPatient: (
     data: CreatePatientData,
@@ -102,6 +103,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       set({ pagination: response.data.data.pagination });
       console.log(response.data.data.pagination, "pagination");
       const fetchedPatients = response.data.data.data;
+      const pharmacyid = response.data[0];
       set({ patients: fetchedPatients });
       console.log(response.data.message);
     } catch (error: any) {
@@ -134,6 +136,21 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
     set({ isLoading: true });
     try {
       const response = await api.get(`/admin/patient/fetch/${id}`);
+      console.log(response.data.data);
+      set({ selectedPatient: response.data.data }); // Store fetched doctor in state
+    } catch (error: any) {
+      console.error(error.response?.data);
+      toast.error(
+        error.response?.data?.message || "Failed to fetch patient details"
+      );
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  getPharPatientById: async (id) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(`/pharmacy/patient/all/${id}`);
       console.log(response.data.data);
       set({ selectedPatient: response.data.data }); // Store fetched doctor in state
     } catch (error: any) {

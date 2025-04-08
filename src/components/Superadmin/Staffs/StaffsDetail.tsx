@@ -3,7 +3,6 @@ import { useGlobalStore } from "../../../store/super-admin/useGlobal";
 import { ChevronLeft, Pencil, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
 import Loader from "../../../Shared/Loader";
-import { format } from "date-fns";
 
 const StaffsDetail = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -16,6 +15,7 @@ const StaffsDetail = () => {
 
   const navigate = useNavigate();
   const staff = useGlobalStore((state) => state.selectedStaff);
+  const roles = useGlobalStore((state) => state.roles);
 
   const { assignShifts, getStaffShifts, staffShift, updateShift, deleteShift } =
     useGlobalStore();
@@ -23,8 +23,6 @@ const StaffsDetail = () => {
   useEffect(() => {
     if (!staff) {
       navigate(-1);
-    } else {
-      // fetchShifts();
     }
   }, [staff, navigate]);
 
@@ -34,12 +32,14 @@ const StaffsDetail = () => {
     }
   }, [staff, getStaffShifts]);
 
-  const roleToDepartment: Record<string, number> = {
-    doctor: 3,
-    nurse: 2,
-    "front-desk-manager": 8,
-    laboratory: 5,
-    pharmacist: 7,
+  // Get department ID dynamically from roles
+  const getDepartmentId = () => {
+    const staffRole = staff?.role?.toLowerCase();
+    if (!staffRole || !roles || !roles[staffRole]) {
+      console.warn(`Role not found: ${staffRole}`);
+      return null;
+    }
+    return roles[staffRole].id;
   };
 
   const handleAddShift = async () => {
@@ -48,7 +48,7 @@ const StaffsDetail = () => {
       return;
     }
 
-    const department_id = roleToDepartment[staff.role?.toLowerCase() || ""];
+    const department_id = getDepartmentId();
 
     if (!department_id) {
       alert("Department not found for this role");
@@ -69,6 +69,7 @@ const StaffsDetail = () => {
     };
 
     try {
+      setLoading(true);
       const response = await assignShifts(payload);
       if (response) {
         setSelectedDate(null);
@@ -79,6 +80,8 @@ const StaffsDetail = () => {
       }
     } catch (error) {
       console.error("Shift assignment failed", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -93,12 +96,17 @@ const StaffsDetail = () => {
       alert("Please fill all fields");
       return;
     }
-    // Define the department ID based on staff role
-    const department_id = roleToDepartment[staff.role?.toLowerCase() || ""];
+
+    const department_id = getDepartmentId();
+
+    if (!department_id) {
+      alert("Department not found for this role");
+      return;
+    }
 
     const payload = {
-      user_id: staff.id, // The staff's ID
-      department_id: department_id, // The department ID based on the role
+      user_id: staff.id,
+      department_id,
       date: selectedDate.toISOString().split("T")[0],
       shift_type: shiftType,
       start_time: startTime,
@@ -106,6 +114,7 @@ const StaffsDetail = () => {
     };
 
     try {
+      setLoading(true);
       const response = await updateShift(editingShift.id, payload);
       if (response) {
         setIsEditModalOpen(false);
@@ -114,6 +123,8 @@ const StaffsDetail = () => {
       }
     } catch (error: any) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -218,7 +229,7 @@ const StaffsDetail = () => {
                     <button
                       className="text-gray-500 hover:text-primary"
                       onClick={() => {
-                        setEditingShift(shift); // This gives you shift.id and attributes
+                        setEditingShift(shift);
                         setSelectedDate(new Date(shift.attributes.date));
                         setShiftType(shift.attributes.shift_type);
                         setStartTime(shift.attributes.start_time);
@@ -290,8 +301,9 @@ const StaffsDetail = () => {
               <button
                 onClick={handleUpdateShift}
                 className="bg-primary text-white px-4 py-2 rounded-md"
+                disabled={loading}
               >
-                Save
+                {loading ? "Saving..." : "Save"}
               </button>
             </div>
           </div>

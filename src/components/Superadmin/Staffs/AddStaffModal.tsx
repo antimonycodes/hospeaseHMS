@@ -1,6 +1,9 @@
 import { X } from "lucide-react";
 import Button from "../../../Shared/Button";
-import { CreateStaff } from "../../../store/super-admin/useGlobal";
+import {
+  CreateStaff,
+  useGlobalStore,
+} from "../../../store/super-admin/useGlobal";
 
 interface AddStaffModalProps {
   formData: {
@@ -13,8 +16,8 @@ interface AddStaffModalProps {
   setShowModal: (value: boolean) => void;
   isLoading: boolean;
   createStaff: (data: CreateStaff, department: string) => Promise<any>;
-
-  department?: any;
+  department: string; // this should now directly match keys in roles
+  roles: Record<string, any>;
 }
 
 const AddStaffModal: React.FC<AddStaffModalProps> = ({
@@ -25,31 +28,18 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({
   createStaff,
   department,
 }) => {
-  // Define department ID and role mappings
-  const getDepartmentDetails = (dept: string) => {
-    const departmentMapping: Record<string, { id: number; role: string }> = {
-      laboratory: { id: 5, role: "laboratory" },
-      pharmacy: { id: 7, role: "pharmacist" },
-      finance: { id: 11, role: "finance" },
-      "front-desk-manager": { id: 8, role: "front-desk-manager" },
-      "inventory-manager": { id: 13, role: "inventory-manager" },
-    };
-
-    return departmentMapping[dept.toLowerCase()] || { id: 0, role: "staff" };
-  };
+  const roles = useGlobalStore((state) => state.roles);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    // Get department ID and role based on department prop
-    const { id, role } = getDepartmentDetails(department);
     e.preventDefault();
+
+    const { id, role } = roles[department]; // direct access using normalized key
 
     const newStaffData = {
       ...formData,
       department_id: id,
-      role: role,
+      role,
     };
-
-    console.log(newStaffData);
 
     await createStaff(newStaffData, role);
     setShowModal(false);
@@ -63,14 +53,13 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({
             <h2 className="text-custom-black text-lg font-semibold">
               Add New Staff
             </h2>
-            <button onClick={() => setShowModal(false)} className="">
+            <button onClick={() => setShowModal(false)}>
               <X className="text-black" />
             </button>
           </div>
 
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Full Name */}
               <div>
                 <label
                   htmlFor="last_name"
@@ -85,7 +74,7 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({
                   value={formData.last_name}
                   onChange={handleInputChange}
                   className="w-full px-3 py-4 border border-[#D0D5DD] placeholder:text-[#98A2B3] rounded-md"
-                  placeholder="John Doe"
+                  placeholder="Doe"
                   required
                 />
               </div>
@@ -103,12 +92,10 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({
                   value={formData.first_name}
                   onChange={handleInputChange}
                   className="w-full px-3 py-4 border border-[#D0D5DD] placeholder:text-[#98A2B3] rounded-md"
-                  placeholder="John Doe"
+                  placeholder="John"
                   required
                 />
               </div>
-
-              {/* Email */}
               <div>
                 <label
                   htmlFor="email"
@@ -147,7 +134,6 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({
               </div>
             </div>
 
-            {/* Submit Button */}
             <div className="mt-6">
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? "Adding..." : "Add Staff"}

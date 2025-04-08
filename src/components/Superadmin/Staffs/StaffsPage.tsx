@@ -17,6 +17,19 @@ const StaffsPage: React.FC<StaffsPageProps> = ({ department }) => {
   const { createStaff, isLoading, isStaffLoading, getDeptStaffs, staffs } =
     useGlobalStore();
 
+  const {
+    getAllRoles,
+    roles,
+  }: { getAllRoles: () => void; roles: Record<string, any> } = useGlobalStore();
+
+  useEffect(() => {
+    getAllRoles();
+  }, [getAllRoles]);
+
+  console.log(department);
+
+  console.log(roles, "roles");
+
   const [formData, setFormData] = useState<CreateStaff>({
     first_name: "",
     email: "",
@@ -75,6 +88,7 @@ const StaffsPage: React.FC<StaffsPageProps> = ({ department }) => {
           createStaff={createStaff}
           isLoading={isLoading}
           department={department}
+          roles={roles}
         />
       )}
     </div>

@@ -40,6 +40,7 @@ import StaffsDetail from "./components/Superadmin/Staffs/StaffsDetail";
 import FrontdeskDetails from "./components/Frontdesk/appointment/FrontdeskDetails";
 import MatronPatientDetails from "./components/Matron/patients/MatronPatientDetails";
 import MatronNurseDetails from "./components/Matron/nurse/MatronNurseDetails";
+import PharPatientDetails from "./components/Pharmacy/Patients/PharPatientDetails";
 
 function App() {
   return (
@@ -59,10 +60,13 @@ function App() {
                 path="doctor/patients/:id"
                 element={<DoctorPatientDetails />}
               />
+              <Route
+                path="pharmacy/patient/:patientId/case-report/:caseId"
+                element={<PharPatientDetails />}
+              />
               <Route path="doctors" element={<Doctors />} />
               <Route path="doctors/:id" element={<DoctorDetails />} />
 
-              {/* Add this route */}
               <Route path="consultants" element={<Consultants />} />
               <Route path="consultants/:id" element={<ConsultantDetails />} />
               <Route path="finance/info" element={<Finance />} />
@@ -90,7 +94,7 @@ function App() {
               <Route path="pharmacy/info" element={<Pharmacy />} />
               <Route
                 path="pharmacy/staffs"
-                element={<Staffs department="pharmacy" />}
+                element={<Staffs department="pharmacist" />}
               />
               <Route
                 path="laboratory/staffs"

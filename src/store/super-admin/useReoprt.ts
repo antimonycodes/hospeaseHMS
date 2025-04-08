@@ -21,6 +21,7 @@ api.interceptors.request.use(
 
 interface ReportStore {
   isLoading: boolean;
+  isReportLoading: boolean;
 
   createReport: (formData: {
     patient_id: string | number | null;
@@ -29,12 +30,28 @@ interface ReportStore {
     parent_id: number | null;
     file?: File | null;
     status: string | null;
+    role: any;
   }) => Promise<any>;
+  singleReport: any[];
+  allReports: any[];
   createNote: (data: any) => Promise<any>;
+  getAllReport: (id: any) => Promise<any>;
+  getSingleReport: (id: any) => Promise<any>;
+  respondToReport: (
+    id: any,
+    formData: {
+      note: string;
+      status: string;
+      file?: File | null;
+    }
+  ) => Promise<any>;
 }
 
 export const useReportStore = create<ReportStore>((set) => ({
   isLoading: false,
+  isReportLoading: false,
+  singleReport: [],
+  allReports: [],
   createReport: async ({
     patient_id,
     note,
@@ -42,6 +59,7 @@ export const useReportStore = create<ReportStore>((set) => ({
     parent_id,
     file,
     status,
+    role,
   }) => {
     set({ isLoading: true });
     try {
@@ -65,6 +83,11 @@ export const useReportStore = create<ReportStore>((set) => ({
         form.append("parent_id", ""); // Empty string for null
       }
 
+      if (role !== null) {
+        form.append("role", role.toString());
+      } else {
+        throw new Error("role cannot be null");
+      }
       if (file) {
         form.append("file", file);
       }
@@ -114,6 +137,74 @@ export const useReportStore = create<ReportStore>((set) => ({
       set({ isLoading: false });
       throw error;
     } finally {
+      set({ isLoading: false });
+    }
+  },
+  getAllReport: async (id) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(`/medical-report/case-report/${id}`);
+      if (response.status === 200) {
+        set({ allReports: response.data.data.data });
+        console.log(response.data.data.data, "fghjk");
+        return response.data;
+      }
+      return response.data;
+    } catch (error: any) {
+      const errorMsg = error?.response?.data?.message || "Something went wrong";
+      toast.error(errorMsg);
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  getSingleReport: async (id) => {
+    set({ isReportLoading: false });
+    try {
+      const response = await api.get(`/medical-report/case-report/${id}`);
+      if (response.status === 200) {
+        set({ singleReport: response.data.data.data });
+        toast.success(response.data.message);
+        // return response.data;
+      }
+      return response.data;
+    } catch (error: any) {
+      const errorMsg = error?.response?.data?.message || "Something went wrong";
+      toast.error(errorMsg);
+      // throw error;
+    } finally {
+      set({ isReportLoading: false });
+    }
+  },
+  respondToReport: async (id, { note, status, file }) => {
+    set({ isLoading: true });
+
+    try {
+      const form = new FormData();
+      form.append("note", note);
+      form.append("status", status);
+      if (file) form.append("file", file);
+
+      const response = await api.post(
+        `/medical-report/case-reports/${id}/respond`,
+        form,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        return true;
+      }
+      toast.success(response.data.message);
+
+      // Handle success, e.g., set success state
+    } catch (error: any) {
+      console.error("Error submitting the report:", error);
+      toast.error(error.response.data.message);
+      // Handle error state
       set({ isLoading: false });
     }
   },

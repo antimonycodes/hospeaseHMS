@@ -37,7 +37,7 @@ const Profile = () => {
           {/* img */}
           <div className=" size-20">
             <img
-              src={undefined}
+              src={profileData?.attributes?.logo}
               alt="Logo"
               className=" h-full w-full bord er border-[#009952]  rounded-full"
             />
@@ -78,7 +78,7 @@ const Profile = () => {
               Hospital Phone number
             </label>
             <h1 className=" text-[#3E3E3E] font-medium text-xl">
-              {details.phoneNumber}
+              {profileData?.attributes?.user?.phone}
             </h1>
           </div>
         </div>
