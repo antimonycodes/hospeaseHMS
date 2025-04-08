@@ -145,6 +145,7 @@ const SaFinancePage: React.FC = () => {
             }}
             isLoading={false}
             endpoint={""} // formData={expenseForm}
+            refreshEndpoint={""}
           />
         )}
       </div>
