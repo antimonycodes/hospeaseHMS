@@ -26,7 +26,7 @@ const Table = <T extends Record<string, any>>({
   rowKey,
   pagination = false,
   rowsPerPage = 5,
-  radius = "rounded-lg",
+  radius = "rounded-b-lg",
   onPageChange,
   currentPage = 1,
   totalPages = 1,

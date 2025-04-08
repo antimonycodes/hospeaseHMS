@@ -7,8 +7,8 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from "recharts";
+import { useChartStore } from "../../../store/staff/useChartStore";
 
 type DataPoint = {
   month: string;
@@ -16,85 +16,30 @@ type DataPoint = {
   value2: number;
 };
 
-const data: DataPoint[] = [
-  {
-    month: "Jan",
-    value1: 650,
-    value2: 350,
-  },
-  {
-    month: "Feb",
-    value1: 650,
-    value2: 350,
-  },
-  {
-    month: "Mar",
-    value1: 650,
-    value2: 350,
-  },
-  {
-    month: "Apr",
-    value1: 650,
-    value2: 350,
-  },
-  {
-    month: "May",
-    value1: 650,
-    value2: 350,
-  },
-  {
-    month: "Jun",
-    value1: 650,
-    value2: 350,
-  },
-  {
-    month: "Jul",
-    value1: 650,
-    value2: 350,
-  },
-  {
-    month: "Aug",
-    value1: 650,
-    value2: 350,
-  },
-  {
-    month: "Sep",
-    value1: 650,
-    value2: 350,
-  },
-  {
-    month: "Oct",
-    value1: 650,
-    value2: 350,
-  },
-  {
-    month: "Nov",
-    value1: 650,
-    value2: 350,
-  },
-  {
-    month: "Dec",
-    value1: 650,
-    value2: 350,
-  },
-];
-
 const PharmChart = () => {
   const [isMobile, setIsMobile] = useState(false);
+  const { pharmData, getPharmData, isLoading } = useChartStore();
+
+  useEffect(() => {
+    getPharmData("/pharmacy/dispersal-graphical-representation/");
+  }, [getPharmData]);
 
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-
-    // Initial check
     checkMobile();
-
     window.addEventListener("resize", checkMobile);
-
-    // Cleanup
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
+
+  const chartData: DataPoint[] = pharmData
+    ? pharmData.months.map((month: string, index: number) => ({
+        month: month, // Already "Jan", "Feb", etc. from API
+        value1: parseFloat(pharmData.monthly_earnings[index] || "0"),
+        value2: parseFloat(pharmData.monthly_earnings[index] || "0") * 0.54, // Example derivation
+      }))
+    : [];
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -111,6 +56,7 @@ const PharmChart = () => {
     }
     return null;
   };
+
   return (
     <div className="w-full bg-white rounded-lg p-10 font-jakarta">
       <div className="flex items-center justify-between pb-10">
@@ -118,51 +64,39 @@ const PharmChart = () => {
         <button>2025</button>
       </div>
       <div className="h-[350px] md:h-[400px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={data}
-            margin={{
-              top: 20,
-              right: isMobile ? 10 : 10,
-              left: isMobile ? 0 : 0,
-              bottom: 5,
-            }}
-            barSize={6}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="month"
-              tick={{ fontSize: isMobile ? 12 : 14, fill: "black" }}
-              interval={isMobile ? 0 : 0}
-            />
-            <YAxis
-              domain={[100, 800]} // Set the Y-axis domain to start from 100 and end at 800
-              ticks={[100, 200, 300, 400, 500, 600, 700, 800]} // Explicitly define the tick values
-              tick={{ fontSize: isMobile ? 12 : 14, fill: "black" }}
-              width={isMobile ? 30 : 40}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            {/* <Legend
-                     wrapperStyle={{
-                       fontSize: isMobile ? "12px" : "14px",
-                       paddingTop: "10px",
-                     }}
-                   /> */}
-            <Bar
-              dataKey="value1"
-              name="Value 1"
-              fill="#3354F4"
-              //   radius={[4, 4, 0, 0]}
-            />
-            <Bar
-              dataKey="value2"
-              name="Value 2"
-              fill="#F61FA0"
-              //   radius={[4, 4, 0, 0]}
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>{" "}
+        {isLoading ? (
+          <div>Loading...</div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={chartData}
+              margin={{
+                top: 20,
+                right: isMobile ? 10 : 10,
+                left: isMobile ? 0 : 0,
+                bottom: 5,
+              }}
+              barSize={6}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                dataKey="month"
+                tick={{ fontSize: isMobile ? 12 : 14, fill: "black" }}
+                interval={isMobile ? 0 : 0}
+              />
+              <YAxis
+                domain={[100, 800]}
+                ticks={[100, 200, 300, 400, 500, 600, 700, 800]}
+                tick={{ fontSize: isMobile ? 12 : 14, fill: "black" }}
+                width={isMobile ? 30 : 40}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="value1" name="Dispersal" fill="#3354F4" />
+              <Bar dataKey="value2" name="Derived Value" fill="#F61FA0" />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
+      </div>
     </div>
   );
 };

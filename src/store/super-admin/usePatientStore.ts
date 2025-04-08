@@ -105,6 +105,7 @@ interface PatientStore {
 export const usePatientStore = create<PatientStore>((set, get) => ({
   isLoading: true,
   patients: [],
+
   selectedPatient: null,
   appointments: [],
   pagination: null,
