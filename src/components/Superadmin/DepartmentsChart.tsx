@@ -93,10 +93,24 @@ const DepartmentChart: React.FC<DepartmentChartProps> = ({
         PATIENTS BY DEPARTMENT
       </h2>
       {transformedData.length === 0 ? (
-        <div className="w-full h-64 flex items-center justify-center">
-          <span className="text-gray-400 text-sm">
-            No department data available
-          </span>
+        <div className="w-full h-64 flex flex-col items-center justify-center text-center px-4">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-12 w-12 text-gray-300 mb-2"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M9 17v-6a3 3 0 016 0v6M5 13h14M12 19h.01"
+            />
+          </svg>
+          <p className="text-sm text-gray-500 font-medium mb-1">
+            No department data available yet
+          </p>
         </div>
       ) : (
         <>

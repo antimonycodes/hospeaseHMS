@@ -108,7 +108,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       console.log(response.data.message);
     } catch (error: any) {
       console.error(error.response?.data);
-      toast.error(error.response?.data?.message || "Failed to fetch patients");
+      // toast.error(error.response?.data?.message || "Failed to fetch patients");
     } finally {
       set({ isLoading: false });
     }

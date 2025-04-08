@@ -23,7 +23,7 @@ const DashboardLayout = () => {
               window.open("https://wa.me/+2348114675297", "_blank")
             }
           >
-            <span className=" rounded-full  bg-white p-2  text-primary shadow-md  rounded-full">
+            <span className="   bg-white p-2  text-primary shadow-md  rounded-full">
               <BsWhatsapp size={30} />
             </span>
             <span className="  bg-white p-2 px-3  text-base rounded-2xl shadow-md">

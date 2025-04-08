@@ -365,7 +365,7 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
         pharmacy: "pharmacist",
         inventory: "inventory-manager",
         "medical director": "medical-director",
-        "front desk": "front-desk-manager", // optional: if you have this department
+        // "front desk": "front-desk-manager", // optional: if you have this department
       };
 
       // Prepare the roleVariables object

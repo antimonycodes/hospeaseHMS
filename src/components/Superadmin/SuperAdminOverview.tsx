@@ -29,15 +29,6 @@ const SuperAdminOverview = () => {
 
     // Optionally fetch patients data if needed
     getAllPatients();
-
-    // Set up a refresh interval if needed (e.g., every minute)
-    const intervalId = setInterval(() => {
-      getAllDoctors();
-      getAllPatients();
-    }, 60000); // 60 seconds refresh
-
-    // Clean up interval on component unmount
-    return () => clearInterval(intervalId);
   }, [
     // Only include the fetch functions, not the data itself
     getStats,
@@ -47,7 +38,6 @@ const SuperAdminOverview = () => {
   ]);
 
   // Ensure we are passing data when clinicalStats are available
-  const isClinicalStatsLoaded = clinicalStats && clinicalStats.length > 0;
 
   return (
     <div className="space-y-4">
@@ -55,18 +45,11 @@ const SuperAdminOverview = () => {
       <QuickStats />
       <div className="flex flex-col md:flex-row gap-4">
         <PatientBarChart />
-        {isClinicalStatsLoaded ? (
-          <DepartmentChart
-            clinicalStats={clinicalStats}
-            isLoading={isLoading}
-          />
-        ) : (
-          <div className="w-full h-64 flex items-center justify-center">
-            <span className="text-gray-400 text-sm">
-              No stats available for this department yet.
-            </span>
-          </div>
-        )}
+
+        <DepartmentChart
+          clinicalStats={clinicalStats || []}
+          isLoading={isLoading}
+        />
       </div>
       <div className="w-full gap-4 h-full flex flex-col md:flex-row">
         <DoctorsTable doctors={doctors} />

@@ -16,7 +16,7 @@ interface AddStaffModalProps {
   setShowModal: (value: boolean) => void;
   isLoading: boolean;
   createStaff: (data: CreateStaff, department: string) => Promise<any>;
-  department: string; // this should now directly match keys in roles
+  department: string;
   roles: Record<string, any>;
 }
 
@@ -29,11 +29,12 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({
   department,
 }) => {
   const roles = useGlobalStore((state) => state.roles);
+  console.log(department, "gyj");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const { id, role } = roles[department]; // direct access using normalized key
+    const { id, role } = roles[department];
 
     const newStaffData = {
       ...formData,
