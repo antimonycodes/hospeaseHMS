@@ -312,12 +312,12 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       const response = await api.get(endpoint);
       if (response.status === 200) {
         set({ staffShift: response.data.data.data });
-        toast.success(response.data.message);
+        // toast.success(response.data.message);
         console.log(response.data.data.data);
         return true;
       }
     } catch (error: any) {
-      toast.error(error.response?.message);
+      // toast.error(error.response?.message);
       console.log(error.response.message);
       return null;
     } finally {

@@ -76,15 +76,19 @@ export interface CreateNurseData {
 interface NurseStore {
   isLoading: boolean;
   nurses: Nurse[];
+  frontdesks: any[];
   selectedNurse: any | null;
   getNurses: () => Promise<any>;
+  getFrontdesk: () => Promise<any>;
   getNurseById: (id: string) => Promise<any>;
   createNurse: (data: CreateNurseData) => Promise<any>;
+  createFrontdesk: (data: any) => Promise<any>;
 }
 
 export const useNurseStore = create<NurseStore>((set, get) => ({
   isLoading: false,
   nurses: [],
+  frontdesks: [],
   selectedNurse: null,
   getNurses: async () => {
     set({ isLoading: true });
@@ -97,7 +101,24 @@ export const useNurseStore = create<NurseStore>((set, get) => ({
       }
       return false;
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to fetch nurses");
+      // toast.error(error.response?.data?.message || "Failed to fetch nurses");
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  getFrontdesk: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get("/admin/front-desk/all-records");
+      if (response.status === 200 || response.status === 201) {
+        console.log(response.data.data);
+        set({ frontdesks: response.data.data.data });
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      // toast.error(error.response?.data?.message || "Failed to fetch nurses");
       return null;
     } finally {
       set({ isLoading: false });
@@ -122,6 +143,24 @@ export const useNurseStore = create<NurseStore>((set, get) => ({
     set({ isLoading: true }); // Should be true when starting
     try {
       const response = await api.post("/admin/nurse/create", data);
+      if (response.status === 201) {
+        await get().getNurses();
+        toast.success(response.data.message);
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.error(error.response?.data);
+      toast.error(error.response.data.message || "Failed to add nurse");
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  createFrontdesk: async (data: any) => {
+    set({ isLoading: true }); // Should be true when starting
+    try {
+      const response = await api.post("/admin/front-desk/create", data);
       if (response.status === 201) {
         await get().getNurses();
         toast.success(response.data.message);

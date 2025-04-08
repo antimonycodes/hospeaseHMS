@@ -3,22 +3,22 @@ import { CreateNurseData } from "../../../store/super-admin/useNuseStore";
 import Button from "../../../Shared/Button";
 
 interface AddNurseModalProps {
-  formData: CreateNurseData; // Use the same interface as Zustand
+  formData: any; // Use the same interface as Zustand
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   setShowModal: (show: boolean) => void;
-  createNurse: (data: CreateNurseData) => any;
+  createFrontdesk: (data: any) => any;
 }
 
-const AddNurseModal: React.FC<AddNurseModalProps> = ({
+const AddFrontDeskModal: React.FC<AddNurseModalProps> = ({
   formData,
   handleInputChange,
   setShowModal,
-  createNurse,
+  createFrontdesk,
 }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log(formData);
-    const response = await createNurse(formData);
+    const response = await createFrontdesk(formData);
     if (response) {
       setShowModal(false);
     }
@@ -29,7 +29,7 @@ const AddNurseModal: React.FC<AddNurseModalProps> = ({
         <div className="p-4 md:p-12">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-custom-black text-lg font-semibold">
-              Add New Nurse
+              Add New Frontdesk
             </h2>
             <button onClick={() => setShowModal(false)} className="">
               <X className="text-black" />
@@ -38,7 +38,7 @@ const AddNurseModal: React.FC<AddNurseModalProps> = ({
 
           <form onSubmit={handleSubmit}>
             {/* Upload Picture */}
-            <div className="mb-4 flex gap-4">
+            {/* <div className="mb-4 flex gap-4">
               <div className="mb-2 text-center">
                 <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center"></div>
               </div>
@@ -50,7 +50,7 @@ const AddNurseModal: React.FC<AddNurseModalProps> = ({
                 </p>
                 <Button variant="primary">Upload</Button>
               </div>
-            </div>
+            </div> */}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* First Name */}
@@ -134,7 +134,7 @@ const AddNurseModal: React.FC<AddNurseModalProps> = ({
               </div>
 
               {/* Date of Birth */}
-              <div>
+              {/* <div>
                 <label
                   htmlFor="dob"
                   className="block text-sm font-medium text-custom-black mb-1"
@@ -150,26 +150,7 @@ const AddNurseModal: React.FC<AddNurseModalProps> = ({
                   className="w-full px-3 py-4 border border-[#D0D5DD] placeholder:text-[#98A2B3] rounded-md"
                   required
                 />
-              </div>
-
-              {/* Religion */}
-              <div>
-                <label
-                  htmlFor="religion"
-                  className="block text-sm font-medium text-custom-black mb-1"
-                >
-                  Religion
-                </label>
-                <input
-                  type="text"
-                  id="religion"
-                  name="religion"
-                  value={formData.religion}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-4 border border-[#D0D5DD] placeholder:text-[#98A2B3] rounded-md"
-                  placeholder="Christianity"
-                />
-              </div>
+              </div> */}
 
               {/* House Address */}
               <div>
@@ -193,7 +174,7 @@ const AddNurseModal: React.FC<AddNurseModalProps> = ({
 
             {/* Submit Button */}
             <div className="mt-6">
-              <Button type="submit">Add Nurse</Button>
+              <Button type="submit">Add Frontdesk</Button>
             </div>
           </form>
         </div>
@@ -202,4 +183,4 @@ const AddNurseModal: React.FC<AddNurseModalProps> = ({
   );
 };
 
-export default AddNurseModal;
+export default AddFrontDeskModal;

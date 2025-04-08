@@ -25,7 +25,7 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
     },
     {
       name: "Front Desk",
-      path: "/dashboard/frontdesk/staffs",
+      path: "/dashboard/front-desk",
       icon: getImageSrc("front-desk.svg"),
       activeIcon: getImageSrc("front-desk.svg"),
     },
