@@ -41,6 +41,7 @@ import FrontdeskDetails from "./components/Frontdesk/appointment/FrontdeskDetail
 import MatronPatientDetails from "./components/Matron/patients/MatronPatientDetails";
 import MatronNurseDetails from "./components/Matron/nurse/MatronNurseDetails";
 import PharPatientDetails from "./components/Pharmacy/Patients/PharPatientDetails";
+import SaFrontdeskpage from "./components/Superadmin/frontdesk/SaFrontdeskpage";
 
 function App() {
   return (
@@ -123,6 +124,7 @@ function App() {
               <Route path="expenses" element={<Expenses />} />
               <Route path="branch" element={<Branch />} />
               <Route path="clinical-department" element={<ClinicalDept />} />
+              <Route path="front-desk" element={<SaFrontdeskpage />} />
             </Route>
           </Route>
         </Routes>

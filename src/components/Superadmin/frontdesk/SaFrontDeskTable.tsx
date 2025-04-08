@@ -18,29 +18,30 @@ type Column<T> = {
 
 interface Props {
   isLoading: boolean;
-  nurses: Nurse[];
+  frontdesks: any[];
 }
 
-const SaNurseTable = ({ nurses, isLoading }: Props) => {
+const SaFrontDeskTable = ({ frontdesks, isLoading }: Props) => {
   const [transformedNurses, setTransformedNurses] = useState<NurseAttributes[]>(
     []
   );
   const navigate = useNavigate();
   const { togglestatus } = useGlobalStore();
-
-  const handleViewMore = (nurse: NurseAttributes) => {
-    console.log("View more clicked for:", nurse);
-    navigate(`/dashboard/nurses/${nurse.id}`);
-  };
+  //   console.log(frontdesks.id);
 
   useEffect(() => {
     setTransformedNurses(
-      nurses.map((nurse) => ({
-        ...nurse.attributes,
-        id: nurse.id,
+      frontdesks?.map((frontdesk) => ({
+        ...frontdesk.attributes,
+        id: frontdesk.id,
       }))
     );
   }, [nurses]);
+
+  const handleViewMore = (frontdesk: any) => {
+    console.log("View more clicked for:", frontdesk);
+    navigate(`/dashboard/nurses/${frontdesk.id}`);
+  };
 
   if (isLoading) return <Loader />;
 
@@ -54,13 +55,7 @@ const SaNurseTable = ({ nurses, isLoading }: Props) => {
         </span>
       ),
     },
-    {
-      key: "nurse_id",
-      label: "Nurse ID",
-      render: (value) => (
-        <span className="text-sm text-[#667085]">{value ?? "N/A"}</span>
-      ),
-    },
+
     {
       key: "phone",
       label: "Phone",
@@ -75,33 +70,33 @@ const SaNurseTable = ({ nurses, isLoading }: Props) => {
         <span className="text-sm text-[#667085]">{value ?? "N/A"}</span>
       ),
     },
-    {
-      key: "is_active",
-      label: "Status",
-      render: (value, row) => (
-        <div className="flex items-center">
-          <label className="inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              className="sr-only peer"
-              checked={row.is_active}
-              onChange={() => handleToggleStatus(row)} // Corrected here
-            />
-            <div
-              className={`relative w-10 h-5 rounded-full transition-colors ${
-                row.is_active ? "bg-primary" : "bg-gray-200"
-              }`}
-            >
-              <div
-                className={`absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform ${
-                  row.is_active ? "transform translate-x-5" : ""
-                }`}
-              ></div>
-            </div>
-          </label>
-        </div>
-      ),
-    },
+    // {
+    //   key: "is_active",
+    //   label: "Status",
+    //   render: (value, row) => (
+    //     <div className="flex items-center">
+    //       <label className="inline-flex items-center cursor-pointer">
+    //         <input
+    //           type="checkbox"
+    //           className="sr-only peer"
+    //           checked={row.is_active}
+    //           onChange={() => handleToggleStatus(row)} // Corrected here
+    //         />
+    //         <div
+    //           className={`relative w-10 h-5 rounded-full transition-colors ${
+    //             row.is_active ? "bg-primary" : "bg-gray-200"
+    //           }`}
+    //         >
+    //           <div
+    //             className={`absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform ${
+    //               row.is_active ? "transform translate-x-5" : ""
+    //             }`}
+    //           ></div>
+    //         </div>
+    //       </label>
+    //     </div>
+    //   ),
+    // },
     // {
     //   key: "id",
     //   label: "Action",
@@ -116,25 +111,27 @@ const SaNurseTable = ({ nurses, isLoading }: Props) => {
     // },
   ];
 
-  const handleToggleStatus = async (nurse: NurseAttributes) => {
-    const newStatus = !nurse.is_active;
+  const handleToggleStatus = async (frontdesk: NurseAttributes) => {
+    const newStatus = !frontdesk.is_active;
 
     // 1. Immediate UI update
     setTransformedNurses((prev) =>
-      prev.map((n) => (n.id === nurse.id ? { ...n, is_active: newStatus } : n))
+      prev.map((n) =>
+        n.id === frontdesk.id ? { ...n, is_active: newStatus } : n
+      )
     );
 
     // 2. API call
     const serverStatus = await togglestatus({
       is_active: newStatus,
-      user_id: nurse.user_id,
+      user_id: frontdesk.user_id,
     });
 
     // If API failed, revert
     if (serverStatus === null) {
       setTransformedNurses((prev) =>
         prev.map((n) =>
-          n.id === nurse.id ? { ...n, is_active: nurse.is_active } : n
+          n.id === frontdesk.id ? { ...n, is_active: frontdesk.is_active } : n
         )
       );
     }
@@ -153,4 +150,4 @@ const SaNurseTable = ({ nurses, isLoading }: Props) => {
   );
 };
 
-export default SaNurseTable;
+export default SaFrontDeskTable;
