@@ -70,7 +70,7 @@ const StaffsDetail = () => {
 
     try {
       setLoading(true);
-      const response = await assignShifts(payload);
+      const response = await assignShifts(payload, "/admin/shift/assign");
       if (response) {
         setSelectedDate(null);
         setShiftType("");
@@ -115,7 +115,11 @@ const StaffsDetail = () => {
 
     try {
       setLoading(true);
-      const response = await updateShift(editingShift.id, payload);
+      const response = await updateShift(
+        editingShift.id,
+        payload,
+        `/admin/shift/update/${staff.id}`
+      );
       if (response) {
         setIsEditModalOpen(false);
         setEditingShift(null);
@@ -129,7 +133,10 @@ const StaffsDetail = () => {
   };
 
   const handleDeleteShift = async (shiftId: number) => {
-    const response = await deleteShift(shiftId);
+    const response = await deleteShift(
+      shiftId,
+      `/admin/shift/delete/${shiftId}`
+    );
     if (response) {
       getStaffShifts(staff.id, `/admin/shift/user-records/${staff.id}`);
     }
