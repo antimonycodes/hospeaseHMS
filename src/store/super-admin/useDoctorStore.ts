@@ -108,11 +108,11 @@ interface DoctorStore {
   getDoctorById: (id: string) => Promise<void>;
   createDoctor: (data: any) => Promise<void>;
   getAllConsultants: () => Promise<void>;
-  getConsultantById: (id: string) => Promise<void>;
+  getConsultantById: (id: string, endpoint: string) => Promise<void>;
   createConsultant: (data: any) => Promise<void>;
 }
 
-export const useDoctorStore = create<DoctorStore>((set, get) => ({
+export const useDoctorStore = create<DoctorStore>((set, get, endpoint) => ({
   isLoading: false,
   doctors: [],
   selectedDoctor: null,
@@ -172,17 +172,19 @@ export const useDoctorStore = create<DoctorStore>((set, get) => ({
     }
   },
 
-  // Fetch all doctors
-  getAllConsultants: async () => {
+  // Fetch all consultants
+  getAllConsultants: async (endpoint = "/admin/consultant/fetch") => {
     set({ isLoading: true });
     try {
-      const response = await api.get("/admin/consultant/fetch");
-      const fetchedConsultants = response.data.data.data; // Extract doctor array
+      const response = await api.get(endpoint);
+      const fetchedConsultants = response.data.data.data; // Extract consultant array
       set({ consultants: fetchedConsultants });
-      // toast.success(response.data.message);
+      console.log("Consultants fetched successfully:", fetchedConsultants);
     } catch (error: any) {
       console.error(error.response?.data);
-      // toast.error(error.response.data.message);
+      toast.error(
+        error.response?.data?.message || "Failed to fetch consultants"
+      );
     } finally {
       set({ isLoading: false });
     }

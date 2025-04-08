@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Tablehead from "../../ReusablepatientD/Tablehead";
-import InventoryStockTable from "./InventoryStockTable";
 import AddStockModal from "./AddStockModal";
 import { useInventoryStore } from "../overview/useInventoryStore";
+import InventoryStockTable from "./InventoryStockTable";
 
 const InventoryStocks = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -37,8 +37,7 @@ const InventoryStocks = () => {
           }}
         />
       )}
-      <InventoryStockTable />
-      {/* <InventoryStockTable stocks={stocks} isLoading={isLoading} /> */}
+      <InventoryStockTable stocks={stocks} isLoading={isLoading} />
     </div>
   );
 };

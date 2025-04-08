@@ -21,7 +21,7 @@ const roleComponents: Record<string, JSX.Element> = {
   pharmacist: <PharmDash />,
   "inventory-manager": <InventoryDash />,
   nurse: <NurseDash />,
-  matron: <MatronDash />,
+  Matron: <MatronDash />,
 };
 
 const Overview = () => {

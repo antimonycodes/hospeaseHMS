@@ -298,7 +298,7 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       activeIcon: getImageSrc("pharmacyWhite.svg"),
     },
   ],
-  matron: [
+  Matron: [
     {
       name: "Overview",
       path: "/dashboard/overview",

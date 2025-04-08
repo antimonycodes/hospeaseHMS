@@ -17,7 +17,7 @@ const roleComponents: Record<string, JSX.Element> = {
   laboratory: <Labpatients />,
   pharmacist: <PharmPatients />,
   nurse: <NursePatients />,
-  matron: <MatronPatients />,
+  Matron: <MatronPatients />,
   consultant: <ConsultantPatients />,
 };
 

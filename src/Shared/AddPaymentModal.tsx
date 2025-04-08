@@ -20,15 +20,24 @@ const initialFormData: FormData = {
   payment_type: "",
 };
 
-const AddPaymentModal = ({ onClose }: { onClose: () => void }) => {
+interface AddPaymentModalProps {
+  onClose: () => void;
+  endpoint?: string; // Optional custom endpoint
+  refreshEndpoint?: string; // Optional refresh endpoint
+}
+
+const AddPaymentModal = ({
+  onClose,
+  endpoint = "/finance/save-revenue", // Default endpoint
+  refreshEndpoint = "/finance/all-revenues", // Default refresh endpoint
+}: AddPaymentModalProps) => {
   const { createPayment, isLoading } = useFinanceStore();
-  const { searchPatients } = usePatientStore(); // For patient search
+  const { searchPatients } = usePatientStore();
 
   const [formData, setFormData] = useState<FormData>(initialFormData);
-  const [query, setQuery] = useState(""); // Patient search query
-  const [patientOptions, setPatientOptions] = useState<any[]>([]); // Patient dropdown options
-  const [selectedPatient, setSelectedPatient] = useState<any>(null); // Selected patient data
-
+  const [query, setQuery] = useState("");
+  const [patientOptions, setPatientOptions] = useState<any[]>([]);
+  const [selectedPatient, setSelectedPatient] = useState<any>(null);
   // Debounced patient search
   const handleSearch = debounce(async (val: string) => {
     if (val.length > 2) {
@@ -67,6 +76,7 @@ const AddPaymentModal = ({ onClose }: { onClose: () => void }) => {
   };
 
   // Handle form submission
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -81,7 +91,7 @@ const AddPaymentModal = ({ onClose }: { onClose: () => void }) => {
       return;
     }
 
-    const success = await createPayment(formData, "/finance/save-revenue");
+    const success = await createPayment(formData, endpoint, refreshEndpoint);
     if (success) {
       setFormData(initialFormData);
       setQuery("");

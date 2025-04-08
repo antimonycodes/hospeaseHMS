@@ -6,6 +6,12 @@ import Tabs from "../../ReusablepatientD/Tabs";
 import FpaymentTable from "./FpaymentTable";
 
 const Fpayment = () => {
+  // const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [activeTab, setActiveTab] = useState<
+  //   "All" | "Half Payment" | "Full Payment"
+  // >("All");
+  // const { payments = [], getAllPayments, isLoading } = useFinanceStore();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<
     "All" | "Half Payment" | "Full Payment"
@@ -58,7 +64,13 @@ const Fpayment = () => {
         typebutton="Add New"
         onButtonClick={openModal}
       />
-      {isModalOpen && <AddPaymentModal onClose={closeModal} />}
+      {isModalOpen && (
+        <AddPaymentModal
+          onClose={closeModal}
+          endpoint="/finance/save-revenue" // Endpoint for saving payment
+          refreshEndpoint="/finance/all-revenues" // Endpoint for refreshing payments
+        />
+      )}
 
       <Tabs<"All" | "Full Payment" | "Half Payment">
         activeTab={activeTab}

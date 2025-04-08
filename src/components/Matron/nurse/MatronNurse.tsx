@@ -17,6 +17,7 @@ const MatronNurse = () => {
     religion: "",
     address: "",
     dob: "",
+    age: "",
   });
 
   const { isLoading, getNurses, nurses, createNurse } = useMatronNurse();

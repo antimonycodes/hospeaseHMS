@@ -5,7 +5,7 @@ import { useDoctorStore } from "../../../store/super-admin/useDoctorStore";
 import Button from "../../../Shared/Button";
 // import { useDoctorStore } from "../store/useDoctorStore";
 
-interface Consultant {
+export interface Consultant {
   id: string;
   attributes: {
     first_name: string;
@@ -22,12 +22,19 @@ interface Consultant {
 const ConsultantDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { selectedConsultant, getConsultantById, isLoading } =
-    useDoctorStore() as {
-      selectedConsultant: Consultant | null;
-      getConsultantById: (id: string) => void;
-      isLoading: boolean;
-    };
+  const {
+    selectedConsultant,
+    getConsultantById: originalGetConsultantById,
+    isLoading,
+  } = useDoctorStore() as {
+    selectedConsultant: Consultant | null;
+    getConsultantById: (id: string, endpoint: string) => Promise<void>;
+    isLoading: boolean;
+  };
+
+  const getConsultantById = (id: string) => {
+    originalGetConsultantById(id, "defaultEndpoint");
+  };
 
   useEffect(() => {
     if (id) {

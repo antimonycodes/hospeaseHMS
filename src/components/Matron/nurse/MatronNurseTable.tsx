@@ -72,28 +72,12 @@ const MatronNurseTable = ({ nurses, isLoading }: Props) => {
       ),
     },
     {
-      key: "is_active",
+      key: "shift_status",
       label: "Status",
-      render: (value, row) => (
+      render: (value) => (
         <div className="flex items-center">
           <label className="inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              className="sr-only peer"
-              checked={row.is_active}
-              onChange={() => handleToggleStatus(row)} // Corrected here
-            />
-            <div
-              className={`relative w-10 h-5 rounded-full transition-colors ${
-                row.is_active ? "bg-primary" : "bg-gray-200"
-              }`}
-            >
-              <div
-                className={`absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform ${
-                  row.is_active ? "transform translate-x-5" : ""
-                }`}
-              ></div>
-            </div>
+            {value ?? "N/A"}
           </label>
         </div>
       ),

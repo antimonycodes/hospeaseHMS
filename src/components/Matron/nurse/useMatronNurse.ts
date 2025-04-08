@@ -52,6 +52,9 @@ export interface NurseAttributes {
   id: number;
   is_active: boolean;
   user_id: number;
+  age: number;
+  religion: string;
+  address: string;
 }
 
 // Patient interfaces
@@ -121,10 +124,11 @@ export interface CreateNurseData {
   last_name: string;
   dob: string;
   email: string;
-  nurse_id: string | null; // Allow null if that's the intended behavior
+  nurse_id: string;
   religion: string;
   phone: string;
   address: string;
+  age: any;
 }
 
 // Zustand Store for Matron
@@ -228,6 +232,9 @@ export const useMatronNurse = create<MatronStore>((set, get) => ({
       const payload = {
         ...data,
         nurse_id: data.nurse_id === "" ? null : data.nurse_id,
+        age: data.age, // Include age
+        religion: data.religion, // Include religion
+        address: data.address, // Include address
       };
       const response = await api.post("/matron/nurse/create", payload);
       if (response.status === 201) {
