@@ -1,118 +1,96 @@
-import { X } from "lucide-react";
-interface formDataData {
-  itemName: string;
-  category: string;
-  purchaseCost: string;
-  quantity: string;
-}
+import React, { useState } from "react";
+import axios from "axios";
+import toast from "react-hot-toast";
+
 interface AddRequestModalProps {
   onClose: () => void;
-  formData: formDataData;
+  formData: {
+    itemName: string;
+    category: string;
+    purchaseCost: string;
+    quantity: string;
+  };
 }
-const AddRequestModal: React.FC<AddRequestModalProps> = ({ onClose }) => {
+
+const AddRequestModal: React.FC<AddRequestModalProps> = ({
+  onClose,
+  formData,
+}) => {
+  const [form, setForm] = useState(formData);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        requested_by: 1, // Replace with the actual user ID
+        status: "pending", // Default status
+        inventory_id: parseInt(form.itemName), // Assuming itemName holds the inventory ID
+        quantity: parseInt(form.quantity),
+      };
+
+      const response = await axios.post("/inventory/requests/create", payload);
+      toast.success("Request created successfully!");
+      onClose(); // Close the modal after successful submission
+    } catch (error: any) {
+      console.error("Error creating request:", error);
+      toast.error(error.response?.data?.message || "Failed to create request.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center z-50 p-6">
-      <div className="bg-white rounded-lg p-12 w-full max-w-2xl">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-medium">Add New Item </h2>
-          <button onClick={onClose}>
-            <X />
+    <div className="modal">
+      <div className="modal-content">
+        <h2 className="text-lg font-semibold">Add Request</h2>
+        <div className="form-group">
+          <label>Item Name</label>
+          <input
+            type="text"
+            name="itemName"
+            value={form.itemName}
+            onChange={handleChange}
+            className="input"
+          />
+        </div>
+        <div className="form-group">
+          <label>Category</label>
+          <input
+            type="text"
+            name="category"
+            value={form.category}
+            onChange={handleChange}
+            className="input"
+          />
+        </div>
+        <div className="form-group">
+          <label>Quantity</label>
+          <input
+            type="number"
+            name="quantity"
+            value={form.quantity}
+            onChange={handleChange}
+            className="input"
+          />
+        </div>
+        <div className="modal-actions">
+          <button onClick={onClose} className="btn-secondary">
+            Cancel
           </button>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="col-span-1">
-            <label className="block text-sm font-medium text-custom-black mb-1">
-              Item name
-            </label>
-            <div className="relative">
-              <select
-                name="itemName"
-                // value={formData.paymentMethod}
-                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm appearance-none"
-              >
-                <option value="Gloves">Gloves</option>
-                <option value="Gloves">Gloves</option>
-                <option value="Gloves">Gloves</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 9l-7 7-7-7"
-                  ></path>
-                </svg>
-              </div>
-            </div>
-          </div>
-          {/*  */}
-          <div className="col-span-1">
-            <label className="block text-sm font-medium text-custom-black mb-1">
-              Category
-            </label>
-            <div className="relative">
-              <select
-                name="category"
-                // value={formData.paymentMethod}
-                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm appearance-none"
-              >
-                <option value="Gloves">Medical Supplies</option>
-                <option value="Gloves">Medical Supplies</option>
-                <option value="Gloves">Medical Supplies</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 9l-7 7-7-7"
-                  ></path>
-                </svg>
-              </div>
-            </div>
-          </div>
-          {/*  */}
-          <div>
-            <label className="block text-sm font-medium text-custom-black mb-1">
-              Quantity
-            </label>
-            <input
-              type="text"
-              name="quantity"
-              //   value={expenseForm.item}
-              className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
-            />
-          </div>
-          {/*  */}
-          <div>
-            <label className="block text-sm font-medium text-custom-black mb-1">
-              Purchase Cost
-            </label>
-            <input
-              type="text"
-              name="purchaseCost"
-              //   value={expenseForm.item}
-              className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
-            />
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <button className="bg-primary text-white px-4 py-2 rounded-md text-sm">
-            Add new Item
+          <button
+            onClick={handleSubmit}
+            className="btn-primary"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Submitting..." : "Submit"}
           </button>
         </div>
       </div>
