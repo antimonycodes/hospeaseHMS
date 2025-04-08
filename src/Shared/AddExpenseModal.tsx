@@ -11,6 +11,7 @@ interface AddExpenseModalProps {
   ) => Promise<boolean | null>;
   isLoading: boolean;
   endpoint: string;
+  refreshEndpoint: string;
 }
 
 const AddExpenseModal = ({
@@ -18,6 +19,7 @@ const AddExpenseModal = ({
   createExpense,
   isLoading,
   endpoint,
+  refreshEndpoint,
 }: AddExpenseModalProps) => {
   const [expense, setExpense] = useState<CreateExpenseData>({
     item: "",

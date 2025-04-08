@@ -56,11 +56,26 @@ interface FinanceStats {
   total_expenses_balance: string;
 }
 
+export interface LabStats {
+  dispersal_status: {
+    pending: {
+      count: number;
+    };
+    completed: {
+      count: number;
+    };
+    ongoing: {
+      count: number;
+    };
+  };
+  total_dispersed: number;
+}
+
 interface FinanceStore {
   isLoading: boolean;
   expenses: any[];
   payments: Payment[];
-  stats: FinanceStats | null;
+  stats: (FinanceStats & LabStats) | null;
   getAllExpenses: (endpoint?: string) => Promise<void>;
   getAllPayments: (endpoint?: string) => Promise<void>;
   createExpense: (
@@ -74,6 +89,7 @@ interface FinanceStore {
     refreshEndpoint?: string
   ) => Promise<boolean | null>;
   getFinanceStats: (endpoint?: string) => Promise<void>;
+  getLabStats: (endpoint?: string) => Promise<void>;
 }
 
 export const useFinanceStore = create<FinanceStore>((set) => ({
@@ -163,6 +179,7 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
       set({ isLoading: false });
     }
   },
+
   getFinanceStats: async (endpoint = "/finance/stats") => {
     set({ isLoading: true });
     try {
@@ -176,6 +193,41 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
     } catch (error: any) {
       console.error("Stats fetch error:", error.response?.data);
       toast.error(error.response?.data?.message || "Failed to fetch stats");
+      set({ stats: null });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  getLabStats: async (endpoint = "/laboratory/stats") => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(endpoint);
+      const responseData = response.data.data || {
+        dispersal_status: {
+          pending: { count: 0 },
+          completed: { count: 0 },
+          ongoing: { count: 0 },
+        },
+        total_dispersed: 0,
+      };
+
+      // Create a new object with flattened properties
+      const labStatsData = {
+        ...responseData,
+        total_tests: responseData.total_dispersed,
+        pending: responseData.dispersal_status.pending.count,
+        ongoing: responseData.dispersal_status.ongoing.count,
+        completed: responseData.dispersal_status.completed.count,
+      };
+
+      set({ stats: labStatsData });
+      console.log("Lab stats fetched:", labStatsData);
+    } catch (error: any) {
+      console.error("Lab stats fetch error:", error.response?.data);
+      toast.error(
+        error.response?.data?.message || "Failed to fetch laboratory stats"
+      );
       set({ stats: null });
     } finally {
       set({ isLoading: false });

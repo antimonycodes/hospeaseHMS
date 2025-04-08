@@ -49,7 +49,7 @@ export const getUserColumns = (
       key: "gender",
       label: "Gender",
       render: (_, data) => (
-        <span className="text-[#667085] text-sm">{data.gender}</span>
+        <span className="text-[rgb(102,112,133)] text-sm">{data.gender}</span>
       ),
     },
     {

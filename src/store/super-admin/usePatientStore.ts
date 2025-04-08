@@ -46,6 +46,7 @@ export interface CreatePatientData {
   next_of_kin: NextOfKin[];
   dob: string;
 }
+
 export interface Pagination {
   total: number;
   per_page: number;
@@ -61,6 +62,16 @@ export interface BookAppointmentData {
   date: string;
   time: string;
 }
+
+export interface LabPatient {
+  id: number;
+  name: string;
+  patientid: string;
+  phone: string;
+  gender: string;
+  status: "Pending" | "Ongoing" | "Completed";
+}
+
 interface PatientStore {
   isLoading: boolean;
   patients: any[];
@@ -68,6 +79,7 @@ interface PatientStore {
   selectedPatient: any | null;
   appointments: any[];
   selectedAppointment: any | null;
+  labPatients: LabPatient[];
 
   getAllPatients: (endpoint?: string) => Promise<void>;
   getPatientById: (id: string) => Promise<void>;
@@ -87,7 +99,9 @@ interface PatientStore {
   getAppointmentById: (id: string) => Promise<void>;
   manageAppointment: (id: string, data: any) => Promise<any>;
   searchPatients: (query: string) => Promise<any[]>;
+  getLabPatients: (endpoint?: string) => Promise<void>; // New function for lab patients
 }
+
 export const usePatientStore = create<PatientStore>((set, get) => ({
   isLoading: true,
   patients: [],
@@ -95,6 +109,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   appointments: [],
   pagination: null,
   selectedAppointment: null,
+  labPatients: [],
 
   // Fetch all patient
   getAllPatients: async (endpoint = "/admin/patient/fetch") => {
@@ -110,6 +125,36 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
     } catch (error: any) {
       console.error(error.response?.data);
       // toast.error(error.response?.data?.message || "Failed to fetch patients");
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  // Fetch lab patients
+  getLabPatients: async (endpoint = "/laboratory/patient/all") => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(endpoint);
+      if (response.data && response.data.data) {
+        // Transform API data to match our component's expected structure
+        const formattedData = response.data.data.map((patient: any) => ({
+          id: patient.id,
+          name: `${patient.first_name || ""} ${patient.last_name || ""}`.trim(),
+          patientid: patient.card_id || "N/A",
+          phone: patient.phone_number || "",
+          gender: patient.gender || "",
+          status: patient.test_status || "Pending",
+        }));
+
+        set({ labPatients: formattedData });
+        console.log("Lab patients loaded:", formattedData);
+      }
+    } catch (error: any) {
+      console.error("Error fetching lab patients:", error);
+      toast.error(
+        error.response?.data?.message || "Failed to fetch laboratory patients"
+      );
+      set({ labPatients: [] });
     } finally {
       set({ isLoading: false });
     }
@@ -148,6 +193,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
+
   getPharPatientById: async (id) => {
     set({ isLoading: true });
     try {
@@ -163,6 +209,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
+
   getPatientByIdDoc: async (id) => {
     set({ isLoading: true });
     try {
@@ -265,6 +312,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
+
   getAppointmentById: async (id) => {
     set({ isLoading: true });
     try {
@@ -280,6 +328,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
+
   manageAppointment: async (id, data) => {
     set({ isLoading: true });
     try {
@@ -303,33 +352,4 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
-
-  // Book Appointment
-  // bookAppointment: async (
-  //   data,
-  //   endpoint = "/front-desk/appointment/book",
-  //   refreshendpoint
-  // ) => {
-  //   set({ isLoading: true });
-  //   try {
-  //     const payload = {
-  //       ...data,
-  //       branch_id: data.branch_id ?? null,
-  //     };
-  //     const response = await api.post(endpoint, payload);
-  //     if (response.status === 201) {
-  //       // Refresh the doctors list after creation
-  //       await get().getAllAppointments(refreshendpoint);
-  //       toast.success(response.data.message);
-  //       return true;
-  //     }
-  //     return null;
-  //   } catch (error: any) {
-  //     console.error(error.response?.data);
-  //     toast.error(error.response?.data?.message || "Failed to add patient");
-  //     return null;
-  //   } finally {
-  //     set({ isLoading: false });
-  //   }
-  // },
 }));

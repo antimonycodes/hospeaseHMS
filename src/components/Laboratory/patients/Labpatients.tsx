@@ -1,24 +1,34 @@
-import React, { useState } from "react";
-import { patients } from "../../../data/patientsData";
+import React, { useEffect, useState } from "react";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import Tabs from "../../ReusablepatientD/Tabs";
-import PatientTable from "../../ReusablepatientD/PatientTable"; // Ensure correct import
-
-const getStatusCounts = () => {
-  return patients.reduce(
-    (acc, patient) => {
-      acc[patient.status] = (acc[patient.status] || 0) + 1;
-      return acc;
-    },
-    { Pending: 0, Ongoing: 0, Completed: 0 }
-  );
-};
+import Labpatientsinfo from "./Labpatientsinfo";
+import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 
 const Labpatients = () => {
+  const { patients, getAllPatients, isLoading } = usePatientStore();
+
+  useEffect(() => {
+    getAllPatients("/laboratory/patient/all");
+  }, [getAllPatients]);
+
   const [activeTab, setActiveTab] = useState<
     "Pending" | "Ongoing" | "Completed"
   >("Pending");
+
+  // Calculate status counts for the tabs
+  const getStatusCounts = () => {
+    return patients.reduce(
+      (acc, patient) => {
+        acc[patient.status] = (acc[patient.status] || 0) + 1;
+        return acc;
+      },
+      { Pending: 0, Ongoing: 0, Completed: 0 }
+    );
+  };
+
   const statusCounts = getStatusCounts();
+
+  // Filter patients based on the active tab
   const filteredPatients = patients.filter((p) => p.status === activeTab);
 
   return (
@@ -35,7 +45,8 @@ const Labpatients = () => {
         tabs={["Pending", "Ongoing", "Completed"]}
       />
 
-      <PatientTable patients={filteredPatients} />
+      {/* Pass filtered patients to Labpatientsinfo */}
+      <Labpatientsinfo patients={filteredPatients} isLoading={isLoading} />
     </div>
   );
 };

@@ -30,6 +30,7 @@ const Fexpenses = () => {
           isLoading={isLoading}
           createExpense={createExpense}
           endpoint="/finance/expenses-record"
+          refreshEndpoint="/finance/all-expenses"
         />
       )}
       <FexpensesTable />

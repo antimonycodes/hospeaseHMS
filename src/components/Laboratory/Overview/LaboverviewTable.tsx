@@ -1,42 +1,61 @@
-import React from "react";
+import React, { JSX, useEffect } from "react";
 import Tablehead from "../../ReusablepatientD/Tablehead";
-import { patients, Patient } from "../../../data/patientsData";
 import Table from "../../../Shared/Table";
 import { formatPhoneNumber } from "../../../utils/formatPhoneNumber";
+import { usePatientStore } from "../../../store/super-admin/usePatientStore";
+
+type LabPatient = {
+  id: number;
+  name: string;
+  patientid: string;
+  phone: string;
+  gender: string;
+  status: "Pending" | "Ongoing" | "Completed";
+};
+
+type Columns = {
+  key: keyof LabPatient;
+  label: string;
+  render?: (value: any, patient: LabPatient) => JSX.Element;
+};
 
 const LaboverviewTable = () => {
-  const pendingPatients = patients.filter(
+  const { labPatients, getLabPatients, isLoading } = usePatientStore();
+
+  useEffect(() => {
+    getLabPatients();
+  }, [getLabPatients]);
+
+  // Filter patients by status
+  const pendingPatients = labPatients.filter(
     (patient) => patient.status === "Pending"
   );
-  const ongoingPatients = patients.filter(
+
+  const ongoingPatients = labPatients.filter(
     (patient) => patient.status === "Ongoing"
   );
 
-  const statusStyles: Record<Patient["status"], string> = {
+  const statusStyles: Record<string, string> = {
     Ongoing: "bg-[#FFEBAA] text-[#B58A00]",
     Completed: "bg-[#CFFFE9] text-[#009952]",
     Pending: "bg-[#FBE1E1] text-[#F83E41]",
   };
 
-  const columns: {
-    key: keyof Patient;
-    label: string;
-    render: (value: string | number, row: Patient) => React.ReactNode;
-  }[] = [
+  const columns: Columns[] = [
     {
       key: "name",
       label: "Name",
-      render: (value) => (
+      render: (value: string) => (
         <span className="text-dark font-medium text-sm">{value}</span>
       ),
     },
     {
       key: "status",
       label: "Status",
-      render: (value) => (
+      render: (value: string) => (
         <span
           className={`text-sm px-2 py-1 rounded-full ${
-            statusStyles[value as Patient["status"]]
+            statusStyles[value] || "bg-gray-200 text-gray-700"
           }`}
         >
           {value}
@@ -45,45 +64,49 @@ const LaboverviewTable = () => {
     },
   ];
 
-  const columnss: {
-    key: keyof Patient;
-    label: string;
-    render: (value: string | number, row: Patient) => React.ReactNode;
-  }[] = [
+  const detailedColumns: Columns[] = [
     {
       key: "name",
       label: "Name",
-      render: (value) => (
+      render: (value: string) => (
         <span className="text-dark font-medium text-sm">{value}</span>
       ),
     },
     {
       key: "patientid",
       label: "Patient ID",
-      render: (value) => (
+      render: (value: string) => (
         <span className="text-[#667085] text-sm">{value}</span>
       ),
     },
     {
       key: "phone",
       label: "Phone",
-      render: (value) => (
+      render: (value: string) => (
         <span className="text-[#667085] text-sm">
-          {formatPhoneNumber(value as string)}
+          {formatPhoneNumber(value)}
         </span>
       ),
     },
     {
       key: "gender",
       label: "Gender",
-      render: (value) => (
+      render: (value: string) => (
         <span className="text-[#667085] text-sm">{value}</span>
       ),
     },
   ];
 
+  if (isLoading) {
+    return (
+      <div className="w-full text-center py-4">
+        Loading laboratory patients...
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full flex    gap-4">
+    <div className="w-full flex gap-4">
       {/* Pending Tests */}
       <div className="w-1/2">
         <Tablehead
@@ -116,7 +139,7 @@ const LaboverviewTable = () => {
         <div>
           <Table
             data={ongoingPatients.slice(0, 3)}
-            columns={columnss}
+            columns={detailedColumns}
             rowKey="id"
             pagination={false}
             radius="rounded-none"
