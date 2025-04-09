@@ -43,6 +43,7 @@ import MatronNurseDetails from "./components/Matron/nurse/MatronNurseDetails";
 import PharPatientDetails from "./components/Pharmacy/Patients/PharPatientDetails";
 import SaFrontdeskpage from "./components/Superadmin/frontdesk/SaFrontdeskpage";
 import LabDetails from "./components/Laboratory/patients/labDetails";
+import StaffProfile from "./pages/StaffProfile";
 
 function App() {
   return (
@@ -56,6 +57,7 @@ function App() {
             <Route path="/dashboard" element={<DashboardLayout />}>
               <Route index element={<Navigate to="overview" />} />
               <Route path="overview" element={<Overview />} />
+              <Route path="staffprofile" element={<StaffProfile />} />
               <Route path="patients" element={<Patients />} />
               <Route path="patients/:id" element={<PatientDetails />} />
               <Route
