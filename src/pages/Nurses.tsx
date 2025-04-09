@@ -4,7 +4,7 @@ import SaNursesPage from "../components/Superadmin/nurses/SaNursesPage";
 import MatronNurse from "../components/Matron/nurse/MatronNurse";
 
 const roleComponents: Record<string, JSX.Element> = {
-  Matron: <MatronNurse />,
+  matron: <MatronNurse />,
   admin: <SaNursesPage />,
 
   //   doctor:  ,

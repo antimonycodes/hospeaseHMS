@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import Table from "../../../Shared/Table";
 import { useNavigate } from "react-router-dom";
+import Tablehead from "../../ReusablepatientD/Tablehead";
 
 const PharmPatients = () => {
   const { getAllPatients, patients } = usePatientStore();
@@ -119,8 +120,15 @@ const PharmPatients = () => {
 
   return (
     <div className="mt-2">
+      {/*  Table Header */}
+      <Tablehead
+        tableTitle="Patients"
+        showSearchBar={true}
+        showControls={true}
+        tableCount={patients.length}
+      />
       {/* 🔘 Tabs */}
-      <div className="w-full flex space-x-2 md:space-x-6 mb-4">
+      <div className="w-full bg-white flex space-x-2 md:space-x-6 ">
         {statuses.map((status) => (
           <button
             key={status}

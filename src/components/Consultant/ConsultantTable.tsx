@@ -5,6 +5,7 @@ import { useAppointmentStore } from "../../store/staff/useAppointmentStore";
 import FrontdeskAppointmentModal from "../Frontdesk/appointment/FrontdeskAppointmentModal";
 import { getImageSrc } from "../../utils/imageUtils";
 import Table from "../../Shared/Table";
+import { usePatientStore } from "../../store/super-admin/usePatientStore";
 
 interface Patient {
   id: number;
@@ -39,7 +40,7 @@ const ConsultantTable = () => {
   const [activeTab, setActiveTab] = useState<TabType>("Pending");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { getAllAppointments, appointments } = useAppointmentStore();
+  const { getAllAppointments, appointments } = usePatientStore();
 
   const transformedPatients: Patient[] = appointments.map((item: any) => {
     const rawStatus = item.attributes.status?.toLowerCase() ?? "";

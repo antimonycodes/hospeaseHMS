@@ -1,8 +1,9 @@
-import React, { JSX, useEffect } from "react";
+import React, { JSX, useEffect, useState } from "react";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import Table from "../../../Shared/Table";
 import { formatPhoneNumber } from "../../../utils/formatPhoneNumber";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
+import Tabs from "../../ReusablepatientD/Tabs";
 
 type LabPatient = {
   id: number;
@@ -20,18 +21,24 @@ type Columns = {
 };
 
 const LaboverviewTable = () => {
-  const { labPatients, getLabPatients, isLoading } = usePatientStore();
+  const { patients, getAllPatients, isLoading } = usePatientStore();
 
   useEffect(() => {
-    getLabPatients();
-  }, [getLabPatients]);
+    getAllPatients("/laboratory/patient/all");
+  }, [getAllPatients]);
 
-  // Filter patients by status
-  const pendingPatients = labPatients.filter(
+  // Calculate status counts
+  const statusCounts = {
+    Pending: patients.filter((p) => p.status === "Pending").length,
+    Ongoing: patients.filter((p) => p.status === "Ongoing").length,
+    Completed: patients.filter((p) => p.status === "Completed").length,
+  };
+
+  const pendingPatients = patients.filter(
     (patient) => patient.status === "Pending"
   );
 
-  const ongoingPatients = labPatients.filter(
+  const ongoingPatients = patients.filter(
     (patient) => patient.status === "Ongoing"
   );
 
@@ -116,15 +123,19 @@ const LaboverviewTable = () => {
           tableCount={pendingPatients.length}
           showControls={false}
         />
-        <div>
-          <Table
-            data={pendingPatients.slice(0, 3)}
-            columns={columns}
-            rowKey="id"
-            pagination={false}
-            radius="rounded-none"
-          />
-        </div>
+        <Tabs
+          activeTab="Pending"
+          setActiveTab={() => {}}
+          statusCounts={statusCounts}
+          tabs={["Pending"]}
+        />
+        <Table
+          data={pendingPatients.slice(0, 3)}
+          columns={columns}
+          rowKey="id"
+          pagination={false}
+          radius="rounded-none"
+        />
       </div>
 
       {/* Ongoing Tests */}
@@ -136,15 +147,19 @@ const LaboverviewTable = () => {
           showControls={false}
           showSearchBar={false}
         />
-        <div>
-          <Table
-            data={ongoingPatients.slice(0, 3)}
-            columns={detailedColumns}
-            rowKey="id"
-            pagination={false}
-            radius="rounded-none"
-          />
-        </div>
+        <Tabs
+          activeTab="Ongoing"
+          setActiveTab={() => {}}
+          statusCounts={statusCounts}
+          tabs={["Ongoing"]}
+        />
+        <Table
+          data={ongoingPatients.slice(0, 3)}
+          columns={detailedColumns}
+          rowKey="id"
+          pagination={false}
+          radius="rounded-none"
+        />
       </div>
     </div>
   );
