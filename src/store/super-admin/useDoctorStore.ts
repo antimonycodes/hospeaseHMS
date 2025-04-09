@@ -104,12 +104,20 @@ interface DoctorStore {
   consultants: any[];
   selectedDoctor: Doctor | null;
   selectedConsultant: Doctor | null;
-  getAllDoctors: () => Promise<void>;
+  getAllDoctors: (enpoint?: string) => Promise<void>;
   getDoctorById: (id: string) => Promise<void>;
-  createDoctor: (data: any) => Promise<void>;
-  getAllConsultants: () => Promise<void>;
+  createDoctor: (
+    data: any,
+    endpoint?: string,
+    refreshEndpoint?: string
+  ) => Promise<void>;
+  getAllConsultants: (endpoint?: string) => Promise<void>;
   getConsultantById: (id: string, endpoint?: string) => Promise<void>;
-  createConsultant: (data: any) => Promise<void>;
+  createConsultant: (
+    data: any,
+    endpoint?: string,
+    refreshEndpoint?: string
+  ) => Promise<void>;
 }
 
 export const useDoctorStore = create<DoctorStore>((set, get, endpoint) => ({
@@ -120,10 +128,10 @@ export const useDoctorStore = create<DoctorStore>((set, get, endpoint) => ({
   selectedConsultant: null,
 
   // Fetch all doctors
-  getAllDoctors: async () => {
+  getAllDoctors: async (enpoint = "/admin/doctor/fetch") => {
     set({ isLoading: true });
     try {
-      const response = await api.get("/admin/doctor/fetch");
+      const response = await api.get(enpoint);
       const fetchedDoctors = response.data.data.data; // Extract doctor array
       set({ doctors: fetchedDoctors });
       // toast.success("Doctors retrieved successfully!");
@@ -153,16 +161,20 @@ export const useDoctorStore = create<DoctorStore>((set, get, endpoint) => ({
   },
 
   // Create a new doctor
-  createDoctor: async (data) => {
+  createDoctor: async (
+    data,
+    endpoint = "/admin/doctor/create",
+    refreshEndpoint
+  ) => {
     set({ isLoading: true });
     try {
       const payload = {
         ...data,
         doctor_id: data.doctor_id ?? null,
       };
-      const response = await api.post("/admin/doctor/create", payload);
+      const response = await api.post(endpoint, payload);
       // Refresh the doctors list after creation
-      await get().getAllDoctors();
+      await get().getAllDoctors(refreshEndpoint);
       toast.success(response.data.message);
     } catch (error: any) {
       console.error(error.response?.data);
@@ -206,16 +218,20 @@ export const useDoctorStore = create<DoctorStore>((set, get, endpoint) => ({
   },
 
   // Create a new doctor
-  createConsultant: async (data) => {
+  createConsultant: async (
+    data,
+    endpoint = "/admin/consultant/create",
+    refreshEndpoint
+  ) => {
     set({ isLoading: true });
     try {
       const payload = {
         ...data,
         consultant_id: data.consultant_id ?? null,
       };
-      const response = await api.post("/admin/consultant/create", payload);
+      const response = await api.post(endpoint, payload);
       // Refresh the doctors list after creation
-      await get().getAllConsultants();
+      await get().getAllConsultants(refreshEndpoint);
       toast.success(response.data.message);
     } catch (error: any) {
       console.error(error.response?.data);

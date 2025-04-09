@@ -2,6 +2,7 @@ import React, { JSX, useEffect, useState } from "react";
 import Table from "../../../Shared/Table";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import Tablehead from "../../ReusablepatientD/Tablehead";
+import { useNavigate } from "react-router-dom";
 
 interface AppointmentAttributes {
   doctor: string;
@@ -70,11 +71,13 @@ type FlattenedAppointment = {
   rescheduled_data: any | null;
   reason_if_rejected_or_rescheduled: string | null;
   assigned_by: string;
+  viewMore: string;
 };
 
 const MedAppointment = () => {
   const [activeTab, setActiveTab] = useState<TabType>("New");
   const { appointments, isLoading, getAllAppointments } = usePatientStore();
+  const navigate = useNavigate(); // Initialize navigate here
 
   useEffect(() => {
     getAllAppointments("/medical-director/all-appointments");
@@ -87,7 +90,13 @@ const MedAppointment = () => {
       id: appointment.id,
       type: appointment.type,
       ...appointment.attributes,
+      viewMore: `/appointment/medicalDirector/${appointment.id}`, // Add viewMore property
     }));
+  };
+
+  const handleViewMore = (id: string) => {
+    console.log("Navigating to appointment details for ID:", id);
+    navigate(`/appointment/medicalDirector/${id}`); // Update the route to point to MedAppointmentDetails
   };
 
   const columns: TableColumn<FlattenedAppointment>[] = [
@@ -130,6 +139,18 @@ const MedAppointment = () => {
       label: "Occupation",
       render: (_, data) => (
         <span className="text-[#667085]">{data.occupation || "N/A"}</span>
+      ),
+    },
+    {
+      key: "viewMore",
+      label: "",
+      render: (_, data) => (
+        <span
+          className="text-primary text-sm font-medium cursor-pointer"
+          onClick={() => handleViewMore(data.id.toString())}
+        >
+          View More
+        </span>
       ),
     },
     // {

@@ -46,6 +46,7 @@ import LabDetails from "./components/Laboratory/patients/LabDetaill";
 import StaffProfile from "./pages/StaffProfile";
 import LabDetaill from "./components/Laboratory/patients/LabDetaill";
 import MedPatientsDetails from "./components/medicaldirector/patients/MedPatientsDetails";
+import MedAppointmentDetails from "./components/medicaldirector/appointment/MedAppointmentDetails";
 
 function App() {
   return (
@@ -82,6 +83,10 @@ function App() {
               <Route
                 path="appointment/doctor/:id"
                 element={<DoctorAppointmentDetails />}
+              />
+              <Route
+                path="appointment/medicalDirector/:id"
+                element={<MedAppointmentDetails />}
               />
               <Route
                 path="appointment/frontdesk/:id"
