@@ -350,8 +350,8 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
     {
       name: "Nurse",
       path: "/dashboard/nurses",
-      icon: getImageSrc("pharmacyicon.svg"),
-      activeIcon: getImageSrc("pharmacyWhite.svg"),
+      icon: getImageSrc("nursesicon.svg"),
+      activeIcon: getImageSrc("nurseWhite.svg"),
     },
     {
       name: "Patients",
@@ -372,6 +372,34 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       path: "/dashboard/patients",
       icon: getImageSrc("patientsicon.svg"),
       activeIcon: getImageSrc("patienticonsLight.svg"),
+    },
+    {
+      name: "Profile",
+      path: "/dashboard/staffprofile",
+      icon: getImageSrc("profile.svg"),
+      activeIcon: getImageSrc("profile.svg"),
+    },
+  ],
+
+  "medical-director": [
+    {
+      name: "Overview",
+      path: "/dashboard/overview",
+      icon: getImageSrc("darkdashboarddark.svg"),
+      activeIcon: getImageSrc("overviewicon.svg"),
+    },
+
+    {
+      name: "Patients",
+      path: "/dashboard/patients",
+      icon: getImageSrc("patientsicon.svg"),
+      activeIcon: getImageSrc("patienticonsLight.svg"),
+    },
+    {
+      name: "Appointments",
+      path: "/dashboard/appointments",
+      icon: getImageSrc("appointmentsdark.svg"),
+      activeIcon: getImageSrc("appointmentLight.svg"),
     },
     {
       name: "Profile",

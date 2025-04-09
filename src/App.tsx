@@ -42,8 +42,10 @@ import MatronPatientDetails from "./components/Matron/patients/MatronPatientDeta
 import MatronNurseDetails from "./components/Matron/nurse/MatronNurseDetails";
 import PharPatientDetails from "./components/Pharmacy/Patients/PharPatientDetails";
 import SaFrontdeskpage from "./components/Superadmin/frontdesk/SaFrontdeskpage";
-import LabDetails from "./components/Laboratory/patients/labDetails";
+import LabDetails from "./components/Laboratory/patients/LabDetaill";
 import StaffProfile from "./pages/StaffProfile";
+import LabDetaill from "./components/Laboratory/patients/LabDetaill";
+import MedPatientsDetails from "./components/medicaldirector/patients/MedPatientsDetails";
 
 function App() {
   return (
@@ -93,7 +95,11 @@ function App() {
                 path="matron/nurses/:id"
                 element={<MatronNurseDetails />}
               />
-              <Route path="laboratory/patients/:id" element={<LabDetails />} />
+              <Route path="laboratory/patients/:id" element={<LabDetaill />} />
+              <Route
+                path="medical/patients/:id"
+                element={<MedPatientsDetails />}
+              />
               <Route path="nurses" element={<Nurses />} />
               <Route path="nurses/:id" element={<NurseDetails />} />
               <Route path="pharmacy/info" element={<Pharmacy />} />

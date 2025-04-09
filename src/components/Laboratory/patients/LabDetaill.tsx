@@ -1,7 +1,7 @@
 import React from "react";
 
-const LabDetails = () => {
+const LabDetaill = () => {
   return <div>labDetails</div>;
 };
 
-export default LabDetails;
+export default LabDetaill;
