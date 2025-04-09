@@ -9,11 +9,11 @@ interface TopNavProps {
 }
 
 const TopNav: React.FC<TopNavProps> = ({ setIsMobileMenuOpen }) => {
-  const { profileData, isLoading, getProfileData } = useProfileStore();
+  // const { profileData, isLoading, getProfileData } = useProfileStore();
 
-  useEffect(() => {
-    getProfileData();
-  }, [getProfileData]);
+  // useEffect(() => {
+  //   getProfileData();
+  // }, [getProfileData]);
   return (
     <div className="w-full z">
       <div className="w-full py-2 px-4 flex justify-between items-center border-0 border-[#009952] bg-white z-20 h-[61px] custom-shadow">
@@ -33,10 +33,10 @@ const TopNav: React.FC<TopNavProps> = ({ setIsMobileMenuOpen }) => {
         <div className="flex items-center gap-6">
           <Bell className="text-gray-700 w-5" />
           <div className="size-8">
-            <img
+            {/* <img
               src={profileData?.attributes?.logo}
               className="w-full h-full border border-primary rounded-full"
-            />
+            /> */}
           </div>
         </div>
       </div>
