@@ -340,7 +340,7 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       activeIcon: getImageSrc("profile.svg"),
     },
   ],
-  Matron: [
+  matron: [
     {
       name: "Overview",
       path: "/dashboard/overview",
