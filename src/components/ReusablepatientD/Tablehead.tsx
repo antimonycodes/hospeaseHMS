@@ -53,11 +53,11 @@ const Tablehead: React.FC<TableheadProps> = ({
               <Button
                 variant="primary"
                 size="md"
-                className=" flex items-center gap-2  "
+                className="flex items-center gap-2 px-4"
                 onClick={onButtonClick}
               >
                 {typebutton}
-                <Plus size={16} />
+                <Plus size={20} />
               </Button>
             </div>
           )}
