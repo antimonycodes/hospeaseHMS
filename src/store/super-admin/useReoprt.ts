@@ -34,6 +34,7 @@ interface ReportStore {
   }) => Promise<any>;
   singleReport: any[];
   allReports: any[];
+  allNotes: any[];
   createNote: (data: any) => Promise<any>;
   getAllReport: (id: any) => Promise<any>;
   getSingleReport: (id: any) => Promise<any>;
@@ -45,6 +46,7 @@ interface ReportStore {
       file?: File | null;
     }
   ) => Promise<any>;
+  getMedicalNote: (id: any, type: any) => Promise<any>;
 }
 
 export const useReportStore = create<ReportStore>((set) => ({
@@ -52,6 +54,7 @@ export const useReportStore = create<ReportStore>((set) => ({
   isReportLoading: false,
   singleReport: [],
   allReports: [],
+  allNotes: [],
   createReport: async ({
     patient_id,
     note,
@@ -205,6 +208,26 @@ export const useReportStore = create<ReportStore>((set) => ({
       console.error("Error submitting the report:", error);
       toast.error(error.response.data.message);
       // Handle error state
+      set({ isLoading: false });
+    }
+  },
+  getMedicalNote: async (id, type) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(
+        `/medical-report/medical-report/${id}?type=${type}`
+      );
+      if (response.status === 200) {
+        set({ allNotes: response.data.data.data });
+        console.log(response.data.data.data);
+        return true;
+      }
+      return null;
+    } catch (error: any) {
+      console.error("Error fetching medical note:", error);
+      toast.error(error.response?.data?.message || "Failed to fetch note");
+      return null;
+    } finally {
       set({ isLoading: false });
     }
   },

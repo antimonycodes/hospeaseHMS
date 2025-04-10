@@ -42,6 +42,9 @@ import MatronPatientDetails from "./components/Matron/patients/MatronPatientDeta
 import MatronNurseDetails from "./components/Matron/nurse/MatronNurseDetails";
 import PharPatientDetails from "./components/Pharmacy/Patients/PharPatientDetails";
 import SaFrontdeskpage from "./components/Superadmin/frontdesk/SaFrontdeskpage";
+import LabPatientDetails from "./components/Laboratory/patients/LabPatientDetails";
+import NotificationPage from "./components/Dashboard/Notification";
+// import LabDetails from "./components/Laboratory/patients/labDetails";
 import LabDetails from "./components/Laboratory/patients/LabDetaill";
 import StaffProfile from "./pages/StaffProfile";
 import LabDetaill from "./components/Laboratory/patients/LabDetaill";
@@ -71,6 +74,11 @@ function App() {
                 path="pharmacy/patient/:patientId/case-report/:caseId"
                 element={<PharPatientDetails />}
               />
+              <Route
+                path="laboratory/patient/:patientId/case-report/:caseId"
+                element={<LabPatientDetails />}
+              />
+
               <Route path="doctors" element={<Doctors />} />
               <Route path="doctors/:id" element={<DoctorDetails />} />
 
@@ -140,6 +148,7 @@ function App() {
               <Route path="branch" element={<Branch />} />
               <Route path="clinical-department" element={<ClinicalDept />} />
               <Route path="front-desk" element={<SaFrontdeskpage />} />
+              <Route path="notifications" element={<NotificationPage />} />
             </Route>
           </Route>
         </Routes>

@@ -4,9 +4,10 @@ import { Patient, patients } from "../../../data/patientsData";
 import { formatPhoneNumber } from "../../../utils/formatPhoneNumber";
 import { useNavigate } from "react-router-dom";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
+import Loader from "../../../Shared/Loader";
 
 const PharmCard = () => {
-  const { getAllPatients, patients } = usePatientStore();
+  const { getAllPatients, patients, isLoading } = usePatientStore();
   const [activeStatus, setActiveStatus] = useState("pending");
   const navigate = useNavigate();
 
@@ -20,14 +21,14 @@ const PharmCard = () => {
 
     return {
       id: item.id, // case note ID
-      name: `${patient.first_name} ${patient.last_name}`,
-      patientId: patient.card_id,
-      gender: patient.gender,
-      phone: patient.phone_number,
-      status: attr.status,
-      created_at: attr.created_at,
-      caseNoteId: item.id,
-      patientUniqueId: patient.id,
+      name: `${patient?.first_name} ${patient?.last_name}`,
+      patientId: patient?.card_id,
+      gender: patient?.gender,
+      phone: patient?.phone_number,
+      status: attr?.status,
+      created_at: attr?.created_at,
+      caseNoteId: item?.id,
+      patientUniqueId: patient?.id,
     };
   });
 
@@ -37,7 +38,7 @@ const PharmCard = () => {
   // 📊 Count each status
   const statusCounts = transformedPatients.reduce(
     (acc: Record<string, number>, patient) => {
-      const status = patient.status.toLowerCase();
+      const status = patient.status?.toLowerCase();
       acc[status] = (acc[status] || 0) + 1;
       return acc;
     },
@@ -185,6 +186,8 @@ const PharmCard = () => {
   //     ),
   //   },
   // ];
+
+  if (isLoading) return <Loader />;
 
   return (
     <div>
