@@ -30,10 +30,8 @@ const PharmPatients = () => {
     };
   });
 
-  // 👇 Always show these statuses as tabs
   const statuses = ["pending", "ongoing", "completed"];
 
-  // 📊 Count each status
   const statusCounts = transformedPatients.reduce(
     (acc: Record<string, number>, patient) => {
       const status = patient.status.toLowerCase();
@@ -47,7 +45,6 @@ const PharmPatients = () => {
     }
   );
 
-  // ✂️ Filter by current active status
   const filteredPatients = transformedPatients.filter(
     (p) => p.status.toLowerCase() === activeStatus
   );
@@ -127,7 +124,7 @@ const PharmPatients = () => {
         showControls={true}
         tableCount={patients.length}
       />
-      {/* 🔘 Tabs */}
+      {/*  Tabs */}
       <div className="w-full bg-white flex space-x-2 md:space-x-6 ">
         {statuses.map((status) => (
           <button
@@ -147,7 +144,6 @@ const PharmPatients = () => {
         ))}
       </div>
 
-      {/* 📋 Table */}
       <Table
         columns={columns}
         data={filteredPatients}

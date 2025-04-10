@@ -95,6 +95,8 @@ interface Globalstore {
   staffs: any[];
   selectedStaff: any | null;
   staffShift: any[];
+  notifications: any[];
+  unreadCount: any;
   roles: Record<string, { id: number; role: string }>;
   setSelectedStaff: (staff: any) => void;
   togglestatus: (data: Togglestatus) => Promise<any>;
@@ -109,6 +111,8 @@ interface Globalstore {
   updateShift: (id: any, data: any, update: any) => Promise<any>;
   deleteShift: (id: any, endpoint: any) => Promise<any>;
   getAllRoles: () => Promise<any>;
+  getAllNotifications: () => Promise<any>;
+  getUnreadNotificationCount: () => Promise<any>;
 }
 
 export const useGlobalStore = create<Globalstore>((set, get) => ({
@@ -117,9 +121,11 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
   clinicaldepts: [],
   staffs: [],
   roles: {},
+  notifications: [],
   isStaffLoading: false,
   selectedStaff: null,
   staffShift: [],
+  unreadCount: 0,
   setSelectedStaff: (staff) => set({ selectedStaff: staff }),
 
   togglestatus: async (data) => {
@@ -388,6 +394,37 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       set({ roles: roleVariables });
     } catch (error: any) {
       console.log(error.response?.data || error.message);
+    }
+  },
+  getAllNotifications: async () => {
+    set({ isLoading: false });
+    try {
+      const response = await api.get("notification/all");
+      if (response.status === 200) {
+        set({ notifications: response.data.data });
+        console.log(response.data.data);
+        return true;
+      }
+      return null;
+    } catch (error: any) {
+      console.log(error.response?.data || error.message);
+    }
+  },
+  getUnreadNotificationCount: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get("/notification/all-count");
+      if (response.status === 200) {
+        set({ unreadCount: response.data.data });
+        console.log(response.data.data);
+        return true;
+      }
+      return null;
+    } catch (error: any) {
+      console.log(error.response?.data || error.message);
+      return null;
+    } finally {
+      set({ isLoading: false });
     }
   },
 }));
