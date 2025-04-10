@@ -217,13 +217,13 @@ const AppointmentDetails = () => {
   return (
     <div>
       {" "}
-      <div className="mt-2">
-        <div className="w-full flex space-x-2 md:space-x-6">
+      <div className=" ">
+        <div className="w-full bg-white flex space-x-2 md:space-x-6">
           {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-2 text-xs md:text-sm font-medium ${
+              className={`pb-2 px-4 text-xs md:text-sm font-medium ${
                 activeTab === tab
                   ? "text-green-600 border-b-2 border-green-600"
                   : "text-gray-500"

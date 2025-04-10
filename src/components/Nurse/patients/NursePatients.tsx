@@ -1,45 +1,52 @@
-import React, { useEffect, useState } from "react";
+// NursePatients.tsx
+import React, { useEffect, useState, useMemo } from "react";
 import Tablehead from "../../ReusablepatientD/Tablehead";
-import { patients } from "../../../data/patientsData";
 import Tabs from "../../ReusablepatientD/Tabs";
 import PatientTable from "../../ReusablepatientD/PatientTable";
+import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 
-const getStatusCounts = () => {
-  return patients.reduce(
-    (acc: { Pending: number; Completed: number }, patient) => {
-      if (patient.status === "Pending" || patient.status === "Completed") {
-        acc[patient.status] = (acc[patient.status] || 0) + 1;
-      }
-      return acc;
-    },
-    { Pending: 0, Completed: 0 }
-  );
-};
+type PatientStatus = "Pending" | "Completed" | "Ongoing";
 
 const NursePatients = () => {
-  const [activeTab, setActiveTab] = useState<"Pending" | "Completed">(
-    "Pending"
-  );
-  const statusCounts = getStatusCounts();
-  const filteredPatients = patients.filter((p) => p.status === activeTab);
+  const { patients, getAllPatients, isLoading } = usePatientStore();
+  const [activeTab, setActiveTab] = useState<PatientStatus>("Pending");
 
-  // useEffect(() => {
-  //   getAllNurses("");
-  // }, [getAllNurses]);
+  const statusCounts = useMemo(() => {
+    return patients.reduce(
+      (acc: Record<PatientStatus, number>, patient) => {
+        const status = patient.attributes.status as PatientStatus;
+        acc[status] = (acc[status] || 0) + 1;
+        return acc;
+      },
+      { Pending: 0, Completed: 0, Ongoing: 0 }
+    );
+  }, [patients]);
+
+  const filteredPatients = useMemo(() => {
+    return patients.filter((p) => p.attributes.status === activeTab);
+  }, [patients, activeTab]);
+
+  useEffect(() => {
+    getAllPatients("/nurses/all-patients");
+  }, [getAllPatients]);
+
+  // Assuming Tabs component expects these props
+  const tabOptions: PatientStatus[] = ["Pending", "Completed", "Ongoing"];
+
   return (
-    <div>
+    <div className="p-4">
       <Tablehead
         typebutton="Add New"
         tableTitle="Patients"
         tableCount={patients.length}
       />
-      <Tabs<"Pending" | "Completed">
+      <Tabs<PatientStatus>
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         statusCounts={statusCounts}
-        tabs={["Pending", "Completed"]}
+        tabs={tabOptions}
       />
-      <PatientTable patients={filteredPatients} />
+      <PatientTable patients={filteredPatients} isLoading={isLoading} />
     </div>
   );
 };

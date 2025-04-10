@@ -1,87 +1,136 @@
-import Table from "../../Shared/Table";
 import { formatPhoneNumber } from "../../utils/formatPhoneNumber";
 import { useNavigate } from "react-router-dom";
-import { Patient } from "../../data/patientsData";
+import { JSX } from "react";
+import Table from "../../Shared/Table";
 
-interface PatientTableProps {
-  patients: Patient[];
-}
+type PatientTableData = {
+  name: string;
+  patientId: string;
+  age: number;
+  gender: string;
+  phone: string;
+  branch: string;
+  occupation: string;
+  viewMore: string;
+  status: "Pending" | "Completed" | "Ongoing";
+  id: number;
+};
 
-const PatientTable = ({ patients }: PatientTableProps) => {
+type Columns = {
+  key: keyof PatientTableData | "viewMore";
+  label: string;
+  render?: (value: any, patient: PatientTableData) => JSX.Element;
+};
+
+type PatientTableProps = {
+  isLoading?: boolean;
+  patients: {
+    attributes: {
+      first_name: string;
+      last_name: string;
+      age: number;
+      gender: string;
+      phone_number: string;
+      branch: string;
+      occupation: string;
+      status: "Pending" | "Completed" | "Ongoing";
+    };
+    id: number;
+  }[];
+};
+
+const PatientTable = ({ patients, isLoading }: PatientTableProps) => {
   const navigate = useNavigate();
 
-  const details = (patientId: string) => {
-    navigate(`/dashboard/appointments/${patientId}`);
+  const formattedPatients: PatientTableData[] = patients.map((patient) => ({
+    name: `${patient.attributes.first_name} ${patient.attributes.last_name}`,
+    patientId: patient.id.toString(),
+    age: patient.attributes.age,
+    gender: patient.attributes.gender,
+    phone: formatPhoneNumber(patient.attributes.phone_number),
+    branch: patient.attributes.branch,
+    occupation: patient.attributes.occupation,
+    status: patient.attributes.status,
+    viewMore: "View More",
+    id: patient.id,
+  }));
+
+  const handleViewMore = (id: string) => {
+    navigate(`/dashboard/medical/patients/${id}`);
   };
 
-  const statusStyles: Record<Patient["status"], string> = {
-    Ongoing: "bg-[#FFEBAA] text-[#B58A00]",
-    Completed: "bg-[#CFFFE9] text-[#009952]",
-    Pending: "bg-[#FBE1E1] text-[#F83E41]",
+  const statusStyles: Record<PatientTableData["status"], string> = {
+    Ongoing: "bg-[#FFEBAA] text-[#B58A00] px-2 py-1 rounded-full",
+    Completed: "bg-[#CFFFE9] text-[#009952] px-2 py-1 rounded-full",
+    Pending: "bg-[#FBE1E1] text-[#F83E41] px-2 py-1 rounded-full",
   };
 
-  const columns: {
-    key: keyof Patient;
-    label: string;
-    render: (value: string | number, row: Patient) => React.ReactNode;
-  }[] = [
+  const columns: Columns[] = [
     {
       key: "name",
       label: "Name",
-      render: (value) => (
-        <span className="text-dark font-medium text-sm">{value}</span>
+      render: (_, patient) => (
+        <span className="text-dark font-medium text-sm">{patient.name}</span>
       ),
     },
     {
-      key: "patientid",
+      key: "patientId",
       label: "Patient ID",
-      render: (value) => (
-        <span className="text-[#667085] text-sm">{value}</span>
+      render: (_, patient) => (
+        <span className="text-[#667085] text-sm">{patient.patientId}</span>
+      ),
+    },
+    {
+      key: "age",
+      label: "Age",
+      render: (_, patient) => (
+        <span className="text-[#667085] text-sm">{patient.age}</span>
       ),
     },
     {
       key: "gender",
       label: "Gender",
-      render: (value) => (
-        <span className="text-[#667085] text-sm">{value}</span>
+      render: (_, patient) => (
+        <span className="text-[#667085] text-sm">{patient.gender}</span>
       ),
     },
     {
       key: "phone",
       label: "Phone",
-      render: (value) => (
-        <span className="text-[#667085] text-sm">
-          {formatPhoneNumber(value as string)}
-        </span>
+      render: (_, patient) => (
+        <span className="text-[#667085] text-sm">{patient.phone}</span>
+      ),
+    },
+    {
+      key: "branch",
+      label: "Branch",
+      render: (_, patient) => (
+        <span className="text-[#667085] text-sm">{patient.branch}</span>
       ),
     },
     {
       key: "occupation",
       label: "Occupation",
-      render: (value) => (
-        <span className="text-[#667085] text-sm">{value}</span>
+      render: (_, patient) => (
+        <span className="text-[#667085] text-sm">{patient.occupation}</span>
       ),
     },
     {
       key: "status",
       label: "Status",
-      render: (value) => (
-        <span
-          className={`text-sm px-2 py-1 rounded-full ${
-            statusStyles[value as Patient["status"]]
-          }`}
-        >
-          {value}
+      render: (_, patient) => (
+        <span className={`text-sm ${statusStyles[patient.status]}`}>
+          {patient.status}
         </span>
       ),
     },
     {
-      key: "id",
+      key: "viewMore",
       label: "",
-      render: (value, row) => (
+      render: (_, patient) => (
         <button
           className="cursor-pointer text-[#009952] text-sm font-medium"
-          onClick={() => details(row.id)}
+          onClick={() => handleViewMore(patient.patientId)}
         >
           View more
         </button>
@@ -89,13 +138,17 @@ const PatientTable = ({ patients }: PatientTableProps) => {
     },
   ];
 
+  if (isLoading) {
+    return <div className="p-4 text-gray-500">Loading patients...</div>;
+  }
+
   return (
     <div className="w-full h-full bg-white">
       <Table
-        data={patients}
+        data={formattedPatients}
         columns={columns}
         rowKey="id"
-        pagination={patients.length > 10}
+        pagination={formattedPatients.length > 10}
         rowsPerPage={10}
         radius="rounded-none"
       />
