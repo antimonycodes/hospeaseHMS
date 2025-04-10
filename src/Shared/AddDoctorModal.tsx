@@ -40,12 +40,19 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
   createDoctor,
   createConsultant,
   isLoading,
-  endpoint = "/admin/doctor/create",
-  refreshEndpoint = "/admin/doctor/fetch",
+  endpoint,
+  refreshEndpoint,
 }) => {
   const location = useLocation();
-  const isConsultant = location.pathname.includes("consultant");
+  const isConsultant = location.pathname.includes("consultants");
 
+  // Dynamically fallback to correct endpoint if not passed from parent
+  const finalEndpoint =
+    endpoint ??
+    (isConsultant ? "/admin/consultant/create" : "/admin/doctor/create");
+  const finalRefreshEndpoint =
+    refreshEndpoint ??
+    (isConsultant ? "/admin/consultant/fetch" : "/admin/doctor/fetch");
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const payload = {
@@ -56,8 +63,8 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
     };
     await (isConsultant ? createConsultant : createDoctor)(
       payload,
-      endpoint,
-      refreshEndpoint
+      finalEndpoint,
+      finalRefreshEndpoint
     );
     setShowModal(false);
   };

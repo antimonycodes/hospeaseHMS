@@ -36,7 +36,9 @@ const SaFrontDeskTable = ({ frontdesks, isLoading }: Props) => {
         id: frontdesk.id,
       }))
     );
-  }, [nurses]);
+  }, [frontdesks]);
+
+  console.log(frontdesks, "ert");
 
   const handleViewMore = (frontdesk: any) => {
     console.log("View more clicked for:", frontdesk);
