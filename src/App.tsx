@@ -46,10 +46,12 @@ import LabPatientDetails from "./components/Laboratory/patients/LabPatientDetail
 import NotificationPage from "./components/Dashboard/Notification";
 // import LabDetails from "./components/Laboratory/patients/labDetails";
 // import LabDetails from "./components/Laboratory/patients/LabDetaill";
+// import LabDetail from "./components/Laboratory/patients/LabDetaill";
 import StaffProfile from "./pages/StaffProfile";
 // import LabDetaill from "./components/Laboratory/patients/LabDetaill";
 import MedPatientsDetails from "./components/medicaldirector/patients/MedPatientsDetails";
 import MedAppointmentDetails from "./components/medicaldirector/appointment/MedAppointmentDetails";
+import MedDoctorDetail from "./components/medicaldirector/doctor/MedDoctorDetail";
 
 function App() {
   return (
@@ -81,7 +83,10 @@ function App() {
 
               <Route path="doctors" element={<Doctors />} />
               <Route path="doctors/:id" element={<DoctorDetails />} />
-
+              <Route
+                path="doctors/meddoctor/:id"
+                element={<MedDoctorDetail />}
+              />
               <Route path="consultants" element={<Consultants />} />
               <Route path="consultants/:id" element={<ConsultantDetails />} />
               <Route path="finance/info" element={<Finance />} />
@@ -109,6 +114,10 @@ function App() {
                 element={<MatronNurseDetails />}
               />
               {/* <Route path="laboratory/patients/:id" element={<LabDetaill />} /> */}
+              <Route
+                path="laboratory/patients/:id"
+                element={<LabPatientDetails />}
+              />
               <Route
                 path="medical/patients/:id"
                 element={<MedPatientsDetails />}
