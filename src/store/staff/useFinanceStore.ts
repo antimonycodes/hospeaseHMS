@@ -90,6 +90,7 @@ interface FinanceStore {
   ) => Promise<boolean | null>;
   getFinanceStats: (endpoint?: string) => Promise<void>;
   getLabStats: (endpoint?: string) => Promise<void>;
+  searchPatients: (query: string) => Promise<any[]>;
 }
 
 export const useFinanceStore = create<FinanceStore>((set) => ({
@@ -110,6 +111,17 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
       toast.error(error.response?.data?.message || "Failed to fetch expenses");
     } finally {
       set({ isLoading: false });
+    }
+  },
+  searchPatients: async (query: string) => {
+    try {
+      const response = await api.get(
+        `/medical-report/all-patient?search=${query}`
+      );
+      return response.data.data.data;
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Search failed");
+      return [];
     }
   },
 

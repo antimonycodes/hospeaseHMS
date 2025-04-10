@@ -23,7 +23,7 @@ const AddPaymentModal = ({
   endpoint = "/finance/save-revenue",
   refreshEndpoint = "/finance/all-revenues",
 }: AddPaymentModalProps) => {
-  // const { searchPatients } = useFinanceStore();
+  const { searchPatients } = useFinanceStore();
   const { createPayment, isLoading } = useFinanceStore();
 
   const [formData, setFormData] = useState<FormData>({
@@ -38,14 +38,14 @@ const AddPaymentModal = ({
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
 
   // Debounced patient search
-  // const handleSearch = debounce(async (val: string) => {
-  //   if (val.length > 2) {
-  //     // const results = await searchPatients(val);
-  //     setPatientOptions(results || []);
-  //   } else {
-  //     setPatientOptions([]);
-  //   }
-  // }, 300);
+  const handleSearch = debounce(async (val: string) => {
+    if (val.length > 2) {
+      const results = await searchPatients(val);
+      setPatientOptions(results || []);
+    } else {
+      setPatientOptions([]);
+    }
+  }, 300);
 
   // Handle input changes
   const handleChange = (

@@ -5,32 +5,26 @@ import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import FrontdeskDetails from "./FrontdeskDetails";
 import AppointmentDetails from "./AppointmentDetails";
+import { Plus, Search } from "lucide-react";
+import Button from "../../../Shared/Button";
+import FrontdeskAppointmentModal from "./FrontdeskAppointmentModal";
 
 const FrondeskAppointmentTable = () => {
   const [activeTab, setActiveTab] = useState(0);
-  const [openModal, setOpenModal] = useState(false);
-  const [modalType, setModalType] = useState<"patient" | "appointment">(
-    "patient"
-  );
+  // const [activeTab, setActiveTab] = useState(0); // Tracks the active tab (if you have tabs)
+  const [openModal, setOpenModal] = useState(false); // Controls modal visibility
 
+  // Handler to open the Book Appointment modal
   const handleOpenModal = () => {
-    setModalType(activeTab === 0 ? "patient" : "appointment");
-    setOpenModal(true);
+    setOpenModal(true); // Simply open the modal when the button is clicked
   };
 
-  const {
-    getAllPatients,
-    patients,
-    createPatient,
-    getPatientById,
-    selectedPatient,
-    isLoading,
-    pagination,
-  } = usePatientStore();
+  const { appointments, isLoading, getAllAppointments } = usePatientStore();
 
   useEffect(() => {
-    getAllPatients();
-  }, []);
+    getAllAppointments("/front-desk/appointment/all-records");
+  }, [getAllAppointments]);
+
   return (
     <div>
       <Tablehead
@@ -41,9 +35,10 @@ const FrondeskAppointmentTable = () => {
         showSearchBar={true}
         showControls={true}
       />
+
       <AppointmentDetails />
-      {openModal && modalType === "appointment" && (
-        <BookAppointmentModal
+      {openModal && (
+        <FrontdeskAppointmentModal
           onClose={() => setOpenModal(false)}
           endpoint="/front-desk/appointment/book"
           refreshEndpoint="/front-desk/appointment/all-records"
