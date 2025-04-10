@@ -3,6 +3,7 @@ import AddPatientModal from "../../../Shared/AddPatientModal";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import FrontdeskInfo from "./FrontdeskInfo";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
+import AddPatientModals from "./AddPatientModals";
 
 // FpatientsTable.tsx
 const FpatientsTable = () => {
@@ -34,7 +35,7 @@ const FpatientsTable = () => {
       <FrontdeskInfo patients={patients} isLoading={isLoading} />
       {/* Modal */}
       {openModal && (
-        <AddPatientModal
+        <AddPatientModals
           onClose={() => setOpenModal(false)}
           createPatient={createPatient}
           isLoading={isLoading}

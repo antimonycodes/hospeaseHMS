@@ -72,6 +72,19 @@ export interface CreateNurseData {
   phone: string;
   address: string;
 }
+
+export interface NurseStats {
+  total_patient: number;
+  clinic_total_appointment: number;
+  nurse_assigned_appointment: number;
+  children_count: number;
+  male_count: number;
+  female_count: number;
+  matron_assigned_appointment: number;
+
+  graph_appointment_representation: Record<string, number>;
+}
+
 // Zustand Store for Nurses
 interface NurseStore {
   isLoading: boolean;
@@ -83,11 +96,14 @@ interface NurseStore {
   getNurseById: (id: string) => Promise<any>;
   createNurse: (data: CreateNurseData) => Promise<any>;
   createFrontdesk: (data: any) => Promise<any>;
+  getNurseStats: () => Promise<void>;
+  stats: NurseStats | null;
 }
 
 export const useNurseStore = create<NurseStore>((set, get) => ({
   isLoading: false,
   nurses: [],
+  stats: null,
   frontdesks: [],
   selectedNurse: null,
   getNurses: async () => {
@@ -171,6 +187,29 @@ export const useNurseStore = create<NurseStore>((set, get) => ({
       console.error(error.response?.data);
       toast.error(error.response.data.message || "Failed to add nurse");
       return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  getNurseStats: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get("/nurses/stats");
+      const statsData = response.data || {
+        total_patient: 0,
+        clinic_total_appointment: 0,
+        nurse_assigned_appointment: 0,
+        children_count: 0,
+        male_count: 0,
+        female_count: 0,
+        matron_assigned_appointment: 0,
+      };
+      set({ stats: statsData });
+      console.log("Nurses Stats fetched:", statsData);
+    } catch (error: any) {
+      console.error("Stats fetch error:", error.response?.data);
+      toast.error(error.response?.data?.message || "Failed to fetch stats");
+      set({ stats: null });
     } finally {
       set({ isLoading: false });
     }

@@ -100,9 +100,9 @@ interface Globalstore {
   roles: Record<string, { id: number; role: string }>;
   setSelectedStaff: (staff: any) => void;
   togglestatus: (data: Togglestatus) => Promise<any>;
-  getBranches: () => Promise<any>;
+  getBranches: (endpoint?: string) => Promise<any>;
   createBranch: (data: CreateBranchData) => Promise<any>;
-  getClinicaldept: () => Promise<any>;
+  getClinicaldept: (endpoint?: string) => Promise<any>;
   createClinicaldept: (data: CreateClinicaldeptData) => Promise<any>;
   createStaff: (data: CreateStaff, role: string) => Promise<any>;
   getDeptStaffs: (data: string) => Promise<any>;
@@ -153,10 +153,10 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
     }
   },
 
-  getBranches: async () => {
+  getBranches: async (endpoint = "/admin/branches/fetch") => {
     set({ isLoading: true });
     try {
-      const response = await api.get("/admin/branches/fetch");
+      const response = await api.get(endpoint);
       if (response.status === 200) {
         // Return the new status to confirm it was updated on server
         // toast.success(response.data.message);
@@ -202,12 +202,12 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
     }
   },
 
-  getClinicaldept: async () => {
+  getClinicaldept: async (
+    endpoint = "/admin/department/clinical-department-fetch"
+  ) => {
     set({ isLoading: true });
     try {
-      const response = await api.get(
-        "/admin/department/clinical-department-fetch"
-      );
+      const response = await api.get(endpoint);
       if (response.status === 200) {
         // Return the new status to confirm it was updated on server
         // toast.success(response.data.message);
