@@ -142,7 +142,7 @@ const SignupSuccess = () => {
         </div>
 
         {/* Animation for email sent confirmation */}
-        <div className="mb-6 text-sm text-[#667185] flex items-center justify-center">
+        {/* <div className="mb-6 text-sm text-[#667185] flex items-center justify-center">
           <span className="mr-2">
             {emailSent
               ? "Email sent successfully!"
@@ -152,7 +152,7 @@ const SignupSuccess = () => {
             <div className="animate-spin h-4 w-4 border-2 border-[#009952] border-t-transparent rounded-full"></div>
           )}
           {emailSent && <Check size={16} className="text-[#009952]" />}
-        </div>
+        </div> */}
         {/* 
         <button
           className="w-full py-3 text-white font-medium text-base bg-[#009952] rounded-md hover:bg-[#007a3e] transition-all flex items-center justify-center"
@@ -164,7 +164,7 @@ const SignupSuccess = () => {
       </div>
 
       <p className="mt-4 text-sm text-[#667185]">
-        Need help? Contact our support team at support@hospease.com
+        Need help? Contact our support team at help@hospeasehms.com
       </p>
     </div>
   );
