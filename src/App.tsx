@@ -45,6 +45,11 @@ import SaFrontdeskpage from "./components/Superadmin/frontdesk/SaFrontdeskpage";
 import LabPatientDetails from "./components/Laboratory/patients/LabPatientDetails";
 import NotificationPage from "./components/Dashboard/Notification";
 // import LabDetails from "./components/Laboratory/patients/labDetails";
+import LabDetails from "./components/Laboratory/patients/LabDetaill";
+import StaffProfile from "./pages/StaffProfile";
+import LabDetaill from "./components/Laboratory/patients/LabDetaill";
+import MedPatientsDetails from "./components/medicaldirector/patients/MedPatientsDetails";
+import MedAppointmentDetails from "./components/medicaldirector/appointment/MedAppointmentDetails";
 
 function App() {
   return (
@@ -58,6 +63,7 @@ function App() {
             <Route path="/dashboard" element={<DashboardLayout />}>
               <Route index element={<Navigate to="overview" />} />
               <Route path="overview" element={<Overview />} />
+              <Route path="staffprofile" element={<StaffProfile />} />
               <Route path="patients" element={<Patients />} />
               <Route path="patients/:id" element={<PatientDetails />} />
               <Route
@@ -87,6 +93,10 @@ function App() {
                 element={<DoctorAppointmentDetails />}
               />
               <Route
+                path="appointment/medicalDirector/:id"
+                element={<MedAppointmentDetails />}
+              />
+              <Route
                 path="appointment/frontdesk/:id"
                 element={<FrontdeskDetails />}
               />
@@ -97,6 +107,11 @@ function App() {
               <Route
                 path="matron/nurses/:id"
                 element={<MatronNurseDetails />}
+              />
+              <Route path="laboratory/patients/:id" element={<LabDetaill />} />
+              <Route
+                path="medical/patients/:id"
+                element={<MedPatientsDetails />}
               />
               <Route path="nurses" element={<Nurses />} />
               <Route path="nurses/:id" element={<NurseDetails />} />

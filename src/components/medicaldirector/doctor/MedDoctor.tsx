@@ -1,12 +1,11 @@
-import { useEffect, useState } from "react";
-import DoctorsTable from "./DoctorsTable";
-import AddDoctorModal from "../../../Shared/AddDoctorModal";
-import { Plus } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import MedDoctorTable from "./MedDoctorTable";
 import Button from "../../../Shared/Button";
+import { Plus } from "lucide-react";
 import { useDoctorStore } from "../../../store/super-admin/useDoctorStore";
-import { generateSixDigitId } from "../../../utils/randomNumber";
+import AddDoctorModal from "../../../Shared/AddDoctorModal";
 
-const SaDoctorsPage = () => {
+const MedDoctor = () => {
   const [showModal, setShowModal] = useState(false);
   const { createDoctor, getAllDoctors, doctors, createConsultant, isLoading } =
     useDoctorStore();
@@ -18,21 +17,19 @@ const SaDoctorsPage = () => {
     phone: "",
     religion: "",
     houseAddress: "",
+    dob: "", // Added dob
     doctor_id: null,
+    endpoint: "",
+    refreshEndpoint: "",
   });
 
   useEffect(() => {
-    // Fetch doctors data once on component mount
-    getAllDoctors("/admin/doctor/fetch");
-
-    // Optional: set up a reasonable refresh interval if needed
+    getAllDoctors("/medical-director/all-doctors");
     const intervalId = setInterval(() => {
-      getAllDoctors();
-    }, 60000); // Refresh every minute
-
-    // Clean up on component unmount
+      getAllDoctors("/medical-director/all-doctors");
+    }, 60000);
     return () => clearInterval(intervalId);
-  }, [getAllDoctors]); // Only depend on the fetch function
+  }, [getAllDoctors]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -45,7 +42,7 @@ const SaDoctorsPage = () => {
   return (
     <div className="rounded-lg custom-shadow bg-white p-4">
       <div className="flex items-center justify-between mb-6">
-        <div className="  flex items-center gap-3">
+        <div className="flex items-center gap-3">
           <h1 className="text-xl font-semibold text-gray-900">Doctors</h1>
           <span className="bg-[#F9F5FF] py-1 px-4 rounded-full text-[#6941C6] font-medium">
             {doctors.length}
@@ -61,7 +58,8 @@ const SaDoctorsPage = () => {
           <Plus size={16} />
         </Button>
       </div>
-      <DoctorsTable doctors={doctors} isLoading={isLoading} />
+      <MedDoctorTable doctors={doctors} isLoading={isLoading} />
+
       {showModal && (
         <AddDoctorModal
           formData={formData}
@@ -70,10 +68,12 @@ const SaDoctorsPage = () => {
           setShowModal={setShowModal}
           createDoctor={createDoctor}
           createConsultant={createConsultant}
+          endpoint="/medical-director/add-doctor"
+          refreshEndpoint="/medical-director/all-doctors"
         />
       )}
     </div>
   );
 };
 
-export default SaDoctorsPage;
+export default MedDoctor;

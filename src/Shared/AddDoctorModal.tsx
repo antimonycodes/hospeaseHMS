@@ -4,20 +4,33 @@ import { X } from "lucide-react";
 
 interface AddDoctorModalProps {
   formData: {
-    doctor_id?: null;
+    doctor_id?: null | string;
     first_name: string;
     last_name: string;
     email: string;
     phone: string;
     religion: string;
     houseAddress: string;
-    consultant_id?: null;
+    dob?: string; // Added dob field
+    consultant_id?: null | string;
+    endpoint?: string;
+    refreshEndpoint?: string;
   };
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   setShowModal: (show: boolean) => void;
-  createDoctor: (data: any) => Promise<void>;
-  createConsultant: (data: any) => Promise<void>;
+  createDoctor: (
+    data: any,
+    endpoint?: string,
+    refreshEndpoint?: string
+  ) => Promise<void>;
+  createConsultant: (
+    data: any,
+    endpoint?: string,
+    refreshEndpoint?: string
+  ) => Promise<void>;
   isLoading: boolean;
+  endpoint?: string;
+  refreshEndpoint?: string;
 }
 
 const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
@@ -27,14 +40,25 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
   createDoctor,
   createConsultant,
   isLoading,
+  endpoint = "/admin/doctor/create",
+  refreshEndpoint = "/admin/doctor/fetch",
 }) => {
   const location = useLocation();
   const isConsultant = location.pathname.includes("consultant");
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await (isConsultant ? createConsultant : createDoctor)({
+    const payload = {
       ...formData,
-    });
+      address: formData.houseAddress, // Map houseAddress to address for store compatibility
+      [isConsultant ? "consultant_id" : "doctor_id"]:
+        formData[isConsultant ? "consultant_id" : "doctor_id"] ?? null,
+    };
+    await (isConsultant ? createConsultant : createDoctor)(
+      payload,
+      endpoint,
+      refreshEndpoint
+    );
     setShowModal(false);
   };
 
@@ -44,7 +68,7 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
         <div className="p-4 md:p-12">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold text-custom-black">
-              Add New Doctor
+              Add New {isConsultant ? "Consultant" : "Doctor"}
             </h2>
             <button onClick={() => setShowModal(false)}>
               <X className="text-black" />
@@ -66,6 +90,7 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
                 <Button variant="primary">Upload</Button>
               </div>
             </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label
@@ -144,7 +169,24 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label
+                  htmlFor="dob"
+                  className="block text-sm font-medium text-custom-black mb-1"
+                >
+                  Date of Birth
+                </label>
+                <input
+                  type="date"
+                  id="dob"
+                  name="dob"
+                  value={formData.dob || ""}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-4 border border-[#D0D5DD] rounded-md"
+                  required
+                />
+              </div>
               <div>
                 <label
                   htmlFor="religion"
@@ -162,31 +204,30 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
                   placeholder="Christianity"
                 />
               </div>
-              <div>
-                <label
-                  htmlFor="houseAddress"
-                  className="block text-sm font-medium text-custom-black mb-1"
-                >
-                  House Address
-                </label>
-                <input
-                  type="text"
-                  id="houseAddress"
-                  name="houseAddress"
-                  value={formData.houseAddress}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-4 border border-[#D0D5DD] rounded-md"
-                  placeholder="10, Road George close, Ibadan"
-                />
-              </div>
+            </div>
+
+            <div className="mb-6">
+              <label
+                htmlFor="houseAddress"
+                className="block text-sm font-medium text-custom-black mb-1"
+              >
+                House Address
+              </label>
+              <input
+                type="text"
+                id="houseAddress"
+                name="houseAddress"
+                value={formData.houseAddress}
+                onChange={handleInputChange}
+                className="w-full px-3 py-4 border border-[#D0D5DD] rounded-md"
+                placeholder="10, Road George close, Ibadan"
+              />
             </div>
 
             <Button
               type="submit"
-              disabled={!!isLoading}
-              className={`
-               ${isLoading ? "opacity-50 cursor-not-allowed" : ""}
-              `}
+              disabled={isLoading}
+              className={isLoading ? "opacity-50 cursor-not-allowed" : ""}
             >
               {isConsultant ? "Add Consultant" : "Add Doctor"}
             </Button>

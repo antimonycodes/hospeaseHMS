@@ -9,6 +9,7 @@ import PharmPatients from "../components/Pharmacy/Patients/PharmPatients";
 import NursePatients from "../components/Nurse/patients/NursePatients";
 import MatronPatients from "../components/Matron/patients/MatronPatients";
 import ConsultantPatients from "../components/Consultant/ConsultantPatients";
+import MedicalPatient from "../components/medicaldirector/patients/MedicalPatient";
 
 const roleComponents: Record<string, JSX.Element> = {
   admin: <PatientsPage />,
@@ -19,6 +20,7 @@ const roleComponents: Record<string, JSX.Element> = {
   nurse: <NursePatients />,
   matron: <MatronPatients />,
   consultant: <ConsultantPatients />,
+  "medical-director": <MedicalPatient />,
 };
 
 const Patients = () => {

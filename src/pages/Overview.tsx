@@ -11,6 +11,7 @@ import SuperAdminOverview from "../components/Superadmin/SuperAdminOverview";
 // import SuperAdminOverview from "../components/Superadmin/Overview";
 import { useRole } from "../hooks/useRole";
 import { JSX } from "react";
+import MedicalDash from "../components/medicaldirector/overview/MedicalDash";
 
 const roleComponents: Record<string, JSX.Element> = {
   admin: <SuperAdminOverview />,
@@ -22,6 +23,7 @@ const roleComponents: Record<string, JSX.Element> = {
   "inventory-manager": <InventoryDash />,
   nurse: <NurseDash />,
   matron: <MatronDash />,
+  "medical-director": <MedicalDash />,
 };
 
 const Overview = () => {
