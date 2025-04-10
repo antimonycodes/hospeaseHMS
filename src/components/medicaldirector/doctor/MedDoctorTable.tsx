@@ -168,7 +168,7 @@ const MedDoctorTable = ({
     },
   ];
   const handleViewMore = (doc: DoctorAttributes) => {
-    navigate(`/dashboard/doctors/${doc.id}`);
+    navigate(`/dashboard/doctors/meddoctor/${doc.id}`);
   };
 
   return (

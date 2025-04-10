@@ -21,7 +21,7 @@ const PharmChart = () => {
   const { pharmData, getPharmData, isLoading } = useChartStore();
 
   useEffect(() => {
-    getPharmData("/pharmacy/dispersal-graphical-representation/");
+    getPharmData("/pharmacy/dispersal-graphical-representation");
   }, [getPharmData]);
 
   useEffect(() => {

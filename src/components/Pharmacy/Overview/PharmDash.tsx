@@ -56,7 +56,7 @@ const PharmDash = () => {
           <div>Loading stats...</div>
         ) : (
           <OverviewCard
-            cardTitle="Laboratory Dashboard"
+            cardTitle="Pharmacy Dashboard"
             category="laboratory"
             limit={4}
             data={LabStats}

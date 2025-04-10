@@ -118,6 +118,7 @@ interface DoctorStore {
     endpoint?: string,
     refreshEndpoint?: string
   ) => Promise<void>;
+  getMedDoctorById: (id: string) => Promise<void>;
 }
 
 export const useDoctorStore = create<DoctorStore>((set, get, endpoint) => ({
@@ -148,6 +149,21 @@ export const useDoctorStore = create<DoctorStore>((set, get, endpoint) => ({
     set({ isLoading: true });
     try {
       const response = await api.get(`/admin/doctor/fetch/${id}`);
+      set({ selectedDoctor: response.data.data }); // Store fetched doctor in state
+      // toast.success(response.data.message);
+    } catch (error: any) {
+      console.error(error.response?.data);
+      // toast.error(
+      //   error.response.data.message || "Failed to fetch doctor details"
+      // );
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  getMedDoctorById: async (id) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(`/medical-director/all-doctors/${id}`);
       set({ selectedDoctor: response.data.data }); // Store fetched doctor in state
       // toast.success(response.data.message);
     } catch (error: any) {

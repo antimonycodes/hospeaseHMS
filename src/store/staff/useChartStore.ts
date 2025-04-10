@@ -127,7 +127,7 @@ export const useChartStore = create<ChartState>((set) => ({
   },
 
   getPharmData: async (
-    endpoint = "/pharmacy/dispersal-graphical-representation/"
+    endpoint = "/pharmacy/dispersal-graphical-representation"
   ) => {
     set({ isLoading: true });
     try {
