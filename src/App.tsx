@@ -45,9 +45,9 @@ import SaFrontdeskpage from "./components/Superadmin/frontdesk/SaFrontdeskpage";
 import LabPatientDetails from "./components/Laboratory/patients/LabPatientDetails";
 import NotificationPage from "./components/Dashboard/Notification";
 // import LabDetails from "./components/Laboratory/patients/labDetails";
-import LabDetails from "./components/Laboratory/patients/LabDetaill";
+// import LabDetails from "./components/Laboratory/patients/LabDetaill";
 import StaffProfile from "./pages/StaffProfile";
-import LabDetaill from "./components/Laboratory/patients/LabDetaill";
+// import LabDetaill from "./components/Laboratory/patients/LabDetaill";
 import MedPatientsDetails from "./components/medicaldirector/patients/MedPatientsDetails";
 import MedAppointmentDetails from "./components/medicaldirector/appointment/MedAppointmentDetails";
 
@@ -108,7 +108,7 @@ function App() {
                 path="matron/nurses/:id"
                 element={<MatronNurseDetails />}
               />
-              <Route path="laboratory/patients/:id" element={<LabDetaill />} />
+              {/* <Route path="laboratory/patients/:id" element={<LabDetaill />} /> */}
               <Route
                 path="medical/patients/:id"
                 element={<MedPatientsDetails />}

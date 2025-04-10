@@ -43,17 +43,11 @@ const StaffsDetail = () => {
   };
 
   const handleAddShift = async () => {
-    if (!selectedDate || !shiftType || !startTime || !endTime) {
-      alert("Please fill all fields");
-      return;
-    }
+    if (!selectedDate || !shiftType || !startTime || !endTime) return;
 
     const department_id = getDepartmentId();
 
-    if (!department_id) {
-      alert("Department not found for this role");
-      return;
-    }
+    if (!department_id) return;
 
     const payload = {
       user_id: staff.id,
@@ -92,17 +86,12 @@ const StaffsDetail = () => {
       !startTime ||
       !endTime ||
       !editingShift?.id
-    ) {
-      alert("Please fill all fields");
+    )
       return;
-    }
 
     const department_id = getDepartmentId();
 
-    if (!department_id) {
-      alert("Department not found for this role");
-      return;
-    }
+    if (!department_id) return;
 
     const payload = {
       user_id: staff.id,

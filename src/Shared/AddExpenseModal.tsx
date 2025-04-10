@@ -48,10 +48,8 @@ const AddExpenseModal = ({
       !expense.from ||
       !expense.by ||
       !expense.payment_method
-    ) {
-      alert("Please fill in all required fields.");
+    )
       return;
-    }
 
     const success = await createExpense(
       expense,

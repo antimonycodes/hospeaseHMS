@@ -77,10 +77,7 @@ const MatronNurseDetails = () => {
   }, [selectedNurse?.attributes.user_id]);
 
   const handleAddShift = async () => {
-    if (!selectedDate || !shiftType || !startTime || !endTime) {
-      alert("Please fill all fields");
-      return;
-    }
+    if (!selectedDate || !shiftType || !startTime || !endTime) return;
 
     const payload = {
       user_id: selectedNurse.attributes.user_id,
@@ -90,7 +87,7 @@ const MatronNurseDetails = () => {
           shift_type: shiftType,
           start_time: startTime,
           end_time: endTime,
-          department_id: 2, // Assuming nurse department_id is 2
+          department_id: null, // Assuming nurse department_id is 2
         },
       ],
     };
@@ -122,10 +119,8 @@ const MatronNurseDetails = () => {
       !startTime ||
       !endTime ||
       !editingShift?.id
-    ) {
-      alert("Please fill all fields");
+    )
       return;
-    }
 
     const payload = {
       user_id: selectedNurse.attributes.user_id,

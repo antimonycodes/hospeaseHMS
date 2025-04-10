@@ -29,10 +29,7 @@ const LabPatientDetails = () => {
   // Handle report submit
   const handleReportSubmit = async () => {
     // Call the respondToReport function from the store
-    if (!reportText) {
-      alert("Please provide a note.");
-      return;
-    }
+    if (!reportText) return;
 
     const formData = {
       note: reportText,
@@ -41,7 +38,6 @@ const LabPatientDetails = () => {
     };
 
     const success = await respondToReport(caseId, formData);
-    //   alert("Report submitted successfully!");
     if (success) {
       await getSingleReport(patient);
       setReportText("");

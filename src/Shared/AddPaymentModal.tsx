@@ -83,10 +83,8 @@ const AddPaymentModal = ({
       !formData.purpose ||
       !formData.payment_method ||
       !formData.payment_type
-    ) {
-      alert("Please fill in all required fields.");
+    )
       return;
-    }
 
     const success = await createPayment(formData, endpoint, refreshEndpoint);
     if (success) {

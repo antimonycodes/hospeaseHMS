@@ -275,7 +275,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   searchPatients: async (query: string) => {
     try {
       const response = await api.get(`/admin/patient/fetch?search=${query}`);
-      return response.data.data.data; // returns an array of matching patients
+      return response.data.data.data;
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Search failed");
       return [];
