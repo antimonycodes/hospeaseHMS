@@ -1,21 +1,24 @@
 import { useState } from "react";
-import { Mail } from "lucide-react";
+import { Mail, CheckSquare, Square } from "lucide-react";
 import logo from "../assets/logo-full.png";
 import onboardingImg from "../assets/onboardingImg.png";
 import { useAuthStore } from "../store/_auth/useAuthStore";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
   const { signup, isLoading } = useAuthStore();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
     address: "",
     email: "",
-    logo: null as File | null, // Store as File
-    // cac_docs: null as File | null, // Store as File
+    logo: null as File | null,
   });
+
+  const [acceptTerms, setAcceptTerms] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -30,11 +33,11 @@ const Signup = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate if files exist
-    // if (!formData.logo || !formData.cac_docs) {
-    //   toast.error("Logo and CAC documents are required.");
-    //   return;
-    // }
+    if (!acceptTerms) {
+      toast.error("You must accept the Terms and Conditions to register");
+      return;
+    }
+
     console.log(formData);
     const response = await signup(formData);
     if (response) {
@@ -44,9 +47,8 @@ const Signup = () => {
         address: "",
         email: "",
         logo: null,
-        // cac_docs: null,
       });
-      toast.success("You will be contacted by hospease for the next step");
+      navigate("/signup-success");
     }
   };
 
@@ -62,16 +64,16 @@ const Signup = () => {
       </div>
 
       {/* Form Section */}
-      <div className="w-full md:w-1/2 min-h-screen bg-[#E3FFF2] flex items-center justify-center py-4 px-4">
+      <div className="w-full md:w-1/2 min-h-screen bg-[#E3FFF2] flex items-center justify-center py-2 px-4">
         <div className="flex flex-col items-center gap-4 w-full max-w-md">
           {/* Logo */}
-          <div className="w-48 sm:w-32 mb-2">
+          <div className="w-48 sm:w-32 mb-">
             <img src={logo} alt="Logo" className="w-full" />
           </div>
 
           {/* Form Container */}
           <div className="bg-white py-6 px-4 sm:py-4 sm:px-7 border border-[#D0D5DD] rounded-[10px] w-full shadow-sm overflow-y-auto">
-            <h1 className="text-center text-[#101928] text-2xl sm:text-3xl font-semibold mb-2">
+            <h1 className="text-center text-[#101928] text-xl sm:text-3xl font-semibold mb-2">
               Welcome Onboard
             </h1>
             <p className="text-sm text-center text-[#667185]">
@@ -81,7 +83,7 @@ const Signup = () => {
             {/* Form */}
             <form
               onSubmit={handleSubmit}
-              className="mt-6 space-y-3 sm:space-y-4 w-full"
+              className="mt-6 space-y-3 sm:space-y-3 w-full"
             >
               {/* Hospital Name */}
               <div className="mb-3 sm:mb-4">
@@ -154,27 +156,55 @@ const Signup = () => {
                 />
               </div>
 
-              {/* Hospital CAC */}
-              {/* <div className="mb-3 sm:mb-4">
-                <label className="block text-[#101928] font-semibold text-xs">
-                  HOSPITAL CAC
-                </label>
+              {/* Terms and Conditions Checkbox */}
+              <div className="mb-3 sm:mb-2">
+                <div
+                  className="flex items-start cursor-pointer"
+                  onClick={() => setAcceptTerms(!acceptTerms)}
+                >
+                  <div className="mt-0.5 mr-2">
+                    {acceptTerms ? (
+                      <CheckSquare size={20} className="text-[#009952]" />
+                    ) : (
+                      <Square size={20} className="text-[#667185]" />
+                    )}
+                  </div>
+                  <div className="text-sm text-[#667185]">
+                    I accept the{" "}
+                    <a href="/terms" className="text-[#009952] hover:underline">
+                      Terms and Conditions
+                    </a>{" "}
+                    and{" "}
+                    <a
+                      href="/privacy"
+                      className="text-[#009952] hover:underline"
+                    >
+                      Privacy Policy
+                    </a>{" "}
+                    of HospEase
+                  </div>
+                </div>
+                {/* Hidden checkbox for form validation */}
                 <input
-                  type="file"
-                  name="cac_docs"
-                  accept=".pdf,.doc,.docx"
-                  onChange={handleFileChange}
-                  className="w-full mt-1 p-2 sm:p-3 border border-[#009952] rounded-md outline-none text-sm"
+                  type="checkbox"
+                  checked={acceptTerms}
+                  onChange={() => setAcceptTerms(!acceptTerms)}
+                  className="hidden"
+                  required
                 />
-              </div> */}
+              </div>
 
               {/* Submit Button */}
               <button
                 type="submit"
                 className={`w-full py-2.5 sm:py-3 text-white font-medium text-base sm:text-lg bg-[#009952] rounded-md hover:bg-[#007a3e] transition-all 
-                  ${isLoading ? "opacity-50 cursor-not-allowed" : ""}
+                  ${
+                    isLoading || !acceptTerms
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
+                  }
                   `}
-                disabled={!!isLoading}
+                disabled={!!isLoading || !acceptTerms}
               >
                 {isLoading ? "Registering..." : "Register"}
               </button>

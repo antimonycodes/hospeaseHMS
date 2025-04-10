@@ -52,6 +52,7 @@ import StaffProfile from "./pages/StaffProfile";
 import MedPatientsDetails from "./components/medicaldirector/patients/MedPatientsDetails";
 import MedAppointmentDetails from "./components/medicaldirector/appointment/MedAppointmentDetails";
 import MedDoctorDetail from "./components/medicaldirector/doctor/MedDoctorDetail";
+import SignupSuccess from "./_Auth/SignupSuccess";
 
 function App() {
   return (
@@ -61,6 +62,7 @@ function App() {
           <Route path="/" element={<Navigate to="/dashboard" />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/signup-success" element={<SignupSuccess />} />
           <Route element={<ProtectedRoutes />}>
             <Route path="/dashboard" element={<DashboardLayout />}>
               <Route index element={<Navigate to="overview" />} />
