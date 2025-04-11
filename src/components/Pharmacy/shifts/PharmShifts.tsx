@@ -1,9 +1,5 @@
-import React, { JSX, useEffect, useState } from "react";
-
-import Tablehead from "../../ReusablepatientD/Tablehead";
+import { JSX, useEffect, useState } from "react";
 import Table from "../../../Shared/Table";
-import { ShiftData } from "../../../data/nurseData";
-import { useNurseStore } from "../../../store/super-admin/useNuseStore";
 import { useGlobalStore } from "../../../store/super-admin/useGlobal";
 
 interface ShiftItem {
@@ -15,14 +11,14 @@ interface ShiftItem {
   department: string;
 }
 
-const NurseShifts = () => {
+const PharmShifts = () => {
   const userId = sessionStorage.getItem("userId");
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const { getStaffShifts, staffShift } = useGlobalStore();
 
   useEffect(() => {
     if (userId) {
-      getStaffShifts(userId, `/nurses/shift/user-records/${userId}`);
+      getStaffShifts(userId, `/pharmacy/user-records/${userId}`);
     }
   }, [getStaffShifts, userId]);
 
@@ -165,4 +161,4 @@ const NurseShifts = () => {
   );
 };
 
-export default NurseShifts;
+export default PharmShifts;

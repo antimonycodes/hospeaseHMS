@@ -98,6 +98,7 @@ interface NurseStore {
   createFrontdesk: (data: any) => Promise<any>;
   getNurseStats: () => Promise<void>;
   stats: NurseStats | null;
+  getNurseShiftsById: (id: string) => Promise<any>;
 }
 
 export const useNurseStore = create<NurseStore>((set, get) => ({
@@ -210,6 +211,20 @@ export const useNurseStore = create<NurseStore>((set, get) => ({
       console.error("Stats fetch error:", error.response?.data);
       toast.error(error.response?.data?.message || "Failed to fetch stats");
       set({ stats: null });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  getNurseShiftsById: async (id) => {
+    set({ isLoading: false });
+    try {
+      const response = await api.get(`/nurses/shift/user-records/${id}`);
+      console.log(response.data.data);
+      set({ selectedNurse: response.data.data }); // Store fetched doctor in state
+      // toast.success(response.data.message);
+    } catch (error: any) {
+      console.error(error.response?.data);
+      // toast.error(error.message || "Failed to fetch doctor details");
     } finally {
       set({ isLoading: false });
     }
