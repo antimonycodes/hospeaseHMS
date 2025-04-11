@@ -5,7 +5,7 @@ import Tabs from "../../ReusablepatientD/Tabs";
 import PatientTable from "../../ReusablepatientD/PatientTable";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 
-type PatientStatus = "Pending" | "Completed" | "Ongoing";
+type PatientStatus = "Pending" | "Completed";
 
 const NursePatients = () => {
   const { patients, getAllPatients, isLoading } = usePatientStore();
@@ -18,7 +18,7 @@ const NursePatients = () => {
         acc[status] = (acc[status] || 0) + 1;
         return acc;
       },
-      { Pending: 0, Completed: 0, Ongoing: 0 }
+      { Pending: 0, Completed: 0 }
     );
   }, [patients]);
 
@@ -31,7 +31,7 @@ const NursePatients = () => {
   }, [getAllPatients]);
 
   // Assuming Tabs component expects these props
-  const tabOptions: PatientStatus[] = ["Pending", "Completed", "Ongoing"];
+  const tabOptions: PatientStatus[] = ["Pending", "Completed"];
 
   return (
     <div className="p-4">

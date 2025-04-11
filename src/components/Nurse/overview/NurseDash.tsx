@@ -47,7 +47,7 @@ const NurseDash = () => {
     <div className="font-inter">
       <div className=" flex flex-col gap-4">
         <OverviewCard
-          cardTitle="Doctor's Dashboard"
+          cardTitle="Nurse Dashboard"
           category="lab"
           limit={4}
           data={NurseStatsData}

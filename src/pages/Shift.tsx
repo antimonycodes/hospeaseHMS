@@ -7,6 +7,7 @@ import { useRole } from "../hooks/useRole";
 import { JSX } from "react";
 import MatronShifts from "../components/Matron/shifts/MatronShifts";
 import MedDShifts from "../components/medicaldirector/shifts/MedDShifts";
+import PharmShifts from "../components/Pharmacy/shifts/PharmShifts";
 
 const roleComponents: Record<string, JSX.Element> = {
   //   superadmin: <SuperAdminOverview />,
@@ -14,6 +15,7 @@ const roleComponents: Record<string, JSX.Element> = {
   nurse: <NurseShifts />,
   matron: <MatronShifts />,
   "medical-director": <MedDShifts />,
+  pharmacist: <PharmShifts />,
 
   //   frontdesk: <FrontdeskOverview />,
 };

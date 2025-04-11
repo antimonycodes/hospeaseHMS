@@ -115,7 +115,7 @@ const LaboverviewTable = () => {
   return (
     <div className="w-full flex gap-4">
       {/* Pending Tests */}
-      <div className="w-1/2">
+      <div className="w-1/3">
         <Tablehead
           showSearchBar={false}
           typebutton="Add New"

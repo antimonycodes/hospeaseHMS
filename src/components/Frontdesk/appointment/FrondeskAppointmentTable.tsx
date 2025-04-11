@@ -1,36 +1,22 @@
 import { JSX, useState, useEffect } from "react";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
-import Table from "../../../Shared/Table";
-import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
 import Tablehead from "../../ReusablepatientD/Tablehead";
-import FrontdeskDetails from "./FrontdeskDetails";
 import AppointmentDetails from "./AppointmentDetails";
+import FrontdeskAppointmentModal from "./FrontdeskAppointmentModal";
 
 const FrondeskAppointmentTable = () => {
-  const [activeTab, setActiveTab] = useState(0);
   const [openModal, setOpenModal] = useState(false);
-  const [modalType, setModalType] = useState<"patient" | "appointment">(
-    "patient"
-  );
+
+  const { appointments, isLoading, getAllAppointments } = usePatientStore();
+
+  useEffect(() => {
+    getAllAppointments("/front-desk/appointment/all-records");
+  }, [getAllAppointments]);
 
   const handleOpenModal = () => {
-    setModalType(activeTab === 0 ? "patient" : "appointment");
     setOpenModal(true);
   };
 
-  const {
-    getAllPatients,
-    patients,
-    createPatient,
-    getPatientById,
-    selectedPatient,
-    isLoading,
-    pagination,
-  } = usePatientStore();
-
-  useEffect(() => {
-    getAllPatients();
-  }, []);
   return (
     <div>
       <Tablehead
@@ -41,9 +27,11 @@ const FrondeskAppointmentTable = () => {
         showSearchBar={true}
         showControls={true}
       />
+
       <AppointmentDetails />
-      {openModal && modalType === "appointment" && (
-        <BookAppointmentModal
+
+      {openModal && (
+        <FrontdeskAppointmentModal
           onClose={() => setOpenModal(false)}
           endpoint="/front-desk/appointment/book"
           refreshEndpoint="/front-desk/appointment/all-records"

@@ -71,6 +71,12 @@ export interface LabPatient {
   gender: string;
   status: "Pending" | "Ongoing" | "Completed";
 }
+interface PatientStats {
+  total_patient: number;
+  men_total_count: number;
+  ladies_total_count: number;
+  children_count: number;
+}
 
 interface PatientStore {
   isLoading: boolean;
@@ -101,11 +107,15 @@ interface PatientStore {
   manageAppointment: (id: string, data: any) => Promise<any>;
   searchPatients: (query: string) => Promise<any[]>;
   getLabPatients: (endpoint?: string) => Promise<void>; // New function for lab patients
+  searchPatientsappointment: (query: string) => Promise<any[]>;
+  getFrontdeskStats: () => Promise<void>;
+  stats: PatientStats | null;
 }
 
 export const usePatientStore = create<PatientStore>((set, get) => ({
   isLoading: true,
   patients: [],
+  stats: null,
 
   selectedPatient: null,
   appointments: [],
@@ -127,6 +137,24 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
     } catch (error: any) {
       console.error(error.response?.data);
       // toast.error(error.response?.data?.message || "Failed to fetch patients");
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  getFrontdeskStats: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get("/front-desk/stats");
+      if (response.status === 200) {
+        set({ stats: response.data.data });
+        toast.success(response.data.message);
+      }
+    } catch (error: any) {
+      console.error(
+        "Error fetching front-desk stats:",
+        error.response?.data || error.message
+      );
+      toast.error(error.response?.data?.message || "Failed to fetch stats");
     } finally {
       set({ isLoading: false });
     }
@@ -275,6 +303,17 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   searchPatients: async (query: string) => {
     try {
       const response = await api.get(`/admin/patient/fetch?search=${query}`);
+      return response.data.data.data;
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Search failed");
+      return [];
+    }
+  },
+  searchPatientsappointment: async (query: string) => {
+    try {
+      const response = await api.get(
+        `/medical-report/all-patient?search=${query}`
+      );
       return response.data.data.data;
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Search failed");
