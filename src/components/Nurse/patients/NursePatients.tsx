@@ -2,33 +2,33 @@
 import React, { useEffect, useState, useMemo } from "react";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import Tabs from "../../ReusablepatientD/Tabs";
-import PatientTable from "../../ReusablepatientD/PatientTable";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
+import NursePatientTable from "./NursePatientTable";
 
 type PatientStatus = "Pending" | "Completed";
 
 const NursePatients = () => {
-  const { patients, getAllPatients, isLoading } = usePatientStore();
-  const [activeTab, setActiveTab] = useState<PatientStatus>("Pending");
-
-  const statusCounts = useMemo(() => {
-    return patients.reduce(
-      (acc: Record<PatientStatus, number>, patient) => {
-        const status = patient.attributes.status as PatientStatus;
-        acc[status] = (acc[status] || 0) + 1;
-        return acc;
-      },
-      { Pending: 0, Completed: 0 }
-    );
-  }, [patients]);
-
-  const filteredPatients = useMemo(() => {
-    return patients.filter((p) => p.attributes.status === activeTab);
-  }, [patients, activeTab]);
-
+  const { getAllPatients, patients = [], isLoading } = usePatientStore();
+  const [activeTab, setActiveTab] = React.useState<"Pending" | "Completed">(
+    "Pending"
+  );
   useEffect(() => {
     getAllPatients("/nurses/all-patients");
   }, [getAllPatients]);
+
+  const filteredPatients = patients.filter(
+    (patient) =>
+      patient.attributes?.status === activeTab || activeTab === "Pending"
+  );
+
+  const statusCounts = patients.reduce(
+    (acc, patient) => {
+      const status = patient.attributes?.status || "Pending";
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    },
+    { Pending: 0, Completed: 0 }
+  );
 
   // Assuming Tabs component expects these props
   const tabOptions: PatientStatus[] = ["Pending", "Completed"];
@@ -40,13 +40,13 @@ const NursePatients = () => {
         tableTitle="Patients"
         tableCount={patients.length}
       />
-      <Tabs<PatientStatus>
+      <Tabs<"Pending" | "Completed">
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         statusCounts={statusCounts}
-        tabs={tabOptions}
+        tabs={["Pending", "Completed"]}
       />
-      <PatientTable patients={filteredPatients} isLoading={isLoading} />
+      <NursePatientTable patients={patients} isLoading={isLoading} />
     </div>
   );
 };

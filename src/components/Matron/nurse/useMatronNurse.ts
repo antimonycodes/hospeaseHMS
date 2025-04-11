@@ -145,6 +145,7 @@ interface MatronStore {
   getMatronStats: () => Promise<void>; // Add stats fetch function
   getAllPatients: () => Promise<void>;
   getPatientById: (id: number) => Promise<void>;
+  getMedPatientById: (id: number) => Promise<void>;
 }
 
 export const useMatronNurse = create<MatronStore>((set, get) => ({
@@ -193,6 +194,25 @@ export const useMatronNurse = create<MatronStore>((set, get) => ({
     set({ isLoading: true });
     try {
       const response = await api.get(`/matron/all-patients/${id}`);
+      console.log("API Response:", response.data); // Log full response
+      set({ selectedPatient: response.data.data });
+      console.log("Selected Patient Set:", response.data.data);
+    } catch (error: any) {
+      console.error(
+        "Error fetching patient:",
+        error.response?.data || error.message
+      );
+      toast.error(
+        error.response?.data?.message || "Failed to fetch patient details"
+      );
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  getMedPatientById: async (id: number) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(`/medical-director/patient/${id}`);
       console.log("API Response:", response.data); // Log full response
       set({ selectedPatient: response.data.data });
       console.log("Selected Patient Set:", response.data.data);

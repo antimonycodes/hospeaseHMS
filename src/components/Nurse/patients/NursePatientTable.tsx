@@ -1,77 +1,65 @@
-import { JSX, useEffect, useState } from "react";
-
-import { useNavigate, useParams } from "react-router-dom";
-import Loader from "../../../Shared/Loader";
-import EditIcon from "../../../assets/EditIcon.png";
+import React, { useState } from "react";
 import Table from "../../../Shared/Table";
-import EditPatientModal from "../../../Shared/EditPatientModal";
-import { usePatientStore } from "../../../store/super-admin/usePatientStore";
+import { useNavigate } from "react-router-dom";
+import Loader from "../../../Shared/Loader";
 
-type FrondeskPatientData = {
+type NursePatientData = {
   name: string;
   patientId: string;
-  age: number;
   gender: string;
   phone: string;
-  branch: string;
   occupation: string;
-  editpatients: string;
-  id: string; // Added 'id' to match the rowKey
+  viewmore: string;
+  status: string;
+  id: number;
 };
 
 type Columns = {
-  key: keyof FrondeskPatientData | "editpatients";
+  key: keyof NursePatientData | "viewmore";
   label: string;
-  render?: (value: any, patient: FrondeskPatientData) => JSX.Element;
+  render?: (value: any, patient: NursePatientData) => React.ReactElement;
 };
 
-type FrondeskPatientDataProps = {
+type NursePatientDataProps = {
   isLoading?: boolean;
   patients: {
     attributes: {
       first_name: string;
       last_name: string;
-      age: number;
+      card_id: string;
       gender: string;
       phone_number: string;
-      branch: string;
+      status: string;
       occupation: string;
-      address: string;
     };
     id: number;
   }[];
 };
 
-const FrontdeskInfo = ({ patients, isLoading }: FrondeskPatientDataProps) => {
-  console.log(patients);
+const NursePatientTable = ({ patients, isLoading }: NursePatientDataProps) => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(0);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const { selectedPatient, getDeskByIdDoc } = usePatientStore();
-  const { id } = useParams();
-
-  useEffect(() => {
-    if (id) {
-      getDeskByIdDoc(id);
-    }
-  }, [id, getDeskByIdDoc]);
 
   const formattedPatients = patients.map((patient: any) => ({
     name: `${patient.attributes.first_name} ${patient.attributes.last_name}`,
-    patientId: patient.id.toString(), // Convert ID to string if needed
-    age: patient.attributes.age,
+    patientId: patient.attributes.card_id,
     gender: patient.attributes.gender,
     phone: patient.attributes.phone_number,
-    branch: patient.attributes.branch,
     occupation: patient.attributes.occupation,
-    editpatients: "editpatients",
+    status: patient.attributes.status || "Pending",
+
+    viewmore: "viewmore",
     id: patient.id,
   }));
-  const handleViewMore = (id: string) => {
-    console.log("Navigating to patient ID:", id);
-    navigate(` `);
+
+  const handleViewMore = (id: number) => {
+    navigate(`/dashboard/nurses/patients/${id}`);
   };
+
   if (isLoading) return <Loader />;
+
+  if (!patients.length) return <div>No patients to display</div>;
+
   const columns: Columns[] = [
     {
       key: "name",
@@ -87,13 +75,7 @@ const FrontdeskInfo = ({ patients, isLoading }: FrondeskPatientDataProps) => {
         <span className="text-[#667085]">{patient.patientId}</span>
       ),
     },
-    {
-      key: "age",
-      label: "Age",
-      render: (_, patient) => (
-        <span className="text-[#667085]">{patient.age}</span>
-      ),
-    },
+
     {
       key: "gender",
       label: "Gender",
@@ -116,22 +98,27 @@ const FrontdeskInfo = ({ patients, isLoading }: FrondeskPatientDataProps) => {
       ),
     },
     {
-      key: "editpatients",
+      key: "status",
+      label: "Status",
+      render: (_, patient) => (
+        <span className="text-[#667085]">{patient.status}</span>
+      ),
+    },
+    {
+      key: "viewmore",
       label: "",
       render: (_, patient) => (
         <span
           className="text-primary text-sm font-medium cursor-pointer"
-          onClick={() => setIsEditModalOpen(true)}
+          onClick={() => handleViewMore(patient.id)}
         >
-          <img src={EditIcon} alt="" />
+          View More
         </span>
       ),
     },
   ];
-
   return (
     <div>
-      {" "}
       <Table
         data={formattedPatients}
         columns={columns}
@@ -140,13 +127,8 @@ const FrontdeskInfo = ({ patients, isLoading }: FrondeskPatientDataProps) => {
         pagination={formattedPatients.length > 10}
         rowsPerPage={10}
       />
-      <EditPatientModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        patientData={selectedPatient}
-      />
     </div>
   );
 };
 
-export default FrontdeskInfo;
+export default NursePatientTable;

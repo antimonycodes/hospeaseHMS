@@ -53,6 +53,7 @@ import MedPatientsDetails from "./components/medicaldirector/patients/MedPatient
 import MedAppointmentDetails from "./components/medicaldirector/appointment/MedAppointmentDetails";
 import MedDoctorDetail from "./components/medicaldirector/doctor/MedDoctorDetail";
 import SignupSuccess from "./_Auth/SignupSuccess";
+import NurseDetail from "./components/Nurse/patients/NurseDetail";
 
 function App() {
   return (
@@ -126,6 +127,10 @@ function App() {
               />
               <Route path="nurses" element={<Nurses />} />
               <Route path="nurses/:id" element={<NurseDetails />} />
+              <Route
+                path="/dashboard/nurses/patients/:id"
+                element={<NurseDetail />}
+              />
               <Route path="pharmacy/info" element={<Pharmacy />} />
               <Route
                 path="pharmacy/staffs"

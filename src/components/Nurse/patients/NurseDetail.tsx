@@ -1,8 +1,11 @@
-import { ChevronLeft } from "lucide-react";
-import React, { useEffect } from "react";
+// Nurse patients detail page
+
+import { useEffect } from "react";
 import Loader from "../../../Shared/Loader";
 import { useParams } from "react-router-dom";
 import { useMatronNurse } from "../../Matron/nurse/useMatronNurse";
+import { ChevronLeft } from "lucide-react";
+import { useNurseStore } from "../../../store/super-admin/useNuseStore";
 
 interface NextOfKin {
   name: string;
@@ -47,18 +50,18 @@ const InfoRow: React.FC<{
   </div>
 );
 
-const MedPatientsDetails = () => {
+const NurseDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { selectedPatient, getMedPatientById, isLoading } = useMatronNurse();
+  const { selectedPatient, getPatientById, isLoading } = useNurseStore();
 
   useEffect(() => {
     if (id) {
       console.log("Fetching patient with ID:", id);
-      getMedPatientById(parseInt(id)).catch((error) => {
+      getPatientById(parseInt(id)).catch((error) => {
         console.error("Error fetching patient:", error);
       });
     }
-  }, [id, getMedPatientById]);
+  }, [id, getPatientById]);
 
   console.log("Selected Patient in Component:", selectedPatient);
 
@@ -145,4 +148,4 @@ const MedPatientsDetails = () => {
   );
 };
 
-export default MedPatientsDetails;
+export default NurseDetail;
