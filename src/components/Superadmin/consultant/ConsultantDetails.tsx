@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useDoctorStore } from "../../../store/super-admin/useDoctorStore";
 import Button from "../../../Shared/Button";
+import Loader from "../../../Shared/Loader";
 // import { useDoctorStore } from "../store/useDoctorStore";
 
 export interface Consultant {
@@ -22,28 +23,21 @@ export interface Consultant {
 const ConsultantDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const {
-    selectedConsultant,
-    getConsultantById: originalGetConsultantById,
-    isLoading,
-  } = useDoctorStore() as {
-    selectedConsultant: Consultant | null;
-    getConsultantById: (id: string, endpoint: string) => Promise<void>;
-    isLoading: boolean;
-  };
-
-  const getConsultantById = (id: string) => {
-    originalGetConsultantById(id, "defaultEndpoint");
-  };
+  const { selectedConsultant, getConsultantById, isLoading } =
+    useDoctorStore() as {
+      selectedConsultant: Consultant | null;
+      getConsultantById: (id: string, endpoint: string) => Promise<void>;
+      isLoading: boolean;
+    };
 
   useEffect(() => {
     if (id) {
-      getConsultantById(id);
+      getConsultantById(id, `/admin/consultant/fetch/${id}`);
     }
   }, [id, getConsultantById]);
   console.log(selectedConsultant);
 
-  if (isLoading) return <p>Loading consultant details...</p>;
+  if (isLoading) return <Loader />;
   if (!selectedConsultant) return <p>Consultant not found</p>;
 
   return (

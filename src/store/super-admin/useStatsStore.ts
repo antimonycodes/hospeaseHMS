@@ -31,6 +31,7 @@ interface StatsStore {
     total_doctor: number;
     total_appointment: number;
     total_consultant: number;
+    hospital_appointment_management_graphical_reps?: Record<string, number>;
   } | null;
   clinicalStats: any[] | null;
   doctorStats: {

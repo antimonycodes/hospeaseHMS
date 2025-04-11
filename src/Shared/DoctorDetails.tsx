@@ -53,10 +53,10 @@ const DoctorDetails = () => {
               Doctor Details
             </h2>
           </div>
-          <div className="flex space-x-2">
+          {/* <div className="flex space-x-2">
             <Button variant="edit">Edit</Button>
             <Button variant="delete">Block staff</Button>
-          </div>
+          </div> */}
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
