@@ -53,7 +53,7 @@ const PharmDash = () => {
     <div className="font-inter">
       <div className=" flex flex-col gap-4">
         {isLoading ? (
-          <div>Loading stats...</div>
+          <div>...</div>
         ) : (
           <OverviewCard
             cardTitle="Pharmacy Dashboard"

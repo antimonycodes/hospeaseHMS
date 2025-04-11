@@ -5,6 +5,7 @@ import Labpatientsinfo from "./Labpatientsinfo";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import { useNavigate } from "react-router-dom";
 import Table from "../../../Shared/Table";
+import Loader from "../../../Shared/Loader";
 
 const Labpatients = () => {
   const { patients, getAllPatients, isLoading } = usePatientStore();
@@ -117,6 +118,8 @@ const Labpatients = () => {
     },
   ];
 
+  if (isLoading) return <Loader />;
+
   return (
     <div className="mt-2">
       {/*  Table Header */}
@@ -127,7 +130,7 @@ const Labpatients = () => {
         tableCount={patients.length}
       />
       {/*  Tabs */}
-      <div className="w-full bg-white flex space-x-2 md:space-x-6 ">
+      <div className="w-full bg-white flex space-x-2 md:space-x-6 px-6 ">
         {statuses.map((status) => (
           <button
             key={status}

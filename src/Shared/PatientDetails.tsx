@@ -1,10 +1,28 @@
 import { Link, useParams } from "react-router-dom";
-import { ChevronLeft, ChevronDown, ChevronUp, User } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronDown,
+  ChevronUp,
+  User,
+  Clock,
+  Printer,
+  Download,
+  Calendar,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import EditPatientModal from "./EditPatientModal";
 import Button from "./Button";
 import { usePatientStore } from "../store/super-admin/usePatientStore";
 import Loader from "./Loader";
+import {
+  downloadDateReportAsPDF,
+  downloadDateReportAsImage,
+  downloadCompletePDF,
+} from "../utils/reportDownload";
+import { useReportStore } from "../store/super-admin/useReoprt";
+import { ReportItem } from "../components/Doctor/Patient-Details-Props/ReportItem";
+import { NoteItem } from "../components/Doctor/Patient-Details-Props/NoteItem";
+import toast from "react-hot-toast";
 
 const PatientDetails = () => {
   const [openSections, setOpenSections] = useState({
@@ -14,12 +32,29 @@ const PatientDetails = () => {
   });
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [mergedData, setMergedData] = useState<
+    Array<{
+      date: string;
+      reports: any[];
+      notes: any[];
+      isExpanded: boolean;
+    }>
+  >([]);
   const { id } = useParams<{ id: string }>();
   console.log(id);
 
   const { selectedPatient, getPatientById } = usePatientStore();
 
   console.log(selectedPatient);
+
+  const {
+    createReport,
+    createNote,
+    getAllReport,
+    allReports,
+    getMedicalNote,
+    allNotes,
+  } = useReportStore();
 
   const toggleSection = (section: keyof typeof openSections) => {
     setOpenSections((prev) => ({
@@ -28,11 +63,59 @@ const PatientDetails = () => {
     }));
   };
 
+  // Group data by date utility function
+  const groupByDate = (data: any[]) => {
+    return data.reduce((acc: { [key: string]: any[] }, item) => {
+      const date = new Date(item.attributes?.created_at)
+        .toISOString()
+        .split("T")[0];
+      if (!acc[date]) acc[date] = [];
+      acc[date].push(item);
+      return acc;
+    }, {});
+  };
+
+  useEffect(() => {
+    if (allReports.length > 0 || allNotes.length > 0) {
+      const processData = () => {
+        const groupedReports = groupByDate(allReports);
+        const groupedNotes = groupByDate(allNotes);
+
+        const allDates = Array.from(
+          new Set([
+            ...Object.keys(groupedReports),
+            ...Object.keys(groupedNotes),
+          ])
+        );
+
+        return allDates
+          .map((date) => ({
+            date,
+            reports: groupedReports[date] || [],
+            notes: groupedNotes[date] || [],
+            isExpanded: true, // Set initially expanded
+          }))
+          .sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          );
+      };
+
+      setMergedData(processData());
+    }
+  }, [allReports, allNotes]);
+
   useEffect(() => {
     if (id) {
       getPatientById(id);
+      getAllReport(id);
+      getMedicalNote(id, "doctor");
     }
-  }, [id, getPatientById]);
+  }, [id, getPatientById, getAllReport, getMedicalNote]);
+  const toggleDateExpansion = (index: number) => {
+    const updatedData = [...mergedData];
+    updatedData[index].isExpanded = !updatedData[index].isExpanded;
+    setMergedData(updatedData);
+  };
 
   if (!selectedPatient) return <Loader />;
 
@@ -200,183 +283,167 @@ const PatientDetails = () => {
         </div>
       </div>
 
-      {/* Doctor's Report Section */}
-      <div className="bg-white rounded-lg shadow mb-6">
-        <div
-          className="border-b border-gray-200 cursor-pointer"
-          onClick={() => toggleSection("doctorsReport")}
-        >
-          <div className="p-4 flex items-center justify-between">
-            <div className="flex gap-1 flex-col">
-              <h3 className="text-sm font-medium">Doctor's Report</h3>
-              <div className="flex items-center gap-2">
-                <div className="size-10 sm:size-12 rounded-full mr-2 bg-gray-200 flex items-center justify-center">
-                  <User size={20} className="text-gray-600" />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <h1 className="text-xs sm:text-sm">Dr Omoge Peter</h1>
-                  <p className="text-gray-500 text-xs">06/02/2025 11:00am</p>
-                </div>
-              </div>
-            </div>
-            {openSections.doctorsReport ? (
-              <ChevronUp size={16} />
-            ) : (
-              <ChevronDown size={16} />
-            )}
+      {/* emr */}
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-medium text-gray-800">
+            Medical Timeline
+          </h3>
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                downloadCompletePDF(mergedData, patient);
+              }}
+              className="flex items-center gap-1 text-sm bg-primary text-white px-3 py-1.5 rounded-md hover:bg-primary/90 transition"
+            >
+              <Download size={16} />
+              <span>Download Complete Report</span>
+            </button>
           </div>
         </div>
 
-        {openSections.doctorsReport && (
-          <div className="p-4">
-            {patientData.doctorsReport.map((item: any, index: number) => (
-              <div key={`doctor-${index}`} className="mb-2">
-                <div className="flex flex-col sm:flex-row">
-                  <span className="text-sm font-medium text-gray-800 sm:min-w-40 mb-1 sm:mb-0">
-                    {item.name}:
-                  </span>
-                  <span className="text-sm text-gray-600">{item.value}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Medical Laboratory Section */}
-      <div className="bg-white rounded-lg shadow mb-6">
-        <div
-          className="border-b border-gray-200 cursor-pointer"
-          onClick={() => toggleSection("medicalLaboratory")}
-        >
-          <div className="p-4 flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="size-10 sm:size-12 rounded-full mr-2 bg-gray-200 flex items-center justify-center">
-                <User size={20} className="text-gray-600" />
-              </div>
-              <div className="space-y-1 sm:space-y-2">
-                <h3 className="text-sm font-medium">Medical Laboratory</h3>
-                <p className="text-gray-500 text-xs">06/02/2025 11:00am</p>
-              </div>
+        <div className="timeline-container bg-white p-6 rounded-lg custom-shadow">
+          <div className="patient-report-header mb-6 border-b pb-4">
+            <h2 className="text-xl font-bold text-primary mb-1">
+              {patient.first_name} {patient.last_name} - Medical Report
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">
+              {/* <InfoRow label="Card ID" value={patient.} /> */}
+              <InfoRow label="Card ID" value={patient.card_id} />
+              <InfoRow label="Age" value={patient.age?.toString()} />
+              <InfoRow label="Gender" value={patient.gender} />
+              <InfoRow label="Phone" value={patient.phone_number} />
             </div>
-            {openSections.medicalLaboratory ? (
-              <ChevronUp size={16} />
-            ) : (
-              <ChevronDown size={16} />
-            )}
           </div>
-        </div>
 
-        {openSections.medicalLaboratory && (
-          <div className="p-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
-              <div className="text-sm font-medium mb-2 sm:mb-0">
-                Laboratory Note
-              </div>
-
-              <div className="bg-[#FEF3CD] text-[#B58A00] py-1 px-3 sm:py-2 sm:px-4 rounded-full text-xs inline-block w-fit">
-                ongoing
-              </div>
-            </div>
-
-            <div className="mb-8">
-              {patientData.medicalLaboratory.map((item: any, index: number) => (
-                <div key={`lab-${index}`} className="mb-2 text-[#667085]">
-                  {item.value ? (
-                    <div className="flex flex-col sm:flex-row">
-                      <span className="text-sm font-medium sm:min-w-40 mb-1 sm:mb-0">
-                        {item.name}:
-                      </span>
-                      <span className="text-sm">{item.value}</span>
-                    </div>
+          {mergedData.map((day, index) => (
+            <div
+              key={day.date}
+              className="timeline-day mb-4 border rounded-lg overflow-hidden bg-white"
+            >
+              <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
+                <div
+                  className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 px-2 py-1 rounded-md"
+                  onClick={() => toggleDateExpansion(index)}
+                >
+                  <Calendar className="text-black w-5 h-5" />
+                  <h3 className="font-medium text-gray-700">
+                    {new Date(day.date).toLocaleDateString("en-US", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </h3>
+                  {day.isExpanded ? (
+                    <ChevronUp className="text-gray-500 w-5 h-5" />
                   ) : (
-                    <div className="text-sm font-medium">{item.name}</div>
+                    <ChevronDown className="text-gray-500 w-5 h-5" />
                   )}
                 </div>
-              ))}
-            </div>
-
-            <div className="mb-4 text-[#667085]">
-              <div className="text-sm font-medium mb-2">Lipid Profile:</div>
-              {patientData.lipidProfile.map((item: any, index: number) => (
-                <div key={`lipid-${index}`} className="mb-2">
-                  <div className="flex flex-col sm:flex-row">
-                    <span className="text-sm font-medium sm:min-w-40 mb-1 sm:mb-0">
-                      {item.name}:
-                    </span>
-                    <span className="text-sm">{item.value}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="text-[#667085] mt-8">
-              <div className="text-sm font-medium mb-2">
-                Fasting Blood Sugar (FBS):
-              </div>
-              {patientData.fastingBloodSugar.map((item: any, index: number) => (
-                <div key={`fbs-${index}`} className="mb-2">
-                  <div className="flex flex-col sm:flex-row">
-                    <span className="text-sm font-medium sm:min-w-40 mb-1 sm:mb-0">
-                      {item.name}:
-                    </span>
-                    <span className="text-sm">{item.value}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {/*  */}
-            <div className="flex items-center mt-8">
-              <div className="size-10 sm:size-12 rounded-full mr-2 bg-gray-200 flex items-center justify-center">
-                <User size={20} className="text-gray-600" />
-              </div>
-              <div className="space-y-1 sm:space-y-2">
-                <h3 className="text-sm font-medium">Medical Laboratory</h3>
-                <p className="text-gray-500 text-xs">06/02/2025 11:00am</p>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Pharmacy Section */}
-      <div className="bg-white rounded-lg shadow mb-6">
-        <div
-          className="border-b border-gray-200 cursor-pointer"
-          onClick={() => toggleSection("pharmacy")}
-        >
-          <div className="p-4 flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="size-10 sm:size-12 rounded-full mr-2 bg-gray-200 flex items-center justify-center">
-                <User size={20} className="text-gray-600" />
-              </div>
-              <div className="space-y-1 sm:space-y-2">
-                <h3 className="text-sm font-medium">Pharmacy</h3>
-                <p className="text-xs text-gray-500">06/02/2025 11:00am</p>
-              </div>
-            </div>
-            {openSections.pharmacy ? (
-              <ChevronUp size={16} />
-            ) : (
-              <ChevronDown size={16} />
-            )}
-          </div>
-        </div>
-
-        {openSections.pharmacy && (
-          <div className="p-4">
-            {patientData.pharmacy.map((item: any, index: number) => (
-              <div key={`pharmacy-${index}`} className="mb-2">
-                <div className="flex flex-col sm:flex-row">
-                  <span className="text-sm font-medium text-gray-800 sm:min-w-40 mb-1 sm:mb-0">
-                    {item.name}:
+                <div className="flex items-center gap-2">
+                  <span className="text-xs bg-[#CFFFE9] text-[#009952] px-2 py-1 rounded-full">
+                    {day.reports.length + day.notes.length} entries
                   </span>
-                  <span className="text-sm text-gray-600">{item.value}</span>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => {
+                        toast.loading("Generating PDF...", { id: "date-pdf" });
+                        downloadDateReportAsPDF(day, patient)
+                          .then(() =>
+                            toast.success("PDF downloaded", { id: "date-pdf" })
+                          )
+                          .catch(() =>
+                            toast.error("Failed to download PDF", {
+                              id: "date-pdf",
+                            })
+                          );
+                      }}
+                      className="flex items-center gap-1 text-xs bg-primary text-white px-2 py-1 rounded-md hover:bg-blue-700"
+                      title="Download as PDF"
+                    >
+                      <Download size={14} />
+                      <span>PDF</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        toast.loading("Generating image...", {
+                          id: "date-img",
+                        });
+                        downloadDateReportAsImage(day, patient)
+                          .then(() =>
+                            toast.success("Image downloaded", {
+                              id: "date-img",
+                            })
+                          )
+                          .catch(() =>
+                            toast.error("Failed to download image", {
+                              id: "date-img",
+                            })
+                          );
+                      }}
+                      className="flex items-center gap-1 text-xs bg-gray-700 text-white px-2 py-1 rounded-md hover:bg-gray-600"
+                      title="Download as Image"
+                    >
+                      <Printer size={14} />
+                      <span>IMG</span>
+                    </button>
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+
+              {day.isExpanded && (
+                <div className="p-4 space-y-4">
+                  {/* Timeline items with vertical connector */}
+                  <div className="relative timeline-items">
+                    {[...day.reports, ...day.notes]
+                      .sort(
+                        (a, b) =>
+                          new Date(b.attributes.created_at).getTime() -
+                          new Date(a.attributes.created_at).getTime()
+                      )
+                      .map((item, itemIdx) => {
+                        const isReport = "case_report_id" in item;
+                        return (
+                          <div
+                            key={isReport ? item.case_report_id : item.id}
+                            className="timeline-item relative pl-8 pb-4 mb-4"
+                          >
+                            {/* Vertical line */}
+                            {itemIdx !==
+                              [...day.reports, ...day.notes].length - 1 && (
+                              <div className="absolute left-3 top-6 bottom-0 w-0.5 bg-gray-200"></div>
+                            )}
+
+                            {/* Time dot */}
+                            <div className="absolute left-0 top-0 bg-[#DFE0E0] rounded-full w-6 h-6 flex items-center justify-center">
+                              <Clock className="text-white w-3 h-3" />
+                            </div>
+
+                            {/* Time */}
+                            <div className="text-xs text-gray-500 mb-1">
+                              {new Date(
+                                item.attributes.created_at
+                              ).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </div>
+
+                            {isReport ? (
+                              <ReportItem report={item} />
+                            ) : (
+                              <NoteItem note={item} />
+                            )}
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
       <EditPatientModal

@@ -125,7 +125,7 @@ const PharmPatients = () => {
         tableCount={patients.length}
       />
       {/*  Tabs */}
-      <div className="w-full bg-white flex space-x-2 md:space-x-6 ">
+      <div className="w-full bg-white flex space-x-2 md:space-x-6  px-6">
         {statuses.map((status) => (
           <button
             key={status}

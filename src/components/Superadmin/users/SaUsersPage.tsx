@@ -1,21 +1,61 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "../../../Shared/Button";
 import { Plus, Search } from "lucide-react";
 import AdministratorTable from "./AdministratorTable";
 import DepartmentTable from "./DepartmentTable";
 import AddDepartmentModal from "./AddDepartmentModal";
+import {
+  CreateStaff,
+  useGlobalStore,
+} from "../../../store/super-admin/useGlobal";
+import AddHeadModal from "../Heads/AddHeadModal";
+import StaffsList from "../Staffs/StaffsList";
 
 const SaUsersPage = () => {
-  const [activeTab, setActiveTab] = useState<"Department" | "Administrator">(
-    "Department"
+  const [activeTab, setActiveTab] = useState<"Matron" | "Medical-director">(
+    "Matron"
   );
   const [openModal, setOpenModal] = useState(false);
-  const [modalType, setModalType] = useState<"Department" | "Administrator">(
-    "Department"
+  const [modalType, setModalType] = useState<"Matron" | "Medical-director">(
+    "Matron"
   );
 
+  const [formData, setFormData] = useState<CreateStaff>({
+    first_name: "",
+    email: "",
+    last_name: "",
+    phone: "",
+  });
+
+  const department = activeTab === "Matron" ? "matron" : "medical-director";
+
+  const { createStaff, isLoading, isStaffLoading, getDeptStaffs, staffs } =
+    useGlobalStore();
+  const {
+    getAllRoles,
+    roles,
+  }: { getAllRoles: () => void; roles: Record<string, any> } = useGlobalStore();
+
+  useEffect(() => {
+    getAllRoles();
+  }, [getAllRoles]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  useEffect(() => {
+    getDeptStaffs(department);
+  }, [getDeptStaffs, department]);
+
+  console.log(roles, "roles");
+
   const handleOpenModal = () => {
-    setModalType(activeTab === "Department" ? "Department" : "Administrator");
+    setModalType(activeTab === "Matron" ? "Matron" : "Medical-director");
     setOpenModal(true);
   };
   return (
@@ -25,23 +65,23 @@ const SaUsersPage = () => {
         <div className=" flex">
           <button
             className={`px-4 py-2 mr-2 font-semibold ${
-              activeTab === "Department"
+              activeTab === "Matron"
                 ? "text-primary border-b-2 border-primary"
                 : "text-[#667185]"
             }`}
-            onClick={() => setActiveTab("Department")}
+            onClick={() => setActiveTab("Matron")}
           >
-            Department
+            Matron
           </button>
           <button
             className={`px-4 py-2 font-semibold  ${
-              activeTab === "Administrator"
+              activeTab === "Medical-director"
                 ? "text-primary border-b-2 border-primary"
                 : "text-[#667185]"
             }`}
-            onClick={() => setActiveTab("Administrator")}
+            onClick={() => setActiveTab("Medical-director")}
           >
-            Administrator
+            Medical-director
           </button>
         </div>
 
@@ -71,15 +111,22 @@ const SaUsersPage = () => {
       </div>
 
       {/* tables */}
-      {activeTab === "Administrator" ? (
-        <AdministratorTable />
-      ) : (
-        <DepartmentTable />
-      )}
-
+      {/* {activeTab === "Matron" ? <AdministratorTable /> : <DepartmentTable />} */}
+      <StaffsList staffs={staffs} isStaffLoading={isStaffLoading} />
       {/* modals */}
-      {openModal && modalType === "Department" && (
+      {/* {openModal && modalType === "Medical-director" && (
         <AddDepartmentModal onClose={() => setOpenModal(false)} />
+      )} */}
+      {openModal && (
+        <AddHeadModal
+          formData={formData}
+          onClose={() => setOpenModal(false)}
+          department={department}
+          handleInputChange={handleInputChange}
+          createStaff={createStaff}
+          isLoading={isLoading}
+          roles={roles}
+        />
       )}
     </div>
   );

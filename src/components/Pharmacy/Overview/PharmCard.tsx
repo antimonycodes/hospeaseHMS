@@ -49,9 +49,8 @@ const PharmCard = () => {
     }
   );
 
-  // ✂️ Filter by current active status
   const filteredPatients = transformedPatients.filter(
-    (p) => p.status.toLowerCase() === activeStatus
+    (p) => p.status?.toLowerCase() === activeStatus
   );
 
   const statusStyles: Record<string, string> = {
@@ -119,73 +118,6 @@ const PharmCard = () => {
       ),
     },
   ];
-
-  // const pendingPatients = patients.filter(
-  //   (patient) => patient.status === "Pending"
-  // );
-
-  // const statusStyles: Record<Patient["status"], string> = {
-  //   Ongoing: "bg-[#FFEBAA] text-[#B58A00]",
-  //   Completed: "bg-[#CFFFE9] text-[#009952]",
-  //   Pending: "bg-[#FBE1E1] text-[#F83E41]",
-  // };
-
-  // const columns: {
-  //   key: keyof Patient;
-  //   label: string;
-  //   render: (value: string | number, row: Patient) => React.ReactNode;
-  // }[] = [
-  //   {
-  //     key: "name",
-  //     label: "Name",
-  //     render: (value) => (
-  //       <span className="text-dark font-medium text-sm">{value}</span>
-  //     ),
-  //   },
-  //   {
-  //     key: "patientid",
-  //     label: "Patient ID",
-  //     render: (value) => (
-  //       <span className="text-dark font-medium text-sm">{value}</span>
-  //     ),
-  //   },
-  //   {
-  //     key: "gender",
-  //     label: "Gender",
-  //     render: (value) => (
-  //       <span className="text-dark font-medium text-sm">{value}</span>
-  //     ),
-  //   },
-  //   {
-  //     key: "occupation",
-  //     label: "Occupation",
-  //     render: (value) => (
-  //       <span className="text-dark font-medium text-sm">{value}</span>
-  //     ),
-  //   },
-  //   {
-  //     key: "phone",
-  //     label: "Phone",
-  //     render: (value) => (
-  //       <span className="text-[#667085] text-sm">
-  //         {formatPhoneNumber(value as string)}
-  //       </span>
-  //     ),
-  //   },
-  //   {
-  //     key: "status",
-  //     label: "Status",
-  //     render: (value) => (
-  //       <span
-  //         className={`text-sm px-2 py-1 rounded-full ${
-  //           statusStyles[value as Patient["status"]]
-  //         }`}
-  //       >
-  //         {value}
-  //       </span>
-  //     ),
-  //   },
-  // ];
 
   if (isLoading) return <Loader />;
 

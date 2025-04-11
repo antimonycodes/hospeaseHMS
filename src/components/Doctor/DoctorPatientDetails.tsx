@@ -327,58 +327,6 @@ const DoctorPatientDetails = () => {
     toast.success("Report downloaded as text file", { id: "pdf-download" });
   };
 
-  const downloadAsCSV = () => {
-    if (!selectedPatient?.attributes) return;
-
-    const patient = selectedPatient.attributes;
-    toast.loading("Generating CSV...", { id: "csv-download" });
-
-    let csvContent = "Date,Time,Type,Staff,Department,Status,Content\n";
-
-    mergedData.forEach((day) => {
-      const items = [...day.reports, ...day.notes].sort(
-        (a, b) =>
-          new Date(b.attributes.created_at).getTime() -
-          new Date(a.attributes.created_at).getTime()
-      );
-
-      items.forEach((item) => {
-        const isReport = "case_report_id" in item;
-        const staff = item.attributes.staff_details;
-        const date = new Date(day.date).toLocaleDateString("en-US");
-        const time = new Date(item.attributes.created_at).toLocaleTimeString(
-          [],
-          {
-            hour: "2-digit",
-            minute: "2-digit",
-          }
-        );
-        const type = isReport ? "Report" : "Note";
-        const staffName = `${staff?.first_name || ""} ${
-          staff?.last_name || ""
-        }`;
-        const department = isReport
-          ? item.attributes.department?.name || ""
-          : "Doctor's Note";
-        const status = isReport ? item.attributes.status : "N/A";
-        const content = item.attributes.note.replace(/"/g, '""'); // Escape quotes for CSV
-
-        csvContent += `"${date}","${time}","${type}","${staffName}","${department}","${status}","${content}"\n`;
-      });
-    });
-
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.style.display = "none";
-    a.href = url;
-    a.download = `${patient.first_name}-${patient.last_name}-Medical-Report.csv`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    toast.success("CSV downloaded successfully", { id: "csv-download" });
-  };
-
   if (!selectedPatient) return <Loader />;
 
   const patient = selectedPatient.attributes;
