@@ -233,8 +233,9 @@ export const useMatronNurse = create<MatronStore>((set, get) => ({
     set({ isLoading: true });
     try {
       const response = await api.get(`/matron/nurse/fetch/${id}`);
-      console.log(response.data.data);
+      console.log(response.data.data, "genursedata");
       set({ selectedNurse: response.data.data });
+      toast.success(response.data.message);
     } catch (error: any) {
       console.error(error.response?.data);
       toast.error(

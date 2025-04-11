@@ -39,7 +39,7 @@ const MatronNurseDetails = () => {
   const [loading, setLoading] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingShift, setEditingShift] = useState<any | null>(null);
-  const [staffShift, setStaffShift] = useState<any[]>([]);
+  // const [staffShift, setStaffShift] = useState<any[]>([]);
 
   const navigate = useNavigate();
   const { id } = useParams();
@@ -48,18 +48,30 @@ const MatronNurseDetails = () => {
     getNurseById: (id: string) => void;
     isLoading: boolean;
   };
-  const { assignShifts, updateShift, deleteShift } = useGlobalStore();
+  const { assignShifts, updateShift, deleteShift, getStaffShifts, staffShift } =
+    useGlobalStore();
+
+  console.log(selectedNurse, "fghjklhgf");
 
   // Fetch nurse shifts
-  const getStaffShifts = async (userId: number, url: string) => {
-    try {
-      const response = await fetch(url);
-      const data = await response.json();
-      setStaffShift(data || []);
-    } catch (error) {
-      console.error("Error fetching shifts:", error);
+  // const getStaffShifts = async (userId: number, url: string) => {
+  //   try {
+  //     const response = await fetch(url);
+  //     const data = await response.json();
+  //     setStaffShift(data || []);
+  //   } catch (error) {
+  //     console.error("Error fetching shifts:", error);
+  //   }
+  // };
+
+  useEffect(() => {
+    if (selectedNurse) {
+      getStaffShifts(
+        selectedNurse.attributes.user_id,
+        `/matron/shift/user-records/${selectedNurse.attributes.user_id}`
+      );
     }
-  };
+  }, [selectedNurse?.attributes.user_id, getStaffShifts]);
 
   useEffect(() => {
     if (id) {
@@ -67,14 +79,16 @@ const MatronNurseDetails = () => {
     }
   }, [id, getNurseById]);
 
-  useEffect(() => {
-    if (selectedNurse?.attributes.user_id) {
-      getStaffShifts(
-        selectedNurse.attributes.user_id,
-        `/matron/shift/user-records/${selectedNurse.attributes.user_id}`
-      );
-    }
-  }, [selectedNurse?.attributes.user_id]);
+  // useEffect(() => {
+  //   if (selectedNurse) {
+  //     getStaffShifts(
+  //       selectedNurse.attributes.user_id,
+  //       `/matron/shift/user-records/${selectedNurse.attributes.user_id}`
+  //     );
+  //   }
+  // }, [selectedNurse?.attributes.user_id]);
+
+  console.log(selectedNurse?.attributes.user_id, "fghjk");
 
   const handleAddShift = async () => {
     if (!selectedDate || !shiftType || !startTime || !endTime) return;
@@ -281,10 +295,10 @@ const MatronNurseDetails = () => {
             <tbody>
               {staffShift.map((shift) => (
                 <tr key={shift.id} className="bg-white rounded-md shadow-sm">
-                  <td className="px-2 py-2">{shift.date}</td>
-                  <td className="px-2 py-2">{shift.shift_type}</td>
-                  <td className="px-2 py-2">{shift.start_time}</td>
-                  <td className="px-2 py-2">{shift.end_time}</td>
+                  <td className="px-2 py-2 ">{shift.attributes.date}</td>
+                  <td className="px-2 py-2">{shift.attributes.shift_type}</td>
+                  <td className="px-2 py-2">{shift.attributes.start_time}</td>
+                  <td className="px-2 py-2">{shift.attributes.end_time}</td>
                   <td className="px-2 py-2 text-right flex justify-end gap-2">
                     <button
                       className="text-gray-500 hover:text-primary"
