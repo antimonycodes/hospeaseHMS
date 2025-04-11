@@ -21,6 +21,7 @@ export const Pharmacy = lazy(() => import("./Pharmacy"));
 export const AppointmentDetails = lazy(
   () => import("../components/Frontdesk/appointment/AppointmentDetails")
 );
+
 export const Payment = lazy(() => import("./Payment"));
 export const Profile = lazy(() => import("./Profile"));
 export const Shift = lazy(() => import("./Shift"));

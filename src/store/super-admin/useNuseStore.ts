@@ -28,7 +28,51 @@ export interface Hospital {
   name: string;
   logo: string;
 }
+export interface PatientAttributes {
+  id?: number;
+  first_name: string;
+  last_name: string;
+  card_id: string;
+  phone_number: string | null;
+  occupation: string;
+  gender: string;
+  address: string;
+  age: number;
+  branch: string | null;
+  patient_type?: string;
+  hospital?: {
+    id: number;
+    name: string;
+    logo: string;
+  };
+  clinical_department?: {
+    id: number;
+    name: string;
+  };
+  next_of_kin: NextOfKin[];
+  created_at?: string;
+}
+export interface NextOfKin {
+  name: string;
+  last_name: string;
+  gender: string;
+  phone: string;
+  occupation: string;
+  address: string;
+  relationship: string;
+}
 
+export interface Patient {
+  id: number;
+  first_name: string;
+  last_name: string;
+  card_id: string;
+  phone_number: string;
+  occupation: string;
+  gender: string;
+  address: string;
+  patient_type: string;
+}
 // Interface for Nurse Attributes
 export interface NurseAttributes {
   first_name: string;
@@ -91,6 +135,7 @@ interface NurseStore {
   nurses: Nurse[];
   frontdesks: any[];
   selectedNurse: any | null;
+  selectedPatient: any | null; // Added selectedPatient property
   getNurses: () => Promise<any>;
   getFrontdesk: () => Promise<any>;
   getNurseById: (id: string) => Promise<any>;
@@ -99,6 +144,7 @@ interface NurseStore {
   getNurseStats: () => Promise<void>;
   stats: NurseStats | null;
   getNurseShiftsById: (id: string) => Promise<any>;
+  getPatientById: (id: number) => Promise<void>;
 }
 
 export const useNurseStore = create<NurseStore>((set, get) => ({
@@ -107,6 +153,7 @@ export const useNurseStore = create<NurseStore>((set, get) => ({
   stats: null,
   frontdesks: [],
   selectedNurse: null,
+  selectedPatient: null,
   getNurses: async () => {
     set({ isLoading: true });
     try {
@@ -152,6 +199,25 @@ export const useNurseStore = create<NurseStore>((set, get) => ({
     } catch (error: any) {
       console.error(error.response?.data);
       // toast.error(error.message || "Failed to fetch doctor details");
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  getPatientById: async (id: number) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(`/nurses/all-patients/${id}`);
+      console.log("API Response:", response.data); // Log full response
+      set({ selectedPatient: response.data.data });
+      console.log("Selected Patient Set:", response.data.data);
+    } catch (error: any) {
+      console.error(
+        "Error fetching patient:",
+        error.response?.data || error.message
+      );
+      toast.error(
+        error.response?.data?.message || "Failed to fetch patient details"
+      );
     } finally {
       set({ isLoading: false });
     }
