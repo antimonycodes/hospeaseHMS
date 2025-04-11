@@ -127,7 +127,7 @@ const PatientDetails = () => {
             </Link>
             {/*  */}
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-              <Button
+              {/* <Button
                 variant="edit"
                 rounded="lg"
                 onClick={() => setIsEditModalOpen(true)}
@@ -135,13 +135,12 @@ const PatientDetails = () => {
               >
                 Edit Patient
               </Button>
-              {/*  */}
               <Button
                 variant="delete"
                 className="text-xs sm:text-sm flex-1 sm:flex-none"
               >
                 Delete Patient
-              </Button>
+              </Button> */}
             </div>
           </div>
           {/* Patient information card */}

@@ -8,12 +8,13 @@ type Column<T> = {
 };
 
 interface PatientAttributes {
+  phone_number: any;
   card_id: any;
   id: number;
   first_name: string;
   last_name: string;
   patientId: string;
-  phone: string;
+  // phone: string;
   gender: "Male" | "Female";
 }
 
@@ -44,7 +45,7 @@ const PatientsTable = ({
         last_name: patient.attributes.last_name,
         card_id: patient.attributes.card_id,
         patientId: patient.attributes.card_id,
-        phone: patient.attributes.phone,
+        phone_number: patient.attributes.phone_number,
         gender: patient.attributes.gender,
       }))
     );
@@ -68,10 +69,10 @@ const PatientsTable = ({
       ),
     },
     {
-      key: "phone",
+      key: "phone_number",
       label: "Phone",
       render: (_, patient) => (
-        <span className="text-[#667085]">{patient.phone}</span>
+        <span className="text-[#667085]">{patient.phone_number}</span>
       ),
     },
     {
