@@ -14,12 +14,12 @@ const Tabs = <T extends string>({
   tabs,
 }: TabsProps<T>) => {
   return (
-    <div className="px-6 w-full bg-white flex space-x-2 md:space-x-6">
+    <div className=" w-full bg-white flex space-x-2 md:space-x-6">
       {tabs.map((tab) => (
         <button
           key={tab}
           onClick={() => setActiveTab(tab)}
-          className={`pb-4 text-xs md:text-sm font-medium ${
+          className={`pb-3 px-4 text-xs md:text-sm font-medium ${
             activeTab === tab
               ? "text-green-600 border-b-2 border-green-600"
               : "text-gray-500"

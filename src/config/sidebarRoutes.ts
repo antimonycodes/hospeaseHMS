@@ -231,7 +231,7 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
     },
     {
       name: "Profile",
-      path: "/dashboard/profile",
+      path: "/dashboard/staffprofile",
       icon: getImageSrc("profile.svg"),
       activeIcon: getImageSrc("profile.svg"),
     },

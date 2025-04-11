@@ -1,7 +1,9 @@
 import { formatPhoneNumber } from "../../utils/formatPhoneNumber";
 import { useNavigate } from "react-router-dom";
-import { JSX } from "react";
+import { JSX, useEffect } from "react";
 import Table from "../../Shared/Table";
+import { usePatientStore } from "../../store/super-admin/usePatientStore";
+import Loader from "../../Shared/Loader";
 
 type PatientTableData = {
   name: string;
@@ -12,7 +14,7 @@ type PatientTableData = {
   branch: string;
   occupation: string;
   viewMore: string;
-  status: "Pending" | "Completed" | "Ongoing";
+  status: string;
   id: number;
 };
 
@@ -33,7 +35,7 @@ type PatientTableProps = {
       phone_number: string;
       branch: string;
       occupation: string;
-      status: "Pending" | "Completed" | "Ongoing";
+      status: string;
     };
     id: number;
   }[];
@@ -47,7 +49,7 @@ const PatientTable = ({ patients, isLoading }: PatientTableProps) => {
     patientId: patient.id.toString(),
     age: patient.attributes.age,
     gender: patient.attributes.gender,
-    phone: formatPhoneNumber(patient.attributes.phone_number),
+    phone: patient.attributes.phone_number,
     branch: patient.attributes.branch,
     occupation: patient.attributes.occupation,
     status: patient.attributes.status,
@@ -60,7 +62,6 @@ const PatientTable = ({ patients, isLoading }: PatientTableProps) => {
   };
 
   const statusStyles: Record<PatientTableData["status"], string> = {
-    Ongoing: "bg-[#FFEBAA] text-[#B58A00] px-2 py-1 rounded-full",
     Completed: "bg-[#CFFFE9] text-[#009952] px-2 py-1 rounded-full",
     Pending: "bg-[#FBE1E1] text-[#F83E41] px-2 py-1 rounded-full",
   };
@@ -139,7 +140,7 @@ const PatientTable = ({ patients, isLoading }: PatientTableProps) => {
   ];
 
   if (isLoading) {
-    return <div className="p-4 text-gray-500">Loading patients...</div>;
+    return <Loader />;
   }
 
   return (

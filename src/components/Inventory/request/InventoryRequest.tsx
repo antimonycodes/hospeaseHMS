@@ -2,8 +2,8 @@ import React, { JSX, useEffect, useState } from "react";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import Table from "../../../Shared/Table";
 import AddRequestModal from "./AddRequestModal";
-import axios from "axios";
 import { useInventoryStore } from "../../../store/staff/useInventoryStore";
+
 export type RequestData = {
   id: number;
   requested_by: string;
@@ -18,12 +18,17 @@ export type RequestData = {
   item_name: string;
   created_at: string;
 };
+
 const InventoryRequest = () => {
   const { getAllRequest, requests, isLoading } = useInventoryStore();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     getAllRequest();
   }, [getAllRequest]);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   type Columns = {
     key: keyof RequestData;
@@ -32,14 +37,6 @@ const InventoryRequest = () => {
   };
 
   const requestsArray = Array.isArray(requests) ? requests : [];
-
-  // const formattedPayments: RequestData[] = requestsArray.map((request) => ({
-  //   id: request.id.toString(),
-  //   requested_by: request.attributes?.requested_by || "N/A",
-  //   inventory_id: request.attributes?.inventory_id || "Unknown",
-  //   quantity: request.attributes?.quantity || "0",
-  //   status: request.attributes?.status || "0",
-  // }));
 
   const columns: Columns[] = [
     {
@@ -53,7 +50,6 @@ const InventoryRequest = () => {
           <div className="flex items-center gap-2">
             <img
               src={imageSrc}
-              // alt={`Dr. ${request.first_name} ${request.last_name}`}
               className="h-10 w-10 border rounded-full object-cover border-gray-300"
             />
             <h1 className="text-custom-black font-medium">
@@ -74,7 +70,7 @@ const InventoryRequest = () => {
     },
     {
       key: "item_category",
-      label: "Inventory ID",
+      label: "Category",
       render: (value) => (
         <span className="text-[#667085] text-sm">{String(value)}</span>
       ),
@@ -82,44 +78,66 @@ const InventoryRequest = () => {
     {
       key: "item_name",
       label: "Item Name",
-      render: (_, request) => (
-        <span className="text-[#667085] text-sm">{request.status}</span>
+      render: (value) => (
+        <span className="text-[#667085] text-sm">{String(value)}</span>
       ),
     },
     {
       key: "quantity",
       label: "Quantity",
-      render: (_, request) => (
-        <span className="text-[#667085] text-sm">{request.quantity}</span>
+      render: (value) => (
+        <span className="text-[#667085] text-sm">{value}</span>
+      ),
+    },
+    {
+      key: "status",
+      label: "Status",
+      render: (value) => (
+        <span className="text-[#667085] text-sm">{value}</span>
       ),
     },
     {
       key: "created_at",
       label: "Date",
-      render: (_, request) => (
-        <span className="text-[#667085] text-sm">{request.quantity}</span>
+      render: (value) => (
+        <span className="text-[#667085] text-sm">
+          {new Date(value).toLocaleDateString()}
+        </span>
       ),
     },
   ];
 
   return (
     <div>
-      <Tablehead typebutton="Add New" tableTitle="Requests" showButton={true} />
+      <Tablehead
+        typebutton="Add New"
+        tableTitle="Requests"
+        showButton={true}
+        onButtonClick={openModal}
+      />
 
       <div className="w-full bg-white rounded-b-[8px] shadow-table">
         {isLoading ? (
           <p>Loading...</p>
         ) : (
           <Table
-            data={requestsArray} // Ensure this is always an array
+            data={requestsArray}
             columns={columns}
             rowKey="id"
-            pagination={requestsArray.length > 10} // Use requestsArray here
+            pagination={requestsArray.length > 10}
             rowsPerPage={10}
             radius="rounded-none"
           />
         )}
       </div>
+
+      {isModalOpen && (
+        <AddRequestModal
+          onClose={closeModal}
+          endpoint="/inventory/requests/create"
+          refreshEndpoint="/inventory/requests/all-records?status=pending"
+        />
+      )}
     </div>
   );
 };
