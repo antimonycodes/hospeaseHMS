@@ -54,9 +54,9 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       activeIcon: getImageSrc("pharmacyWhite.svg"),
       children: [
         {
-          name: "Users",
+          name: "Staff",
           path: "/dashboard/pharmacy/staffs",
-          icon: getImageSrc("usericon.svg"),
+          icon: getImageSrc("staffs.svg"),
           activeIcon: getImageSrc("usersWhite.svg"),
         },
         // {
@@ -74,7 +74,7 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       activeIcon: getImageSrc("inventory-default.svg"),
       children: [
         {
-          name: "Staffs",
+          name: "Staff",
           path: "/dashboard/inventory/staffs",
           icon: getImageSrc("staffs.svg"),
           activeIcon: getImageSrc("usersWhite.svg"),
@@ -94,7 +94,7 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       activeIcon: getImageSrc("labWhite.svg"),
       children: [
         {
-          name: "Staffs",
+          name: "Staff",
           path: "/dashboard/laboratory/staffs",
           icon: getImageSrc("staffs.svg"),
           activeIcon: getImageSrc("usersWhite.svg"),
@@ -114,7 +114,7 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       activeIcon: getImageSrc("financeWhite.svg"),
       children: [
         {
-          name: "Users",
+          name: "Staff",
           path: "/dashboard/finance/staffs",
           icon: getImageSrc("staffs.svg"),
           activeIcon: getImageSrc("usersWhite.svg"),
@@ -128,17 +128,17 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       ],
     },
     {
-      name: "Users",
+      name: "Department Heads",
       path: "/dashboard/users",
       icon: getImageSrc("usericon.svg"),
       activeIcon: getImageSrc("usersWhite.svg"),
     },
-    {
-      name: "Payment",
-      path: "/dashboard/payment",
-      icon: getImageSrc("usericon.svg"),
-      activeIcon: getImageSrc("usersWhite.svg"),
-    },
+    // {
+    //   name: "Payment",
+    //   path: "/dashboard/payment",
+    //   icon: getImageSrc("usericon.svg"),
+    //   activeIcon: getImageSrc("usersWhite.svg"),
+    // },
     {
       name: "Profile",
       path: "/dashboard/profile",

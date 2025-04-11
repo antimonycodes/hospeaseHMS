@@ -74,7 +74,7 @@ export const useStaffProfileStore = create<StaffProfileState>((set) => ({
       const errorMessage =
         error.response?.data?.message || "Failed to fetch profile data";
       set({ error: errorMessage, isLoading: false });
-      toast.error(errorMessage);
+      // toast.error(errorMessage);
     }
   },
 

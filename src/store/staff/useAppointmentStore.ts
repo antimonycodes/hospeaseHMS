@@ -60,7 +60,7 @@ export const useAppointmentStore = create<AppointmentStore>((set) => ({
       console.log(response.data.data, "dfgh");
       console.log(response.data.message);
     } catch (error: any) {
-      toast.error(error.response.message);
+      // toast.error(error.response.message);
     } finally {
       set({ isLoading: false });
     }
@@ -74,7 +74,7 @@ export const useAppointmentStore = create<AppointmentStore>((set) => ({
       );
       set({ selectedAppointment: response.data.data });
     } catch (error: any) {
-      toast.error(error.response.message);
+      // toast.error(error.response.message);
     } finally {
       set({ isLoading: false });
     }

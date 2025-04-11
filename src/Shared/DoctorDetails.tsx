@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Button from "./Button";
 import { useDoctorStore } from "../store/super-admin/useDoctorStore";
 import Loader from "./Loader";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronLeft } from "lucide-react";
 
 interface Doctor {
   id: string;
@@ -45,9 +45,9 @@ const DoctorDetails = () => {
           <div className="flex items-center">
             <button
               onClick={() => navigate(-1)}
-              className="mr-2 text-custom-black"
+              className="mr-2 text-gray-600 hover:text-primary"
             >
-              <ArrowLeft />
+              <ChevronLeft size={20} />
             </button>
             <h2 className="text-lg md:text-base font-medium text-custom-black">
               Doctor Details

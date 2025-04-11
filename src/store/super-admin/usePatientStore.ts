@@ -131,7 +131,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       set({ pagination: response.data.data.pagination });
       console.log(response.data.data.pagination, "pagination");
       const fetchedPatients = response.data.data.data;
-      const pharmacyid = response.data[0];
+      // const pharmacyid = response.data[0];
       set({ patients: fetchedPatients });
       console.log(response.data.message);
     } catch (error: any) {
@@ -147,14 +147,14 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       const response = await api.get("/front-desk/stats");
       if (response.status === 200) {
         set({ stats: response.data.data });
-        toast.success(response.data.message);
+        // toast.success(response.data.message);
       }
     } catch (error: any) {
       console.error(
         "Error fetching front-desk stats:",
         error.response?.data || error.message
       );
-      toast.error(error.response?.data?.message || "Failed to fetch stats");
+      // toast.error(error.response?.data?.message || "Failed to fetch stats");
     } finally {
       set({ isLoading: false });
     }
@@ -181,9 +181,9 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       }
     } catch (error: any) {
       console.error("Error fetching lab patients:", error);
-      toast.error(
-        error.response?.data?.message || "Failed to fetch laboratory patients"
-      );
+      // toast.error(
+      //   error.response?.data?.message || "Failed to fetch laboratory patients"
+      // );
       set({ labPatients: [] });
     } finally {
       set({ isLoading: false });
@@ -201,7 +201,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       console.log(response.data.message);
     } catch (error: any) {
       console.error(error.response?.data);
-      toast.error(error.response?.data?.message || "Failed to fetch patients");
+      // toast.error(error.response?.data?.message || "Failed to fetch patients");
     } finally {
       set({ isLoading: false });
     }
@@ -216,9 +216,9 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       set({ selectedPatient: response.data.data }); // Store fetched doctor in state
     } catch (error: any) {
       console.error(error.response?.data);
-      toast.error(
-        error.response?.data?.message || "Failed to fetch patient details"
-      );
+      // toast.error(
+      //   error.response?.data?.message || "Failed to fetch patient details"
+      // );
     } finally {
       set({ isLoading: false });
     }
@@ -232,9 +232,9 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       set({ selectedPatient: response.data.data }); // Store fetched doctor in state
     } catch (error: any) {
       console.error(error.response?.data);
-      toast.error(
-        error.response?.data?.message || "Failed to fetch patient details"
-      );
+      // toast.error(
+      //   error.response?.data?.message || "Failed to fetch patient details"
+      // );
     } finally {
       set({ isLoading: false });
     }
@@ -247,9 +247,9 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       set({ selectedPatient: response.data.data }); // Store fetched doctor in state
     } catch (error: any) {
       console.error(error.response?.data);
-      toast.error(
-        error.response?.data?.message || "Failed to fetch patient details"
-      );
+      // toast.error(
+      //   error.response?.data?.message || "Failed to fetch patient details"
+      // );
     } finally {
       set({ isLoading: false });
     }
@@ -263,9 +263,9 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       set({ selectedPatient: response.data.data }); // Store fetched doctor in state
     } catch (error: any) {
       console.error(error.response?.data);
-      toast.error(
-        error.response?.data?.message || "Failed to fetch patient details"
-      );
+      // toast.error(
+      //   error.response?.data?.message || "Failed to fetch patient details"
+      // );
     } finally {
       set({ isLoading: false });
     }
@@ -302,10 +302,13 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
 
   searchPatients: async (query: string) => {
     try {
-      const response = await api.get(`/admin/patient/fetch?search=${query}`);
-      return response.data.data.data;
+      const response = await api.get(
+        `/medical-report/all-patient?search=${query}`
+      );
+      console.log(response.data.data);
+      return response.data.data;
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Search failed");
+      // toast.error(error.response?.data?.message || "Search failed");
       return [];
     }
   },
@@ -316,7 +319,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       );
       return response.data.data.data;
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Search failed");
+      // toast.error(error.response?.data?.message || "Search failed");
       return [];
     }
   },
@@ -334,9 +337,9 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       }
     } catch (error: any) {
       console.error("Error fetching appointments:", error);
-      toast.error(
-        error.response?.data?.message || "Failed to fetch appointments"
-      );
+      // toast.error(
+      //   error.response?.data?.message || "Failed to fetch appointments"
+      // );
       set({ appointments: [] });
     } finally {
       set({ isLoading: false });

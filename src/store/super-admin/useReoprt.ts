@@ -155,7 +155,7 @@ export const useReportStore = create<ReportStore>((set) => ({
       return response.data;
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || "Something went wrong";
-      toast.error(errorMsg);
+      // toast.error(errorMsg);
       throw error;
     } finally {
       set({ isLoading: false });
@@ -167,13 +167,13 @@ export const useReportStore = create<ReportStore>((set) => ({
       const response = await api.get(`/medical-report/case-report/${id}`);
       if (response.status === 200) {
         set({ singleReport: response.data.data.data });
-        toast.success(response.data.message);
+        // toast.success(response.data.message);
         // return response.data;
       }
       return response.data;
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || "Something went wrong";
-      toast.error(errorMsg);
+      // toast.error(errorMsg);
       // throw error;
     } finally {
       set({ isReportLoading: false });
@@ -206,7 +206,7 @@ export const useReportStore = create<ReportStore>((set) => ({
       // Handle success, e.g., set success state
     } catch (error: any) {
       console.error("Error submitting the report:", error);
-      toast.error(error.response.data.message);
+      // toast.error(error.response.data.message);
       // Handle error state
       set({ isLoading: false });
     }
@@ -225,7 +225,7 @@ export const useReportStore = create<ReportStore>((set) => ({
       return null;
     } catch (error: any) {
       console.error("Error fetching medical note:", error);
-      toast.error(error.response?.data?.message || "Failed to fetch note");
+      // toast.error(error.response?.data?.message || "Failed to fetch note");
       return null;
     } finally {
       set({ isLoading: false });

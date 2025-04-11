@@ -4,7 +4,7 @@ import {
   ChevronDown,
   ChevronUp,
   User,
-  Loader,
+  // Loader,
   FileText,
   StickyNote,
   Download,
@@ -24,6 +24,7 @@ import {
   downloadDateReportAsImage,
   downloadCompletePDF,
 } from "../../utils/reportDownload";
+import Loader from "../../Shared/Loader";
 
 const DoctorPatientDetails = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -130,13 +131,13 @@ const DoctorPatientDetails = () => {
       });
 
       if (response) {
-        toast.success("Report submitted successfully");
+        // toast.success("Report submitted successfully");
         setReportNote("");
         setFile(null);
         setSelectedDepartment("");
       }
     } catch (error) {
-      toast.error("Failed to submit report");
+      // toast.error("Failed to submit report");
     }
   };
 
@@ -153,11 +154,11 @@ const DoctorPatientDetails = () => {
       });
 
       if (response) {
-        toast.success("Note added successfully");
+        // toast.success("Note added successfully");
         setNote("");
       }
     } catch (error) {
-      toast.error("Failed to add note");
+      // toast.error("Failed to add note");
     }
   };
 
@@ -590,7 +591,8 @@ const DoctorPatientDetails = () => {
               {patient.first_name} {patient.last_name} - Medical Report
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">
-              <InfoRow label="Patient ID" value={patient.card_id} />
+              {/* <InfoRow label="Card ID" value={patient.} /> */}
+              <InfoRow label="Card ID" value={patient.card_id} />
               <InfoRow label="Age" value={patient.age?.toString()} />
               <InfoRow label="Gender" value={patient.gender} />
               <InfoRow label="Phone" value={patient.phone_number} />
@@ -607,7 +609,7 @@ const DoctorPatientDetails = () => {
                   className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 px-2 py-1 rounded-md"
                   onClick={() => toggleDateExpansion(index)}
                 >
-                  <Calendar className="text-blue-600 w-5 h-5" />
+                  <Calendar className="text-black w-5 h-5" />
                   <h3 className="font-medium text-gray-700">
                     {new Date(day.date).toLocaleDateString("en-US", {
                       weekday: "long",
@@ -623,7 +625,7 @@ const DoctorPatientDetails = () => {
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+                  <span className="text-xs bg-[#CFFFE9] text-[#009952] px-2 py-1 rounded-full">
                     {day.reports.length + day.notes.length} entries
                   </span>
                   <div className="flex gap-1">
@@ -640,7 +642,7 @@ const DoctorPatientDetails = () => {
                             })
                           );
                       }}
-                      className="flex items-center gap-1 text-xs bg-blue-600 text-white px-2 py-1 rounded-md hover:bg-blue-700"
+                      className="flex items-center gap-1 text-xs bg-primary text-white px-2 py-1 rounded-md hover:bg-blue-700"
                       title="Download as PDF"
                     >
                       <Download size={14} />
@@ -798,7 +800,7 @@ const NoteItem = ({ note }: { note: any }) => {
   console.log(note);
 
   return (
-    <div className="p-4 bg-white rounded-lg border-l-4 border border-blue-200 border-l-blue-600 hover:shadow-md transition">
+    <div className="p-4 bg-white rounded-lg border-l-4 border border-blue-200 border-l-primary hover:shadow-md transition">
       <div className="flex items-center gap-3 mb-3">
         <div className="bg-blue-100 p-2 rounded-full">
           {staff?.image ? (
@@ -808,7 +810,7 @@ const NoteItem = ({ note }: { note: any }) => {
               className="w-6 h-6 rounded-full"
             />
           ) : (
-            <User className="text-blue-600 w-5 h-5" />
+            <User className="text-white w-5 h-5" />
           )}
         </div>
         <div>

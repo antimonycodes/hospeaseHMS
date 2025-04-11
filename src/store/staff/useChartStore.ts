@@ -78,9 +78,9 @@ export const useChartStore = create<ChartState>((set) => ({
         "Income fetch error:",
         error.response?.data || error.message
       );
-      toast.error(
-        error.response?.data?.message || "Failed to fetch income data"
-      );
+      // toast.error(
+      //   error.response?.data?.message || "Failed to fetch income data"
+      // );
       set({ incomeData: null });
     } finally {
       set({ isLoading: false });
@@ -117,9 +117,9 @@ export const useChartStore = create<ChartState>((set) => ({
         "Expenses fetch error:",
         error.response?.data || error.message
       );
-      toast.error(
-        error.response?.data?.message || "Failed to fetch expenses data"
-      );
+      // toast.error(
+      //   error.response?.data?.message || "Failed to fetch expenses data"
+      // );
       set({ expensesData: null });
     } finally {
       set({ isLoading: false });
@@ -168,9 +168,9 @@ export const useChartStore = create<ChartState>((set) => ({
         error.response ? error.response.data : error.message
       );
       console.error("Error Status:", error.response?.status);
-      toast.error(
-        error.response?.data?.message || "Failed to fetch pharmacy data"
-      );
+      // toast.error(
+      //   error.response?.data?.message || "Failed to fetch pharmacy data"
+      // );
       set({ pharmData: null });
     } finally {
       set({ isLoading: false });

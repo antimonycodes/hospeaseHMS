@@ -122,7 +122,7 @@ const PatientDetails = () => {
               to="/dashboard/patients"
               className="flex items-center text-gray-600 hover:text-primary"
             >
-              <ChevronLeft size={16} />
+              <ChevronLeft size={20} />
               <span className="ml-1">Patients</span>
             </Link>
             {/*  */}

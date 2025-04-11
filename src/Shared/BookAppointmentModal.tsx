@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { usePatientStore } from "../store/super-admin/usePatientStore"; // Adjust path
 import { useDoctorStore } from "../store/super-admin/useDoctorStore"; // Adjust path
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import debounce from "lodash.debounce";
 
 interface BookAppointmentModalProps {
@@ -15,7 +15,7 @@ const BookAppointmentModal = ({
   endpoint = "/admin/appointment/assign",
   refreshEndpoint = "/admin/appointment/all-records",
 }: BookAppointmentModalProps) => {
-  const { searchPatients, bookAppointment } = usePatientStore();
+  const { searchPatients, bookAppointment, isLoading } = usePatientStore();
   const { getAllDoctors, doctors } = useDoctorStore();
 
   const [query, setQuery] = useState("");
@@ -109,7 +109,6 @@ const BookAppointmentModal = ({
         {selectedPatient && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
             {[
-              { label: "Patient ID", value: selectedPatient.id },
               {
                 label: "First Name",
                 value: selectedPatient.attributes.first_name,
@@ -118,17 +117,7 @@ const BookAppointmentModal = ({
                 label: "Last Name",
                 value: selectedPatient.attributes.last_name,
               },
-              { label: "Gender", value: selectedPatient.attributes.gender },
-              {
-                label: "Phone Number",
-                value: selectedPatient.attributes.phone_number,
-              },
-              {
-                label: "Occupation",
-                value: selectedPatient.attributes.occupation,
-              },
-              { label: "Religion", value: selectedPatient.attributes.religion },
-              { label: "Address", value: selectedPatient.attributes.address },
+              { label: "Card ID", value: selectedPatient.id },
             ].map((field, i) => (
               <div key={i}>
                 <label className="text-sm text-gray-600">{field.label}</label>
@@ -157,17 +146,14 @@ const BookAppointmentModal = ({
             </div>
             <div>
               <label className="text-sm text-gray-600">Choose Time</label>
-              <select
+              <input
+                type="time"
                 name="time"
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded-lg px-3 py-4"
-              >
-                <option value="">Select Time</option>
-                <option value="10:00">10:00am</option>
-                <option value="12:00">12:00pm</option>
-                <option value="14:00">02:00pm</option>
-              </select>
+              />
             </div>
+
             <div>
               <label className="text-sm text-gray-600">Select Doctor</label>
               <select
@@ -189,9 +175,19 @@ const BookAppointmentModal = ({
           <div className="mt-6">
             <button
               onClick={handleSubmit}
-              className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition"
+              disabled={!!isLoading}
+              className={`bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition flex items-center justify-center
+             ${isLoading ? "opacity-50 cursor-not-allowed" : ""}
+                `}
             >
-              Book Appointment
+              {isLoading ? (
+                <>
+                  <Loader2 className=" size-6 mr-2 animate-spin" />
+                  Booking
+                </>
+              ) : (
+                "Book Appointment"
+              )}
             </button>
           </div>
         </div>
@@ -201,3 +197,19 @@ const BookAppointmentModal = ({
 };
 
 export default BookAppointmentModal;
+const generateTimeSlots = () => {
+  const times = [];
+  const start = 8 * 60; // 8:00 AM in minutes
+  const end = 18 * 60; // 6:00 PM in minutes
+
+  for (let minutes = start; minutes <= end; minutes += 30) {
+    const hour = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    const timeStr = `${hour.toString().padStart(2, "0")}:${mins
+      .toString()
+      .padStart(2, "0")}`;
+    times.push(timeStr);
+  }
+
+  return times;
+};

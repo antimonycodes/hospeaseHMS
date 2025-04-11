@@ -60,7 +60,7 @@ const DoctorBarchart = ({ doctorStats, isLoading }: DoctorBarchartProps) => {
     <div className="w-full bg-white rounded-lg p-10 font-jakarta">
       <div className="flex items-center justify-between pb-10">
         <h1>Appointment Chart</h1>
-        <button>Guess</button>
+        {/* <button>Guess</button> */}
       </div>
       <div className="h-[350px] md:h-[400px]">
         <ResponsiveContainer width="100%" height="100%">

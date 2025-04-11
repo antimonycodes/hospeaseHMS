@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronLeft } from "lucide-react";
 import { useDoctorStore } from "../../../store/super-admin/useDoctorStore";
 import Button from "../../../Shared/Button";
 import Loader from "../../../Shared/Loader";
@@ -47,12 +47,12 @@ const ConsultantDetails = () => {
           <div className="flex items-center">
             <button
               onClick={() => navigate(-1)}
-              className="mr-2 text-custom-black"
+              className="mr-2 text-gray-600 hover:text-primary"
             >
-              <ArrowLeft />
+              <ChevronLeft size={20} />
             </button>
             <h2 className="text-lg md:text-base font-medium text-custom-black">
-              Doctor Details
+              Consultant Details
             </h2>
           </div>
           <div className="flex space-x-2">

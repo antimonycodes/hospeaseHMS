@@ -210,9 +210,9 @@ export const useDoctorStore = create<DoctorStore>((set, get, endpoint) => ({
       console.log("Consultants fetched successfully:", fetchedConsultants);
     } catch (error: any) {
       console.error(error.response?.data);
-      toast.error(
-        error.response?.data?.message || "Failed to fetch consultants"
-      );
+      // toast.error(
+      //   error.response?.data?.message || "Failed to fetch consultants"
+      // );
     } finally {
       set({ isLoading: false });
     }

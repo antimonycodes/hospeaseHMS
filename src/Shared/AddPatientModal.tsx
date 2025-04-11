@@ -161,8 +161,13 @@ const AddPatientModal = ({
             selected={patient.dob}
             onChange={handleDateChange}
             placeholderText="Date of birth"
-            className="border border-[#D0D5DD]  p-4 rounded w-full"
+            className="border border-[#D0D5DD] p-4 rounded w-full"
             dateFormat="yyyy-MM-dd"
+            showMonthDropdown
+            showYearDropdown
+            dropdownMode="select"
+            yearDropdownItemNumber={100} // How many years to show in the dropdown
+            scrollableYearDropdown // Makes the year dropdown scrollable
           />
 
           {/* Gender Select */}

@@ -42,7 +42,7 @@ export const useInventoryStore = create<InventoryStore>((set) => ({
       console.log(response.data.message);
     } catch (error: any) {
       console.error(error.response?.data);
-      toast.error(error.response?.data?.message || "Failed to fetch expenses");
+      // toast.error(error.response?.data?.message || "Failed to fetch expenses");
       set({ requests: [] });
     } finally {
       set({ isLoading: false });

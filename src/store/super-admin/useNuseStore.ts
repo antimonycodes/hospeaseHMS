@@ -209,7 +209,7 @@ export const useNurseStore = create<NurseStore>((set, get) => ({
       console.log("Nurses Stats fetched:", statsData);
     } catch (error: any) {
       console.error("Stats fetch error:", error.response?.data);
-      toast.error(error.response?.data?.message || "Failed to fetch stats");
+      // toast.error(error.response?.data?.message || "Failed to fetch stats");
       set({ stats: null });
     } finally {
       set({ isLoading: false });

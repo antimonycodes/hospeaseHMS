@@ -108,7 +108,7 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
       console.log(response.data.message);
     } catch (error: any) {
       console.error(error.response?.data);
-      toast.error(error.response?.data?.message || "Failed to fetch expenses");
+      // toast.error(error.response?.data?.message || "Failed to fetch expenses");
     } finally {
       set({ isLoading: false });
     }
@@ -120,7 +120,7 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
       );
       return response.data.data.data;
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Search failed");
+      // toast.error(error.response?.data?.message || "Search failed");
       return [];
     }
   },
@@ -134,7 +134,7 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
       set({ payments: fetchedPayments });
     } catch (error: any) {
       console.error("Fetch error:", error.response?.data || error.message);
-      toast.error(error.response?.data?.message || "Failed to fetch payments");
+      // toast.error(error.response?.data?.message || "Failed to fetch payments");
       set({ payments: [] });
     } finally {
       set({ isLoading: false });
@@ -158,9 +158,9 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
       return null;
     } catch (error: any) {
       console.error("Error response:", error.response?.data);
-      const errorMessage =
-        error.response?.data?.message?.[0] || "Failed to create expense";
-      toast.error(errorMessage);
+      // const errorMessage =
+      //   error.response?.data?.message?.[0] || "Failed to create expense";
+      // toast.error(errorMessage);
       return false;
     } finally {
       set({ isLoading: false });
@@ -185,7 +185,7 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
       console.error("Error response:", error.response?.data);
       const errorMessage =
         error.response?.data?.message?.[0] || "Failed to create payment";
-      toast.error(errorMessage);
+      // toast.error(errorMessage);
       return false;
     } finally {
       set({ isLoading: false });
@@ -204,7 +204,7 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
       console.log("Stats fetched:", statsData);
     } catch (error: any) {
       console.error("Stats fetch error:", error.response?.data);
-      toast.error(error.response?.data?.message || "Failed to fetch stats");
+      // toast.error(error.response?.data?.message || "Failed to fetch stats");
       set({ stats: null });
     } finally {
       set({ isLoading: false });
@@ -237,9 +237,9 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
       console.log("Lab stats fetched:", labStatsData);
     } catch (error: any) {
       console.error("Lab stats fetch error:", error.response?.data);
-      toast.error(
-        error.response?.data?.message || "Failed to fetch laboratory stats"
-      );
+      // toast.error(
+      //   error.response?.data?.message || "Failed to fetch laboratory stats"
+      // );
       set({ stats: null });
     } finally {
       set({ isLoading: false });
