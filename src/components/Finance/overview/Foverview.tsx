@@ -47,7 +47,7 @@ const Foverview = () => {
           />
         )}
         <FinanceCharts />
-        <FinanceCard />
+        {/* <FinanceCard /> */}
       </div>
     </div>
   );

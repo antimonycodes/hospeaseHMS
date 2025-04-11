@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import debounce from "lodash.debounce";
 import { usePatientStore } from "../store/super-admin/usePatientStore"; // Adjust path
-import { useFinanceStore } from "../store/staff/useFinanceStore"; // Adjust path
+import { useFinanceStore } from "../store/staff/useFinanceStore"; //
 
 interface FormData {
   patient_id: number;
@@ -41,6 +41,7 @@ const AddPaymentModal = ({
   const handleSearch = debounce(async (val: string) => {
     if (val.length > 2) {
       const results = await searchPatients(val);
+      console.log(val, "ghjk");
       setPatientOptions(results || []);
     } else {
       setPatientOptions([]);
@@ -54,7 +55,7 @@ const AddPaymentModal = ({
     const { name, value } = e.target;
     if (name === "query") {
       setQuery(value);
-      // handleSearch(value);
+      handleSearch(value);
     } else {
       setFormData((prev) => ({
         ...prev,
@@ -72,6 +73,8 @@ const AddPaymentModal = ({
     );
     setPatientOptions([]);
   };
+
+  console.log(patientOptions, "option");
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {

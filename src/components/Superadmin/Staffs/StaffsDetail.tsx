@@ -57,7 +57,7 @@ const StaffsDetail = () => {
           shift_type: shiftType,
           start_time: startTime,
           end_time: endTime,
-          department_id,
+          department_id: null,
         },
       ],
     };

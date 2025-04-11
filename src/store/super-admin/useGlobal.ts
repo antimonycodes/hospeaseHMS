@@ -84,7 +84,7 @@ export interface ShiftData {
   shift_type: string;
   start_time: string;
   end_time: string;
-  department_id: number;
+  department_id: null;
 }
 
 interface Globalstore {

@@ -23,25 +23,25 @@ const PharmDash = () => {
   const LabStats = stats
     ? [
         {
-          title: "Total Tests",
+          title: "Total Dispersal",
           number: String(stats.total_dispersed || "0"),
           icon: patientIcon,
           category: "laboratory",
         },
         {
-          title: "Pending Tests",
+          title: "Pending Dispersal",
           number: String(stats.dispersal_status?.pending?.count || "0"),
           icon: patientIcon,
           category: "laboratory",
         },
         {
-          title: "Ongoing Tests",
+          title: "Ongoing Dispersal",
           number: String(stats.dispersal_status?.ongoing?.count || "0"),
           icon: patientIcon,
           category: "laboratory",
         },
         {
-          title: "Completed Tests",
+          title: "Completed Dispersal",
           number: String(stats.dispersal_status?.completed?.count || "0"),
           icon: patientIcon,
           category: "laboratory",
