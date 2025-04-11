@@ -89,7 +89,7 @@ const MedDoctorDetail = () => {
           shift_type: shiftType,
           start_time: startTime,
           end_time: endTime,
-          department_id: 2, // Assuming nurse department_id is 2
+          department_id: null, // Assuming nurse department_id is 2
         },
       ],
     };
