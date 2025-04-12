@@ -55,7 +55,7 @@ const Fpayment = () => {
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
-
+  console.log("Payments in Fpayment:", payments);
   return (
     <div>
       <Tablehead

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getUserColumns } from "../../Shared/UsersColumn";
 import { useNavigate } from "react-router-dom";
 import { useAppointmentStore } from "../../store/staff/useAppointmentStore";
-import FrontdeskAppointmentModal from "../Frontdesk/appointment/FrontdeskAppointmentModal";
+// import FrontdeskAppointmentModal from "../Frontdesk/appointment/FrontdeskAppointmentModal";
 import { getImageSrc } from "../../utils/imageUtils";
 import Table from "../../Shared/Table";
 import { usePatientStore } from "../../store/super-admin/usePatientStore";

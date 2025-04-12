@@ -29,6 +29,7 @@ interface EditPatientModalProps {
   isOpen: boolean;
   onClose: () => void;
   patientData: PatientData;
+  isLoading: boolean;
   // onSave: (data: PatientData) => void;
 }
 
@@ -36,6 +37,7 @@ const EditPatientModal = ({
   isOpen,
   onClose,
   patientData,
+  isLoading,
 }: // onSave,
 EditPatientModalProps) => {
   const [formData, setFormData] = useState<PatientData>({
@@ -357,9 +359,13 @@ EditPatientModalProps) => {
           <div className="mt-6">
             <button
               type="submit"
-              className="bg-primary text-white py-2 px-4 rounded text-sm "
+              // onClick={handleSubmit}
+              disabled={!!isLoading}
+              className={`bg-primary text-white py-2 px-4 rounded text-sm ${
+                isLoading ? "opacity-50 cursor-not-allowed" : ""
+              } `}
             >
-              Edit Patient
+              {isLoading ? "Editting" : "Edit Patient"}
             </button>
           </div>
         </form>

@@ -4,6 +4,8 @@ import OverviewChart from "../../ReusabledashboardD/OverviewChart";
 import LaboverviewTable from "./LaboverviewTable";
 import patientIcon from "../../../assets/hugeicons.png";
 import { useFinanceStore } from "../../../store/staff/useFinanceStore";
+import { getImageSrc } from "../../../utils/imageUtils";
+import Loader from "../../../Shared/Loader";
 interface LabStats {
   total_dispersed: number;
   // Add these properties for direct access in the component
@@ -26,25 +28,25 @@ const Laboverview = () => {
         {
           title: "Total Tests",
           number: String(stats.total_dispersed || "0"),
-          icon: patientIcon,
+          icon: getImageSrc("labstaticon2.png"),
           category: "laboratory",
         },
         {
           title: "Pending Tests",
           number: String(stats.dispersal_status?.pending?.count || "0"),
-          icon: patientIcon,
+          icon: getImageSrc("labstaticon.png"),
           category: "laboratory",
         },
         {
           title: "Ongoing Tests",
           number: String(stats.dispersal_status?.ongoing?.count || "0"),
-          icon: patientIcon,
+          icon: getImageSrc("labpending.png"),
           category: "laboratory",
         },
         {
           title: "Completed Tests",
           number: String(stats.dispersal_status?.completed?.count || "0"),
-          icon: patientIcon,
+          icon: getImageSrc("labcompleted.png"),
           category: "laboratory",
         },
       ]
@@ -54,7 +56,7 @@ const Laboverview = () => {
     <div className="font-inter">
       <div className="flex flex-col gap-4">
         {isLoading ? (
-          <div>...</div>
+          <div>Loading Stats...</div>
         ) : (
           <OverviewCard
             cardTitle="Laboratory Dashboard"

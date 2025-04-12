@@ -333,9 +333,12 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       const response = await api.get(
         `/medical-report/all-patient?search=${query}`
       );
-      return response.data.data.data;
+      console.log("API response:", response.data); // Log to inspect structure
+      // Adjust based on actual structure, e.g., response.data.data or response.data.data.data
+      return response.data.data.data || response.data.data || [];
     } catch (error: any) {
-      // toast.error(error.response?.data?.message || "Search failed");
+      console.error("Search error:", error.response?.data);
+      toast.error(error.response?.data?.message || "Search failed");
       return [];
     }
   },

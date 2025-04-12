@@ -13,7 +13,7 @@ const MedicalDash = () => {
   const { stats, getMedStats, isLoading } = useMedicalStore();
 
   useEffect(() => {
-    getMedStats();
+    getMedStats("/medical-director/stats");
   }, [getMedStats]);
 
   const MedicalStatsData = stats

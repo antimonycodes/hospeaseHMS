@@ -1,6 +1,10 @@
 import React, { useEffect } from "react";
 import patientIcon from "../../assets/docstaticon.svg";
 import { useStatsStore } from "../../store/super-admin/useStatsStore";
+import childrenIcon from "../../assets/hugeicons_doctor-03.png";
+import femaleIcon from "../../assets/femaleIcon.png";
+import maleIcon from "../../assets/maleIcon.png";
+import totalIcon from "../../assets/totalIcon.png";
 interface DoctorStatsProps {
   stats: any;
   isLoading: boolean;
@@ -13,10 +17,10 @@ const DoctorStats = ({ stats, isLoading }: DoctorStatsProps) => {
     | "children_count";
 
   const doctorStatItems: { title: string; key: doctorStats; icon: string }[] = [
-    { title: "TOTAL PATIENTS", key: "total_patient", icon: patientIcon },
-    { title: "MEN PATIENTS", key: "men_total_count", icon: patientIcon },
-    { title: "LADIES PATIENTS", key: "ladies_total_count", icon: patientIcon },
-    { title: "CHILDREN PATIENTS", key: "children_count", icon: patientIcon },
+    { title: "TOTAL PATIENTS", key: "total_patient", icon: totalIcon },
+    { title: "MEN PATIENTS", key: "men_total_count", icon: maleIcon },
+    { title: "LADIES PATIENTS", key: "ladies_total_count", icon: femaleIcon },
+    { title: "CHILDREN PATIENTS", key: "children_count", icon: childrenIcon },
   ];
 
   return (

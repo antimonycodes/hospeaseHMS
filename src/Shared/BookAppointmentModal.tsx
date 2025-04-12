@@ -3,10 +3,11 @@ import { usePatientStore } from "../store/super-admin/usePatientStore"; // Adjus
 import { useDoctorStore } from "../store/super-admin/useDoctorStore"; // Adjust path
 import { Loader2, X } from "lucide-react";
 import debounce from "lodash.debounce";
+import { useLocation } from "react-router-dom";
 
 interface BookAppointmentModalProps {
   onClose: () => void;
-  endpoint?: string; // Add optional endpoint prop
+  endpoint?: string;
   refreshEndpoint?: string;
 }
 
@@ -17,6 +18,7 @@ const BookAppointmentModal = ({
 }: BookAppointmentModalProps) => {
   const { searchPatients, bookAppointment, isLoading } = usePatientStore();
   const { getAllDoctors, doctors } = useDoctorStore();
+  // const location = useLocation();
 
   const [query, setQuery] = useState("");
   const [patientOptions, setPatientOptions] = useState<any[]>([]);
@@ -31,6 +33,13 @@ const BookAppointmentModal = ({
   useEffect(() => {
     getAllDoctors();
   }, [getAllDoctors]);
+  // useEffect(() => {
+  //   const doctorEndpoint = location.pathname.includes("/frontdesk")
+  //     ? "/front-desk/doctors/all-records"
+  //     : "/admin/doctors/all-records";
+
+  //   getAllDoctors(doctorEndpoint);
+  // }, [getAllDoctors, location.pathname]);
 
   const handleSearch = debounce(async (val: string) => {
     const results = await searchPatients(val);
