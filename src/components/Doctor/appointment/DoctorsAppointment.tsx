@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import Table from "../../../Shared/Table";
 import { getUserColumns } from "../../../Shared/UsersColumn";
 import { getImageSrc } from "../../../utils/imageUtils";
-import FrontdeskAppointmentModal from "../../Frontdesk/appointment/FrontdeskAppointmentModal";
 import { useEffect, useState } from "react";
 import { useAppointmentStore } from "../../../store/staff/useAppointmentStore";
 
