@@ -26,7 +26,7 @@ type Columns = {
 };
 
 type FrondeskPatientDataProps = {
-  isLoading?: boolean;
+  isLoading: boolean;
   patients: {
     attributes: {
       first_name: string;
@@ -141,6 +141,7 @@ const FrontdeskInfo = ({ patients, isLoading }: FrondeskPatientDataProps) => {
         rowsPerPage={10}
       />
       <EditPatientModal
+        isLoading={isLoading}
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         patientData={selectedPatient}

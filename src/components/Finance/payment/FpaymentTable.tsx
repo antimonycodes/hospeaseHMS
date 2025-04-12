@@ -106,7 +106,7 @@ const FpaymentTable = ({
       ),
     },
   ];
-
+  console.log("Payments in FinanceCard:", payments);
   if (isLoading) return <Loader />;
   if (!formattedPayments.length) return <div>No payments found</div>;
 

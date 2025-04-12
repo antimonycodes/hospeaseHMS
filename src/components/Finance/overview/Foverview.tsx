@@ -3,8 +3,8 @@ import { useFinanceStore } from "../../../store/staff/useFinanceStore";
 import OverviewCard from "../../ReusabledashboardD/Overviewcard";
 import FinanceCharts from "./FinanceCharts";
 import FinanceCard from "./FinanceCard";
-import patientIcon from "../../../assets/hugeicons.png";
 
+import { getImageSrc } from "../../../utils/imageUtils";
 const Foverview = () => {
   const { stats, getFinanceStats, isLoading } = useFinanceStore();
 
@@ -19,13 +19,13 @@ const Foverview = () => {
         {
           title: "Income ",
           number: stats.total_income_balance || "0",
-          icon: patientIcon,
+          icon: getImageSrc("incomeIcon.png"),
           category: "finance",
         },
         {
           title: "Expenses",
           number: stats.total_expenses_balance || "0",
-          icon: patientIcon,
+          icon: getImageSrc("hugeicons.png"),
           category: "finance",
         },
       ]
@@ -47,7 +47,7 @@ const Foverview = () => {
           />
         )}
         <FinanceCharts />
-        {/* <FinanceCard /> */}
+        <FinanceCard />
       </div>
     </div>
   );

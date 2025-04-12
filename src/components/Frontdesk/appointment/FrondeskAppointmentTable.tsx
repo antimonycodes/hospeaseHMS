@@ -2,7 +2,6 @@ import { JSX, useState, useEffect } from "react";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import AppointmentDetails from "./AppointmentDetails";
-import FrontdeskAppointmentModal from "./FrontdeskAppointmentModal";
 import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
 
 const FrondeskAppointmentTable = () => {
@@ -32,11 +31,6 @@ const FrondeskAppointmentTable = () => {
       <AppointmentDetails />
 
       {openModal && (
-        // <FrontdeskAppointmentModal
-        //   onClose={() => setOpenModal(false)}
-        //   endpoint="/front-desk/appointment/book"
-        //   refreshEndpoint="/front-desk/appointment/all-records"
-        // />
         <BookAppointmentModal
           onClose={() => setOpenModal(false)}
           endpoint="/front-desk/appointment/book"

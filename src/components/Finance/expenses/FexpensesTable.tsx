@@ -1,6 +1,7 @@
 import { JSX, useEffect } from "react";
 import Table from "../../../Shared/Table";
 import { useFinanceStore } from "../../../store/staff/useFinanceStore";
+import Loader from "../../../Shared/Loader";
 
 type ExpenseApiData = {
   item: string;
@@ -79,6 +80,7 @@ const FexpensesTable = () => {
       ),
     },
   ];
+  if (isLoading) return <Loader />;
 
   return (
     <div className="w-full bg-white rounded-[10px] shadow-table  ">

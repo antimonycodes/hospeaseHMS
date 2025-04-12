@@ -25,6 +25,7 @@ import { NoteItem } from "../components/Doctor/Patient-Details-Props/NoteItem";
 import toast from "react-hot-toast";
 
 const PatientDetails = () => {
+  const [isLoading] = useState(false);
   const [openSections, setOpenSections] = useState({
     doctorsReport: true,
     medicalLaboratory: true,
@@ -447,6 +448,7 @@ const PatientDetails = () => {
       </div>
 
       <EditPatientModal
+        isLoading={isLoading}
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         patientData={patientData}

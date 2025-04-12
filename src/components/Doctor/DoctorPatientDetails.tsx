@@ -53,6 +53,7 @@ const DoctorPatientDetails = () => {
     allNotes,
   } = useReportStore();
   const { getAllRoles, roles } = useGlobalStore();
+  const [isLoading] = useState(false);
 
   // Group data by date utility function
   const groupByDate = (data: any[]) => {
@@ -506,9 +507,12 @@ const DoctorPatientDetails = () => {
             </select>
             <button
               onClick={handleReportSubmit}
-              className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition"
+              className={`bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition
+            ${isLoading ? "opacity-50 cursor-not-allowed" : ""}
+            `}
+              disabled={isLoading}
             >
-              Add Report
+              {isLoading ? "Adding" : "Add Report"}
             </button>
           </div>
         )}
@@ -678,6 +682,7 @@ const DoctorPatientDetails = () => {
       </div>
 
       <EditPatientModal
+        isLoading={false}
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         patientData={patient}
