@@ -29,6 +29,8 @@ export interface MedicalStatss {
   men_total_count: number;
   ladies_total_count: number;
   children_count: number;
+  male_count: number;
+  female_count: number;
   doctorAppointmentCount: number;
   graph_appointment_representation: Record<string, number>;
 }
@@ -36,22 +38,24 @@ export interface MedicalStatss {
 interface MedicalStore {
   stats: MedicalStatss | null;
   isLoading: boolean;
-  getMedStats: () => Promise<void>;
+  getMedStats: (endpoint?: string) => Promise<void>;
 }
 
 export const useMedicalStore = create<MedicalStore>((set) => ({
   stats: null,
   isLoading: false,
 
-  getMedStats: async () => {
+  getMedStats: async (endpoint = "/medical-director/stats") => {
     set({ isLoading: true });
     try {
-      const response = await api.get("/medical-director/stats");
+      const response = await api.get(endpoint);
       const statsData = response.data || {
         total_patient: 0,
         men_total_count: 0,
         ladies_total_count: 0,
         children_count: 0,
+        male_count: 0,
+        female_count: 0,
         doctorAppointmentCount: 0,
         graph_appointment_representation: {
           Jan: 0,

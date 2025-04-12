@@ -95,7 +95,7 @@ const NurseCard = () => {
         <div className="p-4 text-gray-500">Loading patients...</div>
       ) : (
         <Table
-          data={patients}
+          data={patients.slice(0, 3)}
           columns={columns}
           rowKey="id"
           // pagination={filteredPatients.length > 5} // Adjust as needed

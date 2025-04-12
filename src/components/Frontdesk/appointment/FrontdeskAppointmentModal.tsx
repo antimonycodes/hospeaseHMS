@@ -4,7 +4,6 @@ import debounce from "lodash.debounce";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import { useDoctorStore } from "../../../store/super-admin/useDoctorStore";
 import toast from "react-hot-toast";
-import Button from "../../../Shared/Button";
 
 interface FrontdeskAppointmentModalProps {
   onClose: () => void;
@@ -19,7 +18,7 @@ const FrontdeskAppointmentModal = ({
 }: FrontdeskAppointmentModalProps) => {
   const { searchPatientsappointment, bookAppointment } = usePatientStore();
   const { getAllDoctors, doctors } = useDoctorStore();
-  const [isAdding, setIsAdding] = useState(false);
+
   const [query, setQuery] = useState("");
   const [patientOptions, setPatientOptions] = useState<any[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
@@ -232,13 +231,12 @@ const FrontdeskAppointmentModal = ({
 
           {/* Book Button */}
           <div className="mt-6">
-            <Button
+            <button
               onClick={handleSubmit}
-              disabled={isAdding}
-              variant="primary"
+              className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition"
             >
-              {isAdding ? "Booking..." : "Book Appointment"}
-            </Button>
+              Book Appointment
+            </button>
           </div>
         </div>
       </div>
