@@ -51,9 +51,10 @@ const DoctorPatientDetails = () => {
     allReports,
     getMedicalNote,
     allNotes,
+    isLoading,
   } = useReportStore();
   const { getAllRoles, roles } = useGlobalStore();
-  const [isLoading] = useState(false);
+  // const [isLoading] = useState(false);
 
   // Group data by date utility function
   const groupByDate = (data: any[]) => {

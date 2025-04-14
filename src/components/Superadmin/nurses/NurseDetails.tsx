@@ -8,13 +8,21 @@ const NurseDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const { getNurseById, selectedNurse, isLoading } = useNurseStore();
+  const { getNurseById, selectedNurse, isLoading, deleteNurse } =
+    useNurseStore();
 
   useEffect(() => {
     if (id) {
       getNurseById(id);
     }
   }, [id, getNurseById]);
+
+  const handleDelete = () => {
+    if (selectedNurse) {
+      deleteNurse(selectedNurse.id);
+      navigate(-1);
+    }
+  };
   console.log(selectedNurse);
 
   if (isLoading) return <p>Loading doctor details...</p>;
@@ -36,27 +44,29 @@ const NurseDetails = () => {
           </div>
           <div className="flex space-x-2">
             <Button variant="edit">Edit</Button>
-            <Button variant="delete">Block staff</Button>
+            <Button variant="delete" onClick={handleDelete}>
+              Delete staff
+            </Button>
           </div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <Info
             label="First Name"
-            value={selectedNurse.attributes.first_name}
+            value={selectedNurse?.attributes.first_name}
           />
-          <Info label="Last Name" value={selectedNurse.attributes.last_name} />
-          <Info label="Staff ID" value={selectedNurse.attributes.nurse_id} />
-          <Info label="Age" value={selectedNurse.attributes.details.age} />
-          <Info label="Gender" value={selectedNurse.gender} />
+          <Info label="Last Name" value={selectedNurse?.attributes.last_name} />
+          <Info label="Staff ID" value={selectedNurse?.attributes.nurse_id} />
+          <Info label="Age" value={selectedNurse?.attributes.details.age} />
+          <Info label="Gender" value={selectedNurse?.gender} />
           <Info
             label="Religion"
-            value={selectedNurse.attributes.details.religion}
+            value={selectedNurse?.attributes.details.religion}
           />
-          <Info label="Phone" value={selectedNurse.attributes.phone} />
+          <Info label="Phone" value={selectedNurse?.attributes.phone} />
           <Info
             label="House Address"
-            value={selectedNurse.attributes.details.address}
+            value={selectedNurse?.attributes.details.address}
           />
         </div>
       </div>

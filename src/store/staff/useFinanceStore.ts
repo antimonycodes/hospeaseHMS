@@ -30,11 +30,11 @@ export interface CreateExpenseData {
 }
 
 export interface CreatePaymentData {
-  patient_id: number;
-  amount: string;
-  purpose: string;
-  payment_method: string;
-  payment_type: string;
+  // patient_id: number;
+  // amount: string;
+  // purpose: string;
+  // payment_method: string;
+  // payment_type: string;
 }
 
 interface Payment {

@@ -23,17 +23,28 @@ interface Doctor {
 const DoctorDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { selectedDoctor, getDoctorById, isLoading } = useDoctorStore() as {
-    selectedDoctor: Doctor | null;
-    getDoctorById: (id: string) => void;
-    isLoading: boolean;
-  };
+  const { selectedDoctor, getDoctorById, isLoading, deleteDoctor } =
+    useDoctorStore() as {
+      selectedDoctor: Doctor | null;
+      getDoctorById: (id: string) => void;
+      isLoading: boolean;
+      deleteDoctor: (id: string) => void;
+    };
 
   useEffect(() => {
     if (id) {
       getDoctorById(id);
     }
   }, [id, getDoctorById]);
+
+  console.log(id);
+
+  const handleDelete = () => {
+    if (selectedDoctor) {
+      deleteDoctor(selectedDoctor.id);
+      navigate(-1);
+    }
+  };
 
   if (isLoading) return <Loader />;
   if (!selectedDoctor) return <p>Doctor not found</p>;
@@ -53,10 +64,12 @@ const DoctorDetails = () => {
               Doctor Details
             </h2>
           </div>
-          {/* <div className="flex space-x-2">
+          <div className="flex space-x-2">
             <Button variant="edit">Edit</Button>
-            <Button variant="delete">Block staff</Button>
-          </div> */}
+            <Button variant="delete" onClick={handleDelete}>
+              Delete staff
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">

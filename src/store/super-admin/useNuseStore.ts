@@ -2,6 +2,10 @@ import { create } from "zustand";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
+import {
+  handleErrorToast,
+  isSuccessfulResponse,
+} from "../../utils/responseHandler";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_URL,
@@ -111,10 +115,11 @@ export interface CreateNurseData {
   last_name: string;
   dob: string;
   email: string;
-  nurse_id: string | null; // Allow null if that's the intended behavior
+  nurse_id: string | null;
   religion: string;
   phone: string;
   address: string;
+  // department_id: number;
 }
 
 export interface NurseStats {
@@ -132,6 +137,7 @@ export interface NurseStats {
 // Zustand Store for Nurses
 interface NurseStore {
   isLoading: boolean;
+  isDeleting: boolean;
   nurses: Nurse[];
   frontdesks: any[];
   selectedNurse: any | null;
@@ -145,10 +151,12 @@ interface NurseStore {
   stats: NurseStats | null;
   getNurseShiftsById: (id: string) => Promise<any>;
   getPatientById: (id: number) => Promise<void>;
+  deleteNurse: (id: string) => Promise<any>;
 }
 
 export const useNurseStore = create<NurseStore>((set, get) => ({
   isLoading: false,
+  isDeleting: false,
   nurses: [],
   stats: null,
   frontdesks: [],
@@ -293,6 +301,25 @@ export const useNurseStore = create<NurseStore>((set, get) => ({
       // toast.error(error.message || "Failed to fetch doctor details");
     } finally {
       set({ isLoading: false });
+    }
+  },
+  deleteNurse: async (id) => {
+    set({ isDeleting: true });
+    try {
+      const response = await api.delete(`admin/nurse/delete/${id}`);
+
+      if (isSuccessfulResponse(response)) {
+        toast.success(response.data?.message);
+        console.log(response.data.data);
+        get().getNurses();
+        return true;
+      }
+      return null;
+    } catch (error) {
+      handleErrorToast(error);
+      return null;
+    } finally {
+      set({ isDeleting: false });
     }
   },
 }));

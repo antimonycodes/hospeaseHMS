@@ -1,6 +1,8 @@
 import { useLocation } from "react-router-dom";
 import Button from "./Button";
 import { X } from "lucide-react";
+import { useGlobalStore } from "../store/super-admin/useGlobal";
+import { useEffect } from "react";
 
 interface AddDoctorModalProps {
   formData: {
@@ -11,7 +13,8 @@ interface AddDoctorModalProps {
     phone: string;
     religion: string;
     houseAddress: string;
-    dob?: string; // Added dob field
+    // department_id: number;
+    dob?: string; //
     consultant_id?: null | string;
     endpoint?: string;
     refreshEndpoint?: string;
@@ -46,6 +49,15 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
   const location = useLocation();
   const isConsultant = location.pathname.includes("consultants");
 
+  const department = "doctor";
+  const { getAllRoles, roles } = useGlobalStore();
+
+  useEffect(() => {
+    getAllRoles();
+  }, [getAllRoles]);
+
+  console.log(roles, "dfg");
+
   // Dynamically fallback to correct endpoint if not passed from parent
   const finalEndpoint =
     endpoint ??
@@ -53,9 +65,15 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
   const finalRefreshEndpoint =
     refreshEndpoint ??
     (isConsultant ? "/admin/consultant/fetch" : "/admin/doctor/fetch");
+
   const handleSubmit = async (e: React.FormEvent) => {
+    const { id, role } = roles[department];
+
+    console.log(id, "id");
+
     e.preventDefault();
     const payload = {
+      department_id: id,
       ...formData,
       address: formData.houseAddress, // Map houseAddress to address for store compatibility
       [isConsultant ? "consultant_id" : "doctor_id"]:

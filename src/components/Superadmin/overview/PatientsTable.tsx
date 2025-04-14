@@ -39,7 +39,7 @@ const PatientsTable = ({
   // UseEffect to transform patient data into a simplified version
   useEffect(() => {
     return setSimplifiedPatients(
-      patients.slice(0, 3).map((patient) => ({
+      patients?.slice(0, 3).map((patient) => ({
         id: patient.id,
         first_name: patient.attributes.first_name,
         last_name: patient.attributes.last_name,
