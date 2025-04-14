@@ -102,18 +102,18 @@ const SaNurseTable = ({ nurses, isLoading }: Props) => {
         </div>
       ),
     },
-    // {
-    //   key: "id",
-    //   label: "Action",
-    //   render: (_, row) => (
-    //     <span
-    //       onClick={() => handleViewMore(row)}
-    //       className="text-[#009952] font-medium text-sm cursor-pointer"
-    //     >
-    //       View More
-    //     </span>
-    //   ),
-    // },
+    {
+      key: "id",
+      label: "Action",
+      render: (_, row) => (
+        <span
+          onClick={() => handleViewMore(row)}
+          className="text-[#009952] font-medium text-sm cursor-pointer"
+        >
+          View More
+        </span>
+      ),
+    },
   ];
 
   const handleToggleStatus = async (nurse: NurseAttributes) => {

@@ -2,6 +2,10 @@ import { create } from "zustand";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
+import {
+  handleErrorToast,
+  isSuccessfulResponse,
+} from "../../utils/responseHandler";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_URL,
@@ -111,6 +115,7 @@ export interface CreateConsultantData {
 
 interface DoctorStore {
   isLoading: boolean;
+  isDeleting: boolean;
   doctors: Doctor[];
   department: Department[];
   consultants: any[];
@@ -132,10 +137,12 @@ interface DoctorStore {
   ) => Promise<void>;
   getMedDoctorById: (id: string) => Promise<void>;
   getAllDepartment: () => Promise<void>;
+  deleteDoctor: (id: string) => Promise<any>;
 }
 
 export const useDoctorStore = create<DoctorStore>((set, get, endpoint) => ({
   isLoading: false,
+  isDeleting: false,
   doctors: [],
   selectedDoctor: null,
   consultants: [],
@@ -282,6 +289,25 @@ export const useDoctorStore = create<DoctorStore>((set, get, endpoint) => ({
       toast.error(error.response.data.message);
     } finally {
       set({ isLoading: false });
+    }
+  },
+  deleteDoctor: async (id) => {
+    set({ isDeleting: true });
+    try {
+      const response = await api.delete(`admin/doctor/delete/${id}`);
+
+      if (isSuccessfulResponse(response)) {
+        toast.success(response.data?.message);
+        console.log(response.data.data);
+        get().getAllDoctors();
+        return true;
+      }
+      return null;
+    } catch (error) {
+      handleErrorToast(error);
+      return null;
+    } finally {
+      set({ isDeleting: false });
     }
   },
 }));
