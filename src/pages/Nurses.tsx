@@ -13,7 +13,7 @@ const roleComponents: Record<string, JSX.Element> = {
 };
 
 const Nurses = () => {
-  const navigate = useNavigatevigate();
+  const navigate = useNavigate();
 
   const role = useRole();
 
