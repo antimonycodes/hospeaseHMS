@@ -69,6 +69,7 @@ const SaNursesPage = () => {
           handleInputChange={handleInputChange}
           setShowModal={setShowModal}
           createNurse={createNurse}
+          isLoading={isLoading}
         />
       )}
     </div>

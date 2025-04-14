@@ -21,6 +21,7 @@ const SaConsultantPage = () => {
     religion: "",
     houseAddress: "",
     consultant_id: null,
+    department_id: 0,
   });
 
   useEffect(() => {

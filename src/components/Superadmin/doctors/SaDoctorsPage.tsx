@@ -19,6 +19,7 @@ const SaDoctorsPage = () => {
     religion: "",
     houseAddress: "",
     doctor_id: null,
+    // department_id: "",
   });
 
   useEffect(() => {

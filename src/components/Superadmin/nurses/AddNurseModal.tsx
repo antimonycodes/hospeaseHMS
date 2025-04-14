@@ -1,12 +1,15 @@
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { CreateNurseData } from "../../../store/super-admin/useNuseStore";
 import Button from "../../../Shared/Button";
+import { useEffect } from "react";
+import { useGlobalStore } from "../../../store/super-admin/useGlobal";
 
 interface AddNurseModalProps {
-  formData: CreateNurseData; // Use the same interface as Zustand
+  formData: CreateNurseData;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   setShowModal: (show: boolean) => void;
   createNurse: (data: CreateNurseData) => any;
+  isLoading: boolean;
 }
 
 const AddNurseModal: React.FC<AddNurseModalProps> = ({
@@ -14,11 +17,26 @@ const AddNurseModal: React.FC<AddNurseModalProps> = ({
   handleInputChange,
   setShowModal,
   createNurse,
+  isLoading,
 }) => {
+  const department = "nurse";
+  const { getAllRoles, roles } = useGlobalStore();
+
+  useEffect(() => {
+    getAllRoles();
+  }, [getAllRoles]);
+
   const handleSubmit = async (e: React.FormEvent) => {
+    const { id, role } = roles[department];
+
     e.preventDefault();
     console.log(formData);
-    const response = await createNurse(formData);
+
+    const payload = {
+      department_id: id,
+      ...formData,
+    };
+    const response = await createNurse(payload);
     if (response) {
       setShowModal(false);
     }
@@ -193,7 +211,20 @@ const AddNurseModal: React.FC<AddNurseModalProps> = ({
 
             {/* Submit Button */}
             <div className="mt-6">
-              <Button type="submit">Add Nurse</Button>
+              <Button
+                type="submit"
+                disabled={!!isLoading}
+                className={` flex items-center justify-center
+                  ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className=" size-6 mr-2 animate-spin" />
+                  </>
+                ) : (
+                  "   Add Nurse"
+                )}
+              </Button>
             </div>
           </form>
         </div>

@@ -111,10 +111,11 @@ export interface CreateNurseData {
   last_name: string;
   dob: string;
   email: string;
-  nurse_id: string | null; // Allow null if that's the intended behavior
+  nurse_id: string | null;
   religion: string;
   phone: string;
   address: string;
+  // department_id: number;
 }
 
 export interface NurseStats {

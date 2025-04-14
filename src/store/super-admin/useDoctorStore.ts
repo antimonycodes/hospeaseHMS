@@ -95,6 +95,7 @@ export interface CreateDoctorData {
   religion: string;
   phone: string;
   address: string;
+  department_id: number;
 }
 export interface CreateConsultantData {
   first_name: string;
@@ -105,6 +106,7 @@ export interface CreateConsultantData {
   religion: string;
   phone: string;
   address: string;
+  department_id: number;
 }
 
 interface DoctorStore {
