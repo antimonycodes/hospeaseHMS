@@ -3,6 +3,10 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import { useDoctorStore } from "./useDoctorStore";
+import {
+  handleErrorToast,
+  isSuccessfulResponse,
+} from "../../utils/responseHandler";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_URL,
@@ -93,6 +97,7 @@ interface Globalstore {
   branches: Branch[];
   clinicaldepts: Clinicaldept[];
   staffs: any[];
+  allStaffs: any[];
   selectedStaff: any | null;
   staffShift: any[];
   notifications: any[];
@@ -110,9 +115,10 @@ interface Globalstore {
   getStaffShifts: (id: any, endpoint: string) => Promise<any>;
   updateShift: (id: any, data: any, update: any) => Promise<any>;
   deleteShift: (id: any, endpoint: any) => Promise<any>;
-  getAllRoles: () => Promise<any>;
+  getAllRoles: (endpoint?: string) => Promise<any>;
   getAllNotifications: () => Promise<any>;
   getUnreadNotificationCount: () => Promise<any>;
+  getAllStaffs: () => Promise<any>;
 }
 
 export const useGlobalStore = create<Globalstore>((set, get) => ({
@@ -121,6 +127,7 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
   clinicaldepts: [],
   staffs: [],
   roles: {},
+  allStaffs: [],
   notifications: [],
   isStaffLoading: false,
   selectedStaff: null,
@@ -361,9 +368,9 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       set({ isLoading: false });
     }
   },
-  getAllRoles: async () => {
+  getAllRoles: async (endpoint = "/medical-report/dept-fetch") => {
     try {
-      const response = await api.get("/medical-report/dept-fetch");
+      const response = await api.get(endpoint);
       const departments = response.data.data;
 
       // Define custom name mappings
@@ -422,6 +429,25 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       return null;
     } catch (error: any) {
       console.log(error.response?.data || error.message);
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  getAllStaffs: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get("/medical-report/all-staffs");
+
+      if (isSuccessfulResponse(response)) {
+        set({ allStaffs: response.data.data });
+        toast.success(response.data?.message);
+        console.log(response.data.data);
+        return true;
+      }
+      return null;
+    } catch (error) {
+      handleErrorToast(error);
       return null;
     } finally {
       set({ isLoading: false });

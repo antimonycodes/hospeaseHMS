@@ -3,7 +3,7 @@ import { usePatientStore } from "../store/super-admin/usePatientStore";
 import { useDoctorStore } from "../store/super-admin/useDoctorStore";
 import { Loader2, X } from "lucide-react";
 import debounce from "lodash.debounce";
-import { useLocation } from "react-router-dom";
+import { useGlobalStore } from "../store/super-admin/useGlobal";
 
 interface BookAppointmentModalProps {
   onClose: () => void;
@@ -17,52 +17,42 @@ const BookAppointmentModal = ({
   refreshEndpoint = "/admin/appointment/all-records",
 }: BookAppointmentModalProps) => {
   const { searchPatients, bookAppointment, isLoading } = usePatientStore();
-  const { getAllDoctors, doctors, department, getAllDepartment } =
-    useDoctorStore();
-  // const location = useLocation();
+  const { getAllStaffs, allStaffs, getAllRoles, roles } = useGlobalStore();
 
   const [query, setQuery] = useState("");
   const [patientOptions, setPatientOptions] = useState<any[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const [appointmentData, setAppointmentData] = useState({
     patient_id: 0,
-    user_id: 0,
-    department_id: 0,
+    user_id: null as number | null,
+    department_id: null as number | null,
     date: "",
     time: "",
     appointmentType: "staff", // Default to staff appointment
   });
 
-  // Mock departments data - replace with actual data fetch in your implementation
-  const departments = [
-    { id: 1, name: "General Medicine" },
-    { id: 2, name: "Cardiology" },
-    { id: 3, name: "Pediatrics" },
-    { id: 4, name: "Nursing" },
-    { id: 5, name: "Emergency Care" },
-  ];
+  const getFilteredDepartments = () => {
+    if (!roles || typeof roles !== "object") return [];
 
-  // Mock staff data - it will include nurses along with doctors
-  // In your implementation, you'll need to fetch staff from API
-  const staffMembers = [
-    ...doctors,
-    // Add nurses or other staff here when implementing the actual logic
-  ];
+    // Extract only doctor and nurse roles
+    const doctorRole = roles.doctor;
+    const nurseRole = roles.nurse;
+
+    // Return as array of filtered departments
+    const filteredRoles = [];
+    if (doctorRole) filteredRoles.push({ id: doctorRole.id, name: "Doctor" });
+    if (nurseRole) filteredRoles.push({ id: nurseRole.id, name: "Nurse" });
+
+    return filteredRoles;
+  };
 
   useEffect(() => {
-    getAllDepartment();
-  }, [getAllDepartment]);
+    // Fetch departments and staff members when component mounts
+    getAllRoles();
+    getAllStaffs();
+  }, [getAllRoles, getAllStaffs]);
 
-  // useEffect(() => {
-  //   getAllDoctors();
-  // }, [getAllDoctors]);
-  // useEffect(() => {
-  //   const doctorEndpoint = location.pathname.includes("/frontdesk")
-  //     ? "/front-desk/doctors/all-records"
-  //     : "/admin/doctors/all-records";
-
-  //   getAllDoctors(doctorEndpoint);
-  // }, [getAllDoctors, location.pathname]);
+  console.log(roles, "roles");
 
   const handleSearch = debounce(async (val: string) => {
     const results = await searchPatients(val);
@@ -73,6 +63,7 @@ const BookAppointmentModal = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
+
     if (name === "query") {
       setQuery(value);
       handleSearch(value);
@@ -81,22 +72,35 @@ const BookAppointmentModal = ({
       setAppointmentData((prev) => ({
         ...prev,
         appointmentType: value,
-        user_id: 0,
-        department_id: 0,
+        user_id: null,
+        department_id: null,
+      }));
+    } else if (name === "user_id") {
+      setAppointmentData((prev) => ({
+        ...prev,
+        user_id: value ? Number(value) : null,
+        department_id: null, // Clear department when selecting a staff
+      }));
+    } else if (name === "department_id") {
+      setAppointmentData((prev) => ({
+        ...prev,
+        department_id: value ? Number(value) : null,
+        user_id: null, // Clear user when selecting a department
       }));
     } else {
       setAppointmentData((prev) => ({
         ...prev,
-        [name]: ["user_id", "department_id"].includes(name)
-          ? Number(value)
-          : value,
+        [name]: value,
       }));
     }
   };
 
   const handleSelectPatient = (patient: any) => {
     setSelectedPatient(patient);
-    setAppointmentData((prev) => ({ ...prev, patient_id: patient.id }));
+    setAppointmentData((prev) => ({
+      ...prev,
+      patient_id: patient.id,
+    }));
     setQuery(
       `${patient.attributes.first_name} ${patient.attributes.last_name}`
     );
@@ -104,10 +108,52 @@ const BookAppointmentModal = ({
   };
 
   const handleSubmit = async () => {
-    const success = await bookAppointment(appointmentData, endpoint);
+    // Prepare the final appointment data before submission
+    const finalAppointmentData: any = {
+      patient_id: appointmentData.patient_id,
+      date: appointmentData.date,
+      time: appointmentData.time,
+    };
+
+    if (
+      appointmentData.appointmentType === "staff" &&
+      appointmentData.user_id !== null
+    ) {
+      finalAppointmentData.user_id = appointmentData.user_id;
+    }
+
+    if (
+      appointmentData.appointmentType === "department" &&
+      appointmentData.department_id !== null
+    ) {
+      finalAppointmentData.department_id = appointmentData.department_id;
+    }
+
+    const success = await bookAppointment(finalAppointmentData, endpoint);
     if (success) {
       onClose();
     }
+  };
+
+  // Check if form is valid for submission
+  const isFormValid = () => {
+    const { patient_id, date, time, appointmentType } = appointmentData;
+
+    // Basic validations
+    if (!patient_id || !date || !time) {
+      return false;
+    }
+
+    // Appointment type specific validations
+    if (appointmentType === "staff" && !appointmentData.user_id) {
+      return false;
+    }
+
+    if (appointmentType === "department" && !appointmentData.department_id) {
+      return false;
+    }
+
+    return true;
   };
 
   return (
@@ -184,6 +230,7 @@ const BookAppointmentModal = ({
               <input
                 type="date"
                 name="date"
+                value={appointmentData.date}
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded-lg px-3 py-4"
               />
@@ -193,6 +240,7 @@ const BookAppointmentModal = ({
               <input
                 type="time"
                 name="time"
+                value={appointmentData.time}
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded-lg px-3 py-4"
               />
@@ -228,47 +276,56 @@ const BookAppointmentModal = ({
             </div>
           </div>
 
-          {/* <div>
-              <label className="text-sm text-gray-600">Select Doctor</label>
+          {/* Conditional rendering based on appointment type */}
+          {appointmentData.appointmentType === "staff" ? (
+            <div className="mb-6">
+              <label className="text-sm text-gray-600">
+                Select Staff Member
+              </label>
               <select
                 name="user_id"
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded-lg px-3 py-4"
                 value={appointmentData.user_id || ""}
               >
-                <option value="">Select Doctor</option>
-                {doctors.map((doc: any) => (
-                  <option key={doc.id} value={doc.attributes.user_id}>
-                    Dr {doc.attributes.first_name} {doc.attributes.last_name}
+                <option value="">Select Staff Member</option>
+                {allStaffs.map((staff: any) => (
+                  <option key={staff.id} value={staff.id}>
+                    {staff.attributes.first_name} {staff.attributes.last_name}
                   </option>
                 ))}
               </select>
-            </div> */}
-          <div>
-            <label className="text-sm text-gray-600">Select Department</label>
-            <select
-              name="name"
-              id=""
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-4"
-            >
-              <option value="">Select Department</option>
-              {department.map((dept: any) => (
-                <option key={dept.id} value={dept.attributes.department_id}>
-                  {dept.attributes.department_name}
-                  {/* {dept.attributes.name} */}
-                </option>
-              ))}
-            </select>
-          </div>
+            </div>
+          ) : (
+            <div className="mb-6">
+              <label className="text-sm text-gray-600">Select Department</label>
+              <select
+                name="department_id"
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg px-3 py-4"
+                value={appointmentData.department_id || ""}
+              >
+                <option value="">Select Department</option>
+                {getFilteredDepartments().map((dept) => (
+                  <option key={dept.id} value={dept.id}>
+                    {dept.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Book Button */}
           <div className="mt-6">
             <button
               onClick={handleSubmit}
-              disabled={isLoading}
+              disabled={isLoading || !isFormValid()}
               className={`bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition flex items-center justify-center w-full
-                ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                ${
+                  isLoading || !isFormValid()
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                }`}
             >
               {isLoading ? (
                 <>

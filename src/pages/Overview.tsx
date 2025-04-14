@@ -10,7 +10,7 @@ import PharmDash from "../components/Pharmacy/Overview/PharmDash";
 import SuperAdminOverview from "../components/Superadmin/SuperAdminOverview";
 // import SuperAdminOverview from "../components/Superadmin/Overview";
 import { useRole } from "../hooks/useRole";
-import { JSX } from "react";
+import { JSX, useEffect } from "react";
 import MedicalDash from "../components/medicaldirector/overview/MedicalDash";
 
 const roleComponents: Record<string, JSX.Element> = {
@@ -29,9 +29,12 @@ const roleComponents: Record<string, JSX.Element> = {
 const Overview = () => {
   const navigate = useNavigate();
   const role = useRole();
+  useEffect(() => {
+    if (!role) {
+      navigate("/signin");
+    }
+  }, [role, navigate]);
 
-  // Default to 'Unauthorized' if role is not recognized
-  // return role ? roleComponents[role] : <p>Unauthorized Access</p>;
-  return role ? roleComponents[role] : (navigate("/signin"), null);
+  return role ? roleComponents[role] || null : null;
 };
 export default Overview;

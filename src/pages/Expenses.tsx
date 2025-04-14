@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import Fexpenses from "../components/Finance/expenses/Fexpenses";
 import { useRole } from "../hooks/useRole";
-import { JSX } from "react";
+import { JSX, useEffect } from "react";
 
 const roleComponents: Record<string, JSX.Element> = {
   finance: <Fexpenses />,
@@ -13,8 +13,13 @@ const Expenses = () => {
 
   const role = useRole();
 
-  // Default to 'Unauthorized' if role is not recognized
-  return role ? roleComponents[role] : (navigate("/signin"), null);
+  useEffect(() => {
+    if (!role) {
+      navigate("/signin");
+    }
+  }, [role, navigate]);
+
+  return role ? roleComponents[role] || null : null;
 };
 
 export default Expenses;

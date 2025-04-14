@@ -1,7 +1,7 @@
 import InventoryRequest from "../components/Inventory/request/InventoryRequest";
 import { useRole } from "../hooks/useRole";
 import { useNavigate } from "react-router-dom";
-import { JSX } from "react";
+import { JSX, useEffect } from "react";
 const roleComponents: Record<string, JSX.Element> = {
   //   superadmin: <SuperAdminOverview />,
   "inventory-manager": <InventoryRequest />,
@@ -10,9 +10,13 @@ const roleComponents: Record<string, JSX.Element> = {
 const Request = () => {
   const navigate = useNavigate();
   const role = useRole();
+  useEffect(() => {
+    if (!role) {
+      navigate("/signin");
+    }
+  }, [role, navigate]);
 
-  // Default to 'Unauthorized' if role is not recognized
-  return role ? roleComponents[role] : (navigate("/signin"), null);
+  return role ? roleComponents[role] || null : null;
 };
 
 export default Request;

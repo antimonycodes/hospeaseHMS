@@ -1,5 +1,5 @@
 import { useRole } from "../hooks/useRole";
-import { JSX } from "react";
+import { JSX, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import InventoryStocks from "../components/Inventory/stocks/InventoryStocks";
 const roleComponents: Record<string, JSX.Element> = {
@@ -11,9 +11,13 @@ const roleComponents: Record<string, JSX.Element> = {
 const Stocks = () => {
   const navigate = useNavigate();
   const role = useRole();
+  useEffect(() => {
+    if (!role) {
+      navigate("/signin");
+    }
+  }, [role, navigate]);
 
-  // Default to 'Unauthorized' if role is not recognized
-  return role ? roleComponents[role] : (navigate("/signin"), null);
+  return role ? roleComponents[role] || null : null;
 };
 
 export default Stocks;

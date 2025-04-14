@@ -1,4 +1,4 @@
-import { JSX } from "react";
+import { JSX, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRole } from "../hooks/useRole";
 import FrontdeskAppointment from "../components/Frontdesk/appointment/FrontdeskAppointment";
@@ -16,8 +16,13 @@ const Appointments = () => {
   const navigate = useNavigate();
   const role = useRole();
 
-  // Default to 'Unauthorized' if role is not recognized
-  return role ? roleComponents[role] : (navigate("/signin"), null);
+  useEffect(() => {
+    if (!role) {
+      navigate("/signin");
+    }
+  }, [role, navigate]);
+
+  return role ? roleComponents[role] || null : null;
 };
 
 export default Appointments;

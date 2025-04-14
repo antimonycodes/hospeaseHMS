@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import SaDoctorsPage from "../components/Superadmin/doctors/SaDoctorsPage";
 import { useRole } from "../hooks/useRole";
-import { JSX } from "react";
+import { JSX, useEffect } from "react";
 import MedDoctor from "../components/medicaldirector/doctor/MedDoctor";
 
 const roleComponents: Record<string, JSX.Element> = {
@@ -13,8 +13,13 @@ const Doctors = () => {
 
   const role = useRole();
 
-  // Default to 'Unauthorized' if role is not recognized
-  return role ? roleComponents[role] : (navigate("/signin"), null);
+  useEffect(() => {
+    if (!role) {
+      navigate("/signin");
+    }
+  }, [role, navigate]);
+
+  return role ? roleComponents[role] || null : null;
 };
 
 export default Doctors;
