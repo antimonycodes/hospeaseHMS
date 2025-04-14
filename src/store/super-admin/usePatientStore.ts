@@ -142,6 +142,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
+
   getFrontdeskStats: async () => {
     set({ isLoading: true });
     try {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { usePatientStore } from "../store/super-admin/usePatientStore"; // Adjust path
-import { useDoctorStore } from "../store/super-admin/useDoctorStore"; // Adjust path
+import { usePatientStore } from "../store/super-admin/usePatientStore";
+import { useDoctorStore } from "../store/super-admin/useDoctorStore";
 import { Loader2, X } from "lucide-react";
 import debounce from "lodash.debounce";
 import { useLocation } from "react-router-dom";
@@ -17,7 +17,8 @@ const BookAppointmentModal = ({
   refreshEndpoint = "/admin/appointment/all-records",
 }: BookAppointmentModalProps) => {
   const { searchPatients, bookAppointment, isLoading } = usePatientStore();
-  const { getAllDoctors, doctors } = useDoctorStore();
+  const { getAllDoctors, doctors, department, getAllDepartment } =
+    useDoctorStore();
   // const location = useLocation();
 
   const [query, setQuery] = useState("");
@@ -31,8 +32,12 @@ const BookAppointmentModal = ({
   });
 
   useEffect(() => {
-    getAllDoctors();
-  }, [getAllDoctors]);
+    getAllDepartment();
+  }, [getAllDepartment]);
+
+  // useEffect(() => {
+  //   getAllDoctors();
+  // }, [getAllDoctors]);
   // useEffect(() => {
   //   const doctorEndpoint = location.pathname.includes("/frontdesk")
   //     ? "/front-desk/doctors/all-records"
@@ -163,7 +168,7 @@ const BookAppointmentModal = ({
               />
             </div>
 
-            <div>
+            {/* <div>
               <label className="text-sm text-gray-600">Select Doctor</label>
               <select
                 name="user_id"
@@ -174,6 +179,23 @@ const BookAppointmentModal = ({
                 {doctors.map((doc: any) => (
                   <option key={doc.id} value={doc.attributes.user_id}>
                     Dr {doc.attributes.first_name} {doc.attributes.last_name}
+                  </option>
+                ))}
+              </select>
+            </div> */}
+            <div>
+              <label className="text-sm text-gray-600">Select Department</label>
+              <select
+                name="name"
+                id=""
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg px-3 py-4"
+              >
+                <option value="">Select Department</option>
+                {department.map((dept: any) => (
+                  <option key={dept.id} value={dept.attributes.department_id}>
+                    {dept.attributes.department_name}
+                    {/* {dept.attributes.name} */}
                   </option>
                 ))}
               </select>

@@ -9,14 +9,15 @@ import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 
 type FrondeskPatientData = {
   name: string;
-  patientId: string;
+
   age: number;
   gender: string;
   phone: string;
   branch: string;
   occupation: string;
   editpatients: string;
-  id: string; // Added 'id' to match the rowKey
+  card_id: string;
+  id: string;
 };
 
 type Columns = {
@@ -36,6 +37,7 @@ type FrondeskPatientDataProps = {
       phone_number: string;
       branch: string;
       occupation: string;
+      card_id: string;
       address: string;
     };
     id: number;
@@ -45,7 +47,6 @@ type FrondeskPatientDataProps = {
 const FrontdeskInfo = ({ patients, isLoading }: FrondeskPatientDataProps) => {
   console.log(patients);
   const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState(0);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { selectedPatient, getDeskByIdDoc } = usePatientStore();
   const { id } = useParams();
@@ -58,13 +59,14 @@ const FrontdeskInfo = ({ patients, isLoading }: FrondeskPatientDataProps) => {
 
   const formattedPatients = patients.map((patient: any) => ({
     name: `${patient.attributes.first_name} ${patient.attributes.last_name}`,
-    patientId: patient.id.toString(), // Convert ID to string if needed
+    // patientId: patient.attributes.card_id, // Convert ID to string if needed
     age: patient.attributes.age,
     gender: patient.attributes.gender,
     phone: patient.attributes.phone_number,
     branch: patient.attributes.branch,
     occupation: patient.attributes.occupation,
     editpatients: "editpatients",
+    card_id: patient.attributes.card_id, // Add card_id property
     id: patient.id,
   }));
   const handleViewMore = (id: string) => {
@@ -81,10 +83,10 @@ const FrontdeskInfo = ({ patients, isLoading }: FrondeskPatientDataProps) => {
       ),
     },
     {
-      key: "patientId",
+      key: "card_id",
       label: "Patient ID",
       render: (_, patient) => (
-        <span className="text-[#667085]">{patient.patientId}</span>
+        <span className="text-[#667085]">{patient.card_id}</span>
       ),
     },
     {
@@ -132,14 +134,7 @@ const FrontdeskInfo = ({ patients, isLoading }: FrondeskPatientDataProps) => {
   return (
     <div>
       {" "}
-      <Table
-        data={formattedPatients}
-        columns={columns}
-        rowKey="id"
-        currentPage={currentPage}
-        pagination={formattedPatients.length > 10}
-        rowsPerPage={10}
-      />
+      <Table data={formattedPatients} columns={columns} rowKey="id" />
       <EditPatientModal
         isLoading={isLoading}
         isOpen={isEditModalOpen}
