@@ -20,6 +20,8 @@ export interface Category {
 
 interface AddStockModalProps {
   onClose: () => void;
+  refreshEndpoint: string;
+  endpoint: string;
 }
 
 const AddStockModal: React.FC<AddStockModalProps> = ({ onClose }) => {
