@@ -228,7 +228,7 @@ const BookAppointmentModal = ({
             </div>
           </div>
 
-            {/* <div>
+          {/* <div>
               <label className="text-sm text-gray-600">Select Doctor</label>
               <select
                 name="user_id"
@@ -244,24 +244,23 @@ const BookAppointmentModal = ({
                 ))}
               </select>
             </div> */}
-            <div>
-              <label className="text-sm text-gray-600">Select Department</label>
-              <select
-                name="name"
-                id=""
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg px-3 py-4"
-              >
-                <option value="">Select Department</option>
-                {department.map((dept: any) => (
-                  <option key={dept.id} value={dept.attributes.department_id}>
-                    {dept.attributes.department_name}
-                    {/* {dept.attributes.name} */}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+          <div>
+            <label className="text-sm text-gray-600">Select Department</label>
+            <select
+              name="name"
+              id=""
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-3 py-4"
+            >
+              <option value="">Select Department</option>
+              {department.map((dept: any) => (
+                <option key={dept.id} value={dept.attributes.department_id}>
+                  {dept.attributes.department_name}
+                  {/* {dept.attributes.name} */}
+                </option>
+              ))}
+            </select>
+          </div>
 
           {/* Book Button */}
           <div className="mt-6">
