@@ -43,7 +43,7 @@ const MatronNurse = () => {
             {nurses.length}
           </span>
         </div>
-        <div className="md:w-auto">
+        {/* <div className="md:w-auto">
           <Button
             onClick={() => setShowModal(true)}
             variant="primary"
@@ -53,11 +53,11 @@ const MatronNurse = () => {
             Add new
             <Plus size={16} />
           </Button>
-        </div>
+        </div> */}
       </div>
 
       <MatronNurseTable nurses={nurses} isLoading={isLoading} />
-
+      {/* 
       {showModal && (
         <MatronNurseModal
           formData={formData}
@@ -65,7 +65,7 @@ const MatronNurse = () => {
           setShowModal={setShowModal}
           createNurse={createNurse}
         />
-      )}
+      )} */}
     </div>
   );
 };

@@ -22,7 +22,7 @@ const InventoryStocks = () => {
         typebutton="Add New"
         onButtonClick={openModal}
       />
-      {isModalOpen && (
+      {/* {isModalOpen && (
         <AddStockModal
           showSearchBar={true}
           showPaymentType={true}
@@ -35,6 +35,13 @@ const InventoryStocks = () => {
             itemName: "",
             qantity: "",
           }}
+        />
+      )} */}
+      {isModalOpen && (
+        <AddStockModal
+          onClose={closeModal}
+          endpoint="/inventory/upload-item"
+          refreshEndpoint="/inventory/all-inventory-items"
         />
       )}
       <InventoryStockTable stocks={stocks} isLoading={isLoading} />

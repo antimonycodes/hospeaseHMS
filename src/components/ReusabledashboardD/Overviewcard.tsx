@@ -32,7 +32,7 @@ const OverviewCard: React.FC<OverviewCardProps> = ({
       <h1 className="font-medium text-[20px] text-[#101828] pb-[21px]">
         {cardTitle}
       </h1>
-      <div className="flex gap-[21px] w-full">
+      <div className="flex-col md:flex md:flex-row  lg:flex lg:flex-row  gap-[21px] w-full">
         {filteredCards.length > 0 ? (
           filteredCards.map(({ title, number, icon }, index) => {
             let imageSrc = "/docstaticon.svg"; // Default fallback

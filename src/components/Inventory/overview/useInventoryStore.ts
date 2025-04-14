@@ -29,16 +29,56 @@ export interface Pagination {
   from: number;
   to: number;
 }
+// Stock interface to match the API response
 export interface Stock {
   id: number;
   attributes: {
     item_name: string;
-    category: string;
+    category: string; // Category name as a string
     quantity: string;
-    Card_id: string;
-    first_name: string;
-    last_name: string;
+    expiry_date: string;
+    cost: number;
+    image?: string; // Optional, if the API returns an image URL
   };
+}
+
+// Category interface to match the /inventory/category/all-records response
+export interface Category {
+  id: number;
+  attributes: {
+    name: string;
+  };
+}
+
+// Pagination interface
+export interface Pagination {
+  total: number;
+  per_page: number;
+  current_page: number;
+  last_page: number;
+  from: number;
+  to: number;
+}
+
+// API response for inventory items
+export interface InventoryResponse {
+  status: boolean;
+  message: string;
+  data: {
+    data: Stock[];
+    pagination: Pagination;
+  };
+  status_code: number;
+}
+
+// Form data for creating a stock item
+export interface AddStockData {
+  item: string;
+  quantity: string;
+  category_id: string;
+  expiry_date: string;
+  cost: number;
+  image: File | null;
 }
 
 export interface Staff {
@@ -72,19 +112,17 @@ export interface InventoryStats {
 interface InventoryStore {
   isLoading: boolean;
   stats: InventoryStats;
+  categories: Category[];
 
   pagination: Pagination | null;
   getInventoryStats: () => Promise<void>;
   stocks: Stock[];
   getAllStocks: (endpoint?: string) => Promise<void>;
-  createStock: (
-    data: any,
-    endpoint?: string,
-    refreshEndpoint?: string
-  ) => Promise<boolean>;
+  createStock: (formData: AddStockData) => Promise<boolean>;
   searchStaff: (query: string) => Promise<Staff[]>;
   requests: Request[];
   getAllRequest: (endpoint?: string) => Promise<void>;
+  getCategories: () => Promise<void>;
   createRequest: (
     data: any,
     endpoint?: string,
@@ -102,6 +140,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
   pagination: null,
   stocks: [],
   requests: [],
+  categories: [] as Category[],
 
   getAllRequest: async (
     endpoint = "/inventory/requests/all-records?status=pending"
@@ -207,24 +246,82 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
-  createStock: async (
-    data,
-    endpoint = "/inventory/create-stock",
-    refreshEndpoint = "/inventory/all-inventory-items"
-  ) => {
+  // createStock: async (
+  //   data,
+  //   endpoint = "/inventory/create-stock",
+  //   refreshEndpoint = "/inventory/all-inventory-items"
+  // ) => {
+  //   set({ isLoading: true });
+  //   try {
+  //     const response = await api.post(endpoint, data);
+  //     if (response.status === 201) {
+  //       await get().getAllStocks(refreshEndpoint);
+  //       toast.success(response.data.message || "Stock added successfully");
+  //       return true;
+  //     }
+  //     return false;
+  //   } catch (error: any) {
+  //     console.error(error.response?.data);
+  //     toast.error(error.response?.data?.message || "Failed to add stock");
+  //     return false;
+  //   } finally {
+  //     set({ isLoading: false });
+  //   }
+  // },
+
+  createStock: async ({
+    item,
+    quantity,
+    category_id,
+    expiry_date,
+    cost,
+    image,
+  }) => {
     set({ isLoading: true });
     try {
-      const response = await api.post(endpoint, data);
+      const form = new FormData();
+      form.append("item", item);
+      form.append("quantity", quantity);
+      form.append("category_id", category_id);
+      form.append("expiry_date", expiry_date);
+      form.append("cost", cost.toString());
+      if (image) {
+        form.append("image", image);
+      }
+
+      const response = await api.post("/inventory/upload-item", form, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
       if (response.status === 201) {
-        await get().getAllStocks(refreshEndpoint);
         toast.success(response.data.message || "Stock added successfully");
+        // Refresh stocks after creation
+        await get().getAllStocks();
         return true;
       }
       return false;
     } catch (error: any) {
-      console.error(error.response?.data);
+      console.error("createStock error:", error.response?.data);
       toast.error(error.response?.data?.message || "Failed to add stock");
       return false;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  getCategories: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get("/inventory/category/all-records");
+      const categories = response.data.data?.data || [];
+      set({ categories });
+      toast.success("Categories fetched successfully");
+    } catch (error: any) {
+      console.error("getCategories error:", error.response?.data);
+      toast.error(
+        error.response?.data?.message || "Failed to fetch categories"
+      );
     } finally {
       set({ isLoading: false });
     }

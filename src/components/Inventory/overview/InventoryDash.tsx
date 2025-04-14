@@ -64,7 +64,7 @@ const InventoryDash = () => {
               data={InventoryStatsData}
             />
             <InventoryChart />
-            <InventoryCard />
+            {/* <InventoryCard /> */}
           </>
         )}
       </div>
