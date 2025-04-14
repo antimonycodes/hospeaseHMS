@@ -27,6 +27,15 @@ export interface Doctor {
   type: string;
   attributes: DoctorAttributes;
 }
+export interface Department {
+  id: number;
+  type: string;
+  attributes: DoctorAttributes;
+}
+export interface DepartmentAttributes {
+  id: number;
+  name: string;
+}
 export interface Consultant {
   id: number;
   type: string;
@@ -101,6 +110,7 @@ export interface CreateConsultantData {
 interface DoctorStore {
   isLoading: boolean;
   doctors: Doctor[];
+  department: Department[];
   consultants: any[];
   selectedDoctor: Doctor | null;
   selectedConsultant: Doctor | null;
@@ -119,6 +129,7 @@ interface DoctorStore {
     refreshEndpoint?: string
   ) => Promise<void>;
   getMedDoctorById: (id: string) => Promise<void>;
+  getAllDepartment: () => Promise<void>;
 }
 
 export const useDoctorStore = create<DoctorStore>((set, get, endpoint) => ({
@@ -127,6 +138,7 @@ export const useDoctorStore = create<DoctorStore>((set, get, endpoint) => ({
   selectedDoctor: null,
   consultants: [],
   selectedConsultant: null,
+  department: [],
 
   // Fetch all doctors
   getAllDoctors: async (enpoint = "/admin/doctor/fetch") => {
@@ -139,6 +151,20 @@ export const useDoctorStore = create<DoctorStore>((set, get, endpoint) => ({
     } catch (error: any) {
       console.error(error.response?.data);
       // toast.error(error.response.message || "Failed to fetch doctors");
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  getAllDepartment: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(
+        "/front-desk/branches/clinical-department-fetch"
+      );
+      const fetchedDepartment = response.data.data;
+      set({ department: fetchedDepartment });
+    } catch (error: any) {
+      console.error(error.response?.data);
     } finally {
       set({ isLoading: false });
     }

@@ -57,10 +57,10 @@ interface StaffProfileState {
   isLoading: boolean;
   error: string | null;
   fetchProfile: () => Promise<void>;
-  changePassword: (data: ChangePasswordData) => Promise<boolean>;
+  changePassword: (data: ChangePasswordData) => Promise<any>;
 }
 
-export const useStaffProfileStore = create<StaffProfileState>((set) => ({
+export const useStaffProfileStore = create<StaffProfileState>((set, get) => ({
   profileData: null,
   isLoading: false,
   error: null,
@@ -78,23 +78,28 @@ export const useStaffProfileStore = create<StaffProfileState>((set) => ({
     }
   },
 
-  changePassword: async (data: ChangePasswordData) => {
-    set({ isLoading: true, error: null });
+  changePassword: async (data) => {
+    set({ isLoading: true });
     try {
-      await api.put("/user/password", {
-        old_password: data.old_password,
-        new_password: data.new_password,
-        new_password_confirmation: data.new_password_confirmation,
-      });
-      set({ isLoading: false });
-      toast.success("Password changed successfully");
-      return true;
-    } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to change password";
-      set({ error: errorMessage, isLoading: false });
-      toast.error(errorMessage);
+      const response = await api.post("/auth/change-password", data);
+      if (response.status === 200 || response.status === 201) {
+        console.log("Password changed:", response.data);
+        toast.success(response.data.message);
+        set({ profileData: response.data.data });
+        await get().fetchProfile();
+        return true;
+      }
       return false;
+    } catch (error: any) {
+      console.error(
+        "Error changing password:",
+        error.response?.data || error.message
+      );
+      toast.error(error.response.data.message);
+
+      return null;
+    } finally {
+      set({ isLoading: false });
     }
   },
 }));

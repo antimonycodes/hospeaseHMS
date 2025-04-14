@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import Table from "../../../Shared/Table";
 type MedpatientData = {
   name: string;
-  patientId: string;
   age: number;
   gender: string;
   phone: string;
   branch: string;
   occupation: string;
   viewMore: string;
+  card_id: string;
+  id: string;
 };
 
 type Columns = {
@@ -29,6 +30,8 @@ type MedpatientInfoProps = {
       phone_number: string;
       branch: string;
       occupation: string;
+      card_id: string;
+      address: string;
     };
     id: number;
   }[];
@@ -39,13 +42,14 @@ const MedpatientInfo = ({ patients, isLoading }: MedpatientInfoProps) => {
 
   const formattedPatients = patients.map((patient: any) => ({
     name: `${patient.attributes.first_name} ${patient.attributes.last_name}`,
-    patientId: patient.id.toString(), // Convert ID to string if needed
+    // patientId: patient.attributes.card_id, // Convert ID to string if needed
     age: patient.attributes.age,
     gender: patient.attributes.gender,
     phone: patient.attributes.phone_number,
     branch: patient.attributes.branch,
     occupation: patient.attributes.occupation,
     viewMore: "View More",
+    card_id: patient.attributes.card_id, // Include card_id property
     id: patient.id,
   }));
   const handleViewMore = (id: string) => {
@@ -62,10 +66,10 @@ const MedpatientInfo = ({ patients, isLoading }: MedpatientInfoProps) => {
       ),
     },
     {
-      key: "patientId",
+      key: "card_id",
       label: "Patient ID",
       render: (_, patient) => (
-        <span className="text-[#667085]">{patient.patientId}</span>
+        <span className="text-[#667085]">{patient.card_id}</span>
       ),
     },
     {
@@ -102,7 +106,7 @@ const MedpatientInfo = ({ patients, isLoading }: MedpatientInfoProps) => {
       render: (_, patient) => (
         <span
           className="text-primary text-sm font-medium cursor-pointer"
-          onClick={() => handleViewMore(patient.patientId)}
+          onClick={() => handleViewMore(patient.id)}
         >
           View More
         </span>
@@ -114,7 +118,7 @@ const MedpatientInfo = ({ patients, isLoading }: MedpatientInfoProps) => {
       <Table
         data={formattedPatients}
         columns={columns}
-        rowKey="patientId"
+        rowKey="id"
         pagination={formattedPatients.length > 10}
         rowsPerPage={10}
       />

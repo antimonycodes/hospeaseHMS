@@ -144,7 +144,7 @@ const Table = <T extends Record<string, any>>({
             <button
               onClick={() => onPageChange?.(currentPage - 1)}
               disabled={currentPage <= 1}
-              className={`px-4 py-2 border border-[#D0D5DD] rounded-lg flex items-center gap-2 text-[#344054] font-semibold 
+              className={`px-4 py-2 border border-[#D0D5DD] rounded-lg flex items-center gap-2 text-[#344054] font-semibold
                 ${
                   currentPage <= 1
                     ? "opacity-50 cursor-not-allowed"
@@ -195,7 +195,7 @@ const Table = <T extends Record<string, any>>({
             <button
               onClick={() => onPageChange?.(currentPage + 1)}
               disabled={currentPage >= totalPages}
-              className={`px-4 py-2 border border-[#D0D5DD] rounded-lg flex items-center gap-2 text-[#344054] font-semibold 
+              className={`px-4 py-2 border border-[#D0D5DD] rounded-lg flex items-center gap-2 text-[#344054] font-semibold
                 ${
                   currentPage >= totalPages
                     ? "opacity-50 cursor-not-allowed"
