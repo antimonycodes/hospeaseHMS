@@ -54,6 +54,8 @@ import MedAppointmentDetails from "./components/medicaldirector/appointment/MedA
 import MedDoctorDetail from "./components/medicaldirector/doctor/MedDoctorDetail";
 import SignupSuccess from "./_Auth/SignupSuccess";
 import NurseDetail from "./components/Nurse/patients/NurseDetail";
+import ServiceCharges from "./pages/ServiceCharges";
+import ForgotPassword from "./_Auth/ForgotPassword";
 
 function App() {
   return (
@@ -63,6 +65,7 @@ function App() {
           <Route path="/" element={<Navigate to="/dashboard" />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/signup-success" element={<SignupSuccess />} />
           <Route element={<ProtectedRoutes />}>
             <Route path="/dashboard" element={<DashboardLayout />}>
@@ -165,6 +168,7 @@ function App() {
               <Route path="clinical-department" element={<ClinicalDept />} />
               <Route path="front-desk" element={<SaFrontdeskpage />} />
               <Route path="notifications" element={<NotificationPage />} />
+              <Route path="service-charges" element={<ServiceCharges />} />
             </Route>
           </Route>
         </Routes>

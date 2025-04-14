@@ -18,7 +18,6 @@ const BookAppointmentModal = ({
 }: BookAppointmentModalProps) => {
   const { searchPatients, bookAppointment, isLoading } = usePatientStore();
   const { getAllDoctors, doctors } = useDoctorStore();
-  // const location = useLocation();
 
   const [query, setQuery] = useState("");
   const [patientOptions, setPatientOptions] = useState<any[]>([]);
@@ -26,20 +25,31 @@ const BookAppointmentModal = ({
   const [appointmentData, setAppointmentData] = useState({
     patient_id: 0,
     user_id: 0,
+    department_id: 0,
     date: "",
     time: "",
+    appointmentType: "staff", // Default to staff appointment
   });
+
+  // Mock departments data - replace with actual data fetch in your implementation
+  const departments = [
+    { id: 1, name: "General Medicine" },
+    { id: 2, name: "Cardiology" },
+    { id: 3, name: "Pediatrics" },
+    { id: 4, name: "Nursing" },
+    { id: 5, name: "Emergency Care" },
+  ];
+
+  // Mock staff data - it will include nurses along with doctors
+  // In your implementation, you'll need to fetch staff from API
+  const staffMembers = [
+    ...doctors,
+    // Add nurses or other staff here when implementing the actual logic
+  ];
 
   useEffect(() => {
     getAllDoctors();
   }, [getAllDoctors]);
-  // useEffect(() => {
-  //   const doctorEndpoint = location.pathname.includes("/frontdesk")
-  //     ? "/front-desk/doctors/all-records"
-  //     : "/admin/doctors/all-records";
-
-  //   getAllDoctors(doctorEndpoint);
-  // }, [getAllDoctors, location.pathname]);
 
   const handleSearch = debounce(async (val: string) => {
     const results = await searchPatients(val);
@@ -53,10 +63,20 @@ const BookAppointmentModal = ({
     if (name === "query") {
       setQuery(value);
       handleSearch(value);
+    } else if (name === "appointmentType") {
+      // Reset staff/department selections when changing appointment type
+      setAppointmentData((prev) => ({
+        ...prev,
+        appointmentType: value,
+        user_id: 0,
+        department_id: 0,
+      }));
     } else {
       setAppointmentData((prev) => ({
         ...prev,
-        [name]: name === "user_id" ? Number(value) : value,
+        [name]: ["user_id", "department_id"].includes(name)
+          ? Number(value)
+          : value,
       }));
     }
   };
@@ -71,7 +91,7 @@ const BookAppointmentModal = ({
   };
 
   const handleSubmit = async () => {
-    const success = await bookAppointment(appointmentData, endpoint); // Pass custom endpoint
+    const success = await bookAppointment(appointmentData, endpoint);
     if (success) {
       onClose();
     }
@@ -126,7 +146,7 @@ const BookAppointmentModal = ({
                 label: "Last Name",
                 value: selectedPatient.attributes.last_name,
               },
-              { label: "Card ID", value: selectedPatient.id },
+              { label: "Card ID", value: selectedPatient.attributes.card_id },
             ].map((field, i) => (
               <div key={i}>
                 <label className="text-sm text-gray-600">{field.label}</label>
@@ -143,7 +163,9 @@ const BookAppointmentModal = ({
         {/* Appointment Section */}
         <div className="mt-8">
           <h3 className="text-lg font-semibold mb-4">Appointment Details</h3>
-          <div className="grid grid-cols-1 gap-6">
+
+          {/* Date and Time */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <label className="text-sm text-gray-600">Choose Date</label>
               <input
@@ -162,36 +184,94 @@ const BookAppointmentModal = ({
                 className="w-full border border-gray-300 rounded-lg px-3 py-4"
               />
             </div>
+          </div>
 
-            <div>
-              <label className="text-sm text-gray-600">Select Doctor</label>
+          {/* Appointment Type Selection */}
+          <div className="mb-6">
+            <label className="text-sm text-gray-600">Appointment With</label>
+            <div className="flex gap-4 mt-2">
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="appointmentType"
+                  value="staff"
+                  checked={appointmentData.appointmentType === "staff"}
+                  onChange={handleChange}
+                  className="mr-2"
+                />
+                <span>Staff Member</span>
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="appointmentType"
+                  value="department"
+                  checked={appointmentData.appointmentType === "department"}
+                  onChange={handleChange}
+                  className="mr-2"
+                />
+                <span>Department</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Conditional rendering based on appointment type */}
+          {appointmentData.appointmentType === "staff" ? (
+            <div className="mb-6">
+              <label className="text-sm text-gray-600">
+                Select Staff Member
+              </label>
               <select
                 name="user_id"
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded-lg px-3 py-4"
+                value={appointmentData.user_id || ""}
               >
-                <option value="">Select Doctor</option>
-                {doctors.map((doc: any) => (
-                  <option key={doc.id} value={doc.attributes.user_id}>
-                    Dr {doc.attributes.first_name} {doc.attributes.last_name}
+                <option value="">Select Staff Member</option>
+                <optgroup label="Doctors">
+                  {doctors.map((doc: any) => (
+                    <option key={doc.id} value={doc.attributes.user_id}>
+                      Dr. {doc.attributes.first_name} {doc.attributes.last_name}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="Nurses">
+                  {/* Replace with actual nurse data when implementing */}
+                  <option value="nurse-1">Nurse Smith, Jane</option>
+                  <option value="nurse-2">Nurse Johnson, Robert</option>
+                </optgroup>
+              </select>
+            </div>
+          ) : (
+            <div className="mb-6">
+              <label className="text-sm text-gray-600">Select Department</label>
+              <select
+                name="department_id"
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg px-3 py-4"
+                value={appointmentData.department_id || ""}
+              >
+                <option value="">Select Department</option>
+                {departments.map((dept) => (
+                  <option key={dept.id} value={dept.id}>
+                    {dept.name}
                   </option>
                 ))}
               </select>
             </div>
-          </div>
+          )}
 
           {/* Book Button */}
           <div className="mt-6">
             <button
               onClick={handleSubmit}
-              disabled={!!isLoading}
-              className={`bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition flex items-center justify-center
-             ${isLoading ? "opacity-50 cursor-not-allowed" : ""}
-                `}
+              disabled={isLoading}
+              className={`bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition flex items-center justify-center w-full
+                ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               {isLoading ? (
                 <>
-                  <Loader2 className=" size-6 mr-2 animate-spin" />
+                  <Loader2 className="size-6 mr-2 animate-spin" />
                   Booking
                 </>
               ) : (
@@ -206,19 +286,3 @@ const BookAppointmentModal = ({
 };
 
 export default BookAppointmentModal;
-const generateTimeSlots = () => {
-  const times = [];
-  const start = 8 * 60; // 8:00 AM in minutes
-  const end = 18 * 60; // 6:00 PM in minutes
-
-  for (let minutes = start; minutes <= end; minutes += 30) {
-    const hour = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    const timeStr = `${hour.toString().padStart(2, "0")}:${mins
-      .toString()
-      .padStart(2, "0")}`;
-    times.push(timeStr);
-  }
-
-  return times;
-};

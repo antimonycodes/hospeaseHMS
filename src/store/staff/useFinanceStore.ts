@@ -118,7 +118,8 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
       const response = await api.get(
         `/medical-report/all-patient?search=${query}`
       );
-      return response.data.data.data;
+      console.log(response.data.data, "123");
+      return response.data.data;
     } catch (error: any) {
       // toast.error(error.response?.data?.message || "Search failed");
       return [];
@@ -129,7 +130,7 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
     set({ isLoading: true });
     try {
       const response = await api.get(endpoint);
-      const fetchedPayments = response.data.data || [];
+      const fetchedPayments = response.data.data.data || [];
       console.log("Fetched Payments:", fetchedPayments);
       set({ payments: fetchedPayments });
     } catch (error: any) {

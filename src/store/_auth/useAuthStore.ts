@@ -2,6 +2,10 @@ import { create } from "zustand";
 import axios, { AxiosResponse } from "axios";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
+import {
+  handleErrorToast,
+  isSuccessfulResponse,
+} from "../../utils/responseHandler";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_URL,
@@ -25,11 +29,16 @@ export interface SignupData {
   // cac_docs: File | null;
 }
 
+interface ForgotPassword {
+  email: string;
+}
+
 interface AuthStore {
   isLoading: boolean;
   login: (data: LoginData) => Promise<any>;
   signup: (data: SignupData) => Promise<any>;
   logout: () => Promise<void>;
+  forgotPassword: (data: ForgotPassword) => Promise<any>;
   user: any[];
   role: string;
   isAuthenticated: boolean;
@@ -122,6 +131,23 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       return null;
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Signup failed!");
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  forgotPassword: async (data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.post("/auth/forget-password", data);
+
+      if (isSuccessfulResponse(response)) {
+        toast.success(response.data?.message);
+        return true;
+      }
+      return null;
+    } catch (error) {
+      handleErrorToast(error);
       return null;
     } finally {
       set({ isLoading: false });

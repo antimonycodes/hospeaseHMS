@@ -5,9 +5,9 @@ import Loader from "../../../Shared/Loader";
 interface PaymentFromAPI {
   id: number;
   attributes: {
-    patient: string;
+    patient: { first_name: string } | string;
     amount: string;
-    purpose: string;
+    purpose: any;
     payment_method: string;
     payment_type?: string;
     is_active?: boolean;
@@ -19,7 +19,7 @@ interface PaymentFromAPI {
 export type PaymentData = {
   id: string;
   user_id: string;
-  patient: string;
+  patient: any;
   amount: string;
   purpose: string;
   payment_method: string;
@@ -47,13 +47,18 @@ const FpaymentTable = ({
 }: FpaymentTableProps) => {
   // Ensure payments is always an array
   const paymentsArray = Array.isArray(payments) ? payments : [];
+  console.log(paymentsArray, "fgh");
 
   const formattedPayments: PaymentData[] = paymentsArray.map((payment) => ({
     id: payment.id.toString(),
     user_id: payment.attributes?.user_id || "N/A",
-    patient: payment.attributes?.patient || "Unknown",
+    patient:
+      typeof payment.attributes?.patient === "object" &&
+      "first_name" in payment.attributes.patient
+        ? payment.attributes.patient.first_name
+        : "Unknown",
     amount: payment.attributes?.amount || "0",
-    purpose: payment.attributes?.purpose || "N/A",
+    purpose: payment.attributes?.purpose.name || "N/A",
     payment_method: payment.attributes?.payment_method || "N/A",
     payment_type: payment.attributes?.payment_type || "",
     created_at: payment.attributes?.created_at || "N/A",
@@ -62,14 +67,16 @@ const FpaymentTable = ({
     active: payment.attributes?.is_active || false,
   }));
 
+  console.log(formattedPayments);
+
   const columns: Columns[] = [
-    {
-      key: "user_id",
-      label: "User ID",
-      render: (_, payment) => (
-        <span className="text-dark font-medium text-sm">{payment.user_id}</span>
-      ),
-    },
+    // {
+    //   key: "user_id",
+    //   label: "User ID",
+    //   render: (_, payment) => (
+    //     <span className="text-dark font-medium text-sm">{payment.user_id}</span>
+    //   ),
+    // },
     {
       key: "patient",
       label: "Patient Name",

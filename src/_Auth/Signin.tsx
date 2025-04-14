@@ -3,7 +3,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Loader2, Mail } from "lucide-react";
 import logo from "../assets/logo-full.png";
 import { useAuthStore } from "../store/_auth/useAuthStore";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 // import { useAdminStore } from "../store/_auth/useAuthStore";
 
 const Signin = () => {
@@ -14,7 +14,7 @@ const Signin = () => {
   });
   const navigate = useNavigate();
 
-  const { login, isLoading } = useAuthStore(); // Ensure isLoading & error are handled in Zustand
+  const { login, isLoading } = useAuthStore();
 
   // Handle Input Change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,7 +23,7 @@ const Signin = () => {
 
   // Handle Form Submission
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent page reload
+    e.preventDefault();
     const response = await login(formData);
     if (response) {
       navigate("/dashboard");
@@ -106,9 +106,11 @@ const Signin = () => {
                 Remember me for 30 days
               </label>
             </div>
-            <h3 className="text-[#009952] text-xs cursor-pointer">
-              Forgot password?
-            </h3>
+            <Link to="/forgot-password">
+              <h3 className="text-[#009952] text-xs cursor-pointer">
+                Forgot password?
+              </h3>
+            </Link>
           </div>
 
           {/* Error Message */}
