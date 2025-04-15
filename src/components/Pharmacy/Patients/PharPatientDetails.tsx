@@ -172,7 +172,7 @@ const PharPatientDetails = () => {
                   <div>
                     <p className="text-sm font-medium">
                       {report.attributes.staff_details
-                        ? `Dr ${report.attributes.staff_details.first_name} ${report.attributes.staff_details.last_name}`
+                        ? `${report.attributes.staff_details.first_name} ${report.attributes.staff_details.last_name}`
                         : ""}
                     </p>
                     <p className="text-xs text-gray-500">

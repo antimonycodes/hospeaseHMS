@@ -28,7 +28,7 @@ const BookAppointmentModal = ({
     department_id: null as number | null,
     date: "",
     time: "",
-    appointmentType: "staff", // Default to staff appointment
+    appointmentType: "staff",
   });
 
   const getFilteredDepartments = () => {
@@ -108,26 +108,24 @@ const BookAppointmentModal = ({
   };
 
   const handleSubmit = async () => {
-    // Prepare the final appointment data before submission
     const finalAppointmentData: any = {
       patient_id: appointmentData.patient_id,
       date: appointmentData.date,
       time: appointmentData.time,
     };
 
-    if (
-      appointmentData.appointmentType === "staff" &&
-      appointmentData.user_id !== null
-    ) {
+    if (appointmentData.appointmentType === "staff") {
+      // Must send user_id (required for staff)
       finalAppointmentData.user_id = appointmentData.user_id;
     }
 
-    if (
-      appointmentData.appointmentType === "department" &&
-      appointmentData.department_id !== null
-    ) {
+    if (appointmentData.appointmentType === "department") {
+      // Send department_id if available, and always send user_id as null
       finalAppointmentData.department_id = appointmentData.department_id;
+      finalAppointmentData.user_id = null;
     }
+
+    console.log("Final Payload:", finalAppointmentData);
 
     const success = await bookAppointment(finalAppointmentData, endpoint);
     if (success) {
