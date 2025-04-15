@@ -12,7 +12,7 @@ const InventoryStockTable: React.FC<InventoryStockTableProps> = ({
   }
 
   if (!stocks || stocks.length === 0) {
-    return <p>No stocks available.</p>;
+    return <p className="w-full bg-white p-4">No stocks available.</p>;
   }
 
   return (

@@ -36,9 +36,9 @@ const Tablehead: React.FC<TableheadProps> = ({
           </h1>
         </div>
         {/*  */}
-        <div className="flex  flex-grow justify-end items-center space-x-4">
+        <div className="flex   flex-grow justify-end items-center space-x-4">
           {showSearchBar && (
-            <div className="w-full  ">
+            <div className="w-full md:w-[300px] lg:w-[400px]">
               <SearchBar />
             </div>
           )}
@@ -52,11 +52,11 @@ const Tablehead: React.FC<TableheadProps> = ({
             <div className="w-full flex justify-end  ">
               <Button
                 variant="primary"
-                size="md"
-                className="flex items-center gap-2 px-4"
+                // size="md"
+                className="flex items-center text-[12px] gap-2 px-2 md:px-4"
                 onClick={onButtonClick}
               >
-                {/* {typebutton} */}
+                {typebutton}
                 <Plus size={20} />
               </Button>
             </div>

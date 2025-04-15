@@ -140,7 +140,7 @@ const AddStockModal: React.FC<AddStockModalProps> = ({ onClose }) => {
                 Purchase Cost
               </label>
               <input
-                type="number"
+                type="text"
                 name="cost"
                 value={stock.cost}
                 onChange={handleChange}
