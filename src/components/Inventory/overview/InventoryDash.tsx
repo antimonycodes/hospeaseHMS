@@ -21,7 +21,7 @@ const InventoryDash = () => {
   const { stats, getInventoryStats, isLoading } = useInventoryStore();
 
   useEffect(() => {
-    console.log("Fetching stats...");
+    console.log(getInventoryStats, "Fetching stats...");
     getInventoryStats();
   }, [getInventoryStats]);
 

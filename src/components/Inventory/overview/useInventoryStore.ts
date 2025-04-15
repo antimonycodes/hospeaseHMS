@@ -193,7 +193,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
         `/medical-report/all-patient?search=${encodeURIComponent(query)}`
       );
       console.log("searchStaff response:", response.data);
-      const results = response.data.data?.data || [];
+      const results = response.data.data || [];
       if (!results.length) {
         console.log("searchStaff: No results found for query:", query);
       }
