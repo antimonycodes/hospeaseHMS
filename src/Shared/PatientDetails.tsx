@@ -67,9 +67,8 @@ const PatientDetails = () => {
   // Group data by date utility function
   const groupByDate = (data: any[]) => {
     return data.reduce((acc: { [key: string]: any[] }, item) => {
-      const date = new Date(item.attributes?.created_at)
-        .toISOString()
-        .split("T")[0];
+      const rawDate = new Date(item.attributes?.created_at);
+      const date = rawDate.toLocaleDateString("en-CA"); // Format: yyyy-mm-dd (ISO format but local)
       if (!acc[date]) acc[date] = [];
       acc[date].push(item);
       return acc;

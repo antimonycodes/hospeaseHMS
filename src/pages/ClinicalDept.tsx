@@ -100,7 +100,7 @@ const ClinicalDept = () => {
                   {isLoading ? (
                     <div className="flex justify-center items-center">
                       <Loader2 className="w-6 h-6 text-primary animate-spin mr-2" />
-                      <span>Loading departments...</span>
+                      <span>Loading departments</span>
                     </div>
                   ) : (
                     <p className="text-gray-500">No departments found</p>
@@ -155,7 +155,7 @@ const ClinicalDept = () => {
                     {isLoading ? (
                       <div className="flex items-center gap-2">
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Adding...</span>
+                        <span>Adding</span>
                       </div>
                     ) : (
                       "Add Department"

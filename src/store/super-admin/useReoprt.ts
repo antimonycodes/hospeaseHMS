@@ -21,6 +21,8 @@ api.interceptors.request.use(
 
 interface ReportStore {
   isLoading: boolean;
+  isCreating: boolean;
+  isResponding: boolean;
   isReportLoading: boolean;
 
   createReport: (formData: {
@@ -51,6 +53,8 @@ interface ReportStore {
 
 export const useReportStore = create<ReportStore>((set) => ({
   isLoading: false,
+  isCreating: false,
+  isResponding: false,
   isReportLoading: false,
   singleReport: [],
   allReports: [],
@@ -64,7 +68,7 @@ export const useReportStore = create<ReportStore>((set) => ({
     status,
     role,
   }) => {
-    set({ isLoading: true });
+    set({ isCreating: true });
     try {
       const form = new FormData();
       if (patient_id !== null) {
@@ -119,14 +123,14 @@ export const useReportStore = create<ReportStore>((set) => ({
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || "Something went wrong";
       toast.error(errorMsg);
-      set({ isLoading: false });
+      set({ isCreating: false });
       throw error;
     } finally {
-      set({ isLoading: false });
+      set({ isCreating: false });
     }
   },
   createNote: async (data) => {
-    set({ isLoading: true });
+    set({ isCreating: true });
     try {
       const response = await api.post("/medical-report/case-note", data);
       if (response.status === 201) {
@@ -137,10 +141,10 @@ export const useReportStore = create<ReportStore>((set) => ({
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || "Something went wrong";
       toast.error(errorMsg);
-      set({ isLoading: false });
+      // set({ isCreating: false });
       throw error;
     } finally {
-      set({ isLoading: false });
+      set({ isCreating: false });
     }
   },
   getAllReport: async (id) => {
@@ -180,7 +184,7 @@ export const useReportStore = create<ReportStore>((set) => ({
     }
   },
   respondToReport: async (id, { note, status, file }) => {
-    set({ isLoading: true });
+    set({ isResponding: true });
 
     try {
       const form = new FormData();
@@ -208,7 +212,9 @@ export const useReportStore = create<ReportStore>((set) => ({
       console.error("Error submitting the report:", error);
       // toast.error(error.response.data.message);
       // Handle error state
-      set({ isLoading: false });
+      set({ isResponding: false });
+    } finally {
+      set({ isResponding: false });
     }
   },
   getMedicalNote: async (id, type) => {

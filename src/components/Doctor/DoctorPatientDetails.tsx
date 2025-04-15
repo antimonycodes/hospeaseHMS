@@ -11,6 +11,7 @@ import {
   Printer,
   Calendar,
   Clock,
+  Loader2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { usePatientStore } from "../../store/super-admin/usePatientStore";
@@ -52,6 +53,7 @@ const DoctorPatientDetails = () => {
     getMedicalNote,
     allNotes,
     isLoading,
+    isCreating,
   } = useReportStore();
   const { getAllRoles, roles } = useGlobalStore();
   // const [isLoading] = useState(false);
@@ -59,9 +61,8 @@ const DoctorPatientDetails = () => {
   // Group data by date utility function
   const groupByDate = (data: any[]) => {
     return data.reduce((acc: { [key: string]: any[] }, item) => {
-      const date = new Date(item.attributes?.created_at)
-        .toISOString()
-        .split("T")[0];
+      const rawDate = new Date(item.attributes?.created_at);
+      const date = rawDate.toLocaleDateString("en-CA"); // Format: yyyy-mm-dd (ISO format but local)
       if (!acc[date]) acc[date] = [];
       acc[date].push(item);
       return acc;
@@ -137,6 +138,7 @@ const DoctorPatientDetails = () => {
         setReportNote("");
         setFile(null);
         setSelectedDepartment("");
+        getAllReport(id);
       }
     } catch (error) {
       // toast.error("Failed to submit report");
@@ -158,175 +160,19 @@ const DoctorPatientDetails = () => {
       if (response) {
         // toast.success("Note added successfully");
         setNote("");
+        getMedicalNote(id, "doctor");
       }
     } catch (error) {
       // toast.error("Failed to add note");
     }
   };
 
+  console.log(mergedData, "fcx");
+
   const toggleDateExpansion = (index: number) => {
     const updatedData = [...mergedData];
     updatedData[index].isExpanded = !updatedData[index].isExpanded;
     setMergedData(updatedData);
-  };
-
-  const downloadAsPDF = () => {
-    if (!selectedPatient?.attributes) return;
-
-    const patient = selectedPatient.attributes;
-    toast.loading("Preparing PDF for download...", { id: "pdf-download" });
-
-    // Gather all report data into a simple format
-    const reportData = mergedData.map((day) => {
-      const items = [...day.reports, ...day.notes].sort(
-        (a, b) =>
-          new Date(b.attributes.created_at).getTime() -
-          new Date(a.attributes.created_at).getTime()
-      );
-
-      const formattedItems = items.map((item) => {
-        const isReport = "case_report_id" in item;
-        const staff = item.attributes.staff_details;
-        const time = new Date(item.attributes.created_at).toLocaleTimeString(
-          [],
-          {
-            hour: "2-digit",
-            minute: "2-digit",
-          }
-        );
-
-        return {
-          type: isReport ? "Report" : "Note",
-          staffName: `${staff?.first_name || ""} ${staff?.last_name || ""}`,
-          department: isReport
-            ? item.attributes.department?.name || ""
-            : "Doctor's Note",
-          status: isReport ? item.attributes.status : null,
-          note: item.attributes.note,
-          time,
-          file: isReport ? item.attributes.file : null,
-        };
-      });
-
-      return {
-        date: new Date(day.date).toLocaleDateString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        }),
-        items: formattedItems,
-      };
-    });
-
-    // Make an API call to your backend for PDF generation
-    fetch("/api/generate-pdf", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        patientName: `${patient.first_name} ${patient.last_name}`,
-        patientId: patient.card_id,
-        patientInfo: {
-          age: patient.age,
-          gender: patient.gender,
-          phone: patient.phone_number,
-          address: patient.address,
-        },
-        reportData,
-      }),
-    })
-      .then((response) => response.blob())
-      .then((blob) => {
-        // Create a URL for the blob
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.style.display = "none";
-        a.href = url;
-        a.download = `${patient.first_name}-${patient.last_name}-Medical-Report.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        toast.success("PDF downloaded successfully", { id: "pdf-download" });
-      })
-      .catch((error) => {
-        console.error("Error generating PDF:", error);
-        toast.error("Failed to generate PDF", { id: "pdf-download" });
-        useFallbackPDFGeneration();
-      });
-  };
-
-  // Fallback method using simple data export
-  const useFallbackPDFGeneration = () => {
-    if (!selectedPatient?.attributes) return;
-
-    const patient = selectedPatient.attributes;
-
-    // Create a simple text representation of the data
-    let textContent = `MEDICAL REPORT\n\n`;
-    textContent += `Patient: ${patient.first_name} ${patient.last_name}\n`;
-    textContent += `Patient ID: ${patient.card_id}\n`;
-    textContent += `Age: ${patient.age}\n`;
-    textContent += `Gender: ${patient.gender}\n`;
-    textContent += `Phone: ${patient.phone_number}\n\n`;
-    textContent += `MEDICAL TIMELINE\n\n`;
-
-    mergedData.forEach((day) => {
-      textContent += `Date: ${new Date(day.date).toLocaleDateString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })}\n\n`;
-
-      const items = [...day.reports, ...day.notes].sort(
-        (a, b) =>
-          new Date(b.attributes.created_at).getTime() -
-          new Date(a.attributes.created_at).getTime()
-      );
-
-      items.forEach((item) => {
-        const isReport = "case_report_id" in item;
-        const staff = item.attributes.staff_details;
-        const time = new Date(item.attributes.created_at).toLocaleTimeString(
-          [],
-          {
-            hour: "2-digit",
-            minute: "2-digit",
-          }
-        );
-
-        textContent += `Time: ${time}\n`;
-        textContent += `Type: ${isReport ? "Report" : "Note"}\n`;
-        textContent += `Staff: ${staff?.first_name || ""} ${
-          staff?.last_name || ""
-        }\n`;
-        if (isReport) {
-          textContent += `Department: ${
-            item.attributes.department?.name || ""
-          }\n`;
-          textContent += `Status: ${item.attributes.status}\n`;
-        } else {
-          textContent += `Department: Doctor's Note\n`;
-        }
-        textContent += `Content: ${item.attributes.note}\n\n`;
-      });
-
-      textContent += `\n`;
-    });
-
-    // Create a blob and download it
-    const blob = new Blob([textContent], { type: "text/plain" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.style.display = "none";
-    a.href = url;
-    a.download = `${patient.first_name}-${patient.last_name}-Medical-Report.txt`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    toast.success("Report downloaded as text file", { id: "pdf-download" });
   };
 
   if (!selectedPatient) return <Loader />;
@@ -348,7 +194,7 @@ const DoctorPatientDetails = () => {
               <span className="ml-1">Patients</span>
             </Link>
             {/*  */}
-            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            {/* <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
               <Button
                 variant="edit"
                 rounded="lg"
@@ -357,14 +203,13 @@ const DoctorPatientDetails = () => {
               >
                 Edit Patient
               </Button>
-              {/*  */}
               <Button
                 variant="delete"
                 className="text-xs sm:text-sm flex-1 sm:flex-none"
               >
                 Delete Patient
               </Button>
-            </div>
+            </div> */}
           </div>
           {/* Patient information card */}
 
@@ -463,9 +308,18 @@ const DoctorPatientDetails = () => {
             />
             <button
               onClick={handleNoteSubmit}
-              className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition"
+              disabled={!!isCreating}
+              className={`bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition flex items-center justify-center
+                 ${isCreating ? "opacity-50 cursor-not-allowed" : ""}`}
             >
-              Add Note
+              {isCreating ? (
+                <>
+                  Adding
+                  <Loader2 className=" size-6 mr-2 animate-spin" />
+                </>
+              ) : (
+                <>Add note</>
+              )}
             </button>
           </div>
         ) : (
@@ -508,12 +362,19 @@ const DoctorPatientDetails = () => {
             </select>
             <button
               onClick={handleReportSubmit}
-              className={`bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition
-            ${isLoading ? "opacity-50 cursor-not-allowed" : ""}
+              className={`bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition flex items-center justify-center
+            ${isCreating ? "opacity-50 cursor-not-allowed" : ""}
             `}
-              disabled={isLoading}
+              disabled={isCreating}
             >
-              {isLoading ? "Adding" : "Add Report"}
+              {isCreating ? (
+                <>
+                  Adding
+                  <Loader2 className=" size-6 mr-2 animate-spin" />
+                </>
+              ) : (
+                "Add Report"
+              )}
             </button>
           </div>
         )}
@@ -525,7 +386,7 @@ const DoctorPatientDetails = () => {
           <h3 className="text-lg font-medium text-gray-800">
             Medical Timeline
           </h3>
-          <div className="flex gap-2">
+          {/* <div className="flex gap-2">
             <button
               onClick={() => {
                 downloadCompletePDF(mergedData, patient);
@@ -535,7 +396,7 @@ const DoctorPatientDetails = () => {
               <Download size={16} />
               <span>Download Complete Report</span>
             </button>
-          </div>
+          </div> */}
         </div>
 
         <div className="timeline-container bg-white p-6 rounded-lg custom-shadow">
@@ -581,7 +442,7 @@ const DoctorPatientDetails = () => {
                   <span className="text-xs bg-[#CFFFE9] text-[#009952] px-2 py-1 rounded-full">
                     {day.reports.length + day.notes.length} entries
                   </span>
-                  <div className="flex gap-1">
+                  {/* <div className="flex gap-1">
                     <button
                       onClick={() => {
                         toast.loading("Generating PDF...", { id: "date-pdf" });
@@ -624,7 +485,7 @@ const DoctorPatientDetails = () => {
                       <Printer size={14} />
                       <span>IMG</span>
                     </button>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
@@ -721,7 +582,8 @@ const ReportItem = ({ report }: { report: any }) => {
         </div>
         <span
           className={`text-xs px-2 py-1 rounded-full ${
-            report.attributes.status === "completed" || "sent"
+            report.attributes.status === "completed" ||
+            report.attributes.status === "sent"
               ? "bg-[#CCFFE7] text-[#009952]"
               : "bg-[#FFEBAA] text-[#B58A00]"
           }`}

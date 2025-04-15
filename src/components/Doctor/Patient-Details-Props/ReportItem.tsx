@@ -2,7 +2,7 @@ import { FileText, User } from "lucide-react";
 
 export const ReportItem = ({ report }: { report: any }) => {
   const staff = report.attributes.staff_details;
-  const department = report.attributes.department?.name || "Unknown Department";
+  const department = report.attributes.role || "Unknown Department";
 
   return (
     <div className="p-4 bg-gray-50 rounded-lg border hover:shadow-md transition">

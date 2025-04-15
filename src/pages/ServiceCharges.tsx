@@ -191,7 +191,7 @@ const ServiceCharges = () => {
                   {isLoading ? (
                     <div className="flex justify-center items-center">
                       <Loader2 className="w-6 h-6 text-primary animate-spin mr-2" />
-                      <span>Loading items...</span>
+                      <span>Loading items</span>
                     </div>
                   ) : (
                     <p className="text-gray-500">
@@ -276,7 +276,7 @@ const ServiceCharges = () => {
                     {isLoading ? (
                       <div className="flex items-center gap-2">
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>{isEditMode ? "Updating..." : "Adding..."}</span>
+                        <span>{isEditMode ? "Updating" : "Adding"}</span>
                       </div>
                     ) : isEditMode ? (
                       "Update Item"

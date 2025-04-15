@@ -118,6 +118,7 @@ interface Globalstore {
   getAllRoles: (endpoint?: string) => Promise<any>;
   getAllNotifications: () => Promise<any>;
   getUnreadNotificationCount: () => Promise<any>;
+  markAllAsRead: () => Promise<any>;
   getAllStaffs: () => Promise<any>;
 }
 
@@ -409,7 +410,7 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       const response = await api.get("notification/all");
       if (response.status === 200) {
         set({ notifications: response.data.data });
-        console.log(response.data.data);
+        console.log(response.data.data[0].unread_count, "erfgh");
         return true;
       }
       return null;
@@ -423,12 +424,30 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       const response = await api.get("/notification/all-count");
       if (response.status === 200) {
         set({ unreadCount: response.data.data });
-        console.log(response.data.data);
+        console.log(response.data);
         return true;
       }
       return null;
     } catch (error: any) {
       console.log(error.response?.data || error.message);
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  markAllAsRead: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await api.post("/notification/mark-all-read");
+
+      if (isSuccessfulResponse(response)) {
+        // toast.success(response.data?.msg);
+        // set({ items: response.data.data });
+        return true;
+      }
+      return null;
+    } catch (error) {
+      //   handleErrorToast(error, "Failed.");
       return null;
     } finally {
       set({ isLoading: false });

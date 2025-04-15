@@ -1,19 +1,27 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import { useReportStore } from "../../../store/super-admin/useReoprt";
 import { useEffect, useState } from "react";
 import Loader from "../../../Shared/Loader";
+import { Loader2 } from "lucide-react";
 
 const LabPatientDetails = () => {
   const { patientId, caseId } = useParams();
   const { getLabPatientById } = usePatientStore();
-  const { isReportLoading, getSingleReport, singleReport, respondToReport } =
-    useReportStore();
+  const {
+    isReportLoading,
+    isResponding,
+    getSingleReport,
+    singleReport,
+    respondToReport,
+  } = useReportStore();
   const selectedPatient = usePatientStore((state) => state.selectedPatient);
   const isLoading = usePatientStore((state) => state.isLoading);
   const [reportText, setReportText] = useState("");
   const [status, setStatus] = useState("in Progress"); // Dropdown status default
   const [file, setFile] = useState<File | null>(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (patientId) {
@@ -39,7 +47,7 @@ const LabPatientDetails = () => {
 
     const success = await respondToReport(caseId, formData);
     if (success) {
-      await getSingleReport(patient);
+      await getSingleReport(patientId);
       setReportText("");
       setStatus("In Progress");
       setFile(null);
@@ -66,7 +74,7 @@ const LabPatientDetails = () => {
     <div className="max-w-5xl mx-auto p-4">
       {/* Back navigation */}
       <div className="flex items-center mb-4">
-        <Link to="/patients" className="flex items-center">
+        <div className="flex items-center" onClick={() => navigate(-1)}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
@@ -82,7 +90,7 @@ const LabPatientDetails = () => {
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
           <span>Patients</span>
-        </Link>
+        </div>
       </div>
 
       {/* Patient Basic Info Card */}
@@ -192,7 +200,7 @@ const LabPatientDetails = () => {
             value={status}
             onChange={(e) => setStatus(e.target.value)}
           >
-            <option value="In Progress">in Progress</option>
+            <option value="In progress">in Progress</option>
             <option value="Completed">completed</option>
           </select>
         </div>
@@ -207,10 +215,21 @@ const LabPatientDetails = () => {
         </div>
 
         <button
-          className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md"
+          className={`bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md flex items-center justify-center     
+                        ${
+                          isResponding ? "opacity-50 cursor-not-allowed" : ""
+                        }  `}
           onClick={handleReportSubmit}
+          disabled={!!isResponding}
         >
-          Add Report
+          {isResponding ? (
+            <>
+              Adding
+              <Loader2 className=" size-6 mr-2 animate-spin" />
+            </>
+          ) : (
+            "Add Report"
+          )}
         </button>
       </div>
     </div>

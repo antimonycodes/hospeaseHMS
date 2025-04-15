@@ -3,12 +3,18 @@ import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useReportStore } from "../../../store/super-admin/useReoprt";
 import Loader from "../../../Shared/Loader";
+import { Loader2 } from "lucide-react";
 
 const PharPatientDetails = () => {
   const { patientId, caseId } = useParams();
   const { getPharPatientById } = usePatientStore();
-  const { isReportLoading, getSingleReport, singleReport, respondToReport } =
-    useReportStore();
+  const {
+    isReportLoading,
+    getSingleReport,
+    singleReport,
+    respondToReport,
+    isResponding,
+  } = useReportStore();
   const selectedPatient = usePatientStore((state) => state.selectedPatient);
   const isLoading = usePatientStore((state) => state.isLoading);
   const [reportText, setReportText] = useState("");
@@ -196,7 +202,7 @@ const PharPatientDetails = () => {
             value={status}
             onChange={(e) => setStatus(e.target.value)}
           >
-            <option value="In Progress">in Progress</option>
+            <option value="In Progress">in progress</option>
             <option value="Completed">completed</option>
           </select>
         </div>
@@ -211,10 +217,21 @@ const PharPatientDetails = () => {
         </div>
 
         <button
-          className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md"
+          className={`bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md flex items-center justify-center     
+                        ${
+                          isResponding ? "opacity-50 cursor-not-allowed" : ""
+                        }      `}
           onClick={handleReportSubmit}
+          disabled={!!isResponding}
         >
-          Add Report
+          {isResponding ? (
+            <>
+              Adding
+              <Loader2 className=" size-6 mr-2 animate-spin" />
+            </>
+          ) : (
+            "Add Report"
+          )}
         </button>
       </div>
     </div>
