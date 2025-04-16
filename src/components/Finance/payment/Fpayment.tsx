@@ -6,16 +6,11 @@ import Tabs from "../../ReusablepatientD/Tabs";
 import FpaymentTable from "./FpaymentTable";
 
 const Fpayment = () => {
-  // const [isModalOpen, setIsModalOpen] = useState(false);
-  // const [activeTab, setActiveTab] = useState<
-  //   "All" | "Half Payment" | "Full Payment"
-  // >("All");
-  // const { payments = [], getAllPayments, isLoading } = useFinanceStore();
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<
-    "All" | "Half Payment" | "Full Payment"
+    "All" | "half payment" | "full payment"
   >("All");
+
   const { payments = [], getAllPayments, isLoading } = useFinanceStore();
 
   useEffect(() => {
@@ -23,23 +18,24 @@ const Fpayment = () => {
   }, [getAllPayments]);
 
   const getStatusCounts = () => {
-    if (!Array.isArray(payments) || payments.length === 0) {
-      return { All: 0, "Half Payment": 0, "Full Payment": 0 };
+    if (!Array.isArray(payments)) {
+      return { All: 0, "half payment": 0, "full payment": 0 };
     }
 
     return payments.reduce(
       (acc, payment) => {
-        const status = payment.attributes?.is_active
-          ? "Full Payment"
-          : "Half Payment";
-        if (status === "Half Payment") acc["Half Payment"]++;
-        else if (status === "Full Payment") acc["Full Payment"]++;
+        const type = payment.attributes?.payment_type?.toLowerCase();
+
+        if (type === "half payment") acc["half payment"]++;
+        else if (type === "full payment") acc["full payment"]++;
+
         acc.All++;
         return acc;
       },
-      { All: 0, "Half Payment": 0, "Full Payment": 0 }
+      { All: 0, "half payment": 0, "full payment": 0 }
     );
   };
+
   const statusCounts = getStatusCounts();
 
   const filteredPayments = Array.isArray(payments)
@@ -47,15 +43,14 @@ const Fpayment = () => {
       ? payments
       : payments.filter(
           (payment) =>
-            (payment.attributes?.is_active
-              ? "Full Payment"
-              : "Half Payment") === activeTab
+            payment.attributes?.payment_type?.toLowerCase() ===
+            activeTab.toLowerCase()
         )
     : [];
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
-  console.log("Payments in Fpayment:", payments);
+
   return (
     <div>
       <Tablehead
@@ -64,20 +59,22 @@ const Fpayment = () => {
         typebutton="Add New"
         onButtonClick={openModal}
       />
+
       {isModalOpen && (
         <AddPaymentModal
           onClose={closeModal}
-          endpoint="/finance/save-revenue" // Endpoint for saving payment
-          refreshEndpoint="/finance/all-revenues" // Endpoint for refreshing payments
+          endpoint="/finance/save-revenue"
+          refreshEndpoint="/finance/all-revenues"
         />
       )}
 
-      <Tabs<"All" | "Full Payment" | "Half Payment">
+      <Tabs<"All" | "full payment" | "half payment">
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         statusCounts={statusCounts}
-        tabs={["All", "Full Payment", "Half Payment"]}
+        tabs={["All", "full payment", "half payment"]}
       />
+
       <FpaymentTable payments={filteredPayments} isLoading={isLoading} />
     </div>
   );

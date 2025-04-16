@@ -25,7 +25,7 @@ import { NoteItem } from "../components/Doctor/Patient-Details-Props/NoteItem";
 import toast from "react-hot-toast";
 
 const PatientDetails = () => {
-  const [isLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [openSections, setOpenSections] = useState({
     doctorsReport: true,
     medicalLaboratory: true,
@@ -42,9 +42,8 @@ const PatientDetails = () => {
     }>
   >([]);
   const { id } = useParams<{ id: string }>();
-  console.log(id);
 
-  const { selectedPatient, getPatientById } = usePatientStore();
+  const { selectedPatient, getPatientById, updatePatient } = usePatientStore();
 
   console.log(selectedPatient);
 
@@ -111,88 +110,33 @@ const PatientDetails = () => {
       getMedicalNote(id, "doctor");
     }
   }, [id, getPatientById, getAllReport, getMedicalNote]);
+
   const toggleDateExpansion = (index: number) => {
     const updatedData = [...mergedData];
     updatedData[index].isExpanded = !updatedData[index].isExpanded;
     setMergedData(updatedData);
   };
 
+  const handleSavePatient = async (updatedPatientData: any) => {
+    if (!id) return;
+
+    setIsLoading(true);
+    try {
+      await updatePatient(id, updatedPatientData);
+      toast.success("Patient information updated successfully");
+      setIsEditModalOpen(false);
+      getPatientById(id); // Refresh patient data
+    } catch (error) {
+      console.error("Error updating patient:", error);
+      toast.error("Failed to update patient information");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (!selectedPatient) return <Loader />;
 
   const patient = selectedPatient.attributes;
-
-  const patientData: any = {
-    firstName: "Philip",
-    lastName: "Ikiko",
-    patientId: "001602",
-    sex: "Male",
-    dob: "28/04/1990",
-    age: "32",
-    religion: "Christian",
-    email: "philip.ikiko@gmail.com",
-    phone: "+2347098765435",
-    address: "3, John Ajayi's Close, Agodi, Ibadan Oyo State",
-    branch: "Agodi",
-
-    nextOfKin: {
-      firstName: "Philip",
-      lastName: "Juliet",
-      relationship: "Sister",
-      phone: "+2348012345678",
-      religion: "Christian",
-      address: "3, John Ajayi's Close, Agodi, Ibadan Oyo State",
-    },
-    doctorsReport: [
-      {
-        name: "Heart",
-        value: "ASD - Left to right shunting. Good surgical repair",
-      },
-      { name: "Red Blood Cell Count (RBC)", value: "4.78 10^6/uL (Normal)" },
-      { name: "Mean Blood Cell Count (MBC)", value: "4.9 10^3/uL (Normal)" },
-      { name: "Hemoglobin (Hb)", value: "12.6 g/dL (Normal)" },
-      { name: "Hematocrit (Hct)", value: "42.0% (Normal)" },
-      { name: "Platelet Count (Plt)", value: "257K (Normal)" },
-    ],
-    medicalLaboratory: [
-      {
-        name: "Tests: CBC, BMP, Lipid profile and Fasting blood sugar test results.",
-        value: "",
-      },
-      { name: "Complete Blood Count (CBC):", value: "" },
-      { name: "White Blood Cell Count (WBC)", value: "8.5 x 10^3/L (Normal)" },
-      { name: "Red Blood Cell Count (RBC)", value: "4.5 x 10^12/L (Normal)" },
-      { name: "Hemoglobin (Hb)", value: "14.6 g/dL (Normal)" },
-      { name: "Hematocrit (Hct)", value: "42.0% (Normal)" },
-      { name: "Platelet Count", value: "250 x 10^9/L (Normal)" },
-      { name: "Basic Metabolic Panel (BMP):", value: "" },
-      { name: "Glucose", value: "85 mg/dL (Normal)" },
-      { name: "Potassium", value: "4.1 mmol/L (Normal)" },
-      { name: "Calcium", value: "9.5 mg/dL (Normal)" },
-      { name: "Bicarbonate", value: "24 mmol/L (Normal)" },
-      { name: "Blood Urea Nitrogen (BUN)", value: "15 mg/dL (Normal)" },
-      { name: "Creatinine", value: "1.0 mg/dL (Normal)" },
-      { name: "Glucose", value: "85 mg/dL (Normal)" },
-    ],
-    lipidProfile: [
-      { name: "Total Cholesterol", value: "180 mg/dL (Normal)" },
-      { name: "High-Density Lipoprotein (HDL)", value: "50 mg/dL (Normal)" },
-      { name: "Low-Density Lipoprotein (LDL)", value: "110 mg/dL (Normal)" },
-      { name: "Triglycerides", value: "140 mg/dL (Normal)" },
-    ],
-    fastingBloodSugar: [
-      { name: "Fasting Glucose", value: "90 mg/dL (Normal)" },
-      {
-        name: "Interpretation",
-        value: "All test results are within normal limits.",
-      },
-    ],
-    pharmacy: [
-      { name: "Total Cholesterol", value: "205 mg/dL (Normal)" },
-      { name: "High-Density Lipoprotein (HDL)", value: "45 mg/dL (Normal)" },
-      { name: "Low-Density Lipoprotein (LDL)", value: "100 mg/dL (Normal)" },
-      { name: "Triglycerides", value: "154 mg/dL (Normal)" },
-    ],
-  };
 
   return (
     <div className="px-2 sm:px-0">
@@ -210,7 +154,7 @@ const PatientDetails = () => {
             </Link>
             {/*  */}
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-              {/* <Button
+              <Button
                 variant="edit"
                 rounded="lg"
                 onClick={() => setIsEditModalOpen(true)}
@@ -218,7 +162,7 @@ const PatientDetails = () => {
               >
                 Edit Patient
               </Button>
-              <Button
+              {/* <Button
                 variant="delete"
                 className="text-xs sm:text-sm flex-1 sm:flex-none"
               >
@@ -450,8 +394,8 @@ const PatientDetails = () => {
         isLoading={isLoading}
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        patientData={patientData}
-        // onSave={handleSavePatient}
+        patientData={selectedPatient?.attributes}
+        onSave={handleSavePatient}
       />
     </div>
   );

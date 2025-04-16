@@ -414,7 +414,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
           <div className="flex justify-end p-6 border-t bg-gray-50">
             <button
               onClick={onClose}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium"
+              className="bg-primary text-white px-6 py-3 rounded-lg font-medium"
             >
               Done
             </button>
@@ -505,7 +505,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                 onClick={() => setActiveTab("items")}
                 className={`py-3 border-b-2 font-medium ${
                   activeTab === "items"
-                    ? "border-blue-500 text-blue-600"
+                    ? "border-primary text-primary"
                     : "border-transparent text-gray-500 hover:text-gray-700"
                 }`}
               >
@@ -515,7 +515,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                 onClick={() => setActiveTab("payment")}
                 className={`py-3 border-b-2 font-medium ${
                   activeTab === "payment"
-                    ? "border-blue-500 text-blue-600"
+                    ? "border-primary text-primary"
                     : "border-transparent text-gray-500 hover:text-gray-700"
                 }`}
               >
@@ -762,7 +762,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
             {activeTab === "items" ? (
               <button
                 onClick={() => setActiveTab("payment")}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium flex items-center"
+                className="bg-primary text-white px-6 py-3 rounded-lg font-medium flex items-center"
                 disabled={selectedItems.length === 0}
               >
                 Continue to Payment
@@ -777,7 +777,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                 </button>
                 <button
                   onClick={() => setShowSummary(true)}
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-primary text-white px-6 py-3 rounded-lg font-medium flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={isSubmitDisabled}
                 >
                   Process Payment
@@ -850,7 +850,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
               </button>
               <button
                 onClick={handleSubmit}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 flex items-center justify-center min-w-32"
+                className="bg-primary text-white px-6 py-2 rounded-lg flex items-center justify-center min-w-32"
               >
                 {isLoading ? (
                   <Loader2 className="animate-spin h-5 w-5" />

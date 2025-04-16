@@ -10,7 +10,11 @@ export const ReportItem = ({ report }: { report: any }) => {
         <div className="flex items-center gap-3">
           <StaffAvatar staff={staff} />
           <StaffInfo
-            name={`${staff?.first_name} ${staff?.last_name}`}
+            name={
+              staff?.first_name || staff?.last_name
+                ? `${staff?.first_name ?? ""} ${staff?.last_name ?? ""}`.trim()
+                : null
+            }
             role={department}
           />
         </div>
@@ -35,9 +39,9 @@ const StaffAvatar = ({ staff }: { staff: any }) => (
   </div>
 );
 
-const StaffInfo = ({ name, role }: { name: string; role: string }) => (
+const StaffInfo = ({ name, role }: { name: string | null; role: string }) => (
   <div>
-    <p className="font-medium text-sm">{name}</p>
+    {name && <p className="font-medium text-sm">{name}</p>}
     <p className="text-xs text-gray-500">{role}</p>
   </div>
 );
