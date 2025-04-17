@@ -23,7 +23,8 @@ const SaNursesPage = () => {
     getNurses();
   }, []);
 
-  const { isLoading, getNurses, nurses, createNurse } = useNurseStore();
+  const { isLoading, getNurses, nurses, createNurse, pagination } =
+    useNurseStore();
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,7 +61,12 @@ const SaNursesPage = () => {
       </div>
 
       {/* table */}
-      <SaNurseTable nurses={nurses} isLoading={isLoading} />
+      <SaNurseTable
+        nurses={nurses}
+        isLoading={isLoading}
+        pagination={pagination}
+        getNurses={getNurses}
+      />
 
       {/* Add Doctor Modal */}
       {showModal && (

@@ -19,12 +19,23 @@ type Column<T> = {
 interface Props {
   isLoading: boolean;
   nurses: Nurse[];
+  pagination: {
+    total: number;
+    per_page: number;
+    current_page: number;
+    last_page: number;
+    from: number;
+    to: number;
+  } | null;
+  getNurses: (page: string, perPage: string) => void;
 }
 
-const SaNurseTable = ({ nurses, isLoading }: Props) => {
+const SaNurseTable = ({ nurses, isLoading, pagination, getNurses }: Props) => {
   const [transformedNurses, setTransformedNurses] = useState<NurseAttributes[]>(
     []
   );
+  const [perPage, setPerPage] = useState(pagination?.per_page || 10);
+
   const navigate = useNavigate();
   const { togglestatus } = useGlobalStore();
 
@@ -41,6 +52,11 @@ const SaNurseTable = ({ nurses, isLoading }: Props) => {
       }))
     );
   }, [nurses]);
+
+  const handlePageChange = (page: number) => {
+    // Call getAllPatients with the page number, perPage value, and the current baseEndpoint
+    getNurses(page.toString(), perPage.toString());
+  };
 
   if (isLoading) return <Loader />;
 
@@ -147,7 +163,9 @@ const SaNurseTable = ({ nurses, isLoading }: Props) => {
         data={transformedNurses}
         rowKey="id"
         pagination={true}
-        rowsPerPage={10}
+        paginationData={pagination}
+        loading={isLoading}
+        onPageChange={handlePageChange}
       />
     </div>
   );

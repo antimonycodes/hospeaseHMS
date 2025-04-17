@@ -16,6 +16,7 @@ const PatientsPage = () => {
     "patient"
   );
 
+  const [perPage, setPerPage] = useState(10);
   const handleOpenModal = () => {
     setModalType(activeTab === 0 ? "patient" : "appointment");
     setOpenModal(true);
@@ -120,6 +121,7 @@ const PatientsPage = () => {
             patients={patients}
             pagination={pagination}
             isLoading={isLoading}
+            // perPage={perPage}
           />
         ) : (
           <AppointmentsTable />

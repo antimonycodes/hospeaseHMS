@@ -14,7 +14,7 @@ interface Notification {
 
 const NotificationPage = () => {
   const navigate = useNavigate();
-  const { notifications } = useGlobalStore();
+  const { notifications, markAllAsRead } = useGlobalStore();
   const [localNotifications, setLocalNotifications] = useState<Notification[]>(
     []
   );
@@ -32,7 +32,8 @@ const NotificationPage = () => {
       }));
       setLocalNotifications(mapped);
     }
-  }, [notifications]);
+    markAllAsRead();
+  }, [notifications, markAllAsRead]);
 
   const handleMarkAsRead = (id: string) => {
     setLocalNotifications((prev) =>

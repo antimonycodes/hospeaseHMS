@@ -146,7 +146,6 @@ const SaFrontDeskTable = ({ frontdesks, isLoading }: Props) => {
         data={transformedNurses}
         rowKey="id"
         pagination={true}
-        rowsPerPage={10}
       />
     </div>
   );

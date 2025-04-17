@@ -39,7 +39,7 @@ const NurseDetails = () => {
               <ArrowLeft />
             </button>
             <h2 className="text-lg md:text-base font-medium text-custom-black">
-              Doctor Details
+              Nurse Details
             </h2>
           </div>
           <div className="flex space-x-2">

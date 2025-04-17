@@ -7,6 +7,7 @@ import {
   handleErrorToast,
   isSuccessfulResponse,
 } from "../../utils/responseHandler";
+import { Pagination } from "./usePatientStore";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_URL,
@@ -97,6 +98,7 @@ interface Globalstore {
   branches: Branch[];
   clinicaldepts: Clinicaldept[];
   staffs: any[];
+  pagination: Pagination | null;
   allStaffs: any[];
   selectedStaff: any | null;
   staffShift: any[];
@@ -110,7 +112,11 @@ interface Globalstore {
   getClinicaldept: (endpoint?: string) => Promise<any>;
   createClinicaldept: (data: CreateClinicaldeptData) => Promise<any>;
   createStaff: (data: CreateStaff, role: string) => Promise<any>;
-  getDeptStaffs: (data: string) => Promise<any>;
+  getDeptStaffs: (
+    data: string,
+    page?: string,
+    perPage?: string
+  ) => Promise<any>;
   assignShifts: (data: AssignShift, endpoint: any) => Promise<any>;
   getStaffShifts: (id: any, endpoint: string) => Promise<any>;
   updateShift: (id: any, data: any, update: any) => Promise<any>;
@@ -118,6 +124,7 @@ interface Globalstore {
   getAllRoles: (endpoint?: string) => Promise<any>;
   getAllNotifications: () => Promise<any>;
   getUnreadNotificationCount: () => Promise<any>;
+  markAllAsRead: () => Promise<any>;
   getAllStaffs: () => Promise<any>;
 }
 
@@ -132,6 +139,8 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
   isStaffLoading: false,
   selectedStaff: null,
   staffShift: [],
+  pagination: null,
+
   unreadCount: 0,
   setSelectedStaff: (staff) => set({ selectedStaff: staff }),
 
@@ -294,15 +303,19 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       set({ isLoading: false });
     }
   },
-  getDeptStaffs: async (role) => {
+  getDeptStaffs: async (role, page = "1", perPage = "10") => {
     set({ isStaffLoading: true });
     try {
-      const response = await api.post("/admin/department/get-users-dept", {
-        role,
-      });
+      const response = await api.post(
+        `/admin/department/get-users-dept?page=${page}&per_page=${perPage}`,
+        {
+          role,
+        }
+      );
       if (response.status === 200) {
         // toast.success(response.data.message);
         set({ staffs: response.data.data.data });
+        set({ pagination: response.data.data.pagination });
         // console.log(response.data.data.data, "staffs");
         return response.data.data;
       }
@@ -422,7 +435,7 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       const response = await api.get("notification/all");
       if (response.status === 200) {
         set({ notifications: response.data.data });
-        console.log(response.data.data);
+        console.log(response.data.data[0].unread_count, "erfgh");
         return true;
       }
       return null;
@@ -436,12 +449,30 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       const response = await api.get("/notification/all-count");
       if (response.status === 200) {
         set({ unreadCount: response.data.data });
-        console.log(response.data.data);
+        console.log(response.data);
         return true;
       }
       return null;
     } catch (error: any) {
       console.log(error.response?.data || error.message);
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  markAllAsRead: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await api.post("/notification/mark-all-read");
+
+      if (isSuccessfulResponse(response)) {
+        // toast.success(response.data?.msg);
+        // set({ items: response.data.data });
+        return true;
+      }
+      return null;
+    } catch (error) {
+      //   handleErrorToast(error, "Failed.");
       return null;
     } finally {
       set({ isLoading: false });

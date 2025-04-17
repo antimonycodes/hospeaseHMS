@@ -1,4 +1,4 @@
-import { JSX } from "react";
+import { JSX, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Table from "../../../Shared/Table";
 type MedpatientData = {
@@ -35,9 +35,31 @@ type MedpatientInfoProps = {
     };
     id: number;
   }[];
+  pagination: {
+    total: number;
+    per_page: number;
+    current_page: number;
+    last_page: number;
+    from: number;
+    to: number;
+  } | null;
+  baseEndpoint?: string;
+  getAllPatients: (
+    page: string,
+    perPage: string,
+    baseEndpoint?: string
+  ) => void;
 };
-const MedpatientInfo = ({ patients, isLoading }: MedpatientInfoProps) => {
+const MedpatientInfo = ({
+  patients,
+  isLoading,
+  pagination,
+  baseEndpoint,
+  getAllPatients,
+}: MedpatientInfoProps) => {
   console.log(patients);
+  const [perPage, setPerPage] = useState(pagination?.per_page || 10);
+
   const navigate = useNavigate();
 
   const formattedPatients = patients.map((patient: any) => ({
@@ -57,6 +79,9 @@ const MedpatientInfo = ({ patients, isLoading }: MedpatientInfoProps) => {
     navigate(`/dashboard/medical/patients/${id}`);
   };
 
+  const handlePageChange = (page: number) => {
+    getAllPatients(page.toString(), perPage.toString(), baseEndpoint);
+  };
   const columns: Columns[] = [
     {
       key: "name",
@@ -119,8 +144,10 @@ const MedpatientInfo = ({ patients, isLoading }: MedpatientInfoProps) => {
         data={formattedPatients}
         columns={columns}
         rowKey="id"
-        pagination={formattedPatients.length > 10}
-        rowsPerPage={10}
+        pagination={true}
+        paginationData={pagination}
+        loading={isLoading}
+        onPageChange={handlePageChange}
       />
     </div>
   );

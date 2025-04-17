@@ -122,7 +122,7 @@ const ForgotPassword = () => {
             >
               {isLoading ? (
                 <>
-                  Sending...
+                  Sending
                   <Loader2 className="ml-2 size-5 animate-spin" />
                 </>
               ) : (

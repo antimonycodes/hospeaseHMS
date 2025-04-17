@@ -161,7 +161,6 @@ const ExpenseTable = () => {
         data={paymentData}
         rowKey="id"
         pagination={true}
-        rowsPerPage={10}
       />
     </div>
   );

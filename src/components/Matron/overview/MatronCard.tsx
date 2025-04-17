@@ -13,8 +13,10 @@ type PatientData = {
 const MatronCard = () => {
   const { patients, getAllPatients, isLoading } = usePatientStore();
 
+  const baseEndpoint = "/matron/all-patients";
+
   useEffect(() => {
-    getAllPatients("/matron/all-patients"); // Fetch the data
+    getAllPatients("1", "10", baseEndpoint);
   }, [getAllPatients]);
 
   const formattedPatients: PatientData[] =

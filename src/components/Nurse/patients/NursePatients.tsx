@@ -8,18 +8,20 @@ import NursePatientTable from "./NursePatientTable";
 type PatientStatus = "Pending" | "Completed";
 
 const NursePatients = () => {
-  const { getAllPatients, patients = [], isLoading } = usePatientStore();
+  const {
+    getAllPatients,
+    patients = [],
+    isLoading,
+    pagination,
+  } = usePatientStore();
   const [activeTab, setActiveTab] = React.useState<"Pending" | "Completed">(
     "Pending"
   );
-  useEffect(() => {
-    getAllPatients("/nurses/all-patients");
-  }, [getAllPatients]);
+  const baseEndpoint = "/nurses/all-patients";
 
-  const filteredPatients = patients.filter(
-    (patient) =>
-      patient.attributes?.status === activeTab || activeTab === "Pending"
-  );
+  useEffect(() => {
+    getAllPatients("1", "10", baseEndpoint);
+  }, [getAllPatients]);
 
   const statusCounts = patients.reduce(
     (acc, patient) => {
@@ -40,13 +42,12 @@ const NursePatients = () => {
         tableTitle="Patients"
         tableCount={patients.length}
       />
-      <Tabs<"Pending" | "Completed">
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        statusCounts={statusCounts}
-        tabs={["Pending", "Completed"]}
+      <NursePatientTable
+        patients={patients}
+        isLoading={isLoading}
+        pagination={pagination}
+        baseEndpoint={baseEndpoint}
       />
-      <NursePatientTable patients={patients} isLoading={isLoading} />
     </div>
   );
 };

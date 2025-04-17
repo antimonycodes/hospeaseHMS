@@ -244,7 +244,6 @@ const ConsultantPatientsR = () => {
           data={flattenedAppointments}
           rowKey="id"
           pagination={true}
-          rowsPerPage={5}
         />
       )}
     </div>

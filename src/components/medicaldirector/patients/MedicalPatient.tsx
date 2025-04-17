@@ -4,10 +4,11 @@ import MedpatientInfo from "./MedpatientInfo";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 
 const MedicalPatient = () => {
-  const { patients, getAllPatients, isLoading } = usePatientStore();
+  const { patients, getAllPatients, isLoading, pagination } = usePatientStore();
+  const baseEndpoint = "/medical-director/patient";
 
   useEffect(() => {
-    getAllPatients("/medical-director/patient");
+    getAllPatients("1", "10", baseEndpoint);
   }, [getAllPatients]);
 
   return (
@@ -18,7 +19,13 @@ const MedicalPatient = () => {
         showSearchBar={true}
         showControls={true}
       />
-      <MedpatientInfo patients={patients} isLoading={isLoading} />
+      <MedpatientInfo
+        patients={patients}
+        isLoading={isLoading}
+        pagination={pagination}
+        baseEndpoint={baseEndpoint}
+        getAllPatients={getAllPatients}
+      />
     </div>
   );
 };

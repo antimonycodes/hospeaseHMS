@@ -99,7 +99,6 @@ const NurseCard = () => {
           columns={columns}
           rowKey="id"
           // pagination={filteredPatients.length > 5} // Adjust as needed
-          rowsPerPage={5}
           radius="rounded-lg"
         />
       )}

@@ -159,7 +159,6 @@ const NurseShifts = () => {
         data={mappedShifts}
         rowKey="id"
         pagination={true}
-        rowsPerPage={10}
       />
     </div>
   );

@@ -33,14 +33,30 @@ type DpatientsDataProps = {
     };
     id: number;
   }[];
+  pagination: {
+    total: number;
+    per_page: number;
+    current_page: number;
+    last_page: number;
+    from: number;
+    to: number;
+  } | null;
+  baseEndpoint?: string;
+  getAllPatients: (page: string, perPage: string, endpoint?: string) => void;
 };
-const DpatientsInfo = ({ patients, isLoading }: DpatientsDataProps) => {
+const DpatientsInfo = ({
+  patients,
+  isLoading,
+  pagination,
+  baseEndpoint,
+  getAllPatients,
+}: DpatientsDataProps) => {
   console.log(patients);
   const navigate = useNavigate();
 
   const formattedPatients = patients.map((patient: any) => ({
     name: `${patient.attributes.first_name} ${patient.attributes.last_name}`,
-    patientId: patient.id.toString(), // Convert ID to string if needed
+    patientId: patient.attributes.card_id, // Convert ID to string if needed
     age: patient.attributes.age,
     gender: patient.attributes.gender,
     phone: patient.attributes.phone_number,
@@ -110,6 +126,10 @@ const DpatientsInfo = ({ patients, isLoading }: DpatientsDataProps) => {
       ),
     },
   ];
+  const handlePageChange = (page: number) => {
+    // Use the stored baseEndpoint for consistency when changing pages
+    getAllPatients(page.toString(), "10", baseEndpoint);
+  };
 
   return (
     <div>
@@ -117,8 +137,10 @@ const DpatientsInfo = ({ patients, isLoading }: DpatientsDataProps) => {
         data={formattedPatients}
         columns={columns}
         rowKey="patientId"
-        pagination={formattedPatients.length > 10}
-        rowsPerPage={10}
+        pagination={true}
+        paginationData={pagination}
+        loading={isLoading}
+        onPageChange={handlePageChange}
       />
     </div>
   );

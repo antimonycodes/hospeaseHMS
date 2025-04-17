@@ -6,13 +6,20 @@ import Tabs from "../../ReusablepatientD/Tabs";
 
 const MatronPatients = () => {
   // const { getAllPatients, patients, isLoading } = usePatientStore();
-  const { getAllPatients, patients = [], isLoading } = usePatientStore();
+  const {
+    getAllPatients,
+    patients = [],
+    isLoading,
+    pagination,
+  } = usePatientStore();
   const [activeTab, setActiveTab] = React.useState<"Pending" | "Completed">(
     "Pending"
   );
 
+  const baseEndpoint = "/matron/all-patients";
+
   useEffect(() => {
-    getAllPatients("/matron/all-patients"); // Fetch patients from front-desk endpoint
+    getAllPatients("1", "10", baseEndpoint);
   }, [getAllPatients]);
 
   const filteredPatients = patients.filter(
@@ -43,7 +50,13 @@ const MatronPatients = () => {
         statusCounts={statusCounts}
         tabs={["Pending", "Completed"]}
       />
-      <MatronPatientTable patients={patients} isLoading={isLoading} />
+      <MatronPatientTable
+        patients={patients}
+        isLoading={isLoading}
+        pagination={pagination}
+        baseEndpoint={baseEndpoint}
+        getAllPatients={getAllPatients}
+      />
     </div>
   );
 };

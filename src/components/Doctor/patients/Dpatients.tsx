@@ -4,10 +4,12 @@ import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import { useEffect } from "react";
 
 const Dpatients = () => {
-  const { patients, getAllPatients, isLoading } = usePatientStore();
+  const { patients, getAllPatients, isLoading, pagination } = usePatientStore();
+
+  const baseEndpoint = "/doctor/patient";
 
   useEffect(() => {
-    getAllPatients("/doctor/patient");
+    getAllPatients("1", "10", baseEndpoint);
   }, [getAllPatients]);
 
   return (
@@ -19,7 +21,13 @@ const Dpatients = () => {
         showSearchBar={true}
         showControls={true}
       />
-      <DpatientsInfo patients={patients} isLoading={isLoading} />
+      <DpatientsInfo
+        patients={patients}
+        isLoading={isLoading}
+        pagination={pagination}
+        baseEndpoint={baseEndpoint}
+        getAllPatients={getAllPatients}
+      />
     </div>
   );
 };

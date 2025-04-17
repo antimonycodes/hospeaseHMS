@@ -1,11 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { getUserColumns } from "../../Shared/UsersColumn";
 import { useNavigate } from "react-router-dom";
-import { useAppointmentStore } from "../../store/staff/useAppointmentStore";
-// import FrontdeskAppointmentModal from "../Frontdesk/appointment/FrontdeskAppointmentModal";
-import { getImageSrc } from "../../utils/imageUtils";
-import Table from "../../Shared/Table";
-import { usePatientStore } from "../../store/super-admin/usePatientStore";
+import Table from "../../../Shared/Table";
+import { getUserColumns } from "../../../Shared/UsersColumn";
+import { getImageSrc } from "../../../utils/imageUtils";
+import { useEffect, useState } from "react";
+import { useAppointmentStore } from "../../../store/staff/useAppointmentStore";
 
 interface Patient {
   id: number;
@@ -15,10 +13,16 @@ interface Patient {
   phone: string;
   occupation: string;
   doctor: string;
-  status: "Pending" | "Completed" | undefined;
+  status:
+    | "Pending"
+    | "Accepted"
+    | "Declined"
+    | "Rescheduled"
+    | "Completed"
+    | undefined;
 }
 
-const tabs = ["Pending", "Completed"] as const;
+const tabs = ["Pending", "Accepted", "Rescheduled", "Completed"] as const;
 type TabType = (typeof tabs)[number];
 
 const getStatusCounts = (patients: Patient[]) => {
@@ -31,27 +35,39 @@ const getStatusCounts = (patients: Patient[]) => {
     },
     {
       Pending: 0,
+      Accepted: 0,
+      Rescheduled: 0,
+      Declined: 0,
       Completed: 0,
     }
   );
 };
 
-const ConsultantTable = () => {
+const NurseAppointment = () => {
   const [activeTab, setActiveTab] = useState<TabType>("Pending");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { getAllAppointments, appointments } = usePatientStore();
+  const { getAllAppointments, appointments } = useAppointmentStore();
 
   const transformedPatients: Patient[] = appointments.map((item: any) => {
-    const rawStatus = item.attributes.status?.toLowerCase() ?? "";
+    const rawStatus = item.attributes.status.toLowerCase();
     let status: Patient["status"];
 
     switch (rawStatus) {
       case "pending":
         status = "Pending";
         break;
+      case "accepted":
+        status = "Accepted";
+        break;
+      case "reschedule":
+        status = "Rescheduled";
+        break;
       case "completed":
         status = "Completed";
+        break;
+      case "rejected":
+        status = "Declined";
         break;
       default:
         status = undefined;
@@ -64,15 +80,15 @@ const ConsultantTable = () => {
       gender: item.attributes.patient.attributes.gender ?? "N/A",
       phone: item.attributes.patient.attributes.phone_number,
       occupation: item.attributes.patient.attributes.occupation ?? "N/A",
-      doctor: item.attributes.doctor?.attributes?.name ?? "N/A",
-      status, // Use the mapped status
+      doctor: `Dr ${item.attributes.doctor?.attributes.last_name}`,
+      status,
     };
   });
 
   const statusCounts = getStatusCounts(transformedPatients);
 
   useEffect(() => {
-    getAllAppointments("/consultant/my-appointments");
+    getAllAppointments("nurses/my-appointments");
   }, [getAllAppointments]);
 
   const navigate = useNavigate();
@@ -81,12 +97,7 @@ const ConsultantTable = () => {
     navigate(`/dashboard/appointment/doctor/${id}`);
   };
 
-  // Get all columns, including Status and View more
-  const allColumns = getUserColumns(details, transformedPatients, true);
-  // Filter out the "Doctor Assigned" column
-  const columns = allColumns.filter(
-    (column) => column.label !== "Doctor Assigned"
-  );
+  const columns = getUserColumns(details, transformedPatients, false);
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -155,8 +166,10 @@ const ConsultantTable = () => {
         rowKey="patientId"
         pagination={true}
       />
+
+      {/* <FrontdeskAppointmentModal isOpen={isModalOpen} onClose={closeModal} /> */}
     </div>
   );
 };
 
-export default ConsultantTable;
+export default NurseAppointment;

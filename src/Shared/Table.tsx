@@ -8,16 +8,25 @@ interface Column<T> {
   render?: (value: T[keyof T], row: T) => React.ReactNode;
 }
 
+// Pagination data interface to match backend response
+interface PaginationData {
+  total: number;
+  per_page: number;
+  current_page: number;
+  last_page: number;
+  from: number;
+  to: number;
+}
+
 interface TableProps<T> {
   columns: Column<T>[];
   data: T[];
   rowKey: keyof T;
   pagination?: boolean;
-  rowsPerPage?: number;
+  paginationData?: PaginationData | null;
   radius?: string;
   onPageChange?: (page: number) => void;
-  currentPage?: number;
-  totalPages?: number;
+  loading?: boolean;
 }
 
 const Table = <T extends Record<string, any>>({
@@ -25,14 +34,21 @@ const Table = <T extends Record<string, any>>({
   data,
   rowKey,
   pagination = false,
-  rowsPerPage = 5,
+  paginationData,
   radius = "rounded-b-lg",
   onPageChange,
-  currentPage = 1,
-  totalPages = 1,
+  loading = false,
 }: TableProps<T>) => {
   // Handle edge case where data is empty
-  const showEmptyState = data.length === 0;
+  const showEmptyState = data.length === 0 && !loading;
+  const showLoader = loading && data.length === 0;
+
+  // Use pagination data if available
+  const currentPage = paginationData?.current_page || 1;
+  const totalPages = paginationData?.last_page || 1;
+  const startItem = paginationData?.from || 0;
+  const endItem = paginationData?.to || 0;
+  const totalItems = paginationData?.total || 0;
 
   // Generate page numbers with proper ellipses
   const getPageItems = () => {
@@ -78,14 +94,6 @@ const Table = <T extends Record<string, any>>({
     return items;
   };
 
-  // Calculate display info (from/to/total)
-  const startItem = (currentPage - 1) * rowsPerPage + 1;
-  const endItem = Math.min(
-    currentPage * rowsPerPage,
-    data.length + (currentPage - 1) * rowsPerPage
-  );
-  const totalItems = totalPages * rowsPerPage;
-
   return (
     <div
       className={`overflow-hidden overflow-x-auto border border-[#EAECF0] ${radius}`}
@@ -104,7 +112,15 @@ const Table = <T extends Record<string, any>>({
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-[#EAECF0]">
-          {showEmptyState ? (
+          {showLoader ? (
+            <tr>
+              <td colSpan={columns.length} className="px-6 py-12 text-center">
+                <div className="flex justify-center">
+                  <Loader />
+                </div>
+              </td>
+            </tr>
+          ) : showEmptyState ? (
             <tr>
               <td
                 colSpan={columns.length}
@@ -132,7 +148,7 @@ const Table = <T extends Record<string, any>>({
         </tbody>
       </table>
 
-      {pagination && totalPages > 0 && (
+      {pagination && paginationData && totalPages > 0 && (
         <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 bg-white border-t border-[#EAECF0]">
           {/* Showing entries info */}
           <div className="text-sm text-[#667085] mb-2 sm:mb-0">
@@ -150,6 +166,7 @@ const Table = <T extends Record<string, any>>({
                     ? "opacity-50 cursor-not-allowed"
                     : "cursor-pointer"
                 }`}
+              type="button"
             >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path
@@ -170,6 +187,7 @@ const Table = <T extends Record<string, any>>({
                   <button
                     key={index}
                     onClick={() => onPageChange?.(item)}
+                    type="button"
                     className={`w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium ${
                       item === currentPage
                         ? "bg-[#F9F5FF] text-[#7F56D9] border border-[#7F56D9]"
@@ -195,6 +213,7 @@ const Table = <T extends Record<string, any>>({
             <button
               onClick={() => onPageChange?.(currentPage + 1)}
               disabled={currentPage >= totalPages}
+              type="button"
               className={`px-4 py-2 border border-[#D0D5DD] rounded-lg flex items-center gap-2 text-[#344054] font-semibold
                 ${
                   currentPage >= totalPages

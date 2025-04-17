@@ -29,8 +29,14 @@ const SaUsersPage = () => {
 
   const department = activeTab === "Matron" ? "matron" : "medical-director";
 
-  const { createStaff, isLoading, isStaffLoading, getDeptStaffs, staffs } =
-    useGlobalStore();
+  const {
+    createStaff,
+    isLoading,
+    isStaffLoading,
+    getDeptStaffs,
+    staffs,
+    pagination,
+  } = useGlobalStore();
   const {
     getAllRoles,
     roles,
@@ -112,7 +118,12 @@ const SaUsersPage = () => {
 
       {/* tables */}
       {/* {activeTab === "Matron" ? <AdministratorTable /> : <DepartmentTable />} */}
-      <StaffsList staffs={staffs} isStaffLoading={isStaffLoading} />
+      <StaffsList
+        staffs={staffs}
+        isStaffLoading={isStaffLoading}
+        pagination={pagination}
+        getDeptStaffs={getDeptStaffs}
+      />
       {/* modals */}
       {/* {openModal && modalType === "Medical-director" && (
         <AddDepartmentModal onClose={() => setOpenModal(false)} />

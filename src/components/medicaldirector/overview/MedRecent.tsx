@@ -5,9 +5,10 @@ import RecentPatients from "./RecentPatients";
 
 const MedRecent = () => {
   const { patients, getAllPatients, isLoading } = usePatientStore();
+  const baseEndpoint = "/medical-director/patient";
 
   useEffect(() => {
-    getAllPatients("/medical-director/patient");
+    getAllPatients(baseEndpoint);
   }, [getAllPatients]);
 
   return (

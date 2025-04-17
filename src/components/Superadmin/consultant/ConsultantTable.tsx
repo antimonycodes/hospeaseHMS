@@ -184,7 +184,6 @@ const ConsultantTable = ({
         data={formattedConsultants}
         rowKey="id"
         pagination={true}
-        rowsPerPage={10}
       />
     </div>
   );

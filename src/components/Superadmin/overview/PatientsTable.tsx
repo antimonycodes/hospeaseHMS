@@ -99,7 +99,6 @@ const PatientsTable = ({
         columns={columns}
         rowKey="id"
         pagination={simplifiedPatients.length > 10} // You can adjust this based on your needs
-        rowsPerPage={10} // If you want to have pagination, you can adjust as needed
       />
     </div>
   );

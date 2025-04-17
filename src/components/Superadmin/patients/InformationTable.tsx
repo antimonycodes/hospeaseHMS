@@ -54,45 +54,7 @@ const InformationTable = ({
 }: InformationTableProps) => {
   const navigate = useNavigate();
   const { getAllPatients } = usePatientStore();
-  const [currentPage, setCurrentPage] = useState(0);
-  const [lastKnownPagination, setLastKnownPagination] = useState<{
-    total: number;
-    per_page: number;
-    current_page: number;
-    last_page: number;
-    from: number;
-    to: number;
-  } | null>(null);
-
-  // // Debug: Log current pagination state
-  // useEffect(() => {
-  //   console.log("Current pagination:", pagination);
-  //   console.log("Current page state:", currentPage);
-  // }, [pagination, currentPage]);
-
-  // // Store pagination data whenever it's available
-  // useEffect(() => {
-  //   if (pagination) {
-  //     setLastKnownPagination(pagination);
-  //     // Convert backend page to UI page consistently
-  //     setCurrentPage(pagination.current_page);
-  //   }
-  // }, [pagination]);
-
-  // // Handle page change
-  // const handlePageChange = async (page: number) => {
-  //   console.log("Page change requested:", page);
-
-  //   const paginationInfo = pagination || lastKnownPagination;
-  //   // Don't allow navigating past the last page or before the first page
-  //   if (!paginationInfo || page < 1 || page > paginationInfo.last_page + 1) {
-  //     return;
-  //   }
-
-  //   // Update UI page
-  //   setCurrentPage(page);
-  //   await getAllPatients(page - 1);
-  // };
+  const [perPage, setPerPage] = useState(pagination?.per_page || 10);
 
   const formattedPatients = useMemo(
     () =>
@@ -114,7 +76,12 @@ const InformationTable = ({
     navigate(`/dashboard/patients/${id}`);
   };
 
-  if (isLoading) return <Loader />;
+  const handlePageChange = (page: number) => {
+    // Call getAllPatients with the page number and perPage value
+    getAllPatients(page.toString(), perPage.toString());
+  };
+
+  if (isLoading && !patients.length) return <Loader />;
 
   const columns: Columns[] = [
     {
@@ -166,16 +133,6 @@ const InformationTable = ({
     },
   ];
 
-  // // Determine whether to show pagination and what values to use
-  // const paginationInfo = pagination || lastKnownPagination;
-  // const showPagination =
-  //   !!paginationInfo &&
-  //   (paginationInfo.last_page > 0 ||
-  //     paginationInfo.total > paginationInfo.per_page);
-
-  // // Calculate total pages for display (adding 1 to account for 0-based pagination)
-  // const totalPages = paginationInfo ? paginationInfo.last_page + 1 : 1;
-
   return (
     <div className="w-full">
       <Table
@@ -183,10 +140,9 @@ const InformationTable = ({
         data={formattedPatients}
         rowKey="id"
         pagination={true}
-        // rowsPerPage={paginationInfo?.per_page || 10}
-        currentPage={currentPage}
-        // totalPages={totalPages}
-        // onPageChange={handlePageChange}
+        paginationData={pagination}
+        loading={isLoading}
+        onPageChange={handlePageChange}
       />
     </div>
   );

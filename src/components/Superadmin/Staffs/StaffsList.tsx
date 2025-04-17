@@ -3,6 +3,7 @@ import { useGlobalStore } from "../../../store/super-admin/useGlobal";
 import { useEffect, useState } from "react";
 import Loader from "../../../Shared/Loader";
 import Table from "../../../Shared/Table";
+import { Pagination } from "../../../store/super-admin/useNuseStore";
 
 type Column<T> = {
   key: keyof T;
@@ -13,16 +14,35 @@ type Column<T> = {
 interface Props {
   staffs: any[];
   isStaffLoading: boolean;
+  pagination: {
+    total: number;
+    per_page: number;
+    current_page: number;
+    last_page: number;
+    from: number;
+    to: number;
+  } | null;
+  getDeptStaffs: (page: string, perPage: string) => void;
 }
 
-const StaffsList = ({ staffs, isStaffLoading }: Props) => {
+const StaffsList = ({
+  staffs,
+  isStaffLoading,
+  pagination,
+  getDeptStaffs,
+}: Props) => {
   const [transformedStaffs, setTransformedStaffs] = useState<any[]>([]);
+  const [perPage, setPerPage] = useState(pagination?.per_page || 10);
+
   const navigate = useNavigate();
   const { togglestatus, setSelectedStaff } = useGlobalStore();
 
   const handleViewMore = (staff: any) => {
     setSelectedStaff(staff); // Store in Zustand
     navigate(`/dashboard/staff-detail/${staff.id}`);
+  };
+  const handlePageChange = (page: number) => {
+    getDeptStaffs(page.toString(), perPage.toString());
   };
 
   useEffect(() => {
@@ -136,8 +156,10 @@ const StaffsList = ({ staffs, isStaffLoading }: Props) => {
         columns={staffsColumn}
         data={transformedStaffs}
         rowKey="id"
-        pagination={false}
-        rowsPerPage={10}
+        pagination={true}
+        paginationData={pagination}
+        loading={isStaffLoading}
+        onPageChange={handlePageChange}
       />
     </div>
   );

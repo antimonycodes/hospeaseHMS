@@ -15,10 +15,10 @@ type PatientData = {
 const FrontdeskTable = () => {
   const { patients, getAllPatients, isLoading } = usePatientStore();
 
+  // In FrontdeskTable.tsx
   useEffect(() => {
-    getAllPatients("/front-desk/patient/fetch"); // Fetch the data
+    getAllPatients("1", "10", "/front-desk/patient/fetch");
   }, [getAllPatients]);
-
   // Transform API data into the correct format
   const formattedPatients: PatientData[] =
     patients?.map((patient: any) => ({

@@ -8,8 +8,14 @@ import { generateSixDigitId } from "../../../utils/randomNumber";
 
 const SaDoctorsPage = () => {
   const [showModal, setShowModal] = useState(false);
-  const { createDoctor, getAllDoctors, doctors, createConsultant, isLoading } =
-    useDoctorStore();
+  const {
+    createDoctor,
+    getAllDoctors,
+    doctors,
+    createConsultant,
+    isLoading,
+    pagination,
+  } = useDoctorStore();
 
   const [formData, setFormData] = useState({
     first_name: "",
@@ -24,7 +30,7 @@ const SaDoctorsPage = () => {
 
   useEffect(() => {
     // Fetch doctors data once on component mount
-    getAllDoctors("/admin/doctor/fetch");
+    getAllDoctors();
 
     // Optional: set up a reasonable refresh interval if needed
     const intervalId = setInterval(() => {
@@ -62,7 +68,12 @@ const SaDoctorsPage = () => {
           <Plus size={16} />
         </Button>
       </div>
-      <DoctorsTable doctors={doctors} isLoading={isLoading} />
+      <DoctorsTable
+        doctors={doctors}
+        isLoading={isLoading}
+        pagination={pagination}
+        getAllDoctors={getAllDoctors}
+      />
       {showModal && (
         <AddDoctorModal
           formData={formData}
