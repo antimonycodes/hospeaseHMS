@@ -67,7 +67,7 @@ const InvenCategory: React.FC<InvenCategoryProps> = ({
           data={formattedCategories}
           columns={columns}
           rowKey="id"
-          rowsPerPage={10}
+          // rowsPerPage={10}
           radius="rounded-none"
         />
       )}
