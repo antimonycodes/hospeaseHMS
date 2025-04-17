@@ -8,12 +8,13 @@ import Table from "../../../Shared/Table";
 import Loader from "../../../Shared/Loader";
 
 const Labpatients = () => {
-  const { patients, getAllPatients, isLoading } = usePatientStore();
+  const { patients, getAllPatients, isLoading, pagination } = usePatientStore();
   const [activeStatus, setActiveStatus] = useState("pending");
   const navigate = useNavigate();
+  const baseEndpoint = "/laboratory/patient/all";
 
   useEffect(() => {
-    getAllPatients("/laboratory/patient/all");
+    getAllPatients("1", "10", baseEndpoint);
   }, [getAllPatients]);
 
   const transformedPatients = patients.map((item) => {
@@ -118,6 +119,11 @@ const Labpatients = () => {
     },
   ];
 
+  const handlePageChange = (page: number) => {
+    // Use the stored baseEndpoint for consistency when changing pages
+    getAllPatients(page.toString(), "10", baseEndpoint);
+  };
+
   if (isLoading) return <Loader />;
 
   return (
@@ -154,7 +160,9 @@ const Labpatients = () => {
         data={filteredPatients}
         rowKey="patientId"
         pagination={true}
-        rowsPerPage={5}
+        paginationData={pagination}
+        onPageChange={handlePageChange}
+        loading={isLoading}
       />
     </div>
   );

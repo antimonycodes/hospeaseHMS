@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Table from "../../../Shared/Table";
 import { useNavigate } from "react-router-dom";
 import Loader from "../../../Shared/Loader";
+import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 
 type NursePatientData = {
   name: string;
@@ -34,11 +35,26 @@ type NursePatientDataProps = {
     };
     id: number;
   }[];
+  pagination: {
+    total: number;
+    per_page: number;
+    current_page: number;
+    last_page: number;
+    from: number;
+    to: number;
+  } | null;
+  baseEndpoint?: string;
 };
 
-const NursePatientTable = ({ patients, isLoading }: NursePatientDataProps) => {
+const NursePatientTable = ({
+  patients,
+  isLoading,
+  pagination,
+  baseEndpoint,
+}: NursePatientDataProps) => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(0);
+  const { getAllPatients } = usePatientStore();
 
   const formattedPatients = patients.map((patient: any) => ({
     name: `${patient.attributes.first_name} ${patient.attributes.last_name}`,
@@ -52,10 +68,16 @@ const NursePatientTable = ({ patients, isLoading }: NursePatientDataProps) => {
     id: patient.id,
   }));
 
+  const [perPage, setPerPage] = useState(pagination?.per_page || 10);
+
   const handleViewMore = (id: number) => {
     navigate(`/dashboard/nurses/patients/${id}`);
   };
 
+  const handlePageChange = (page: number) => {
+    // Call getAllPatients with the page number, perPage value, and the current baseEndpoint
+    getAllPatients(page.toString(), perPage.toString(), baseEndpoint);
+  };
   if (isLoading) return <Loader />;
 
   if (!patients.length) return <div>No patients to display</div>;
@@ -123,9 +145,10 @@ const NursePatientTable = ({ patients, isLoading }: NursePatientDataProps) => {
         data={formattedPatients}
         columns={columns}
         rowKey="id"
-        currentPage={currentPage}
-        pagination={formattedPatients.length > 10}
-        rowsPerPage={10}
+        pagination={true}
+        paginationData={pagination}
+        loading={isLoading}
+        onPageChange={handlePageChange}
       />
     </div>
   );

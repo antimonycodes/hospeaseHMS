@@ -118,7 +118,6 @@ const Labpatientsinfo = ({ patients, isLoading }: DpatientsDataProps) => {
         columns={columns}
         rowKey="patientId"
         pagination={formattedPatients.length > 10}
-        rowsPerPage={10}
       />
     </div>
   );

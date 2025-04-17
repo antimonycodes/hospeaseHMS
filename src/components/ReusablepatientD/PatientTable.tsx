@@ -150,7 +150,6 @@ const PatientTable = ({ patients, isLoading }: PatientTableProps) => {
         columns={columns}
         rowKey="id"
         pagination={formattedPatients.length > 10}
-        rowsPerPage={10}
         radius="rounded-none"
       />
     </div>

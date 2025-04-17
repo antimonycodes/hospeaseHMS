@@ -146,7 +146,6 @@ const InventoryTable = () => {
         data={medicineData}
         rowKey="id"
         pagination={true}
-        rowsPerPage={10}
       />
     </div>
   );

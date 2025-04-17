@@ -5,13 +5,31 @@ import { useNavigate } from "react-router-dom";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 
 const PharmPatients = () => {
-  const { getAllPatients, patients } = usePatientStore();
+  const { getAllPatients, patients, isLoading, pagination } = usePatientStore();
   const [activeStatus, setActiveStatus] = useState("pending");
   const navigate = useNavigate();
+  const baseEndpoint = "/pharmacy/patient/all";
 
   useEffect(() => {
-    getAllPatients("pharmacy/patient/all");
-  }, []);
+    getAllPatients("1", "10", baseEndpoint);
+  }, [getAllPatients]);
+
+  // Handle empty patients array
+  if (!patients || patients.length === 0) {
+    return (
+      <div className="mt-2">
+        <Tablehead
+          tableTitle="Patients"
+          showSearchBar={true}
+          showControls={true}
+          tableCount={0}
+        />
+        <div className="w-full bg-white p-6 text-center">
+          {isLoading ? "Loading patients..." : "No patients found"}
+        </div>
+      </div>
+    );
+  }
 
   const transformedPatients = patients.map((item) => {
     const attr = item.attributes;
@@ -115,6 +133,11 @@ const PharmPatients = () => {
     },
   ];
 
+  const handlePageChange = (page: number) => {
+    // Use the stored baseEndpoint for consistency when changing pages
+    getAllPatients(page.toString(), "10", baseEndpoint);
+  };
+
   return (
     <div className="mt-2">
       {/*  Table Header */}
@@ -125,7 +148,7 @@ const PharmPatients = () => {
         tableCount={patients.length}
       />
       {/*  Tabs */}
-      <div className="w-full bg-white flex space-x-2 md:space-x-6  px-6">
+      <div className="w-full bg-white flex space-x-2 md:space-x-6 px-6">
         {statuses.map((status) => (
           <button
             key={status}
@@ -149,7 +172,9 @@ const PharmPatients = () => {
         data={filteredPatients}
         rowKey="patientId"
         pagination={true}
-        rowsPerPage={5}
+        paginationData={pagination}
+        onPageChange={handlePageChange}
+        loading={isLoading}
       />
     </div>
   );

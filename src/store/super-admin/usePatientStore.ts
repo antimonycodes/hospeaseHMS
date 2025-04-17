@@ -2,6 +2,10 @@ import { create } from "zustand";
 import axios from "axios";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
+import {
+  handleErrorToast,
+  isSuccessfulResponse,
+} from "../../utils/responseHandler";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_URL,
@@ -81,14 +85,21 @@ interface PatientStats {
 interface PatientStore {
   isLoading: boolean;
   patients: any[];
+
   pagination: Pagination | null;
   selectedPatient: any | null;
   appointments: any[];
   selectedAppointment: any | null;
   labPatients: LabPatient[];
 
-  getAllPatients: (endpoint?: string) => Promise<void>;
+  // Updated function signature to match implementation
+  getAllPatients: (
+    page?: string,
+    perPage?: string,
+    endpoint?: string
+  ) => Promise<void>;
   getPatientById: (id: string) => Promise<void>;
+  updatePatient: (id: string, patientData: any) => Promise<any>;
   getPharPatientById: (id: string) => Promise<any>;
   getLabPatientById: (id: string) => Promise<any>;
   getPatientByIdDoc: (id: string) => Promise<any>;
@@ -124,15 +135,22 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   selectedAppointment: null,
   labPatients: [],
 
-  // Fetch all patient
-  getAllPatients: async (endpoint = "/admin/patient/fetch") => {
+  getAllPatients: async (
+    page = "1",
+    perPage = "10",
+    baseEndpoint = "/admin/patient/fetch"
+  ) => {
     set({ isLoading: true });
     try {
+      // Construct the full endpoint with query parameters
+      const endpoint = `${baseEndpoint}?page=${page}&per_page=${perPage}`;
+
+      console.log("Fetching patients from:", endpoint);
+
       const response = await api.get(endpoint);
       set({ pagination: response.data.data.pagination });
       console.log(response.data.data.pagination, "pagination");
       const fetchedPatients = response.data.data.data;
-      // const pharmacyid = response.data[0];
       set({ patients: fetchedPatients });
       console.log(response.data.message);
     } catch (error: any) {
@@ -303,7 +321,11 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       const response = await api.post(endpoint, payload);
       if (response.status === 201) {
         // Refresh the doctors list after creation
-        await get().getAllPatients(refreshendpoint);
+        if (refreshendpoint) {
+          await get().getAllPatients(undefined, undefined, refreshendpoint);
+        } else {
+          await get().getAllPatients();
+        }
         toast.success(response.data.message);
         return true;
       }
@@ -311,6 +333,39 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
     } catch (error: any) {
       console.error(error.response?.data);
       toast.error(error.response?.data?.message || "Failed to add patient");
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  updatePatient: async (id: string, patientData: any) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.put(
+        `/admin/patient/update/${id}`,
+        patientData
+      );
+
+      if (isSuccessfulResponse(response)) {
+        console.log(response);
+        const updatedPatient = response.data.data.data;
+        // Update the patient in the state
+        set((state) => ({
+          ...state,
+          selectedPatient: updatedPatient,
+          patients: state.patients.map((patient) =>
+            patient.id === id ? updatedPatient.data : patient
+          ),
+        }));
+        toast.success(response.data.message);
+
+        return updatedPatient;
+        // return true;
+      }
+      return null;
+    } catch (error) {
+      handleErrorToast(error);
+      console.log(error);
       return null;
     } finally {
       set({ isLoading: false });

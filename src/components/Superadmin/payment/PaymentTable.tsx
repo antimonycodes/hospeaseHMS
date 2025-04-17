@@ -88,7 +88,6 @@ const PaymentTable = () => {
         data={payments}
         rowKey="invoiceNumber"
         pagination={true}
-        rowsPerPage={10}
       />
     </div>
   );

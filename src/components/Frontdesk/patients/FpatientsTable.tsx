@@ -1,20 +1,18 @@
 import { useEffect, useState } from "react";
-import AddPatientModal from "../../../Shared/AddPatientModal";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import FrontdeskInfo from "./FrontdeskInfo";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import AddPatientModals from "./AddPatientModals";
 
-// FpatientsTable.tsx
 const FpatientsTable = () => {
-  const [activeTab, setActiveTab] = useState(0);
   const [openModal, setOpenModal] = useState(false);
-
-  const { getAllPatients, patients, createPatient, isLoading } =
+  const { getAllPatients, patients, createPatient, isLoading, pagination } =
     usePatientStore();
+  const baseEndpoint = "/front-desk/patient/fetch";
 
   useEffect(() => {
-    getAllPatients("/front-desk/patient/fetch"); // Fetch patients from front-desk endpoint
+    // Pass page and perPage as strings for the first call
+    getAllPatients("1", "10", baseEndpoint);
   }, [getAllPatients]);
 
   const handleOpenModal = () => {
@@ -32,7 +30,12 @@ const FpatientsTable = () => {
         typebutton="Add New"
         onButtonClick={handleOpenModal}
       />
-      <FrontdeskInfo patients={patients} isLoading={isLoading} />
+      <FrontdeskInfo
+        patients={patients}
+        isLoading={isLoading}
+        pagination={pagination}
+        baseEndpoint={baseEndpoint}
+      />
       {/* Modal */}
       {openModal && (
         <AddPatientModals
@@ -40,7 +43,7 @@ const FpatientsTable = () => {
           createPatient={createPatient}
           isLoading={isLoading}
           endpoint="/front-desk/patient/create"
-          refreshendpoint="/front-desk/patient/fetch"
+          refreshendpoint={baseEndpoint}
         />
       )}
     </div>

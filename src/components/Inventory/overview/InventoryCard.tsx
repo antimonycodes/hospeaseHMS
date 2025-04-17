@@ -75,7 +75,6 @@ const InventoryCard = () => {
         columns={columns}
         rowKey="id"
         pagination={StocksData.length > 10}
-        rowsPerPage={10}
         radius="rounded-lg"
       />
     </div>

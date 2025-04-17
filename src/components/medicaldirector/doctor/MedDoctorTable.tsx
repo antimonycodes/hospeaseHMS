@@ -43,13 +43,28 @@ interface Doctor {
 const MedDoctorTable = ({
   doctors,
   isLoading,
+  baseEndpoint,
+  getAllDoctors,
+  pagination,
 }: {
   doctors: Doctor[];
   isLoading: boolean;
+  pagination: {
+    total: number;
+    per_page: number;
+    current_page: number;
+    last_page: number;
+    from: number;
+    to: number;
+  } | null;
+  baseEndpoint?: string;
+  getAllDoctors: (page: string, perPage: string, baseEndpoint?: string) => void;
 }) => {
   const [transformedDoctors, setTransformedDoctors] = useState<
     DoctorAttributes[]
   >([]);
+  const [perPage, setPerPage] = useState(pagination?.per_page || 10);
+
   const navigate = useNavigate();
 
   useMemo(() => {
@@ -61,6 +76,10 @@ const MedDoctorTable = ({
     );
   }, [doctors]);
 
+  const handlePageChange = (page: number) => {
+    // Call getAllPatients with the page number, perPage value, and the current baseEndpoint
+    getAllDoctors(page.toString(), perPage.toString(), baseEndpoint);
+  };
   if (isLoading) return <Loader />;
 
   const columns: Column<DoctorAttributes>[] = [
@@ -179,7 +198,9 @@ const MedDoctorTable = ({
         data={transformedDoctors}
         rowKey="id"
         pagination={true}
-        rowsPerPage={10}
+        paginationData={pagination}
+        loading={isLoading}
+        onPageChange={handlePageChange}
       />
     </div>
   );

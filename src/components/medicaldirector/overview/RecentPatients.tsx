@@ -116,7 +116,6 @@ const RecentPatients = ({ patients, isLoading }: RecentPatientsProps) => {
         columns={columns}
         rowKey="patientId"
         pagination={formattedPatients.length > 10}
-        rowsPerPage={10}
       />
     </div>
   );

@@ -125,7 +125,6 @@ const InventoryRequest = () => {
             columns={columns}
             rowKey="id"
             pagination={requestsArray.length > 10}
-            rowsPerPage={10}
             radius="rounded-none"
           />
         )}

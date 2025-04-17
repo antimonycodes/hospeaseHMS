@@ -88,7 +88,6 @@ const FexpensesTable = () => {
         data={formattedExpenses}
         columns={columns}
         rowKey="id"
-        rowsPerPage={10}
         radius="rounded-none"
       />
     </div>

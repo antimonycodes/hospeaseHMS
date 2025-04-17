@@ -6,6 +6,7 @@ import {
   handleErrorToast,
   isSuccessfulResponse,
 } from "../../utils/responseHandler";
+import { Pagination } from "./usePatientStore";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_URL,
@@ -115,13 +116,19 @@ export interface CreateConsultantData {
 
 interface DoctorStore {
   isLoading: boolean;
+  pagination: Pagination | null;
+
   isDeleting: boolean;
   doctors: Doctor[];
   department: Department[];
   consultants: any[];
   selectedDoctor: Doctor | null;
   selectedConsultant: Doctor | null;
-  getAllDoctors: (enpoint?: string) => Promise<void>;
+  getAllDoctors: (
+    page?: string,
+    perPage?: string,
+    endpoint?: string
+  ) => Promise<void>;
   getDoctorById: (id: string) => Promise<void>;
   createDoctor: (
     data: any,
@@ -148,14 +155,22 @@ export const useDoctorStore = create<DoctorStore>((set, get, endpoint) => ({
   consultants: [],
   selectedConsultant: null,
   department: [],
+  pagination: null,
 
   // Fetch all doctors
-  getAllDoctors: async (enpoint = "/admin/doctor/fetch") => {
+  getAllDoctors: async (
+    page = "1",
+    perPage = "10",
+    baseEndpoint = "/admin/doctor/fetch"
+  ) => {
     set({ isLoading: true });
     try {
-      const response = await api.get(enpoint);
+      const endpoint = `${baseEndpoint}?page=${page}&per_page=${perPage}`;
+      const response = await api.get(endpoint);
       const fetchedDoctors = response.data.data.data; // Extract doctor array
       set({ doctors: fetchedDoctors });
+      set({ pagination: response.data.data.pagination });
+
       // toast.success("Doctors retrieved successfully!");
     } catch (error: any) {
       console.error(error.response?.data);

@@ -1,5 +1,4 @@
 import { JSX, useEffect, useState } from "react";
-
 import { useNavigate, useParams } from "react-router-dom";
 import Loader from "../../../Shared/Loader";
 import EditIcon from "../../../assets/EditIcon.png";
@@ -9,7 +8,6 @@ import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 
 type FrondeskPatientData = {
   name: string;
-
   age: number;
   gender: string;
   phone: string;
@@ -42,13 +40,26 @@ type FrondeskPatientDataProps = {
     };
     id: number;
   }[];
+  pagination: {
+    total: number;
+    per_page: number;
+    current_page: number;
+    last_page: number;
+    from: number;
+    to: number;
+  } | null;
+  baseEndpoint?: string;
 };
 
-const FrontdeskInfo = ({ patients, isLoading }: FrondeskPatientDataProps) => {
-  console.log(patients);
+const FrontdeskInfo = ({
+  patients,
+  isLoading,
+  pagination,
+  baseEndpoint = "/admin/patient/fetch", // Default value
+}: FrondeskPatientDataProps) => {
   const navigate = useNavigate();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const { selectedPatient, getDeskByIdDoc } = usePatientStore();
+  const { selectedPatient, getDeskByIdDoc, getAllPatients } = usePatientStore();
   const { id } = useParams();
 
   useEffect(() => {
@@ -57,23 +68,32 @@ const FrontdeskInfo = ({ patients, isLoading }: FrondeskPatientDataProps) => {
     }
   }, [id, getDeskByIdDoc]);
 
+  const [perPage, setPerPage] = useState(pagination?.per_page || 10);
+
   const formattedPatients = patients.map((patient: any) => ({
     name: `${patient.attributes.first_name} ${patient.attributes.last_name}`,
-    // patientId: patient.attributes.card_id, // Convert ID to string if needed
     age: patient.attributes.age,
     gender: patient.attributes.gender,
     phone: patient.attributes.phone_number,
     branch: patient.attributes.branch,
     occupation: patient.attributes.occupation,
     editpatients: "editpatients",
-    card_id: patient.attributes.card_id, // Add card_id property
+    card_id: patient.attributes.card_id,
     id: patient.id,
   }));
+
   const handleViewMore = (id: string) => {
     console.log("Navigating to patient ID:", id);
-    navigate(` `);
+    navigate(`/patient/${id}`); // Properly format your navigation path
   };
+
+  const handlePageChange = (page: number) => {
+    // Call getAllPatients with the page number, perPage value, and the current baseEndpoint
+    getAllPatients(page.toString(), perPage.toString(), baseEndpoint);
+  };
+
   if (isLoading) return <Loader />;
+
   const columns: Columns[] = [
     {
       key: "name",
@@ -133,13 +153,23 @@ const FrontdeskInfo = ({ patients, isLoading }: FrondeskPatientDataProps) => {
 
   return (
     <div>
-      {" "}
-      <Table data={formattedPatients} columns={columns} rowKey="id" />
+      <Table
+        data={formattedPatients}
+        columns={columns}
+        rowKey="id"
+        pagination={true}
+        paginationData={pagination}
+        loading={isLoading}
+        onPageChange={handlePageChange}
+      />
       <EditPatientModal
         isLoading={isLoading}
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         patientData={selectedPatient}
+        onSave={function (data: any): void {
+          throw new Error("Function not implemented.");
+        }} // onSave={handleSavePatient}
       />
     </div>
   );

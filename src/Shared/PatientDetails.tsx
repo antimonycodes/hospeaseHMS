@@ -45,8 +45,6 @@ const PatientDetails = () => {
 
   const { selectedPatient, getPatientById, updatePatient } = usePatientStore();
 
-  console.log(selectedPatient);
-
   const {
     createReport,
     createNote,
@@ -108,6 +106,7 @@ const PatientDetails = () => {
       getPatientById(id);
       getAllReport(id);
       getMedicalNote(id, "doctor");
+      getMedicalNote(id, "consultant");
     }
   }, [id, getPatientById, getAllReport, getMedicalNote]);
 
@@ -123,9 +122,9 @@ const PatientDetails = () => {
     setIsLoading(true);
     try {
       await updatePatient(id, updatedPatientData);
-      toast.success("Patient information updated successfully");
+      // toast.success("Patient information updated successfully");
       setIsEditModalOpen(false);
-      getPatientById(id); // Refresh patient data
+      getPatientById(id);
     } catch (error) {
       console.error("Error updating patient:", error);
       toast.error("Failed to update patient information");

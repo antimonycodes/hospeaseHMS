@@ -127,7 +127,6 @@ const MatronNurseTable = ({ nurses, isLoading }: Props) => {
         data={transformedNurses}
         rowKey="id"
         pagination={true}
-        rowsPerPage={10}
       />
     </div>
   );

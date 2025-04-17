@@ -7,8 +7,14 @@ import AddDoctorModal from "../../../Shared/AddDoctorModal";
 
 const MedDoctor = () => {
   const [showModal, setShowModal] = useState(false);
-  const { createDoctor, getAllDoctors, doctors, createConsultant, isLoading } =
-    useDoctorStore();
+  const {
+    createDoctor,
+    getAllDoctors,
+    doctors,
+    createConsultant,
+    isLoading,
+    pagination,
+  } = useDoctorStore();
 
   const [formData, setFormData] = useState({
     first_name: "",
@@ -23,10 +29,13 @@ const MedDoctor = () => {
     refreshEndpoint: "",
   });
 
+  const baseEndpoint = "/medical-director/all-doctors";
+
   useEffect(() => {
-    getAllDoctors("/medical-director/all-doctors");
+    getAllDoctors("1", "10", baseEndpoint);
+
     const intervalId = setInterval(() => {
-      getAllDoctors("/medical-director/all-doctors");
+      getAllDoctors("1", "10", baseEndpoint);
     }, 60000);
     return () => clearInterval(intervalId);
   }, [getAllDoctors]);
@@ -58,7 +67,13 @@ const MedDoctor = () => {
           <Plus size={16} />
         </Button>
       </div>
-      <MedDoctorTable doctors={doctors} isLoading={isLoading} />
+      <MedDoctorTable
+        doctors={doctors}
+        isLoading={isLoading}
+        pagination={pagination}
+        getAllDoctors={getAllDoctors}
+        baseEndpoint={baseEndpoint}
+      />
 
       {showModal && (
         <AddDoctorModal

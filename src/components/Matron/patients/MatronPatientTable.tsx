@@ -34,14 +34,31 @@ type MatronPatientDataProps = {
     };
     id: number;
   }[];
+  pagination: {
+    total: number;
+    per_page: number;
+    current_page: number;
+    last_page: number;
+    from: number;
+    to: number;
+  } | null;
+  baseEndpoint?: string;
+  getAllPatients: (
+    page: string,
+    perPage: string,
+    baseEndpoint?: string
+  ) => void;
 };
 
 const MatronPatientTable = ({
   patients,
   isLoading,
+  pagination,
+  baseEndpoint,
+  getAllPatients,
 }: MatronPatientDataProps) => {
   const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState(0);
+  const [perPage, setPerPage] = useState(pagination?.per_page || 10);
 
   const formattedPatients = patients.map((patient: any) => ({
     name: `${patient.attributes.first_name} ${patient.attributes.last_name}`,
@@ -59,6 +76,9 @@ const MatronPatientTable = ({
     navigate(`/dashboard/matron/patients/${id}`);
   };
 
+  const handlePageChange = (page: number) => {
+    getAllPatients(page.toString(), perPage.toString(), baseEndpoint);
+  };
   if (isLoading) return <Loader />;
 
   if (!patients.length) return <div>No patients to display</div>;
@@ -127,9 +147,10 @@ const MatronPatientTable = ({
         data={formattedPatients}
         columns={columns}
         rowKey="id"
-        currentPage={currentPage}
-        pagination={formattedPatients.length > 10}
-        rowsPerPage={10}
+        pagination={true}
+        paginationData={pagination}
+        loading={isLoading}
+        onPageChange={handlePageChange}
       />
     </div>
   );

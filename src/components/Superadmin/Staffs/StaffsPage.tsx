@@ -14,8 +14,14 @@ interface StaffsPageProps {
 
 const StaffsPage: React.FC<StaffsPageProps> = ({ department }) => {
   const [showModal, setShowModal] = useState(false);
-  const { createStaff, isLoading, isStaffLoading, getDeptStaffs, staffs } =
-    useGlobalStore();
+  const {
+    createStaff,
+    isLoading,
+    isStaffLoading,
+    getDeptStaffs,
+    staffs,
+    pagination,
+  } = useGlobalStore();
 
   const {
     getAllRoles,
@@ -77,7 +83,12 @@ const StaffsPage: React.FC<StaffsPageProps> = ({ department }) => {
       </div>
 
       {/* table */}
-      <StaffsList staffs={staffs} isStaffLoading={isStaffLoading} />
+      <StaffsList
+        staffs={staffs}
+        isStaffLoading={isStaffLoading}
+        pagination={pagination}
+        getDeptStaffs={getDeptStaffs}
+      />
 
       {/* Add Staff Modal */}
       {showModal && (

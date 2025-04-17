@@ -138,11 +138,13 @@ export interface NurseStats {
 interface NurseStore {
   isLoading: boolean;
   isDeleting: boolean;
+  pagination: Pagination | null;
+
   nurses: Nurse[];
   frontdesks: any[];
   selectedNurse: any | null;
   selectedPatient: any | null; // Added selectedPatient property
-  getNurses: () => Promise<any>;
+  getNurses: (page?: string, perPage?: string) => Promise<any>;
   getFrontdesk: () => Promise<any>;
   getNurseById: (id: string) => Promise<any>;
   createNurse: (data: CreateNurseData) => Promise<any>;
@@ -157,18 +159,23 @@ interface NurseStore {
 export const useNurseStore = create<NurseStore>((set, get) => ({
   isLoading: false,
   isDeleting: false,
+  pagination: null,
   nurses: [],
   stats: null,
   frontdesks: [],
   selectedNurse: null,
   selectedPatient: null,
-  getNurses: async () => {
+  getNurses: async (page = "1", perPage = "10") => {
     set({ isLoading: true });
     try {
-      const response = await api.get("/admin/nurse/fetch");
+      const response = await api.get(
+        `/admin/nurse/fetch?page=${page}&per_page=${perPage}`
+      );
       if (response.status === 200 || response.status === 201) {
         console.log(response.data.data);
         set({ nurses: response.data.data.data });
+        set({ pagination: response.data.data.pagination });
+
         return true;
       }
       return false;
