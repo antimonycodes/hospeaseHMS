@@ -154,7 +154,6 @@ const ConsultantTable = () => {
         data={filteredPatients}
         rowKey="patientId"
         pagination={true}
-        // rowsPerPage={5}
       />
     </div>
   );

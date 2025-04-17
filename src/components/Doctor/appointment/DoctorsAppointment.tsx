@@ -165,7 +165,6 @@ const DoctorsAppointment = () => {
         data={filteredPatients}
         rowKey="patientId"
         pagination={true}
-        rowsPerPage={5}
       />
 
       {/* <FrontdeskAppointmentModal isOpen={isModalOpen} onClose={closeModal} /> */}

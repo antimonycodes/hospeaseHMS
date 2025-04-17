@@ -122,7 +122,6 @@ const FpaymentTable = ({
       data={formattedPayments}
       columns={columns}
       rowKey="id"
-      rowsPerPage={10}
     />
   );
 };
