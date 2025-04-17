@@ -1,17 +1,30 @@
-import { JSX, useState, useEffect } from "react";
+// FrondeskAppointmentTable.tsx
+import { JSX, useEffect, useState } from "react";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import AppointmentDetails from "./AppointmentDetails";
 import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
 
-const FrondeskAppointmentTable = () => {
-  const [openModal, setOpenModal] = useState(false);
+type FrondeskAppointmentTableProps = {
+  endpoint?: string; // Allow custom endpoint
+  bookEndpoint?: string; // Endpoint for booking appointments
+  refreshEndpoint?: string; // Endpoint for refreshing after booking
+  tableTitle?: string; // Custom table title
+};
 
-  const { appointments, isLoading, getAllAppointments } = usePatientStore();
+const FrondeskAppointmentTable = ({
+  endpoint = "/front-desk/appointment/all-records",
+  bookEndpoint = "/front-desk/appointment/book",
+  refreshEndpoint = "/front-desk/appointment/all-records",
+  tableTitle = "Appointment",
+}: FrondeskAppointmentTableProps) => {
+  const [openModal, setOpenModal] = useState(false);
+  const { appointments, pagination, isLoading, getAllAppointments } =
+    usePatientStore();
 
   useEffect(() => {
-    getAllAppointments("/front-desk/appointment/all-records");
-  }, [getAllAppointments]);
+    getAllAppointments("1", "10", endpoint);
+  }, [getAllAppointments, endpoint]);
 
   const handleOpenModal = () => {
     setOpenModal(true);
@@ -20,7 +33,7 @@ const FrondeskAppointmentTable = () => {
   return (
     <div>
       <Tablehead
-        tableTitle="Appointment"
+        tableTitle={tableTitle}
         showButton={true}
         typebutton="Book Appointment"
         onButtonClick={handleOpenModal}
@@ -28,13 +41,18 @@ const FrondeskAppointmentTable = () => {
         showControls={true}
       />
 
-      <AppointmentDetails />
+      <AppointmentDetails
+        data={appointments}
+        pagination={pagination}
+        isLoading={isLoading}
+        endpoint={endpoint}
+      />
 
       {openModal && (
         <BookAppointmentModal
           onClose={() => setOpenModal(false)}
-          endpoint="/front-desk/appointment/book"
-          refreshEndpoint="/front-desk/appointment/all-records"
+          endpoint={bookEndpoint}
+          refreshEndpoint={refreshEndpoint}
         />
       )}
     </div>

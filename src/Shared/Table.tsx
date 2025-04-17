@@ -21,7 +21,7 @@ interface PaginationData {
 interface TableProps<T> {
   columns: Column<T>[];
   data: T[];
-  rowKey: keyof T;
+  rowKey: keyof T | string;
   pagination?: boolean;
   paginationData?: PaginationData | null;
   radius?: string;

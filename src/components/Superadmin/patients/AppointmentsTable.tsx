@@ -4,36 +4,49 @@ import Table from "../../../Shared/Table";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 
 // Define interfaces based on your API response
-export interface AppointmentAttributes {
-  doctor: string;
-  status: string; // This is "pending", "approved", etc. from your API
-  rescheduled_data: any | null;
-  doctor_contact: string | null;
-  gender: string;
-  patient_contact: string;
-  occupation: string;
-  patient: string;
-  date: string;
-  time: string;
-  reason_if_rejected_or_rescheduled: string | null;
-  assigned_by: string;
-  created_at: string;
-}
-
-interface AppointmentData {
-  type: string;
+type AppointmentData = {
   id: number;
-  attributes: AppointmentAttributes;
-}
-
-// Use the same Column interface structure that your Table component expects
-type TableColumn<T> = {
-  key: keyof T;
-  label: string;
-  render?: (value: any, row: T) => JSX.Element;
+  attributes: {
+    doctor: string;
+    status: string;
+    card_id: string;
+    rescheduled_data: any | null;
+    doctor_contact: string | null;
+    gender: string;
+    patient_contact: string;
+    occupation: string;
+    patient: string;
+    date: string;
+    time: string;
+    reason_if_rejected_or_rescheduled: string | null;
+    assigned_by: string;
+    created_at: string;
+    responded_at: string | null;
+  };
 };
 
-// Map API status to UI status format and styles
+type AppointmentAttributes = AppointmentData["attributes"];
+
+type Columns = {
+  key: keyof AppointmentAttributes;
+  label: string;
+  render?: (value: any, data: AppointmentAttributes) => JSX.Element; // Use AppointmentAttributes
+};
+
+type AppointmentTableProps = {
+  data: AppointmentData[];
+  pagination: {
+    total: number;
+    per_page: number;
+    current_page: number;
+    last_page: number;
+    from: number;
+    to: number;
+  } | null;
+  isLoading: boolean;
+  endpoint: string;
+};
+
 const formatStatus = (
   status: string
 ): "Pending" | "Accepted" | "Declined" | "Rescheduled" => {
@@ -42,17 +55,15 @@ const formatStatus = (
     "Pending" | "Accepted" | "Declined" | "Rescheduled"
   > = {
     pending: "Pending",
-    approved: "Accepted", // still keep for legacy
-    accepted: "Accepted", // <-- add this
+    approved: "Accepted",
+    accepted: "Accepted",
     rejected: "Declined",
-    declined: "Declined", // optional fallback
+    declined: "Declined",
     rescheduled: "Rescheduled",
-    reschedule: "Rescheduled", // <-- add this
+    reschedule: "Rescheduled",
   };
-
   return statusMap[status.toLowerCase()] || "Pending";
 };
-
 const statusStyles: Record<string, string> = {
   Pending: "bg-[#FFEBAA] text-[#B58A00]",
   Accepted: "bg-[#CFFFE9] text-[#009952]",
@@ -63,72 +74,44 @@ const statusStyles: Record<string, string> = {
 const tabs = ["All", "Pending", "Accepted", "Declined", "Rescheduled"] as const;
 type TabType = (typeof tabs)[number];
 
-// Create a flattened type that includes both top-level properties and attributes properties
-// This will allow us to use dot notation for accessing nested properties
-type FlattenedAppointment = {
-  id: number;
-  type: string;
-  // Add all attributes as direct properties
-  patient: string;
-  doctor: string;
-  status: string;
-  gender: string;
-  patient_contact: string;
-  occupation: string;
-  date: string;
-  time: string;
-  created_at: string;
-  doctor_contact: string | null;
-  rescheduled_data: any | null;
-  reason_if_rejected_or_rescheduled: string | null;
-  assigned_by: string;
-};
-
-const AppointmentTable = () => {
+const AppointmentTable = ({
+  data,
+  isLoading,
+  pagination,
+  endpoint,
+}: AppointmentTableProps) => {
+  const { getAllAppointments } = usePatientStore();
   const [activeTab, setActiveTab] = useState<TabType>("All");
-  const { appointments, isLoading, getAllAppointments } = usePatientStore();
+  const [perPage, setPerPage] = useState(pagination?.per_page || 10);
 
-  useEffect(() => {
-    getAllAppointments("/admin/appointment/all-records");
-  }, [getAllAppointments]);
+  // useEffect(() => {
+  //   getAllAppointments("/admin/appointment/all-records");
+  // }, [getAllAppointments]);
 
-  // Function to flatten appointment data for table consumption
-  const flattenAppointments = (
-    data: AppointmentData[]
-  ): FlattenedAppointment[] => {
-    return data.map((appointment) => ({
-      id: appointment.id,
-      type: appointment.type,
-      // Spread attributes properties to top level
-      ...appointment.attributes,
-    }));
-  };
-
-  // Define columns for the flattened appointment data
-  const columns: TableColumn<FlattenedAppointment>[] = [
+  const columns: Columns[] = [
     {
       key: "patient",
       label: "Name",
-      render: (_, data) => (
-        <span className="font-medium text-[#101828]">{data.patient}</span>
+      render: (_, attributes) => (
+        <span className="font-medium text-[#101828]">{attributes.patient}</span>
       ),
     },
     {
-      key: "id",
-      label: "Appointment ID",
-      render: (_, data) => (
-        <span className="text-[#667085]">
-          #{data.id.toString().padStart(6, "0")}
-        </span>
+      key: "card_id",
+      label: "Patient ID",
+      render: (_, attributes) => (
+        <span className="font-medium text-[#101828]">{attributes.card_id}</span>
       ),
     },
+
     {
       key: "gender",
       label: "Gender",
-      render: (_, data) => (
+      render: (_, attributes) => (
         <span className="text-[#667085]">
-          {data.gender
-            ? data.gender.charAt(0).toUpperCase() + data.gender.slice(1)
+          {attributes.gender
+            ? attributes.gender.charAt(0).toUpperCase() +
+              attributes.gender.slice(1)
             : "N/A"}
         </span>
       ),
@@ -136,29 +119,31 @@ const AppointmentTable = () => {
     {
       key: "patient_contact",
       label: "Phone",
-      render: (_, data) => (
-        <span className="text-[#667085]">{data.patient_contact || "N/A"}</span>
+      render: (_, attributes) => (
+        <span className="text-[#667085]">
+          {attributes.patient_contact || "N/A"}
+        </span>
       ),
     },
     {
       key: "occupation",
       label: "Occupation",
-      render: (_, data) => (
-        <span className="text-[#667085]">{data.occupation || "N/A"}</span>
+      render: (_, attributes) => (
+        <span className="text-[#667085]">{attributes.occupation || "N/A"}</span>
       ),
     },
     {
       key: "doctor",
       label: "Doctor Assigned",
-      render: (_, data) => (
-        <span className="text-[#667085]">{data.doctor || "N/A"}</span>
+      render: (_, attributes) => (
+        <span className="text-[#667085]">{attributes.doctor || "N/A"}</span>
       ),
     },
     {
       key: "status",
       label: "Status",
-      render: (_, data) => {
-        const displayStatus = formatStatus(data.status);
+      render: (_, attributes) => {
+        const displayStatus = formatStatus(attributes.status);
         return (
           <span
             className={`px-3 py-1 rounded-full text-sm font-medium ${statusStyles[displayStatus]}`}
@@ -169,22 +154,14 @@ const AppointmentTable = () => {
       },
     },
   ];
+  const handlePageChange = (page: number) => {
+    getAllAppointments(page.toString(), perPage.toString(), endpoint);
+  };
 
-  // Calculate status counts from API data
   const getStatusCounts = () => {
-    if (!appointments || !appointments.length) {
-      return {
-        All: 0,
-        Pending: 0,
-        Accepted: 0,
-        Declined: 0,
-        Rescheduled: 0,
-      } as Record<TabType, number>;
-    }
-
-    return appointments.reduce(
-      (acc, appointment) => {
-        const status = formatStatus(appointment.attributes.status);
+    return data.reduce(
+      (acc, item) => {
+        const status = formatStatus(item.attributes.status);
         acc[status]++;
         acc.All++;
         return acc;
@@ -201,24 +178,13 @@ const AppointmentTable = () => {
 
   const statusCounts = getStatusCounts();
 
-  // Filter appointments based on selected tab
   const filteredAppointments =
     activeTab === "All"
-      ? appointments || []
-      : (appointments || []).filter(
-          (a) => formatStatus(a.attributes.status) === activeTab
-        );
+      ? data
+      : data.filter((a) => formatStatus(a.attributes.status) === activeTab);
 
-  // Flatten the filtered appointments for the table
-  const flattenedAppointments = flattenAppointments(filteredAppointments);
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-40">
-        Loading appointments...
-      </div>
-    );
-  }
+  // Map data to attributes for the Table component
+  const tableData = filteredAppointments.map((item) => item.attributes);
 
   return (
     <div className="mt-2">
@@ -227,7 +193,7 @@ const AppointmentTable = () => {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`pb-2 text-xs md:text-sm font-medium ${
+            className={`pb-2 px-4 text-xs md:text-sm font-medium ${
               activeTab === tab
                 ? "text-green-600 border-b-2 border-green-600"
                 : "text-gray-500"
@@ -246,17 +212,19 @@ const AppointmentTable = () => {
           </button>
         ))}
       </div>
-
-      {flattenedAppointments.length === 0 ? (
+      {tableData.length === 0 ? (
         <div className="mt-10 text-center text-gray-500">
           No appointments found
         </div>
       ) : (
         <Table
           columns={columns}
-          data={flattenedAppointments}
+          data={tableData}
           rowKey="id"
           pagination={true}
+          paginationData={pagination}
+          loading={isLoading}
+          onPageChange={handlePageChange}
         />
       )}
     </div>
