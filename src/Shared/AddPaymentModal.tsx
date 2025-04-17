@@ -156,7 +156,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
     };
 
     try {
-      const success = await createPayment(payload, endpoint);
+      const success = await createPayment(payload, endpoint, refreshEndpoint);
       if (success) {
         // Generate receipt number and set payment date
         setReceiptNumber(`RCP${Date.now().toString().slice(-8)}`);
