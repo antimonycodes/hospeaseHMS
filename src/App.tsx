@@ -56,6 +56,7 @@ import SignupSuccess from "./_Auth/SignupSuccess";
 import NurseDetail from "./components/Nurse/patients/NurseDetail";
 import ServiceCharges from "./pages/ServiceCharges";
 import ForgotPassword from "./_Auth/ForgotPassword";
+import Category from "./pages/Category";
 
 function App() {
   return (
@@ -161,6 +162,7 @@ function App() {
               <Route path="profile" element={<Profile />} />
               <Route path="shifts" element={<Shift />} />
               <Route path="inventory" element={<Inventory />} />
+              <Route path="category" element={<Category />} />
               <Route path="stocks" element={<Stocks />} />
               <Route path="request" element={<Request />} />
               <Route path="expenses" element={<Expenses />} />

@@ -43,8 +43,9 @@ export interface Stock {
 }
 
 // Category interface to match the /inventory/category/all-records response
-export interface Category {
+export interface Categories {
   id: number;
+  name: string;
   attributes: {
     name: string;
   };
@@ -112,7 +113,7 @@ export interface InventoryStats {
 interface InventoryStore {
   isLoading: boolean;
   stats: InventoryStats;
-  categories: Category[];
+  categories: Categories[];
 
   pagination: Pagination | null;
   getInventoryStats: () => Promise<void>;
@@ -128,6 +129,10 @@ interface InventoryStore {
     endpoint?: string,
     refreshEndpoint?: string
   ) => Promise<boolean>;
+  createCategory: (
+    data: { name: string },
+    endpoint?: string
+  ) => Promise<boolean>;
 }
 
 export const useInventoryStore = create<InventoryStore>((set, get) => ({
@@ -140,7 +145,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
   pagination: null,
   stocks: [],
   requests: [],
-  categories: [] as Category[],
+  categories: [],
 
   getAllRequest: async (
     endpoint = "/inventory/requests/all-records?status=pending"
@@ -158,6 +163,20 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
+  // getAllCategory: async (endpoint = "/inventory/category/all-records") => {
+  //   set({ isLoading: true });
+  //   try {
+  //     const response = await api.get(endpoint);
+  //     console.log("getAllCategory response:", response.data);
+  //     set({ categories: response.data.data || [] });
+  //     toast.success(response.data.message || "Categorys fetched successfully");
+  //   } catch (error: any) {
+  //     console.error("getAllCategory error:", error.response?.data);
+  //     toast.error(error.response?.data?.message || "Failed to fetch category");
+  //   } finally {
+  //     set({ isLoading: false });
+  //   }
+  // },
 
   createRequest: async (
     data,
@@ -177,6 +196,28 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
     } catch (error: any) {
       console.error("createRequest error:", error.response?.data);
       toast.error(error.response?.data?.message || "Failed to create request");
+      return false;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  createCategory: async (
+    data: { name: string },
+    endpoint = "/inventory/category/create"
+  ) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.post(endpoint, data);
+      console.log("createCategory response:", response.data);
+      if (response.status === 201) {
+        await get().getCategories();
+        toast.success(response.data.message || "Category created successfully");
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.error("createCategory error:", error.response?.data);
+      toast.error(error.response?.data?.message || "Failed to create Category");
       return false;
     } finally {
       set({ isLoading: false });
