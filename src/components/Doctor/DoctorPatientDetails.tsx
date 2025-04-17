@@ -548,6 +548,9 @@ const DoctorPatientDetails = () => {
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         patientData={patient}
+        onSave={function (data: any): void {
+          throw new Error("Function not implemented.");
+        }}
       />
     </div>
   );
