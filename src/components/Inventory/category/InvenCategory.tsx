@@ -1,76 +1,55 @@
 import { JSX, useEffect } from "react";
+import Tablehead from "../../ReusablepatientD/Tablehead";
+import { useInventoryStore } from "../overview/useInventoryStore";
 import Table from "../../../Shared/Table";
-import { Categories, useInventoryStore } from "../overview/useInventoryStore";
+import Loader from "../../../Shared/Loader";
 
-interface InvenCategoryProps {
-  categories: Categories[];
-  isLoading: boolean;
-}
-
-interface FormattedCategory {
-  id: number;
+type InventoryData = {
   name: string;
-}
+  id: number;
+};
 
-const InvenCategory: React.FC<InvenCategoryProps> = ({
-  categories,
-  isLoading,
-}) => {
-  const { getCategories } = useInventoryStore();
+type Columns = {
+  key: keyof InventoryData;
+  label: string;
+  render?: (value: any, category: InventoryData) => JSX.Element;
+};
 
-  useEffect(() => {
-    getCategories();
-  }, [getCategories]);
+type InventoryDataProps = {
+  isLoading: boolean;
+  categorys: {
+    attributes: {
+      name: string;
+    };
+    id: number;
+  }[];
+};
 
-  // Define table columns
-  type Columns = {
-    key: keyof FormattedCategory | "id";
-    label: string;
-    render?: (value: any, category: FormattedCategory) => JSX.Element;
-  };
+const InvenCategory = ({ categorys, isLoading }: InventoryDataProps) => {
+  // const { getAllCategorys } = useInventoryStore();
+
+  const formattedCategorys = (categorys || []).map((category) => ({
+    id: category.id,
+    name: category.attributes.name,
+  }));
 
   const columns: Columns[] = [
     {
-      key: "id",
-      label: "ID",
-      render: (value) => (
-        <span className="text-dark font-medium text-sm">{value}</span>
-      ),
-    },
-    {
       key: "name",
       label: "Category Name",
-      render: (value) => (
-        <span className="text-dark font-medium text-sm">{value}</span>
-      ),
+      render: (_, category) => <span>{category.name}</span>,
     },
   ];
 
-  // Flatten categories for the Table component
-  const formattedCategories: FormattedCategory[] = categories.map(
-    (category) => ({
-      id: category.id,
-      name: category.attributes?.name || "Unnamed Category",
-    })
-  );
-
-  if (isLoading) {
-    return <p>Loading...</p>;
-  }
-
+  if (isLoading) return <Loader />;
   return (
     <div>
-      {formattedCategories.length === 0 ? (
-        <p>No categories found.</p>
-      ) : (
-        <Table
-          data={formattedCategories}
-          columns={columns}
-          rowKey="id"
-          // rowsPerPage={10}
-          radius="rounded-none"
-        />
-      )}
+      <Table
+        data={formattedCategorys}
+        columns={columns}
+        rowKey="id"
+        loading={isLoading}
+      />
     </div>
   );
 };
