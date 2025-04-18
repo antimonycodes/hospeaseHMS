@@ -25,7 +25,7 @@ interface AddStockModalProps {
 }
 
 const AddStockModal: React.FC<AddStockModalProps> = ({ onClose }) => {
-  const { createStock, getCategories, categories, isLoading } =
+  const { createStock, getAllCategorys, categorys, isLoading } =
     useInventoryStore();
   const [stock, setStock] = React.useState<AddStockData>({
     item: "",
@@ -38,8 +38,8 @@ const AddStockModal: React.FC<AddStockModalProps> = ({ onClose }) => {
 
   // Fetch categories on mount
   useEffect(() => {
-    getCategories();
-  }, [getCategories]);
+    getAllCategorys();
+  }, [getAllCategorys]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -52,10 +52,10 @@ const AddStockModal: React.FC<AddStockModalProps> = ({ onClose }) => {
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setStock((prev) => ({ ...prev, image: file }));
-  };
+  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0] || null;
+  //   setStock((prev) => ({ ...prev, image: file }));
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,12 +127,26 @@ const AddStockModal: React.FC<AddStockModalProps> = ({ onClose }) => {
                 className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
               >
                 <option value="">Select Category</option>
-                {categories.map((category) => (
+                {categorys.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.attributes.name}
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-custom-black mb-1">
+                Quantity
+              </label>
+              <input
+                type="number"
+                name="quantity"
+                value={stock.quantity}
+                onChange={handleChange}
+                disabled={isLoading}
+                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
+              />
             </div>
 
             <div>
@@ -153,20 +167,6 @@ const AddStockModal: React.FC<AddStockModalProps> = ({ onClose }) => {
 
             <div>
               <label className="block text-sm font-medium text-custom-black mb-1">
-                Quantity
-              </label>
-              <input
-                type="text"
-                name="quantity"
-                value={stock.quantity}
-                onChange={handleChange}
-                disabled={isLoading}
-                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-custom-black mb-1">
                 Expiry Date
               </label>
               <input
@@ -176,20 +176,6 @@ const AddStockModal: React.FC<AddStockModalProps> = ({ onClose }) => {
                 onChange={handleChange}
                 disabled={isLoading}
                 className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-custom-black mb-1">
-                Image (Optional)
-              </label>
-              <input
-                type="file"
-                name="image"
-                onChange={handleFileChange}
-                disabled={isLoading}
-                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
-                accept="image/*"
               />
             </div>
           </div>
