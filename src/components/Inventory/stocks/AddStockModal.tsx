@@ -11,6 +11,7 @@ export interface AddStockData {
   cost: number;
   image: File | null;
 }
+
 export interface Category {
   id: number;
   attributes: {
@@ -20,11 +21,15 @@ export interface Category {
 
 interface AddStockModalProps {
   onClose: () => void;
-  refreshEndpoint: string;
-  endpoint: string;
+  refreshEndpoint?: string;
+  endpoint?: string;
 }
 
-const AddStockModal: React.FC<AddStockModalProps> = ({ onClose }) => {
+const AddStockModal: React.FC<AddStockModalProps> = ({
+  onClose,
+  endpoint = "/inventory/create-stock",
+  refreshEndpoint = "/inventory/all-inventory-items",
+}) => {
   const { createStock, getAllCategorys, categorys, isLoading } =
     useInventoryStore();
   const [stock, setStock] = React.useState<AddStockData>({
@@ -47,15 +52,14 @@ const AddStockModal: React.FC<AddStockModalProps> = ({ onClose }) => {
     const { name, value } = e.target;
     setStock((prev) => ({
       ...prev,
-      [name]:
-        name === "cost" || name === "quantity" ? parseFloat(value) || 0 : value,
+      [name]: name === "cost" ? parseFloat(value) || 0 : value,
     }));
   };
 
-  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = e.target.files?.[0] || null;
-  //   setStock((prev) => ({ ...prev, image: file }));
-  // };
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setStock((prev) => ({ ...prev, image: file }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,6 +74,8 @@ const AddStockModal: React.FC<AddStockModalProps> = ({ onClose }) => {
       toast.error("Please fill in all required fields");
       return;
     }
+
+    console.log("Submitting stock data:", stock);
 
     try {
       const success = await createStock(stock);
@@ -140,7 +146,7 @@ const AddStockModal: React.FC<AddStockModalProps> = ({ onClose }) => {
                 Quantity
               </label>
               <input
-                type="number"
+                type="text"
                 name="quantity"
                 value={stock.quantity}
                 onChange={handleChange}
@@ -154,7 +160,7 @@ const AddStockModal: React.FC<AddStockModalProps> = ({ onClose }) => {
                 Purchase Cost
               </label>
               <input
-                type="text"
+                type="number"
                 name="cost"
                 value={stock.cost}
                 onChange={handleChange}
@@ -176,6 +182,20 @@ const AddStockModal: React.FC<AddStockModalProps> = ({ onClose }) => {
                 onChange={handleChange}
                 disabled={isLoading}
                 className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-custom-black mb-1">
+                Image (Optional)
+              </label>
+              <input
+                type="file"
+                name="image"
+                onChange={handleFileChange}
+                disabled={isLoading}
+                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
+                accept="image/*"
               />
             </div>
           </div>

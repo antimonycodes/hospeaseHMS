@@ -210,21 +210,37 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
   }) => {
     set({ isLoading: true });
     try {
-      const form = new FormData();
-      form.append("item", item);
-      form.append("quantity", quantity);
-      form.append("category_id", category_id);
-      form.append("expiry_date", expiry_date);
-      form.append("cost", cost.toString());
-      if (image) {
-        form.append("image", image);
-      }
+      // Try JSON payload first
+      const payload = {
+        item_name: item, // Adjust field names based on API requirements
+        quantity: quantity.toString(),
+        category_id: category_id.toString(),
+        expiry_date,
+        cost: cost.toString(),
+      };
+      console.log("Attempting JSON payload:", payload);
 
-      const response = await api.post("/inventory/upload-item", form, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      let response = await api.post("/inventory/create-stock", payload); // Try a different endpoint
+
+      // If JSON fails with "prohibited" error, try FormData
+      if (response.status !== 201 && image) {
+        console.log("JSON payload failed, trying FormData...");
+        const form = new FormData();
+        form.append("item_name", item); // Adjust field names
+        form.append("quantity", quantity.toString());
+        form.append("category_id", category_id.toString());
+        form.append("expiry_date", expiry_date);
+        form.append("cost", cost.toString());
+        if (image) {
+          form.append("image", image);
+        }
+
+        response = await api.post("/inventory/upload-item", form, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+      }
 
       if (response.status === 201) {
         toast.success(response.data.message || "Stock added successfully");
