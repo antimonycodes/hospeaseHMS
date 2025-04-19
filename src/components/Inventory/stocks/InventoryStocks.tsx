@@ -6,7 +6,7 @@ import InventoryStockTable from "./InventoryStockTable";
 
 const InventoryStocks = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { getAllStocks, stocks, isLoading } = useInventoryStore();
+  const { getAllStocks, stocks, isLoading, createStock } = useInventoryStore();
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -40,6 +40,8 @@ const InventoryStocks = () => {
       {isModalOpen && (
         <AddStockModal
           onClose={closeModal}
+          isLoading={isLoading}
+          createStock={createStock}
           endpoint="/inventory/upload-item"
           refreshEndpoint="/inventory/all-inventory-items"
         />

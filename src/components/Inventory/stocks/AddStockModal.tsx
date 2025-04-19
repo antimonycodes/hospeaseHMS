@@ -1,16 +1,19 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import toast from "react-hot-toast";
-import { useInventoryStore } from "../overview/useInventoryStore";
+import {
+  CreateStockData,
+  useInventoryStore,
+} from "../overview/useInventoryStore";
 
-export interface AddStockData {
-  item: string;
-  quantity: string;
-  category_id: string;
-  expiry_date: string;
-  cost: number;
-  image: File | null;
-}
+// export interface AddStockData {
+//   item: string;
+//   quantity: string;
+//   category_id: string;
+//   expiry_date: string;
+//   cost: number;
+//   image: File | null;
+// }
 
 export interface Category {
   id: number;
@@ -21,18 +24,30 @@ export interface Category {
 
 interface AddStockModalProps {
   onClose: () => void;
+  isLoading?: boolean;
+  createStock?: (
+    data: CreateStockData,
+    endpoint?: string,
+    refreshEndpoint?: string
+  ) => Promise<boolean | null>;
   refreshEndpoint?: string;
   endpoint?: string;
 }
 
-const AddStockModal: React.FC<AddStockModalProps> = ({
+const AddStockModal = ({
   onClose,
-  endpoint = "/inventory/create-stock",
-  refreshEndpoint = "/inventory/all-inventory-items",
-}) => {
-  const { createStock, getAllCategorys, categorys, isLoading } =
-    useInventoryStore();
-  const [stock, setStock] = React.useState<AddStockData>({
+  createStock,
+  isLoading,
+  endpoint,
+  refreshEndpoint,
+}: AddStockModalProps) => {
+  const { getAllCategorys, categorys } = useInventoryStore();
+
+  useEffect(() => {
+    getAllCategorys();
+  }, [getAllCategorys]);
+
+  const [stock, setStock] = useState<CreateStockData>({
     item: "",
     quantity: "",
     category_id: "",
@@ -40,11 +55,6 @@ const AddStockModal: React.FC<AddStockModalProps> = ({
     cost: 0,
     image: null,
   });
-
-  // Fetch categories on mount
-  useEffect(() => {
-    getAllCategorys();
-  }, [getAllCategorys]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -61,6 +71,39 @@ const AddStockModal: React.FC<AddStockModalProps> = ({
     setStock((prev) => ({ ...prev, image: file }));
   };
 
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+
+  //   if (
+  //     !stock.item ||
+  //     !stock.category_id ||
+  //     !stock.cost ||
+  //     !stock.quantity ||
+  //     !stock.expiry_date
+  //   ) {
+  //     toast.error("Please fill in all required fields");
+  //     return;
+  //   }
+
+  //   console.log("Submitting stock data:", stock);
+
+  //   try {
+  //     const success = await createStock(stock);
+  //     if (success) {
+  //       setStock({
+  //         item: "",
+  //         quantity: "",
+  //         category_id: "",
+  //         expiry_date: "",
+  //         cost: 0,
+  //         image: null,
+  //       });
+  //       onClose();
+  //     }
+  //   } catch (error) {
+  //     // Error is handled in createStock with toast
+  //   }
+  // };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -70,28 +113,29 @@ const AddStockModal: React.FC<AddStockModalProps> = ({
       !stock.cost ||
       !stock.quantity ||
       !stock.expiry_date
-    ) {
-      toast.error("Please fill in all required fields");
+    )
+      return;
+
+    if (!createStock) {
+      console.error("createStock function is not defined");
       return;
     }
 
-    console.log("Submitting stock data:", stock);
-
-    try {
-      const success = await createStock(stock);
-      if (success) {
-        setStock({
-          item: "",
-          quantity: "",
-          category_id: "",
-          expiry_date: "",
-          cost: 0,
-          image: null,
-        });
-        onClose();
-      }
-    } catch (error) {
-      // Error is handled in createStock with toast
+    const success = await createStock(
+      stock,
+      endpoint,
+      "/inventory/all-inventory-items"
+    );
+    if (success) {
+      setStock({
+        item: "",
+        quantity: "",
+        category_id: "",
+        expiry_date: "",
+        cost: 0,
+        // image: null,
+      });
+      onClose();
     }
   };
 
@@ -146,7 +190,7 @@ const AddStockModal: React.FC<AddStockModalProps> = ({
                 Quantity
               </label>
               <input
-                type="text"
+                type="number"
                 name="quantity"
                 value={stock.quantity}
                 onChange={handleChange}
@@ -185,7 +229,7 @@ const AddStockModal: React.FC<AddStockModalProps> = ({
               />
             </div>
 
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium text-custom-black mb-1">
                 Image (Optional)
               </label>
@@ -197,7 +241,7 @@ const AddStockModal: React.FC<AddStockModalProps> = ({
                 className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
                 accept="image/*"
               />
-            </div>
+            </div> */}
           </div>
 
           <div className="mt-6">

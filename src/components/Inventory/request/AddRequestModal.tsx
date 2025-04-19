@@ -33,7 +33,7 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
   // Debounced search function
   const handleSearch = debounce(async (val: string) => {
     // console.log("handleSearch triggered with value:", val);
-    if (val.length < 2) {
+    if (val.length > 2) {
       const results = await searchStaff(val);
       setStaffOptions(results || []);
     } else {

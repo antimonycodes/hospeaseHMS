@@ -71,6 +71,14 @@ export interface Request {
   item_name: string;
   created_at: string;
 }
+export interface CreateStockData {
+  item: string;
+  quantity: string;
+  category_id: string;
+  expiry_date: string;
+  cost: number;
+  image?: File | null;
+}
 
 export interface InventoryStats {
   total_inventories: number;
@@ -87,7 +95,11 @@ interface InventoryStore {
   requests: Request[];
   getInventoryStats: () => Promise<void>;
   getAllStocks: (endpoint?: string) => Promise<void>;
-  createStock: (formData: any) => Promise<boolean>;
+  createStock: (
+    data: CreateStockData,
+    endpoint?: string,
+    refreshEndpoint?: string
+  ) => Promise<boolean | null>;
   searchStaff: (query: string) => Promise<Staff[]>;
   getAllRequest: (endpoint?: string) => Promise<void>;
   getAllCategorys: () => Promise<void>;
@@ -116,9 +128,11 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
 
   searchStaff: async (query: string) => {
     try {
-      const response = await api.get(`/staff/all?search=${query}`); // Replace with correct staff endpoint
+      const response = await api.get(
+        `/medical-report/all-patient?search=${query}`
+      );
       console.log("Staff search response:", response.data);
-      const staffData = response.data.data?.data || response.data.data || [];
+      const staffData = response.data.data;
       return staffData;
     } catch (error: any) {
       console.error("Staff search error:", error.response?.data);
@@ -200,47 +214,25 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
     }
   },
 
-  createStock: async ({
-    item,
-    quantity,
-    category_id,
-    expiry_date,
-    cost,
-    image,
-  }) => {
+  createStock: async (
+    data: CreateStockData,
+    endpoint = "/inventory/upload-item"
+  ) => {
     set({ isLoading: true });
     try {
-      // Try JSON payload first
-      const payload = {
-        item_name: item, // Adjust field names based on API requirements
-        quantity: quantity.toString(),
-        category_id: category_id.toString(),
-        expiry_date,
-        cost: cost.toString(),
-      };
-      console.log("Attempting JSON payload:", payload);
-
-      let response = await api.post("/inventory/create-stock", payload); // Try a different endpoint
-
-      // If JSON fails with "prohibited" error, try FormData
-      if (response.status !== 201 && image) {
-        console.log("JSON payload failed, trying FormData...");
-        const form = new FormData();
-        form.append("item_name", item); // Adjust field names
-        form.append("quantity", quantity.toString());
-        form.append("category_id", category_id.toString());
-        form.append("expiry_date", expiry_date);
-        form.append("cost", cost.toString());
-        if (image) {
-          form.append("image", image);
-        }
-
-        response = await api.post("/inventory/upload-item", form, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+      const form = new FormData();
+      form.append("item", data.item);
+      form.append("quantity", data.quantity.toString());
+      form.append("category_id", data.category_id.toString());
+      form.append("expiry_date", data.expiry_date);
+      form.append("cost", data.cost.toString());
+      if (data.image) {
+        form.append("image", data.image);
       }
+
+      const response = await api.post(endpoint, form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       if (response.status === 201) {
         toast.success(response.data.message || "Stock added successfully");
@@ -249,13 +241,42 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       }
       return false;
     } catch (error: any) {
-      console.error("createStock error:", error.response?.data);
-      toast.error(error.response?.data?.message || "Failed to add stock");
+      console.error("createStock error:", error);
+      const errorMessage =
+        error?.response?.data?.message || "Failed to add stock";
+      if (Array.isArray(errorMessage)) {
+        errorMessage.forEach((msg) => toast.error(msg));
+      } else {
+        toast.error(errorMessage);
+      }
       return false;
     } finally {
       set({ isLoading: false });
     }
   },
+  // createStock: async (
+  //   data: CreateStockData,
+  //   endpoint = "/inventory/create-stock",
+  //   refreshEndpoint = "/inventory/all-inventory-items"
+  // ) => {
+  //   console.log("createStock Payload:", data);
+  //   set({ isLoading: true });
+  //   try {
+  //     const response = await api.post(endpoint, data);
+  //     if (response.status === 201) {
+  //       await useInventoryStore.getState().getAllStocks(refreshEndpoint);
+  //       toast.success(response.data.message || "Stock added successfully");
+  //       return true;
+  //     }
+  //     return null;
+  //   } catch (error: any) {
+  //     console.error("createStock error:", error.response?.data);
+  //     toast.error(error.response?.data?.message || "Failed to add stock");
+  //     return false;
+  //   } finally {
+  //     set({ isLoading: false });
+  //   }
+  // },
 
   createCategory: async (
     data: { name: string },
