@@ -138,32 +138,39 @@ export interface NurseStats {
 interface NurseStore {
   isLoading: boolean;
   isDeleting: boolean;
+  isCreating: boolean;
   pagination: Pagination | null;
 
   nurses: Nurse[];
   frontdesks: any[];
   selectedNurse: any | null;
+  selectedFrontdesk: any | null;
   selectedPatient: any | null; // Added selectedPatient property
   getNurses: (page?: string, perPage?: string) => Promise<any>;
   getFrontdesk: () => Promise<any>;
   getNurseById: (id: string) => Promise<any>;
   createNurse: (data: CreateNurseData) => Promise<any>;
   createFrontdesk: (data: any) => Promise<any>;
+  getFrontdeskById: (id: string) => Promise<any>;
+  updateFrontdek: (id: string, data: any) => Promise<any>;
   getNurseStats: () => Promise<void>;
   stats: NurseStats | null;
   getNurseShiftsById: (id: string) => Promise<any>;
   getPatientById: (id: number) => Promise<void>;
   deleteNurse: (id: string) => Promise<any>;
+  updateNurse: (id: string, data: CreateNurseData) => Promise<any>;
 }
 
 export const useNurseStore = create<NurseStore>((set, get) => ({
   isLoading: false,
   isDeleting: false,
+  isCreating: false,
   pagination: null,
   nurses: [],
   stats: null,
   frontdesks: [],
   selectedNurse: null,
+  selectedFrontdesk: null,
   selectedPatient: null,
   getNurses: async (page = "1", perPage = "10") => {
     set({ isLoading: true });
@@ -198,6 +205,53 @@ export const useNurseStore = create<NurseStore>((set, get) => ({
       return false;
     } catch (error: any) {
       // toast.error(error.response?.data?.message || "Failed to fetch nurses");
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  getFrontdeskById: async (id) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(`/admin/front-desk/all-records/${id}`);
+
+      if (isSuccessfulResponse(response)) {
+        // toast.success(response.data?.msg);
+        console.log(response.data.data.data);
+        set({ selectedFrontdesk: response.data.data });
+        return true;
+      }
+      return null;
+    } catch (error) {
+      //   handleErrorToast(error, "Failed.");
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  updateFrontdek: async (id, data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.put(
+        `/admin/front-desk/update-record/${id}`,
+        data
+      );
+      if (isSuccessfulResponse(response)) {
+        const updatedFrontdesk = response.data.data.data;
+
+        set((state) => ({
+          ...state,
+          selectedFrontdesk: updatedFrontdesk,
+          frontdesks: state.frontdesks.map((frontdesk) =>
+            frontdesk.id === id ? updatedFrontdesk.data : frontdesk
+          ),
+        }));
+        toast.success(response.data?.message);
+        return true;
+      }
+      return null;
+    } catch (error) {
+      // toast.error(error.response?.data?.message || "Failed to update frontdesk");
       return null;
     } finally {
       set({ isLoading: false });
@@ -238,7 +292,7 @@ export const useNurseStore = create<NurseStore>((set, get) => ({
     }
   },
   createNurse: async (data: CreateNurseData) => {
-    set({ isLoading: true }); // Should be true when starting
+    set({ isCreating: true });
     try {
       const response = await api.post("/admin/nurse/create", data);
       if (response.status === 201) {
@@ -252,11 +306,30 @@ export const useNurseStore = create<NurseStore>((set, get) => ({
       toast.error(error.response.data.message || "Failed to add nurse");
       return null;
     } finally {
-      set({ isLoading: false });
+      set({ isCreating: false });
     }
   },
+  updateNurse: async (id: string, data: CreateNurseData) => {
+    set({ isCreating: true });
+    try {
+      const response = await api.put(`/admin/nurse/update/${id}`, data);
+      if (response.status === 200) {
+        await get().getNurses();
+        toast.success(response.data.message);
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.error(error.response?.data);
+      toast.error(error.response.data.message || "Failed to update nurse");
+      return null;
+    } finally {
+      set({ isCreating: false });
+    }
+  },
+
   createFrontdesk: async (data: any) => {
-    set({ isLoading: true }); // Should be true when starting
+    set({ isLoading: true });
     try {
       const response = await api.post("/admin/front-desk/create", data);
       if (response.status === 201) {

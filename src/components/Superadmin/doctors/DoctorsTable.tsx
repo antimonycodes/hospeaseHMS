@@ -31,6 +31,7 @@ const DoctorsTable = ({
   isLoading,
   pagination,
   getAllDoctors,
+  onEdit,
 }: {
   doctors: Doctor[];
   isLoading: boolean;
@@ -43,6 +44,7 @@ const DoctorsTable = ({
     to: number;
   } | null;
   getAllDoctors: (page: string, perPage: string) => void;
+  onEdit: (doctor: any) => void;
 }) => {
   const [transformedDoctors, setTransformedDoctors] = useState<
     DoctorAttributes[]

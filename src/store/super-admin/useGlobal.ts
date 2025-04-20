@@ -112,6 +112,7 @@ interface Globalstore {
   getClinicaldept: (endpoint?: string) => Promise<any>;
   createClinicaldept: (data: CreateClinicaldeptData) => Promise<any>;
   createStaff: (data: CreateStaff, role: string) => Promise<any>;
+  updateStaff: (data: any, id: any) => Promise<any>;
   getDeptStaffs: (
     data: string,
     page?: string,
@@ -278,6 +279,25 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       if (response.status === 201) {
         toast.success(response.data.message);
         await get().getDeptStaffs(role);
+        return true;
+      }
+      console.log(response.data.message);
+      return null;
+    } catch (error: any) {
+      console.error(error.response?.data);
+      toast.error(error.response.data.message);
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  updateStaff: async (id, data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.put(`/medical-report/head-dept/${id}`, data);
+      if (response.status === 200) {
+        toast.success("Record updated successfully");
+        await get().getDeptStaffs(data.role);
         return true;
       }
       console.log(response.data.message);
