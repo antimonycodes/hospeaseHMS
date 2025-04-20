@@ -5,17 +5,26 @@ import AddPaymentModal from "../../../Shared/AddPaymentModal";
 import Tabs from "../../ReusablepatientD/Tabs";
 import FpaymentTable from "./FpaymentTable";
 
-const Fpayment = () => {
+type FpaymentTableProps = {
+  endpoint?: string; // For creating payments
+  refreshEndpoint?: string; // For fetching payments
+};
+
+const Fpayment = ({
+  endpoint = "/finance/save-revenue",
+  refreshEndpoint = "/finance/all-revenues",
+}: FpaymentTableProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<
     "All" | "half payment" | "full payment"
   >("All");
 
-  const { payments = [], getAllPayments, isLoading } = useFinanceStore();
+  const { payments, pagination, getAllPayments, isLoading } = useFinanceStore();
 
   useEffect(() => {
-    getAllPayments("/finance/all-revenues");
-  }, [getAllPayments]);
+    console.log("Fetching payments with endpoint:", refreshEndpoint);
+    getAllPayments("1", "10", refreshEndpoint);
+  }, [getAllPayments, refreshEndpoint]);
 
   const getStatusCounts = () => {
     if (!Array.isArray(payments)) {
@@ -25,10 +34,8 @@ const Fpayment = () => {
     return payments.reduce(
       (acc, payment) => {
         const type = payment.attributes?.payment_type?.toLowerCase();
-
         if (type === "half payment") acc["half payment"]++;
         else if (type === "full payment") acc["full payment"]++;
-
         acc.All++;
         return acc;
       },
@@ -48,6 +55,8 @@ const Fpayment = () => {
         )
     : [];
 
+  console.log("Filtered payments:", filteredPayments);
+
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
@@ -63,8 +72,8 @@ const Fpayment = () => {
       {isModalOpen && (
         <AddPaymentModal
           onClose={closeModal}
-          endpoint="/finance/save-revenue"
-          refreshEndpoint="/finance/all-revenues"
+          endpoint={endpoint} // For creating payments
+          refreshEndpoint={refreshEndpoint} // For refreshing after creation
         />
       )}
 
@@ -75,7 +84,12 @@ const Fpayment = () => {
         tabs={["All", "full payment", "half payment"]}
       />
 
-      <FpaymentTable payments={filteredPayments} isLoading={isLoading} />
+      <FpaymentTable
+        pagination={pagination}
+        payments={filteredPayments}
+        isLoading={isLoading}
+        endpoint={refreshEndpoint}
+      />
     </div>
   );
 };

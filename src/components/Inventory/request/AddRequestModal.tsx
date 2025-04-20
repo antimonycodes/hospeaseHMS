@@ -32,18 +32,21 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
 
   // Debounced search function
   const handleSearch = debounce(async (val: string) => {
-    console.log("handleSearch triggered with value:", val);
-    const results = await searchStaff(val);
-    console.log("handleSearch results:", results);
-    setStaffOptions(results);
+    // console.log("handleSearch triggered with value:", val);
+    if (val.length > 2) {
+      const results = await searchStaff(val);
+      setStaffOptions(results || []);
+    } else {
+      setStaffOptions([]);
+    }
+
+    // console.log("handleSearch results:", results);
   }, 300);
 
   // Handle input changes
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: { target: { name: any; value: any } }) => {
     const { name, value } = e.target;
-    console.log(`Input changed: ${name}=${value}`);
+    // console.log(`Input changed: ${name}=${value}`);
     if (name === "query") {
       setQuery(value);
       handleSearch(value);
@@ -56,15 +59,18 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
   };
 
   // Handle staff selection
-  const handleSelectStaff = (staff: any) => {
+  const handleSelectStaff = (staff: {
+    id: string;
+    attributes: { first_name: string; last_name: string; card_id: string };
+  }) => {
     console.log("Selected staff:", staff);
     setSelectedStaff(staff);
-    setFormData((prev) => ({
-      ...prev,
-      requested_by: staff.attributes.card_id || "",
-      first_name: staff.attributes.first_name || "",
-      last_name: staff.attributes.last_name || "",
-    }));
+    // setFormData((prev) => ({
+    //   ...prev,
+    //   requested_by: staff.attributes.card_id || "",
+    //   first_name: staff.attributes.first_name || "",
+    //   last_name: staff.attributes.last_name || "",
+    // }));
     setQuery(`${staff.attributes.first_name} ${staff.attributes.last_name}`);
     setStaffOptions([]);
   };

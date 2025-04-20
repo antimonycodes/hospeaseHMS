@@ -9,12 +9,24 @@ import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
 // import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
 
-const PatientsPage = () => {
+type PatientsPage = {
+  endpoint?: string; // Allow custom endpoint
+  bookEndpoint?: string; // Endpoint for booking appointments
+  refreshEndpoint?: string; // Endpoint for refreshing after booking
+  // tableTitle?: string; // Custom table title
+};
+const PatientsPage = ({
+  endpoint = "/admin/appointment/all-records",
+  bookEndpoint = "/admin/appointment/book",
+  refreshEndpoint = "/admin/appointment/all-records",
+}) => {
   const [activeTab, setActiveTab] = useState(0);
   const [openModal, setOpenModal] = useState(false);
   const [modalType, setModalType] = useState<"patient" | "appointment">(
     "patient"
   );
+  const { appointments, pagination, isLoading, getAllAppointments } =
+    usePatientStore();
 
   const [perPage, setPerPage] = useState(10);
   const handleOpenModal = () => {
@@ -28,13 +40,15 @@ const PatientsPage = () => {
     createPatient,
     getPatientById,
     selectedPatient,
-    isLoading,
-    pagination,
   } = usePatientStore();
 
   useEffect(() => {
     getAllPatients();
   }, []);
+
+  useEffect(() => {
+    getAllAppointments("1", "10", endpoint);
+  }, [getAllAppointments, endpoint]);
 
   return (
     <div className=" bg-white custom-shadow p-4">
@@ -124,7 +138,12 @@ const PatientsPage = () => {
             // perPage={perPage}
           />
         ) : (
-          <AppointmentsTable />
+          <AppointmentsTable
+            data={appointments}
+            pagination={pagination}
+            isLoading={isLoading}
+            endpoint={endpoint}
+          />
         )}
       </div>
 
@@ -139,7 +158,11 @@ const PatientsPage = () => {
       )}
 
       {openModal && modalType === "appointment" && (
-        <BookAppointmentModal onClose={() => setOpenModal(false)} />
+        <BookAppointmentModal
+          endpoint={bookEndpoint}
+          refreshEndpoint={refreshEndpoint}
+          onClose={() => setOpenModal(false)}
+        />
       )}
     </div>
   );

@@ -29,56 +29,24 @@ export interface Pagination {
   from: number;
   to: number;
 }
-// Stock interface to match the API response
+
 export interface Stock {
   id: number;
   attributes: {
     item_name: string;
-    category: string; // Category name as a string
+    category: string;
     quantity: string;
     expiry_date: string;
     cost: number;
-    image?: string; // Optional, if the API returns an image URL
+    image?: string;
   };
 }
 
-// Category interface to match the /inventory/category/all-records response
 export interface Category {
   id: number;
   attributes: {
     name: string;
   };
-}
-
-// Pagination interface
-export interface Pagination {
-  total: number;
-  per_page: number;
-  current_page: number;
-  last_page: number;
-  from: number;
-  to: number;
-}
-
-// API response for inventory items
-export interface InventoryResponse {
-  status: boolean;
-  message: string;
-  data: {
-    data: Stock[];
-    pagination: Pagination;
-  };
-  status_code: number;
-}
-
-// Form data for creating a stock item
-export interface AddStockData {
-  item: string;
-  quantity: string;
-  category_id: string;
-  expiry_date: string;
-  cost: number;
-  image: File | null;
 }
 
 export interface Staff {
@@ -90,7 +58,7 @@ export interface Staff {
   };
 }
 
-interface Request {
+export interface Request {
   id: number;
   requested_by: string;
   inventory_id: string;
@@ -103,6 +71,15 @@ interface Request {
   item_name: string;
   created_at: string;
 }
+export interface CreateStockData {
+  item: string;
+  quantity: string;
+  category_id: string;
+  expiry_date: string;
+  cost: number;
+  image?: File | null;
+}
+
 export interface InventoryStats {
   total_inventories: number;
   total_categories: number;
@@ -112,21 +89,28 @@ export interface InventoryStats {
 interface InventoryStore {
   isLoading: boolean;
   stats: InventoryStats;
-  categories: Category[];
-
+  categorys: any[];
   pagination: Pagination | null;
-  getInventoryStats: () => Promise<void>;
   stocks: Stock[];
-  getAllStocks: (endpoint?: string) => Promise<void>;
-  createStock: (formData: AddStockData) => Promise<boolean>;
-  searchStaff: (query: string) => Promise<Staff[]>;
   requests: Request[];
+  getInventoryStats: () => Promise<void>;
+  getAllStocks: (endpoint?: string) => Promise<void>;
+  createStock: (
+    data: CreateStockData,
+    endpoint?: string,
+    refreshEndpoint?: string
+  ) => Promise<boolean | null>;
+  searchStaff: (query: string) => Promise<Staff[]>;
   getAllRequest: (endpoint?: string) => Promise<void>;
-  getCategories: () => Promise<void>;
+  getAllCategorys: () => Promise<void>;
   createRequest: (
     data: any,
     endpoint?: string,
     refreshEndpoint?: string
+  ) => Promise<boolean>;
+  createCategory: (
+    data: { name: string },
+    endpoint?: string
   ) => Promise<boolean>;
 }
 
@@ -140,7 +124,22 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
   pagination: null,
   stocks: [],
   requests: [],
-  categories: [] as Category[],
+  categorys: [],
+
+  searchStaff: async (query: string) => {
+    try {
+      const response = await api.get(
+        `/medical-report/all-patient?search=${query}`
+      );
+      console.log("Staff search response:", response.data);
+      const staffData = response.data.data;
+      return staffData;
+    } catch (error: any) {
+      console.error("Staff search error:", error.response?.data);
+      toast.error(error.response?.data?.message || "Staff search failed");
+      return [];
+    }
+  },
 
   getAllRequest: async (
     endpoint = "/inventory/requests/all-records?status=pending"
@@ -183,28 +182,122 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
     }
   },
 
-  searchStaff: async (query: string) => {
-    if (!query.trim()) {
-      console.log("searchStaff: Empty query, returning empty array");
-      return [];
-    }
+  getAllCategorys: async () => {
+    set({ isLoading: true });
     try {
-      const response = await api.get(
-        `/medical-report/all-patient?search=${encodeURIComponent(query)}`
-      );
-      console.log("searchStaff response:", response.data);
-      const results = response.data.data || [];
-      if (!results.length) {
-        console.log("searchStaff: No results found for query:", query);
-      }
-      return results;
+      const response = await api.get("/inventory/category/all-records");
+      const fetchedCategorys = response.data.data;
+      set({ categorys: fetchedCategorys });
+      console.log(response.data.message);
+      toast.success("Categories fetched successfully");
     } catch (error: any) {
-      console.error(
-        "searchStaff error:",
-        error.response?.data || error.message
+      console.error("getCategories error:", error.response?.data);
+      toast.error(
+        error.response?.data?.message || "Failed to fetch categories"
       );
-      toast.error(error.response?.data?.message || "Staff search failed");
-      return [];
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  getAllStocks: async (endpoint = "/inventory/all-inventory-items") => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(endpoint);
+      set({ stocks: response.data.data?.data || [] });
+      toast.success(response.data.message || "Stocks fetched successfully");
+    } catch (error: any) {
+      console.error("getAllStocks error:", error.response?.data);
+      toast.error(error.response?.data?.message || "Failed to fetch stocks");
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  createStock: async (
+    data: CreateStockData,
+    endpoint = "/inventory/upload-item"
+  ) => {
+    set({ isLoading: true });
+    try {
+      const form = new FormData();
+      form.append("item", data.item);
+      form.append("quantity", data.quantity.toString());
+      form.append("category_id", data.category_id.toString());
+      form.append("expiry_date", data.expiry_date);
+      form.append("cost", data.cost.toString());
+      if (data.image) {
+        form.append("image", data.image);
+      }
+
+      const response = await api.post(endpoint, form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (response.status === 201) {
+        toast.success(response.data.message || "Stock added successfully");
+        await get().getAllStocks();
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.error("createStock error:", error);
+      const errorMessage =
+        error?.response?.data?.message || "Failed to add stock";
+      if (Array.isArray(errorMessage)) {
+        errorMessage.forEach((msg) => toast.error(msg));
+      } else {
+        toast.error(errorMessage);
+      }
+      return false;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  // createStock: async (
+  //   data: CreateStockData,
+  //   endpoint = "/inventory/create-stock",
+  //   refreshEndpoint = "/inventory/all-inventory-items"
+  // ) => {
+  //   console.log("createStock Payload:", data);
+  //   set({ isLoading: true });
+  //   try {
+  //     const response = await api.post(endpoint, data);
+  //     if (response.status === 201) {
+  //       await useInventoryStore.getState().getAllStocks(refreshEndpoint);
+  //       toast.success(response.data.message || "Stock added successfully");
+  //       return true;
+  //     }
+  //     return null;
+  //   } catch (error: any) {
+  //     console.error("createStock error:", error.response?.data);
+  //     toast.error(error.response?.data?.message || "Failed to add stock");
+  //     return false;
+  //   } finally {
+  //     set({ isLoading: false });
+  //   }
+  // },
+
+  createCategory: async (
+    data: { name: string },
+    endpoint = "/inventory/category/create"
+  ) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.post(endpoint, data);
+      console.log("createCategory response:", response.data);
+      if (response.status === 201) {
+        await get().getAllCategorys();
+        toast.success(response.data.message || "Category created successfully");
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.error("createCategory error:", error.response?.data);
+      toast.error(error.response?.data?.message || "Failed to create Category");
+      return false;
+    } finally {
+      set({ isLoading: false });
     }
   },
 
@@ -217,10 +310,6 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
     };
     try {
       const response = await api.get("/inventory/stats");
-      if (!response.data) {
-        console.error("No data returned from API");
-        throw new Error("Empty response from server");
-      }
       console.log("Raw API Response:", response.data);
       Object.assign(statsData, response.data);
       set({ stats: statsData as InventoryStats });
@@ -233,109 +322,4 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
-  getAllStocks: async (endpoint = "/inventory/all-inventory-items") => {
-    set({ isLoading: true });
-    try {
-      const response = await api.get(endpoint);
-      set({ stocks: response.data.data.data });
-      toast.success(response.data.message || "Stocks fetched successfully");
-    } catch (error: any) {
-      console.error(error.response?.data);
-      toast.error(error.response?.data?.message || "Failed to fetch stocks");
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-  // createStock: async (
-  //   data,
-  //   endpoint = "/inventory/create-stock",
-  //   refreshEndpoint = "/inventory/all-inventory-items"
-  // ) => {
-  //   set({ isLoading: true });
-  //   try {
-  //     const response = await api.post(endpoint, data);
-  //     if (response.status === 201) {
-  //       await get().getAllStocks(refreshEndpoint);
-  //       toast.success(response.data.message || "Stock added successfully");
-  //       return true;
-  //     }
-  //     return false;
-  //   } catch (error: any) {
-  //     console.error(error.response?.data);
-  //     toast.error(error.response?.data?.message || "Failed to add stock");
-  //     return false;
-  //   } finally {
-  //     set({ isLoading: false });
-  //   }
-  // },
-
-  createStock: async ({
-    item,
-    quantity,
-    category_id,
-    expiry_date,
-    cost,
-    image,
-  }) => {
-    set({ isLoading: true });
-    try {
-      const form = new FormData();
-      form.append("item", item);
-      form.append("quantity", quantity);
-      form.append("category_id", category_id);
-      form.append("expiry_date", expiry_date);
-      form.append("cost", cost.toString());
-      if (image) {
-        form.append("image", image);
-      }
-
-      const response = await api.post("/inventory/upload-item", form, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      if (response.status === 201) {
-        toast.success(response.data.message || "Stock added successfully");
-        // Refresh stocks after creation
-        await get().getAllStocks();
-        return true;
-      }
-      return false;
-    } catch (error: any) {
-      console.error("createStock error:", error.response?.data);
-      toast.error(error.response?.data?.message || "Failed to add stock");
-      return false;
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-  getCategories: async () => {
-    set({ isLoading: true });
-    try {
-      const response = await api.get("/inventory/category/all-records");
-      const categories = response.data.data?.data || [];
-      set({ categories });
-      toast.success("Categories fetched successfully");
-    } catch (error: any) {
-      console.error("getCategories error:", error.response?.data);
-      toast.error(
-        error.response?.data?.message || "Failed to fetch categories"
-      );
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-
-  // searchStaff: async (query: string) => {
-  //   try {
-  //     const response = await api.get(
-  //       `/medical-report/all-patient?search=${query}`
-  //     );
-  //     return response.data.data.data;
-  //   } catch (error: any) {
-  //     toast.error(error.response?.data?.message || "Staff search failed");
-  //     return [];
-  //   }
-  // },
 }));

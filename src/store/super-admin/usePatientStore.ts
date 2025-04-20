@@ -108,7 +108,11 @@ interface PatientStore {
     endpoint?: string,
     refreshendpoint?: string
   ) => Promise<boolean | null>;
-  getAllAppointments: (endpoint?: string) => Promise<void>;
+  getAllAppointments: (
+    page?: string,
+    perPage?: string,
+    endpoint?: string
+  ) => Promise<void>;
   bookAppointment: (
     data: BookAppointmentData,
     endpoint?: string,
@@ -399,28 +403,70 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
     }
   },
 
-  getAllAppointments: async (endpoint = "/admin/appointment/all-records") => {
-    set({ isLoading: true });
+  // In usePatientStore.ts
+  getAllAppointments: async (
+    page = "1",
+    perPage = "10",
+    baseEndpoint = "/front-desk/appointment/all-records"
+  ) => {
+    set({ isLoading: true, appointments: [], pagination: null });
     try {
+      const endpoint = `${baseEndpoint}?page=${page}&per_page=${perPage}`;
+      console.log("Fetching appointments from:", endpoint);
+
       const response = await api.get(endpoint);
-      if (response.data && response.data.data) {
-        set({ appointments: response.data.data.data });
-        console.log("Appointments loaded successfully");
-      } else {
-        set({ appointments: [] });
-        console.log("No appointments data found");
+      if (!response.data?.data) {
+        throw new Error("Invalid response structure");
       }
+
+      // Normalize appointment data
+      const rawAppointments = response.data.data.data || response.data.data;
+      const normalizedAppointments = rawAppointments.map((appt: any) => ({
+        id: appt.id,
+        attributes: {
+          id: appt.id,
+          patient: appt.attributes.patient || appt.patient_name || "Unknown",
+          gender: appt.attributes.gender || "N/A",
+          card_id: appt.attributes.card_id || "N/A",
+          patient_contact: appt.attributes.patient_contact || "N/A",
+          occupation: appt.attributes.occupation || "N/A",
+          doctor: appt.attributes.doctor || appt.doctor_name || "N/A",
+          status: appt.attributes.status || "pending",
+          rescheduled_data: appt.attributes.rescheduled_data || null,
+          doctor_contact: appt.attributes.doctor_contact || "N/A",
+          date: appt.date || appt.attributes.appointment_date || "",
+          time: appt.time || appt.attributes.appointment_time || "",
+          reason_if_rejected_or_rescheduled:
+            appt.attributes.reason_if_rejected_or_rescheduled || null,
+          assigned_by: appt.attributes.assigned_by || "N/A",
+          created_at: appt.attributes.created_at || "",
+          responded_at: appt.attributes.responded_at || null,
+        },
+      }));
+
+      // Normalize pagination data
+      const paginationData = response.data.data.pagination || {
+        total: rawAppointments.length,
+        per_page: parseInt(perPage),
+        current_page: parseInt(page),
+        last_page: Math.ceil(rawAppointments.length / parseInt(perPage)),
+        from: 1,
+        to: rawAppointments.length,
+      };
+
+      set({
+        appointments: normalizedAppointments,
+        pagination: paginationData,
+      });
+      console.log("Appointments loaded:", normalizedAppointments);
     } catch (error: any) {
       console.error("Error fetching appointments:", error);
-      // toast.error(
-      //   error.response?.data?.message || "Failed to fetch appointments"
-      // );
-      set({ appointments: [] });
+      toast.error(error.message || "Failed to fetch appointments");
+      set({ appointments: [], pagination: null });
     } finally {
       set({ isLoading: false });
     }
   },
-
   bookAppointment: async (
     data: BookAppointmentData,
     endpoint = "/admin/appointment/assign",

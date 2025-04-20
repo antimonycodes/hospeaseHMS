@@ -245,6 +245,19 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       set({ isLoading: false });
     }
   },
+
+  // editPatient: async (id, data, endpoint = `/appointments/${id}`) => {
+  //   set({ isLoading: true });
+  //   try {
+  //     const response = await api.put(endpoint, data);
+  //     toast.success("Appointment updated successfully!");
+  //     return response.data;
+  //   } catch (error: any) {
+  //     toast.error(error.response.message);
+  //   } finally {
+  //     set({ isLoading: false });
+  //   }
+  // },
   createClinicaldept: async (data) => {
     set({ isLoading: true });
     try {
