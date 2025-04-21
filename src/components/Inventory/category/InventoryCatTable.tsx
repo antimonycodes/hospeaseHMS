@@ -10,7 +10,7 @@ const InventoryCatTable = () => {
   const [openModal, setOpenModal] = useState(false);
 
   useEffect(() => {
-    getAllCategorys();
+    getAllCategorys("/inventory/category/all-records");
   }, [getAllCategorys]);
 
   const handleOpenModal = () => {

@@ -57,6 +57,7 @@ import NurseDetail from "./components/Nurse/patients/NurseDetail";
 import ServiceCharges from "./pages/ServiceCharges";
 import ForgotPassword from "./_Auth/ForgotPassword";
 import Category from "./pages/Category";
+import SaInventoryPage from "./components/Superadmin/Inventory/SaInventoryPage";
 
 function App() {
   return (
@@ -87,7 +88,6 @@ function App() {
                 path="laboratory/patient/:patientId/case-report/:caseId"
                 element={<LabPatientDetails />}
               />
-
               <Route path="doctors" element={<Doctors />} />
               <Route path="doctors/:id" element={<DoctorDetails />} />
               <Route
@@ -155,7 +155,8 @@ function App() {
               <Route
                 path="inventory/staffs"
                 element={<Staffs department="inventory-manager" />}
-              />
+              />{" "}
+              <Route path="inventory/info" element={<SaInventoryPage />} />
               <Route path="staff-detail/:id" element={<StaffsDetail />} />
               <Route path="users" element={<Users />} />
               <Route path="payment" element={<Payment />} />

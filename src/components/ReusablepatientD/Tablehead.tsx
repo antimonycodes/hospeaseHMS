@@ -4,7 +4,7 @@ import { getImageSrc } from "../../utils/imageUtils";
 import SearchBar from "./SearchBar";
 
 interface TableheadProps {
-  tableTitle: string;
+  tableTitle?: string;
   tableCount?: number;
   showControls?: boolean;
   showSearchBar?: boolean;
@@ -17,8 +17,8 @@ const Tablehead: React.FC<TableheadProps> = ({
   tableTitle,
   typebutton,
   tableCount,
-  showControls = true,
-  showSearchBar = true,
+  showControls = false,
+  showSearchBar = false,
   showButton = false,
   onButtonClick,
 }) => {

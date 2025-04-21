@@ -6,6 +6,7 @@ import { JSX, useEffect } from "react";
 const roleComponents: Record<string, JSX.Element> = {
   admin: <PaymentPage />,
   finance: <Fpayment />,
+  "front-desk-manager": <Fpayment />,
 };
 
 const Payment = () => {

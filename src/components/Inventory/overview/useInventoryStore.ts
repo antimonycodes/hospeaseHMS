@@ -2,6 +2,7 @@ import { create } from "zustand";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
+import { Cat } from "lucide-react";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_URL,
@@ -88,12 +89,12 @@ export interface InventoryStats {
 
 interface InventoryStore {
   isLoading: boolean;
-  stats: InventoryStats;
+  stats: InventoryStats | null;
   categorys: any[];
   pagination: Pagination | null;
-  stocks: Stock[];
-  requests: Request[];
-  getInventoryStats: () => Promise<void>;
+  stocks: any[];
+  requests: any[];
+  getInventoryStats: (endpoint?: string) => Promise<void>;
   getAllStocks: (endpoint?: string) => Promise<void>;
   createStock: (
     data: CreateStockData,
@@ -102,7 +103,7 @@ interface InventoryStore {
   ) => Promise<boolean | null>;
   searchStaff: (query: string) => Promise<Staff[]>;
   getAllRequest: (endpoint?: string) => Promise<void>;
-  getAllCategorys: () => Promise<void>;
+  getAllCategorys: (fetchEndpoint: string) => Promise<void>;
   createRequest: (
     data: any,
     endpoint?: string,
@@ -110,16 +111,13 @@ interface InventoryStore {
   ) => Promise<boolean>;
   createCategory: (
     data: { name: string },
-    endpoint?: string
+    Catendpoint?: string,
+    createEndpoint?: string
   ) => Promise<boolean>;
 }
 
 export const useInventoryStore = create<InventoryStore>((set, get) => ({
-  stats: {
-    total_inventories: 0,
-    total_categories: 0,
-    total_expired_items: 0,
-  },
+  stats: null,
   isLoading: false,
   pagination: null,
   stocks: [],
@@ -129,7 +127,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
   searchStaff: async (query: string) => {
     try {
       const response = await api.get(
-        `/medical-report/all-patient?search=${query}`
+        `/medical-report/all-staffs?search=${query}`
       );
       console.log("Staff search response:", response.data);
       const staffData = response.data.data;
@@ -182,10 +180,12 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
     }
   },
 
-  getAllCategorys: async () => {
+  getAllCategorys: async (
+    fetchEndpoint = "/inventory/category/all-records"
+  ) => {
     set({ isLoading: true });
     try {
-      const response = await api.get("/inventory/category/all-records");
+      const response = await api.get(fetchEndpoint);
       const fetchedCategorys = response.data.data;
       set({ categorys: fetchedCategorys });
       console.log(response.data.message);
@@ -199,11 +199,35 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
+  createCategory: async (
+    data: { name: string },
+    fetchEndpoint = "/inventory/category/all-records",
+    createEndpoint = "/inventory/category/create"
+  ) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.post(createEndpoint, data);
+      console.log("createCategory response:", response.data);
+      if (response.status === 201) {
+        await get().getAllCategorys(fetchEndpoint);
+        toast.success(response.data.message || "Category created successfully");
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.error("createCategory error:", error.response?.data);
+      toast.error(error.response?.data?.message || "Failed to create Category");
+      return false;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 
   getAllStocks: async (endpoint = "/inventory/all-inventory-items") => {
     set({ isLoading: true });
     try {
       const response = await api.get(endpoint);
+
       set({ stocks: response.data.data?.data || [] });
       toast.success(response.data.message || "Stocks fetched successfully");
     } catch (error: any) {
@@ -254,70 +278,22 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
-  // createStock: async (
-  //   data: CreateStockData,
-  //   endpoint = "/inventory/create-stock",
-  //   refreshEndpoint = "/inventory/all-inventory-items"
-  // ) => {
-  //   console.log("createStock Payload:", data);
-  //   set({ isLoading: true });
-  //   try {
-  //     const response = await api.post(endpoint, data);
-  //     if (response.status === 201) {
-  //       await useInventoryStore.getState().getAllStocks(refreshEndpoint);
-  //       toast.success(response.data.message || "Stock added successfully");
-  //       return true;
-  //     }
-  //     return null;
-  //   } catch (error: any) {
-  //     console.error("createStock error:", error.response?.data);
-  //     toast.error(error.response?.data?.message || "Failed to add stock");
-  //     return false;
-  //   } finally {
-  //     set({ isLoading: false });
-  //   }
-  // },
 
-  createCategory: async (
-    data: { name: string },
-    endpoint = "/inventory/category/create"
-  ) => {
+  getInventoryStats: async (endpoint = "/inventory/stats") => {
     set({ isLoading: true });
     try {
-      const response = await api.post(endpoint, data);
-      console.log("createCategory response:", response.data);
-      if (response.status === 201) {
-        await get().getAllCategorys();
-        toast.success(response.data.message || "Category created successfully");
-        return true;
-      }
-      return false;
-    } catch (error: any) {
-      console.error("createCategory error:", error.response?.data);
-      toast.error(error.response?.data?.message || "Failed to create Category");
-      return false;
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-
-  getInventoryStats: async () => {
-    set({ isLoading: true });
-    const statsData = {
-      total_inventories: 0,
-      total_categories: 0,
-      total_expired_items: 0,
-    };
-    try {
-      const response = await api.get("/inventory/stats");
-      console.log("Raw API Response:", response.data);
-      Object.assign(statsData, response.data);
-      set({ stats: statsData as InventoryStats });
+      const response = await api.get(endpoint);
+      const statsData = response.data?.data || {
+        total_inventories: 0,
+        total_categories: 0,
+        total_expired_items: 0,
+      };
+      set({ stats: statsData });
       toast.success("Inventory stats fetched successfully!");
     } catch (error: any) {
-      console.error("Stats fetch error:", error);
-      toast.error(error.message || "Failed to fetch stats");
-      set({ stats: statsData });
+      console.error("Stats fetch error:", error.response?.data);
+      toast.error(error.response?.data?.message || "Failed to fetch stats");
+      set({ stats: null });
     } finally {
       set({ isLoading: false });
     }

@@ -44,7 +44,7 @@ const FpaymentTable = ({
   pagination,
   payments,
   isLoading,
-  endpoint = "/finance/all-revenues",
+  endpoint,
 }: FpaymentTableProps) => {
   const { getAllPayments } = useFinanceStore();
   const [perPage, setPerPage] = useState(pagination?.per_page || 10);

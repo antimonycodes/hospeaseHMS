@@ -90,8 +90,8 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
     setIsSubmitting(true);
     try {
       const payload = {
-        requested_by: formData.requested_by, // card_id
-        inventory_id: formData.item_name, // Assuming item_name maps to inventory_id
+        requested_by: formData.requested_by,
+        inventory_id: formData.item_name,
         quantity: parseInt(formData.quantity),
         status: "pending",
       };
