@@ -11,7 +11,7 @@ const InventoryStocks = () => {
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
   useEffect(() => {
-    getAllStocks("/inventory/all-inventory-items"); // Fetch patients from front-desk endpoint
+    getAllStocks("/inventory/all-inventory-items");
   }, [getAllStocks]);
 
   return (
@@ -22,21 +22,7 @@ const InventoryStocks = () => {
         typebutton="Add New"
         onButtonClick={openModal}
       />
-      {/* {isModalOpen && (
-        <AddStockModal
-          showSearchBar={true}
-          showPaymentType={true}
-          onClose={closeModal}
-          formData={{
-            staffId: "",
-            staffFirstName: "",
-            staffLastName: "",
-            category: "",
-            itemName: "",
-            qantity: "",
-          }}
-        />
-      )} */}
+
       {isModalOpen && (
         <AddStockModal
           onClose={closeModal}
@@ -44,6 +30,8 @@ const InventoryStocks = () => {
           createStock={createStock}
           endpoint="/inventory/upload-item"
           refreshEndpoint="/inventory/all-inventory-items"
+          fetchEndpoint="/inventory/category/all-records"
+          createEndpoint="/inventory/category/create"
         />
       )}
       <InventoryStockTable stocks={stocks} isLoading={isLoading} />

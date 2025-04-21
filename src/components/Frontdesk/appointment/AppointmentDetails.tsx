@@ -2,6 +2,7 @@ import { JSX, useEffect, useMemo, useState } from "react";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import Table from "../../../Shared/Table";
 import Loader from "../../../Shared/Loader";
+import { useNavigate } from "react-router-dom";
 
 type AppointmentData = {
   id: number;
@@ -84,6 +85,13 @@ const AppointmentDetails = ({
   const [activeTab, setActiveTab] = useState<TabType>("All");
   const [perPage, setPerPage] = useState(pagination?.per_page || 10);
 
+  // const navigate = useNavigate();
+
+  // const handleViewMore = (id: string) => {
+  //   console.log("Navigating to patient ID:", id);
+  //   navigate(`/dashboard/appointment/frontdesk/${id}`);
+  // };
+
   const columns: Columns[] = [
     {
       key: "patient",
@@ -148,7 +156,20 @@ const AppointmentDetails = ({
         );
       },
     },
+    // {
+    //   key: "viewMore",
+    //   label: "",
+    //   render: (_, attributes) => (
+    //     <span
+    //       className="text-primary text-sm font-medium cursor-pointer"
+    //       onClick={() => handleViewMore(attributes.id)}
+    //     >
+    //       View More
+    //     </span>
+    //   ),
+    // },
   ];
+  // appointment/frontdesk/:id
 
   const handlePageChange = (page: number) => {
     getAllAppointments(page.toString(), perPage.toString(), endpoint);

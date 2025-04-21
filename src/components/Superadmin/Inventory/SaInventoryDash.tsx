@@ -1,17 +1,14 @@
 import React, { useEffect } from "react";
-import OverviewCard from "../../ReusabledashboardD/Overviewcard";
-import InventoryChart from "./InventoryChart";
-import InventoryCard from "./InventoryCard";
 import patientIcon from "../../../assets/hugeicons.png";
-import { useInventoryStore } from "../overview/useInventoryStore"; // Verify path
-import { useLocation } from "react-router-dom";
+import { useInventoryStore } from "../../Inventory/overview/useInventoryStore";
+import OverviewCard from "../../ReusabledashboardD/Overviewcard";
 
-const InventoryDash = () => {
+const SaInventoryDash = () => {
   const { stats, getInventoryStats, isLoading } = useInventoryStore();
 
   useEffect(() => {
     console.log(getInventoryStats, "Fetching stats...");
-    getInventoryStats();
+    getInventoryStats("/admin/inventory/stats");
   }, [getInventoryStats]);
 
   const InventoryStatsData = stats
@@ -37,28 +34,26 @@ const InventoryDash = () => {
       ]
     : [];
 
-  console.log("Inventory Stats Data:", InventoryStatsData);
+  //   console.log("Inventory Stats Data:", InventoryStatsData);
 
   return (
     <div className="font-inter">
       <div className="flex flex-col gap-4">
         {isLoading ? (
           <p>Loading inventory stats...</p>
+        ) : InventoryStatsData.length > 0 ? (
+          <OverviewCard
+            cardTitle="Inventory Dashboard"
+            category="inventory"
+            limit={3}
+            data={InventoryStatsData}
+          />
         ) : (
-          <>
-            <OverviewCard
-              cardTitle="Inventory Dashboard"
-              category="inventory"
-              limit={3}
-              data={InventoryStatsData}
-            />
-            <InventoryChart />
-            {/* <InventoryCard /> */}
-          </>
+          <div>No stats available</div>
         )}
       </div>
     </div>
   );
 };
 
-export default InventoryDash;
+export default SaInventoryDash;

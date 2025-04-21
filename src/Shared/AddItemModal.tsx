@@ -1,19 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
-import toast from "react-hot-toast";
 import {
   CreateStockData,
   useInventoryStore,
-} from "../overview/useInventoryStore";
-
-// export interface AddStockData {
-//   item: string;
-//   quantity: string;
-//   category_id: string;
-//   expiry_date: string;
-//   cost: number;
-//   image: File | null;
-// }
+} from "../components/Inventory/overview/useInventoryStore";
 
 export interface Category {
   id: number;
@@ -36,7 +26,7 @@ interface AddStockModalProps {
   createEndpoint?: string;
 }
 
-const AddStockModal = ({
+const AddItemModal = ({
   onClose,
   createStock,
   isLoading,
@@ -46,11 +36,9 @@ const AddStockModal = ({
   createEndpoint,
 }: AddStockModalProps) => {
   const { getAllCategorys, categorys } = useInventoryStore();
-
   useEffect(() => {
     getAllCategorys(fetchEndpoint || "");
   }, [getAllCategorys, fetchEndpoint]);
-
   const [stock, setStock] = useState<CreateStockData>({
     item: "",
     quantity: "",
@@ -75,39 +63,6 @@ const AddStockModal = ({
     setStock((prev) => ({ ...prev, image: file }));
   };
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-
-  //   if (
-  //     !stock.item ||
-  //     !stock.category_id ||
-  //     !stock.cost ||
-  //     !stock.quantity ||
-  //     !stock.expiry_date
-  //   ) {
-  //     toast.error("Please fill in all required fields");
-  //     return;
-  //   }
-
-  //   console.log("Submitting stock data:", stock);
-
-  //   try {
-  //     const success = await createStock(stock);
-  //     if (success) {
-  //       setStock({
-  //         item: "",
-  //         quantity: "",
-  //         category_id: "",
-  //         expiry_date: "",
-  //         cost: 0,
-  //         image: null,
-  //       });
-  //       onClose();
-  //     }
-  //   } catch (error) {
-  //     // Error is handled in createStock with toast
-  //   }
-  // };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -137,7 +92,6 @@ const AddStockModal = ({
         category_id: "",
         expiry_date: "",
         cost: 0,
-        // image: null,
       });
       onClose();
     }
@@ -234,18 +188,18 @@ const AddStockModal = ({
             </div>
 
             {/* <div>
-              <label className="block text-sm font-medium text-custom-black mb-1">
-                Image (Optional)
-              </label>
-              <input
-                type="file"
-                name="image"
-                onChange={handleFileChange}
-                disabled={isLoading}
-                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
-                accept="image/*"
-              />
-            </div> */}
+                <label className="block text-sm font-medium text-custom-black mb-1">
+                  Image (Optional)
+                </label>
+                <input
+                  type="file"
+                  name="image"
+                  onChange={handleFileChange}
+                  disabled={isLoading}
+                  className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
+                  accept="image/*"
+                />
+              </div> */}
           </div>
 
           <div className="mt-6">
@@ -263,4 +217,4 @@ const AddStockModal = ({
   );
 };
 
-export default AddStockModal;
+export default AddItemModal;

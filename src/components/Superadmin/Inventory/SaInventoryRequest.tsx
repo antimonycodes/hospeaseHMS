@@ -1,8 +1,7 @@
 import React, { JSX, useEffect, useState } from "react";
-import Tablehead from "../../ReusablepatientD/Tablehead";
 import Table from "../../../Shared/Table";
-import AddRequestModal from "./AddRequestModal";
-import { useInventoryStore } from "../../../store/staff/useInventoryStore";
+import { useInventoryStore } from "../../Inventory/overview/useInventoryStore";
+import Tablehead from "../../ReusablepatientD/Tablehead";
 
 export type RequestData = {
   id: number;
@@ -19,12 +18,12 @@ export type RequestData = {
   created_at: string;
 };
 
-const InventoryRequest = () => {
+const SaInventoryRequest = () => {
   const { getAllRequest, requests, isLoading } = useInventoryStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    getAllRequest();
+    getAllRequest("/admin/inventory/requests/all-records?status=pending");
   }, [getAllRequest]);
 
   const openModal = () => setIsModalOpen(true);
@@ -36,15 +35,27 @@ const InventoryRequest = () => {
     render?: (value: any, request: RequestData) => JSX.Element;
   };
 
-  const requestsArray = Array.isArray(requests) ? requests : [];
-
+  const formattedRequest = (requests || []).map((request) => ({
+    id: request.id,
+    requested_by: request.attributes.requested_by,
+    inventory_id: request.attributes.inventory_id,
+    quantity: request.attributes.quantity,
+    status: request.attributes.status,
+    picture: request.attributes.picture,
+    first_name: request.attributes.first_name,
+    last_name: request.attributes.last_name,
+    user_id: request.attributes.user_id,
+    item_category: request.attributes.item_category,
+    item_name: request.attributes.item_name,
+    created_at: request.attributes.created_at,
+  }));
   const columns: Columns[] = [
     {
       key: "picture",
       label: "Name",
       render: (value, request) => {
-        const imageSrc = value
-          ? value
+        const imageSrc = request.picture
+          ? request.picture
           : "https://placehold.co/600x400?text=img";
         return (
           <div className="flex items-center gap-2">
@@ -104,39 +115,21 @@ const InventoryRequest = () => {
       ),
     },
   ];
-
   return (
     <div>
-      <Tablehead
-        typebutton="Add New"
-        tableTitle="Requests"
-        showButton={true}
-        onButtonClick={openModal}
-      />
-
-      <div className="w-full bg-white rounded-b-[8px] shadow-table">
-        {isLoading ? (
-          <p>Loading...</p>
-        ) : (
-          <Table
-            data={requestsArray}
-            columns={columns}
-            rowKey="id"
-            pagination={requestsArray.length > 10}
-            radius="rounded-none"
-          />
-        )}
-      </div>
-
-      {isModalOpen && (
-        <AddRequestModal
-          onClose={closeModal}
-          endpoint="/inventory/requests/create"
-          refreshEndpoint="/inventory/requests/all-records?status=pending"
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : (
+        <Table
+          data={formattedRequest}
+          columns={columns}
+          rowKey="id"
+          pagination={formattedRequest.length > 10}
+          radius="rounded-none"
         />
       )}
     </div>
   );
 };
 
-export default InventoryRequest;
+export default SaInventoryRequest;

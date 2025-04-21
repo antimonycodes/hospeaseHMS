@@ -96,7 +96,7 @@ const Table = <T extends Record<string, any>>({
 
   return (
     <div
-      className={`overflow-hidden overflow-x-auto border border-[#EAECF0] ${radius}`}
+      className={`overflow-hidden custom-shadow overflow-x-auto border border-[#EAECF0] ${radius}`}
     >
       <table className="min-w-full divide-y divide-[#EAECF0]">
         <thead className="bg-[#F9FAFB]">

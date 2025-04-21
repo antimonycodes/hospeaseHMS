@@ -15,21 +15,21 @@ const PharmPatients = () => {
   }, [getAllPatients]);
 
   // Handle empty patients array
-  if (!patients || patients.length === 0) {
-    return (
-      <div className="mt-2">
-        <Tablehead
-          tableTitle="Patients"
-          showSearchBar={true}
-          showControls={true}
-          tableCount={0}
-        />
-        <div className="w-full bg-white p-6 text-center">
-          {isLoading ? "Loading patients..." : "No patients found"}
-        </div>
-      </div>
-    );
-  }
+  // if (!patients || patients.length === 0) {
+  //   return (
+  //     <div className="mt-2">
+  //       <Tablehead
+  //         tableTitle="Patients"
+  //         showSearchBar={true}
+  //         showControls={true}
+  //         tableCount={0}
+  //       />
+  //       <div className="w-full bg-white p-6 text-center">
+  //         {isLoading ? "Loading patients..." : "No patients found"}
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   const transformedPatients = patients.map((item) => {
     const attr = item.attributes;

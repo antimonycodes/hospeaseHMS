@@ -9,7 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { useMedicalStore } from "../useMedicalStore"; // Adjust the import path as needed
+import { useMedicalStore } from "../useMedicalStore";
 
 const MedicalChart = () => {
   const [isMobile, setIsMobile] = React.useState(false);

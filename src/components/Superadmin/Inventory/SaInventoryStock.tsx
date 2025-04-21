@@ -1,6 +1,8 @@
 import { JSX, useEffect } from "react";
+
+import { useInventoryStore } from "../../Inventory/overview/useInventoryStore";
+import { Loader } from "lucide-react";
 import Table from "../../../Shared/Table";
-import Loader from "../../../Shared/Loader";
 type StockData = {
   item_name: string;
   category: string;
@@ -13,7 +15,8 @@ type Columns = {
   label: string;
   render?: (value: any, stocks: StockData) => JSX.Element;
 };
-interface InventoryStockTableProps {
+
+type SaInventoryStockProps = {
   isLoading: boolean;
   stocks: {
     attributes: {
@@ -25,12 +28,10 @@ interface InventoryStockTableProps {
     };
     id: number;
   }[];
-}
+};
 
-const InventoryStockTable = ({
-  stocks,
-  isLoading,
-}: InventoryStockTableProps) => {
+const SaInventoryStock = ({ stocks, isLoading }: SaInventoryStockProps) => {
+  //   const {  stocks, isLoading } = useInventoryStore();
   const formattedStocks = (stocks || []).map((stock) => ({
     id: stock.id,
     item_name: stock.attributes.item_name,
@@ -82,4 +83,4 @@ const InventoryStockTable = ({
   );
 };
 
-export default InventoryStockTable;
+export default SaInventoryStock;

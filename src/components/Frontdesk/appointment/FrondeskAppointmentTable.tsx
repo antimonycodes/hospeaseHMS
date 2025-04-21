@@ -22,9 +22,11 @@ const FrondeskAppointmentTable = ({
   const { appointments, pagination, isLoading, getAllAppointments } =
     usePatientStore();
 
+  const baseEndpoint = "/front-desk/appointment/all-records";
+
   useEffect(() => {
-    getAllAppointments("1", "10", endpoint);
-  }, [getAllAppointments, endpoint]);
+    getAllAppointments("1", "10", baseEndpoint);
+  }, [getAllAppointments]);
 
   const handleOpenModal = () => {
     setOpenModal(true);
