@@ -34,13 +34,16 @@ export interface AllItems {}
 
 interface CombinedStore {
   isLoading: boolean;
+  isDeleting: boolean;
   items: any[];
   createItem: (data: CreateItem) => Promise<any>;
   getAllItems: (endpoint?: string) => Promise<any>;
+  deleteUser: (id: any) => Promise<any>;
 }
 
 export const useCombinedStore = create<CombinedStore>((set, get) => ({
   isLoading: false,
+  isDeleting: false,
   items: [],
 
   createItem: async (data) => {
@@ -77,6 +80,23 @@ export const useCombinedStore = create<CombinedStore>((set, get) => ({
       return null;
     } finally {
       set({ isLoading: false });
+    }
+  },
+  deleteUser: async (id) => {
+    set({ isDeleting: true });
+    try {
+      const response = await api.delete(`/admin/delete-user/${id}`);
+
+      if (isSuccessfulResponse(response)) {
+        toast.success(response.data?.message);
+        return true;
+      }
+      return null;
+    } catch (error) {
+      handleErrorToast(error);
+      return null;
+    } finally {
+      set({ isDeleting: false });
     }
   },
 }));

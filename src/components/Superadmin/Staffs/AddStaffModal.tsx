@@ -4,6 +4,8 @@ import {
   CreateStaff,
   useGlobalStore,
 } from "../../../store/super-admin/useGlobal";
+import { Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface AddStaffModalProps {
   formData: {
@@ -16,34 +18,49 @@ interface AddStaffModalProps {
   setShowModal: (value: boolean) => void;
   isLoading: boolean;
   createStaff: (data: CreateStaff, department: string) => Promise<any>;
+  updateStaff?: (id: number, data: CreateStaff) => Promise<any>;
   department: string;
-  roles: Record<string, any>;
+  isEditing: boolean;
+  staffId?: number;
 }
 
 const AddStaffModal: React.FC<AddStaffModalProps> = ({
   formData,
   handleInputChange,
   setShowModal,
-  isLoading,
+  // isLoading,
   createStaff,
+  updateStaff,
   department,
+  isEditing,
+  staffId,
 }) => {
   const roles = useGlobalStore((state) => state.roles);
-  console.log(department, "gyj");
+  const isLoading = useGlobalStore((state) => state.isLoading);
+  const navigate = useNavigate();
 
+  console.log(staffId, "staffId");
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const { id, role } = roles[department];
 
-    const newStaffData = {
+    const staffData = {
       ...formData,
       department_id: id,
       role,
     };
 
-    await createStaff(newStaffData, role);
+    if (isEditing && updateStaff && staffId) {
+      // console.log("Updating staff with ID:", staffId);
+      await updateStaff(staffId, staffData);
+    } else {
+      // console.log("Creating new staff");
+      await createStaff(staffData, role);
+    }
+
     setShowModal(false);
+    navigate(-1);
   };
 
   return (
@@ -52,7 +69,7 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({
         <div className="p-4 md:p-12">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-custom-black text-lg font-semibold">
-              Add New Staff
+              {isEditing ? "Edit Staff" : "Add New Staff"}
             </h2>
             <button onClick={() => setShowModal(false)}>
               <X className="text-black" />
@@ -136,8 +153,23 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({
             </div>
 
             <div className="mt-6">
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Adding..." : "Add Staff"}
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className={`
+    ${isLoading ? "opacity-50 cursor-not-allowed" : ""}
+  `}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="size-6 mr-2 animate-spin" />
+                    {isEditing ? "Updating" : "Adding"}
+                  </>
+                ) : isEditing ? (
+                  "Update Staff"
+                ) : (
+                  "Add Staff"
+                )}
               </Button>
             </div>
           </form>

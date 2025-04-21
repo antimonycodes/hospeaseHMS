@@ -33,16 +33,18 @@ const SaFrontDeskTable = ({ frontdesks, isLoading }: Props) => {
     setTransformedNurses(
       frontdesks?.map((frontdesk) => ({
         ...frontdesk.attributes,
-        id: frontdesk.id,
+        id: frontdesk.attributes.user_id,
+        user_id: frontdesk.id,
       }))
     );
   }, [frontdesks]);
 
   console.log(frontdesks, "ert");
+  // console.log(frontdesk.user_id);
 
   const handleViewMore = (frontdesk: any) => {
     console.log("View more clicked for:", frontdesk);
-    navigate(`/dashboard/nurses/${frontdesk.id}`);
+    navigate(`/dashboard/frontdesk/${frontdesk.user_id}`);
   };
 
   if (isLoading) return <Loader />;
@@ -72,45 +74,45 @@ const SaFrontDeskTable = ({ frontdesks, isLoading }: Props) => {
         <span className="text-sm text-[#667085]">{value ?? "N/A"}</span>
       ),
     },
-    // {
-    //   key: "is_active",
-    //   label: "Status",
-    //   render: (value, row) => (
-    //     <div className="flex items-center">
-    //       <label className="inline-flex items-center cursor-pointer">
-    //         <input
-    //           type="checkbox"
-    //           className="sr-only peer"
-    //           checked={row.is_active}
-    //           onChange={() => handleToggleStatus(row)} // Corrected here
-    //         />
-    //         <div
-    //           className={`relative w-10 h-5 rounded-full transition-colors ${
-    //             row.is_active ? "bg-primary" : "bg-gray-200"
-    //           }`}
-    //         >
-    //           <div
-    //             className={`absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform ${
-    //               row.is_active ? "transform translate-x-5" : ""
-    //             }`}
-    //           ></div>
-    //         </div>
-    //       </label>
-    //     </div>
-    //   ),
-    // },
-    // {
-    //   key: "id",
-    //   label: "Action",
-    //   render: (_, row) => (
-    //     <span
-    //       onClick={() => handleViewMore(row)}
-    //       className="text-[#009952] font-medium text-sm cursor-pointer"
-    //     >
-    //       View More
-    //     </span>
-    //   ),
-    // },
+    {
+      key: "is_active",
+      label: "Status",
+      render: (value, row) => (
+        <div className="flex items-center">
+          <label className="inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              className="sr-only peer"
+              checked={row.is_active}
+              onChange={() => handleToggleStatus(row)} // Corrected here
+            />
+            <div
+              className={`relative w-10 h-5 rounded-full transition-colors ${
+                row.is_active ? "bg-primary" : "bg-gray-200"
+              }`}
+            >
+              <div
+                className={`absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform ${
+                  row.is_active ? "transform translate-x-5" : ""
+                }`}
+              ></div>
+            </div>
+          </label>
+        </div>
+      ),
+    },
+    {
+      key: "id",
+      label: "Action",
+      render: (_, row) => (
+        <span
+          onClick={() => handleViewMore(row)}
+          className="text-[#009952] font-medium text-sm cursor-pointer"
+        >
+          View More
+        </span>
+      ),
+    },
   ];
 
   const handleToggleStatus = async (frontdesk: NurseAttributes) => {
@@ -126,8 +128,10 @@ const SaFrontDeskTable = ({ frontdesks, isLoading }: Props) => {
     // 2. API call
     const serverStatus = await togglestatus({
       is_active: newStatus,
-      user_id: frontdesk.user_id,
+      user_id: frontdesk.id,
     });
+
+    console.log(frontdesk.id);
 
     // If API failed, revert
     if (serverStatus === null) {

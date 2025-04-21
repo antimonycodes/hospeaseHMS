@@ -50,7 +50,6 @@ EditPatientModalProps) => {
     if (patientData && isOpen) {
       setFormData({
         ...patientData,
-        // Make sure next_of_kin is an array with at least one item
         next_of_kin:
           patientData.next_of_kin?.length > 0
             ? [...patientData.next_of_kin]
@@ -101,12 +100,12 @@ EditPatientModalProps) => {
     });
   };
 
-  // const handleSubmit = (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   if (formData) {
-  //     onSave(formData);
-  //   }
-  // };
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData) {
+      onSave(formData);
+    }
+  };
 
   if (!isOpen || !formData) return null;
 

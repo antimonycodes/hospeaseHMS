@@ -119,6 +119,7 @@ interface DoctorStore {
   pagination: Pagination | null;
 
   isDeleting: boolean;
+  isUpdating: boolean;
   doctors: Doctor[];
   department: Department[];
   consultants: any[];
@@ -145,11 +146,14 @@ interface DoctorStore {
   getMedDoctorById: (id: string) => Promise<void>;
   getAllDepartment: () => Promise<void>;
   deleteDoctor: (id: string) => Promise<any>;
+  updateDoctor: (id: number | string, data: any) => Promise<any>;
+  updateConsultant: (id: number | string, data: any) => Promise<any>;
 }
 
 export const useDoctorStore = create<DoctorStore>((set, get, endpoint) => ({
   isLoading: false,
   isDeleting: false,
+  isUpdating: false,
   doctors: [],
   selectedDoctor: null,
   consultants: [],
@@ -247,6 +251,30 @@ export const useDoctorStore = create<DoctorStore>((set, get, endpoint) => ({
       toast.error(error.response.data.message);
     } finally {
       set({ isLoading: false });
+    }
+  },
+  updateDoctor: async (id, data, endpoint = "/admin/doctor/update") => {
+    set({ isUpdating: true });
+    try {
+      const response = await api.put(`${endpoint}/${id}`, data);
+
+      toast.success(response.data.message);
+    } catch (error) {
+      console.error("Error updating doctor:", error);
+    } finally {
+      set({ isUpdating: false });
+    }
+  },
+  updateConsultant: async (id, data, endpoint = "/admin/consultant/update") => {
+    set({ isUpdating: true });
+    try {
+      const response = await api.put(`${endpoint}/${id}`, data);
+
+      toast.success(response.data.message);
+    } catch (error) {
+      console.error("Error updating doctor:", error);
+    } finally {
+      set({ isUpdating: false });
     }
   },
 

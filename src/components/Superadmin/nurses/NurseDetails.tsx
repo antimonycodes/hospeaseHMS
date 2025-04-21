@@ -1,15 +1,35 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useNurseStore } from "../../../store/super-admin/useNuseStore";
 import Button from "../../../Shared/Button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import Loader from "../../../Shared/Loader";
+import AddOrEditNurseModal from "./AddOrEditNurseModal";
 
 const NurseDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [showEditModal, setShowEditModal] = useState(false);
 
-  const { getNurseById, selectedNurse, isLoading, deleteNurse } =
-    useNurseStore();
+  const {
+    getNurseById,
+    selectedNurse,
+    isLoading,
+    deleteNurse,
+    updateNurse,
+    isDeleting,
+  } = useNurseStore();
+
+  const [formData, setFormData] = useState({
+    first_name: "",
+    last_name: "",
+    nurse_id: null,
+    email: "",
+    phone: "",
+    religion: "",
+    address: "",
+    dob: "",
+  });
 
   useEffect(() => {
     if (id) {
@@ -17,15 +37,42 @@ const NurseDetails = () => {
     }
   }, [id, getNurseById]);
 
+  // Update form data when selected nurse changes
+  useEffect(() => {
+    if (selectedNurse) {
+      setFormData({
+        first_name: selectedNurse.attributes.first_name || "",
+        last_name: selectedNurse.attributes.last_name || "",
+        nurse_id: selectedNurse.id,
+        email: selectedNurse.attributes.email || "",
+        phone: selectedNurse.attributes.phone || "",
+        religion: selectedNurse.attributes.details?.religion || "",
+        address: selectedNurse.attributes.details?.address || "",
+        dob: selectedNurse.attributes.details?.dob || "",
+      });
+    }
+  }, [selectedNurse]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleEdit = () => {
+    setShowEditModal(true);
+  };
+
   const handleDelete = () => {
     if (selectedNurse) {
       deleteNurse(selectedNurse.id);
       navigate(-1);
     }
   };
-  console.log(selectedNurse);
 
-  if (isLoading) return <p>Loading doctor details...</p>;
+  if (isLoading) return <Loader />;
 
   return (
     <div className="bg-white rounded-lg shadow-md w-full">
@@ -43,9 +90,24 @@ const NurseDetails = () => {
             </h2>
           </div>
           <div className="flex space-x-2">
-            <Button variant="edit">Edit</Button>
-            <Button variant="delete" onClick={handleDelete}>
-              Delete staff
+            <Button variant="edit" onClick={handleEdit}>
+              Edit
+            </Button>
+            <Button
+              variant="delete"
+              onClick={handleDelete}
+              disabled={!!isDeleting}
+              className={`
+                ${isDeleting ? "opacity-50 cursor-not-allowed" : ""}`}
+            >
+              {isDeleting ? (
+                <>
+                  Deleting
+                  <Loader2 className=" size-6 mr-2 animate-spin" />
+                </>
+              ) : (
+                "Delete"
+              )}
             </Button>
           </div>
         </div>
@@ -57,19 +119,33 @@ const NurseDetails = () => {
           />
           <Info label="Last Name" value={selectedNurse?.attributes.last_name} />
           <Info label="Staff ID" value={selectedNurse?.attributes.nurse_id} />
-          <Info label="Age" value={selectedNurse?.attributes.details.age} />
+          <Info label="Age" value={selectedNurse?.attributes.details?.age} />
           <Info label="Gender" value={selectedNurse?.gender} />
           <Info
             label="Religion"
-            value={selectedNurse?.attributes.details.religion}
+            value={selectedNurse?.attributes.details?.religion}
           />
           <Info label="Phone" value={selectedNurse?.attributes.phone} />
           <Info
             label="House Address"
-            value={selectedNurse?.attributes.details.address}
+            value={selectedNurse?.attributes.details?.address}
           />
         </div>
       </div>
+
+      {/* Edit Nurse Modal */}
+      {showEditModal && selectedNurse && (
+        <AddOrEditNurseModal
+          formData={formData}
+          handleInputChange={handleInputChange}
+          setShowModal={setShowEditModal}
+          createNurse={() => null}
+          updateNurse={updateNurse}
+          // isLoading={isLoading}
+          isEditMode={true}
+          selectedNurseId={selectedNurse.id}
+        />
+      )}
     </div>
   );
 };

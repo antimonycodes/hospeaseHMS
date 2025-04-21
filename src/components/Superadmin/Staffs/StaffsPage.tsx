@@ -1,12 +1,13 @@
 import { Plus } from "lucide-react";
 import Button from "../../../Shared/Button";
 import { useEffect, useState } from "react";
-import AddStaffModal from "./AddStaffModal";
+// import StaffModal from "./StaffModal";
 import {
   useGlobalStore,
   CreateStaff,
 } from "../../../store/super-admin/useGlobal";
 import StaffsList from "./StaffsList";
+import AddStaffModal from "./AddStaffModal";
 
 interface StaffsPageProps {
   department: string;
@@ -14,8 +15,14 @@ interface StaffsPageProps {
 
 const StaffsPage: React.FC<StaffsPageProps> = ({ department }) => {
   const [showModal, setShowModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentStaffId, setCurrentStaffId] = useState<number | undefined>(
+    undefined
+  );
+
   const {
     createStaff,
+    updateStaff,
     isLoading,
     isStaffLoading,
     getDeptStaffs,
@@ -31,10 +38,6 @@ const StaffsPage: React.FC<StaffsPageProps> = ({ department }) => {
   useEffect(() => {
     getAllRoles();
   }, [getAllRoles]);
-
-  console.log(department);
-
-  console.log(roles, "roles");
 
   const [formData, setFormData] = useState<CreateStaff>({
     first_name: "",
@@ -59,6 +62,30 @@ const StaffsPage: React.FC<StaffsPageProps> = ({ department }) => {
     });
   };
 
+  const openAddModal = () => {
+    setFormData({
+      first_name: "",
+      email: "",
+      last_name: "",
+      phone: "",
+    });
+    setIsEditing(false);
+    setCurrentStaffId(undefined);
+    setShowModal(true);
+  };
+
+  const openEditModal = (staff: any) => {
+    setFormData({
+      first_name: staff.first_name,
+      email: staff.email,
+      last_name: staff.last_name,
+      phone: staff.phone,
+    });
+    setIsEditing(true);
+    setCurrentStaffId(staff.id);
+    setShowModal(true);
+  };
+
   return (
     <div className="w-full rounded-lg custom-shadow bg-white p-4">
       {/* Header */}
@@ -71,7 +98,7 @@ const StaffsPage: React.FC<StaffsPageProps> = ({ department }) => {
         {/* Add Button */}
         <div className="md:w-auto">
           <Button
-            onClick={() => setShowModal(true)}
+            onClick={openAddModal}
             variant="primary"
             size="md"
             className="flex items-center gap-2 px-4"
@@ -88,18 +115,22 @@ const StaffsPage: React.FC<StaffsPageProps> = ({ department }) => {
         isStaffLoading={isStaffLoading}
         pagination={pagination}
         getDeptStaffs={getDeptStaffs}
+        // onEditStaff={openEditModal}
       />
 
-      {/* Add Staff Modal */}
+      {/* Staff Modal (Add/Edit) */}
       {showModal && (
         <AddStaffModal
           formData={formData}
           handleInputChange={handleInputChange}
           setShowModal={setShowModal}
           createStaff={createStaff}
+          updateStaff={updateStaff}
           isLoading={isLoading}
           department={department}
-          roles={roles}
+          isEditing={isEditing}
+          staffId={currentStaffId}
+          // roles={roles}
         />
       )}
     </div>

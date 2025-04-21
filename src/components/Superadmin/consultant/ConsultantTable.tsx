@@ -20,9 +20,11 @@ type Column<T> = {
 const ConsultantTable = ({
   consultants,
   isLoading,
+  onEdit,
 }: {
   consultants: Consultant[];
   isLoading: boolean;
+  onEdit?: (consultant: Consultant) => void;
 }) => {
   const [formattedConsultants, setFormatteConsultants] = useState<
     ConsultantAttributes[]

@@ -1,8 +1,9 @@
 import { useLocation } from "react-router-dom";
 import Button from "./Button";
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { useGlobalStore } from "../store/super-admin/useGlobal";
 import { useEffect } from "react";
+import { useDoctorStore } from "../store/super-admin/useDoctorStore";
 
 interface AddDoctorModalProps {
   formData: {
@@ -14,10 +15,11 @@ interface AddDoctorModalProps {
     religion: string;
     houseAddress: string;
     // department_id: number;
-    dob?: string; //
+    dob?: string;
     consultant_id?: null | string;
     endpoint?: string;
     refreshEndpoint?: string;
+    id?: number | string; // For update operations
   };
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   setShowModal: (show: boolean) => void;
@@ -31,9 +33,22 @@ interface AddDoctorModalProps {
     endpoint?: string,
     refreshEndpoint?: string
   ) => Promise<void>;
+  updateDoctor?: (
+    id: number | string,
+    data: any,
+    endpoint?: string,
+    refreshEndpoint?: string
+  ) => Promise<any>;
+  updateConsultant?: (
+    id: number | string,
+    data: any,
+    endpoint?: string,
+    refreshEndpoint?: string
+  ) => Promise<any>;
   isLoading: boolean;
   endpoint?: string;
   refreshEndpoint?: string;
+  isEditing?: boolean; // Flag to determine if we're editing or creating
 }
 
 const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
@@ -42,50 +57,81 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
   setShowModal,
   createDoctor,
   createConsultant,
+  updateDoctor,
+  updateConsultant,
   isLoading,
   endpoint,
   refreshEndpoint,
+  isEditing = false,
 }) => {
   const location = useLocation();
   const isConsultant = location.pathname.includes("consultants");
 
   const department = "doctor";
   const { getAllRoles, roles } = useGlobalStore();
+  const isUpdating = useDoctorStore((state) => state.isUpdating);
 
   useEffect(() => {
     getAllRoles();
   }, [getAllRoles]);
 
-  console.log(roles, "dfg");
-
-  // Dynamically fallback to correct endpoint if not passed from parent
   const finalEndpoint =
     endpoint ??
-    (isConsultant ? "/admin/consultant/create" : "/admin/doctor/create");
+    (isConsultant
+      ? isEditing
+        ? "/admin/consultant/update"
+        : "/admin/consultant/create"
+      : isEditing
+      ? "/admin/doctor/update"
+      : "/admin/doctor/create");
+
   const finalRefreshEndpoint =
     refreshEndpoint ??
     (isConsultant ? "/admin/consultant/fetch" : "/admin/doctor/fetch");
+  console.log(formData, "erty");
 
   const handleSubmit = async (e: React.FormEvent) => {
-    const { id, role } = roles[department];
-
-    console.log(id, "id");
-
     e.preventDefault();
+
+    const { id: roleId, role } = roles[department] || { id: 0, role: "" };
+
     const payload = {
-      department_id: id,
+      department_id: roleId,
+      role: role,
       ...formData,
-      address: formData.houseAddress, // Map houseAddress to address for store compatibility
+      address: formData.houseAddress,
       [isConsultant ? "consultant_id" : "doctor_id"]:
         formData[isConsultant ? "consultant_id" : "doctor_id"] ?? null,
     };
-    await (isConsultant ? createConsultant : createDoctor)(
-      payload,
-      finalEndpoint,
-      finalRefreshEndpoint
-    );
+
+    if (isEditing && formData.id) {
+      // Update operation
+      if (isConsultant && updateConsultant) {
+        await updateConsultant(formData.id, payload);
+      } else if (!isConsultant && updateDoctor) {
+        if (formData.doctor_id !== undefined && formData.doctor_id !== null) {
+          await updateDoctor(formData.doctor_id, payload);
+        }
+      }
+    } else {
+      // Create operation
+      await (isConsultant ? createConsultant : createDoctor)(
+        payload,
+        finalEndpoint,
+        finalRefreshEndpoint
+      );
+    }
+
     setShowModal(false);
+    // window.location.reload();
   };
+
+  const modalTitle = `${isEditing ? "Update" : "Add New"} ${
+    isConsultant ? "Consultant" : "Doctor"
+  }`;
+  const submitButtonText = `${isEditing ? "Update" : "Add"} ${
+    isConsultant ? "Consultant" : "Doctor"
+  }`;
 
   return (
     <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center z-50 p-6">
@@ -93,7 +139,7 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
         <div className="p-4 md:p-12">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold text-custom-black">
-              Add New {isConsultant ? "Consultant" : "Doctor"}
+              {modalTitle}
             </h2>
             <button onClick={() => setShowModal(false)}>
               <X className="text-black" />
@@ -251,10 +297,16 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
 
             <Button
               type="submit"
-              disabled={isLoading}
-              className={isLoading ? "opacity-50 cursor-not-allowed" : ""}
+              disabled={isUpdating}
+              className={isUpdating ? "opacity-50 cursor-not-allowed" : ""}
             >
-              {isConsultant ? "Add Consultant" : "Add Doctor"}
+              {isUpdating ? (
+                <>
+                  <Loader2 className=" size-6 mr-2 animate-spin" />
+                </>
+              ) : (
+                submitButtonText
+              )}
             </Button>
           </form>
         </div>

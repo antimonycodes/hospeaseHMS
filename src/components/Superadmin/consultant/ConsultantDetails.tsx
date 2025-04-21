@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, ChevronLeft } from "lucide-react";
+import { ArrowLeft, ChevronLeft, Loader2 } from "lucide-react";
 import { useDoctorStore } from "../../../store/super-admin/useDoctorStore";
 import Button from "../../../Shared/Button";
 import Loader from "../../../Shared/Loader";
+import { useCombinedStore } from "../../../store/super-admin/useCombinedStore";
 // import { useDoctorStore } from "../store/useDoctorStore";
 
 export interface Consultant {
@@ -12,7 +13,7 @@ export interface Consultant {
     first_name: string;
     last_name: string;
     phone: string;
-
+    user_id: string;
     age: number;
     religion: string;
     address: string;
@@ -29,6 +30,7 @@ const ConsultantDetails = () => {
       getConsultantById: (id: string, endpoint: string) => Promise<void>;
       isLoading: boolean;
     };
+  const { deleteUser, isDeleting } = useCombinedStore();
 
   useEffect(() => {
     if (id) {
@@ -36,6 +38,13 @@ const ConsultantDetails = () => {
     }
   }, [id, getConsultantById]);
   console.log(selectedConsultant);
+
+  const handleDelete = async () => {
+    const response = await deleteUser(selectedConsultant?.attributes.user_id);
+    if (response) {
+      navigate(-1);
+    }
+  };
 
   if (isLoading) return <Loader />;
   if (!selectedConsultant) return <p>Consultant not found</p>;
@@ -57,7 +66,22 @@ const ConsultantDetails = () => {
           </div>
           <div className="flex space-x-2">
             <Button variant="edit">Edit</Button>
-            <Button variant="delete">Block staff</Button>
+            <Button
+              variant="delete"
+              onClick={handleDelete}
+              disabled={!!isDeleting}
+              className={`
+                ${isDeleting ? "opacity-50 cursor-not-allowed" : ""}`}
+            >
+              {isDeleting ? (
+                <>
+                  Deleting
+                  <Loader2 className=" size-6 mr-2 animate-spin" />
+                </>
+              ) : (
+                "Delete"
+              )}
+            </Button>
           </div>
         </div>
 

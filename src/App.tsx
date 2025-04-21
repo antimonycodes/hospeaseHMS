@@ -56,6 +56,7 @@ import SignupSuccess from "./_Auth/SignupSuccess";
 import NurseDetail from "./components/Nurse/patients/NurseDetail";
 import ServiceCharges from "./pages/ServiceCharges";
 import ForgotPassword from "./_Auth/ForgotPassword";
+import FrontdeskDeets from "./components/Superadmin/frontdesk/FrontdeskDeets";
 import Category from "./pages/Category";
 import SaInventoryPage from "./components/Superadmin/Inventory/SaInventoryPage";
 
@@ -152,6 +153,8 @@ function App() {
                 path="frontdesk/staffs"
                 element={<Staffs department="front-desk-manager" />}
               />
+              <Route path="frontdesk/:id" element={<FrontdeskDeets />} />
+
               <Route
                 path="inventory/staffs"
                 element={<Staffs department="inventory-manager" />}

@@ -1,10 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { useGlobalStore } from "../../../store/super-admin/useGlobal";
-import { ChevronLeft, Pencil, Trash } from "lucide-react";
+import { ChevronLeft, Loader2, Pencil, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
 import Loader from "../../../Shared/Loader";
+import Button from "../../../Shared/Button";
+import { useCombinedStore } from "../../../store/super-admin/useCombinedStore";
+import AddStaffModal from "./AddStaffModal";
 
-const StaffsDetail = () => {
+const StaffsDetail = ({ setShowModal }: any) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [shiftType, setShiftType] = useState("");
   const [startTime, setStartTime] = useState("");
@@ -12,19 +15,50 @@ const StaffsDetail = () => {
   const [loading, setLoading] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingShift, setEditingShift] = useState<any | null>(null);
-
+  const [isStaffEditModalOpen, setIsStaffEditModalOpen] = useState(false);
+  const [staffFormData, setStaffFormData] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone: "",
+  });
   const navigate = useNavigate();
   const staff = useGlobalStore((state) => state.selectedStaff);
   const roles = useGlobalStore((state) => state.roles);
 
-  const { assignShifts, getStaffShifts, staffShift, updateShift, deleteShift } =
-    useGlobalStore();
+  const {
+    assignShifts,
+    getStaffShifts,
+    staffShift,
+    updateShift,
+    deleteShift,
+    updateStaff,
+  } = useGlobalStore();
+
+  const { deleteUser, isDeleting } = useCombinedStore();
 
   useEffect(() => {
     if (!staff) {
       navigate(-1);
+    } else {
+      // Initialize staff form data
+      setStaffFormData({
+        first_name: staff.first_name || "",
+        last_name: staff.last_name || "",
+        email: staff.email || "",
+        phone: staff.phone || "",
+      });
     }
   }, [staff, navigate]);
+
+  // Handle staff form input change
+  const handleStaffInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setStaffFormData({
+      ...staffFormData,
+      [name]: value,
+    });
+  };
 
   useEffect(() => {
     if (staff) {
@@ -131,17 +165,51 @@ const StaffsDetail = () => {
     }
   };
 
+  const handleDelete = async () => {
+    const response = await deleteUser(staff.id);
+    if (response) {
+      navigate(-1);
+    }
+  };
+  const openStaffEditModal = () => {
+    setIsStaffEditModalOpen(true);
+  };
+
   if (!staff) return <Loader />;
 
   return (
     <div className="px-2 sm:px-0">
       <div className="p-4 bg-white rounded-lg custom-shadow mb-6">
-        <div
-          className="flex items-center text-gray-600 hover:text-primary mb-6"
-          onClick={() => navigate(-1)}
-        >
-          <ChevronLeft size={16} />
-          <span className="ml-1">Staffs</span>
+        <div className=" flex items-center justify-between">
+          <div
+            className="flex items-center text-gray-600 hover:text-primary mb-6"
+            onClick={() => navigate(-1)}
+          >
+            <ChevronLeft size={16} />
+            <span className="ml-1">Staffs</span>
+          </div>
+          {/* btns */}
+          <div className="flex space-x-2">
+            <Button variant="edit" onClick={openStaffEditModal}>
+              Edit
+            </Button>
+            <Button
+              variant="delete"
+              onClick={handleDelete}
+              disabled={!!isDeleting}
+              className={`
+                ${isDeleting ? "opacity-50 cursor-not-allowed" : ""}`}
+            >
+              {isDeleting ? (
+                <>
+                  Deleting
+                  <Loader2 className=" size-6 mr-2 animate-spin" />
+                </>
+              ) : (
+                "Delete"
+              )}
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
@@ -304,6 +372,22 @@ const StaffsDetail = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Staff Edit Modal */}
+      {isStaffEditModalOpen && (
+        <AddStaffModal
+          formData={staffFormData}
+          handleInputChange={handleStaffInputChange}
+          setShowModal={setIsStaffEditModalOpen}
+          createStaff={() => Promise.resolve(null)} // This won't be used in edit mode
+          updateStaff={updateStaff}
+          isLoading={false}
+          department={staff.role.toLowerCase()}
+          isEditing={true}
+          staffId={staff.id}
+          // roles={roles}
+        />
       )}
     </div>
   );
