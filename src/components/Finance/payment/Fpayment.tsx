@@ -6,8 +6,8 @@ import Tabs from "../../ReusablepatientD/Tabs";
 import FpaymentTable from "./FpaymentTable";
 
 type FpaymentTableProps = {
-  endpoint?: string; // For creating payments
-  refreshEndpoint?: string; // For fetching payments
+  endpoint?: string;
+  refreshEndpoint?: string;
 };
 
 const Fpayment = ({

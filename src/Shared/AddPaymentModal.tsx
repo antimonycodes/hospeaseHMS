@@ -52,7 +52,11 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
   const [selectedItems, setSelectedItems] = useState<
     {
       id: any;
-      attributes: { price: string; name?: string };
+      attributes: {
+        amount?: any;
+        // price: string;
+        name?: string;
+      };
       quantity: number;
       total: number;
     }[]
@@ -112,13 +116,21 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
 
   const handleToggleItem = (item: {
     id: any;
-    attributes: { price: string; name?: string };
+    attributes: {
+      amount(amount: any): number;
+      price: string;
+      name?: string;
+    };
   }) => {
     const exists = selectedItems.find((i) => i.id === item.id);
     if (!exists) {
       setSelectedItems((prev) => [
         ...prev,
-        { ...item, quantity: 1, total: parseFloat(item.attributes.price) },
+        {
+          ...item,
+          quantity: 1,
+          total: parseFloat(item.attributes.amount?.toString() || "0"),
+        },
       ]);
       toast.success(`Added ${item.attributes.name || "item"} to selection`);
     } else {
@@ -132,7 +144,8 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
       const updated = [...prev];
       const item = updated[index];
       item.quantity = Math.max(1, item.quantity + delta);
-      item.total = parseFloat(item.attributes.price) * item.quantity;
+      item.total =
+        parseFloat(item.attributes.amount?.toString() || "0") * item.quantity;
       return updated;
     });
   };
