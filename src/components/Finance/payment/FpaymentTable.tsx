@@ -44,8 +44,8 @@ const FpaymentTable = ({
   pagination,
   payments,
   isLoading,
-  endpoint = "/finance/all-revenues",
-}: FpaymentTableProps) => {
+}: // endpoint = "/finance/patient-paymet-history",
+FpaymentTableProps) => {
   const { getAllPayments } = useFinanceStore();
   const [perPage, setPerPage] = useState(pagination?.per_page || 10);
 
@@ -104,7 +104,7 @@ const FpaymentTable = ({
 
   const handlePageChange = (page: number) => {
     console.log("Page change to:", page);
-    getAllPayments(page.toString(), perPage.toString(), endpoint);
+    getAllPayments();
   };
 
   if (isLoading && !payments.length) {

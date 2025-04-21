@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, SetStateAction } from "react";
+import { useState, useEffect } from "react";
 import Button from "../Shared/Button";
 import { XIcon, PlusCircle, Loader2, Edit, Trash2 } from "lucide-react";
 import { useGlobalStore } from "../store/super-admin/useGlobal";
@@ -6,52 +6,103 @@ import toast from "react-hot-toast";
 import Loader from "../Shared/Loader";
 import { useCombinedStore } from "../store/super-admin/useCombinedStore";
 
+interface Item {
+  id: number;
+  attributes: {
+    name: string;
+    price: number;
+    amount: number;
+    department: {
+      name: string;
+      id: number;
+    };
+  };
+}
+
+interface Role {
+  id: number;
+  role: string;
+}
+
+interface RolesState {
+  [key: string]: Role;
+}
+
 const ServiceCharges = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  interface Item {
-    id: string;
-    attributes: {
-      name: string;
-      price: number;
-    };
-  }
-
   const [editItem, setEditItem] = useState<Item | null>(null);
 
-  //   // These would be from your global store
-  const { isLoading, createItem, getAllItems, items } = useCombinedStore();
+  const [formData, setFormData] = useState({
+    name: "",
+    price: "",
+    departmentId: "",
+  });
 
-  const nameRef = useRef<HTMLInputElement>(null);
-  const priceRef = useRef<HTMLInputElement>(null);
+  const {
+    isLoading,
+    isDeleting,
+    createItem,
+    getAllItems,
+    updateItem,
+    deleteItem,
+    items,
+  } = useCombinedStore();
+  const { getAllRoles } = useGlobalStore();
+  const roles = useGlobalStore((state) => state.roles) as RolesState;
+
+  const allowedDepartments = ["pharmacist", "laboratory", "finance"];
+
+  const getDepartmentOptions = () => {
+    if (!roles) return [];
+
+    return allowedDepartments
+      .filter((dept) => roles[dept])
+      .map((dept) => ({
+        id: roles[dept]?.id.toString(),
+        name: dept.charAt(0).toUpperCase() + dept.slice(1),
+      }));
+  };
+
+  const departmentOptions = getDepartmentOptions();
 
   useEffect(() => {
     getAllItems();
-  }, [getAllItems]);
+    getAllRoles();
+  }, [getAllItems, getAllRoles]);
 
-  console.log(items);
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    const name = nameRef.current?.value.trim();
-    const price = priceRef.current?.value;
+    const { name, price, departmentId } = formData;
 
-    if (!name || !price) {
-      toast.error("Name and price are required");
+    if (!name || !price || !departmentId) {
+      toast.error("Name, price, and department are required");
       return;
     }
 
     const itemData = {
       name,
-      price: parseFloat(price),
+      amount: parseFloat(price),
+      department_id: parseInt(departmentId),
     };
 
     let result;
-    if (isEditMode) {
-      // result = await updateItem({ id: editItem.id, ...itemData });
-      // if (result) toast.success("Item updated successfully");
+    if (isEditMode && editItem) {
+      result = await updateItem(editItem.id, itemData);
+      if (result) toast.success("Item updated successfully");
     } else {
       result = await createItem(itemData);
+      if (result) toast.success("Item added successfully");
     }
 
     if (result) {
@@ -60,20 +111,30 @@ const ServiceCharges = () => {
     }
   };
 
-  //   const handleDeleteItem = async (id) => {
-  //     if (window.confirm("Are you sure you want to delete this item?")) {
-  //       const result = await deleteItem(id);
-  //       if (result) {
-  //         toast.success("Item deleted successfully");
-  //       }
-  //     }
-  //   };
+  const handleDeleteItem = async (id: number) => {
+    if (window.confirm("Are you sure you want to delete this item?")) {
+      const result = await deleteItem(id);
+      if (result) {
+        toast.success("Item deleted successfully");
+        getAllItems(); // Refresh the list after deletion
+      }
+    }
+  };
 
-  // const openEditModal = (item: Item | null) => {
-  //   setEditItem(item);
-  //   setIsEditMode(true);
-  //   setIsModalOpen(true);
-  // };
+  const openEditModal = (item: Item) => {
+    setEditItem(item);
+
+    // Find department ID
+    const departmentId = item.attributes.department.id;
+
+    setFormData({
+      name: item.attributes.name,
+      price: (item.attributes.amount || item.attributes.price).toString(),
+      departmentId: departmentId.toString(),
+    });
+    setIsEditMode(true);
+    setIsModalOpen(true);
+  };
 
   const openAddModal = () => {
     setIsEditMode(false);
@@ -83,8 +144,11 @@ const ServiceCharges = () => {
   };
 
   const resetForm = () => {
-    if (nameRef.current) nameRef.current.value = "";
-    if (priceRef.current) priceRef.current.value = "";
+    setFormData({
+      name: "",
+      price: "",
+      departmentId: "",
+    });
   };
 
   const formatPrice = (price: any) => {
@@ -92,6 +156,16 @@ const ServiceCharges = () => {
       style: "currency",
       currency: "NGN",
     }).format(price);
+  };
+
+  // Get department name by ID
+  const getDepartmentName = (departmentId: number) => {
+    const department = Object.values(roles || {}).find(
+      (role) => role.id === departmentId
+    );
+    return department
+      ? department.role.charAt(0).toUpperCase() + department.role.slice(1)
+      : "Unknown";
   };
 
   if (isLoading) return <Loader />;
@@ -137,14 +211,20 @@ const ServiceCharges = () => {
                 scope="col"
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
-                Price
+                Amount
               </th>
-              {/* <th
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Department
+              </th>
+              <th
                 scope="col"
                 className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
                 Actions
-              </th> */}
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -164,10 +244,15 @@ const ServiceCharges = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
-                      {formatPrice(item.attributes.price)}
+                      #{item.attributes.amount || item.attributes.price}
                     </div>
                   </td>
-                  {/* <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">
+                      {item.attributes.department.name}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">
                     <div className="flex items-center justify-end space-x-3">
                       <button
                         onClick={() => openEditModal(item)}
@@ -178,16 +263,17 @@ const ServiceCharges = () => {
                       <button
                         onClick={() => handleDeleteItem(item.id)}
                         className="text-red-600 hover:text-red-900"
+                        disabled={isDeleting}
                       >
                         <Trash2 className="w-5 h-5" />
                       </button>
                     </div>
-                  </td> */}
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={4} className="px-6 py-12 text-center">
+                <td colSpan={5} className="px-6 py-12 text-center">
                   {isLoading ? (
                     <div className="flex justify-center items-center">
                       <Loader2 className="w-6 h-6 text-primary animate-spin mr-2" />
@@ -231,16 +317,17 @@ const ServiceCharges = () => {
                   </label>
                   <input
                     id="name"
+                    name="name"
                     type="text"
-                    ref={nameRef}
-                    defaultValue={editItem?.attributes.name || ""}
+                    value={formData.name}
+                    onChange={handleInputChange}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 outline-none focus:ring-primary focus:border-primary"
                     placeholder="Enter name"
                     autoFocus
                   />
                 </div>
 
-                <div className="mb-6">
+                <div className="mb-4">
                   <label
                     htmlFor="price"
                     className="block text-sm font-medium text-gray-700 mb-2"
@@ -249,13 +336,37 @@ const ServiceCharges = () => {
                   </label>
                   <input
                     id="price"
+                    name="price"
                     type="number"
                     step="0.01"
-                    ref={priceRef}
-                    defaultValue={editItem?.attributes.price || ""}
+                    value={formData.price}
+                    onChange={handleInputChange}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 outline-none focus:ring-primary focus:border-primary"
                     placeholder="Enter price"
                   />
+                </div>
+
+                <div className="mb-6">
+                  <label
+                    htmlFor="departmentId"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    Department*
+                  </label>
+                  <select
+                    id="departmentId"
+                    name="departmentId"
+                    value={formData.departmentId}
+                    onChange={handleInputChange}
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 outline-none focus:ring-primary focus:border-primary bg-white"
+                  >
+                    <option value="">Select Department</option>
+                    {departmentOptions.map((dept) => (
+                      <option key={dept.id} value={dept.id}>
+                        {dept.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="flex justify-end gap-3">

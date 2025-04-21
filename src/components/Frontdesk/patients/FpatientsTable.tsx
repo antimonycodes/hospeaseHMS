@@ -11,7 +11,6 @@ const FpatientsTable = () => {
   const baseEndpoint = "/front-desk/patient/fetch";
 
   useEffect(() => {
-    // Pass page and perPage as strings for the first call
     getAllPatients("1", "10", baseEndpoint);
   }, [getAllPatients]);
 

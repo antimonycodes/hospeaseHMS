@@ -11,8 +11,8 @@ type FpaymentTableProps = {
 };
 
 const Fpayment = ({
-  endpoint = "/finance/save-revenue",
-  refreshEndpoint = "/finance/all-revenues",
+  endpoint = "/save-patient-payment",
+  refreshEndpoint = "/finance/patient-paymet-history",
 }: FpaymentTableProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<
@@ -23,7 +23,7 @@ const Fpayment = ({
 
   useEffect(() => {
     console.log("Fetching payments with endpoint:", refreshEndpoint);
-    getAllPayments("1", "10", refreshEndpoint);
+    getAllPayments();
   }, [getAllPayments, refreshEndpoint]);
 
   const getStatusCounts = () => {
@@ -72,8 +72,8 @@ const Fpayment = ({
       {isModalOpen && (
         <AddPaymentModal
           onClose={closeModal}
-          endpoint={endpoint} // For creating payments
-          refreshEndpoint={refreshEndpoint} // For refreshing after creation
+          endpoint={endpoint}
+          refreshEndpoint={refreshEndpoint}
         />
       )}
 

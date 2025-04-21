@@ -158,14 +158,15 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
 
   getAllPayments: async (
     page = "1",
-    perPage = "10",
-    baseEndpoint = "/finance/all-revenues"
+    perPage = "10"
+    // baseEndpoint = "/finance/patient-paymet-history"
   ) => {
     set({ isLoading: true, payments: [], pagination: null });
     try {
-      const endpoint = `${baseEndpoint}?page=${page}&per_page=${perPage}`;
-      console.log("Fetching Payments from:", endpoint);
-      const response = await api.get(endpoint);
+      // const endpoint = `${baseEndpoint}?page=${page}&per_page=${perPage}`;
+      // const endpoint = baseEndpoint;
+      // console.log("Fetching Payments from:", endpoint);
+      const response = await api.get("/medical-report/patient-payment-history");
       if (!response.data?.data) {
         throw new Error("No data found in response");
       }
@@ -244,7 +245,7 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
 
   createPayment: async (
     data: CreatePaymentData,
-    endpoint = "/finance/save-revenue",
+    endpoint = "/save-patient-payment",
     refreshEndpoint = "/finance/all-revenues"
   ) => {
     set({ isLoading: true });

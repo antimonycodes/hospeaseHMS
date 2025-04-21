@@ -31,11 +31,11 @@ interface AddPaymentModalProps {
 
 const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
   onClose,
-  endpoint = "/finance/save-revenue",
+  endpoint = "/save-patient-payment",
   refreshEndpoint = "/finance/all-revenues",
 }) => {
   const { searchPatients, createPayment, isLoading } = useFinanceStore();
-  const { getAllPatients } = usePatientStore();
+  const { getAllPatients, getAllPatientsNoPerPage } = usePatientStore();
   const { getAllItems, items } = useCombinedStore();
 
   const [query, setQuery] = useState("");
@@ -69,10 +69,12 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
 
   const receiptRef = useRef<HTMLDivElement>(null);
 
+  const baseEndpoint = "/medical-report/all-patient";
+
   useEffect(() => {
-    getAllPatients("/medical-report/all-patient");
-    getAllItems("/finance/purpose/all");
-  }, [getAllPatients, getAllItems]);
+    getAllPatientsNoPerPage();
+    getAllItems();
+  }, [getAllPatientsNoPerPage, getAllItems]);
 
   const handleSearch = debounce(async (val) => {
     if (val.length > 2) {
@@ -170,92 +172,92 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
     }
   };
 
-  const handleDownloadPDF = () => {
-    if (!receiptRef.current) return;
+  // const handleDownloadPDF = () => {
+  //   if (!receiptRef.current) return;
 
-    toast.loading("Generating PDF...");
+  //   toast.loading("Generating PDF...");
 
-    const receiptElement = receiptRef.current;
+  //   const receiptElement = receiptRef.current;
 
-    html2canvas(receiptElement, {
-      scale: 2,
-      logging: false,
-      useCORS: true,
-      backgroundColor: "#ffffff",
-    }).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
-      });
+  //   html2canvas(receiptElement, {
+  //     scale: 2,
+  //     logging: false,
+  //     useCORS: true,
+  //     backgroundColor: "#ffffff",
+  //   }).then((canvas) => {
+  //     const imgData = canvas.toDataURL("image/png");
+  //     const pdf = new jsPDF({
+  //       orientation: "portrait",
+  //       unit: "mm",
+  //       format: "a4",
+  //     });
 
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  //     const imgWidth = 210; // A4 width in mm
+  //     const pageHeight = 297; // A4 height in mm
+  //     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-      pdf.save(`Receipt-${receiptNumber}.pdf`);
+  //     pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+  //     pdf.save(`Receipt-${receiptNumber}.pdf`);
 
-      toast.dismiss();
-      toast.success("Receipt downloaded as PDF");
-    });
-  };
+  //     toast.dismiss();
+  //     toast.success("Receipt downloaded as PDF");
+  //   });
+  // };
 
-  const handleDownloadImage = () => {
-    if (!receiptRef.current) return;
+  // const handleDownloadImage = () => {
+  //   if (!receiptRef.current) return;
 
-    toast.loading("Generating image...");
+  //   toast.loading("Generating image...");
 
-    html2canvas(receiptRef.current, {
-      scale: 2,
-      logging: false,
-      useCORS: true,
-      backgroundColor: "#ffffff",
-    }).then((canvas) => {
-      const link = document.createElement("a");
-      link.download = `Receipt-${receiptNumber}.png`;
-      link.href = canvas.toDataURL("image/png");
-      link.click();
+  //   html2canvas(receiptRef.current, {
+  //     scale: 2,
+  //     logging: false,
+  //     useCORS: true,
+  //     backgroundColor: "#ffffff",
+  //   }).then((canvas) => {
+  //     const link = document.createElement("a");
+  //     link.download = `Receipt-${receiptNumber}.png`;
+  //     link.href = canvas.toDataURL("image/png");
+  //     link.click();
 
-      toast.dismiss();
-      toast.success("Receipt downloaded as image");
-    });
-  };
+  //     toast.dismiss();
+  //     toast.success("Receipt downloaded as image");
+  //   });
+  // };
 
-  const handlePrint = () => {
-    if (!receiptRef.current) return;
+  // const handlePrint = () => {
+  //   if (!receiptRef.current) return;
 
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) {
-      toast.error("Please allow pop-ups to print receipt");
-      return;
-    }
+  //   const printWindow = window.open("", "_blank");
+  //   if (!printWindow) {
+  //     toast.error("Please allow pop-ups to print receipt");
+  //     return;
+  //   }
 
-    const receiptHtml = receiptRef.current.outerHTML;
+  //   const receiptHtml = receiptRef.current.outerHTML;
 
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Payment Receipt - ${receiptNumber}</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            .receipt { max-width: 100%; margin: 0 auto; }
-          </style>
-        </head>
-        <body>
-          <div class="receipt">
-            ${receiptHtml}
-          </div>
-          <script>
-            window.onload = function() { window.print(); setTimeout(function() { window.close(); }, 500); }
-          </script>
-        </body>
-      </html>
-    `);
+  //   printWindow.document.write(`
+  //     <html>
+  //       <head>
+  //         <title>Payment Receipt - ${receiptNumber}</title>
+  //         <style>
+  //           body { font-family: Arial, sans-serif; padding: 20px; }
+  //           .receipt { max-width: 100%; margin: 0 auto; }
+  //         </style>
+  //       </head>
+  //       <body>
+  //         <div class="receipt">
+  //           ${receiptHtml}
+  //         </div>
+  //         <script>
+  //           window.onload = function() { window.print(); setTimeout(function() { window.close(); }, 500); }
+  //         </script>
+  //       </body>
+  //     </html>
+  //   `);
 
-    printWindow.document.close();
-  };
+  //   printWindow.document.close();
+  // };
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString("en-US", {
@@ -273,7 +275,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
     !paymentMethod ||
     !paymentType;
 
-  const filteredItems = items.filter((item) =>
+  const filteredItems = items?.filter((item) =>
     item.attributes.name?.toLowerCase().includes(itemSearch.toLowerCase())
   );
 
@@ -302,21 +304,21 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
           <div className="flex-1 overflow-y-auto p-6">
             <div className="mb-6 flex justify-end space-x-3">
               <button
-                onClick={handleDownloadPDF}
+                // onClick={handleDownloadPDF}
                 className="flex items-center text-blue-600 hover:text-blue-800 px-3 py-2 border border-blue-600 rounded"
               >
                 <FileText className="h-4 w-4 mr-2" />
                 Download PDF
               </button>
               <button
-                onClick={handleDownloadImage}
+                // onClick={handleDownloadImage}
                 className="flex items-center text-green-600 hover:text-green-800 px-3 py-2 border border-green-600 rounded"
               >
                 <Camera className="h-4 w-4 mr-2" />
                 Download Image
               </button>
               <button
-                onClick={handlePrint}
+                // onClick={handlePrint}
                 className="flex items-center text-gray-600 hover:text-gray-800 px-3 py-2 border border-gray-600 rounded"
               >
                 <Printer className="h-4 w-4 mr-2" />
@@ -580,7 +582,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                         />
                       </div>
                       <ul className="divide-y">
-                        {filteredItems.map((item) => (
+                        {filteredItems?.map((item) => (
                           <li
                             key={item.id}
                             onClick={() => handleToggleItem(item)}
@@ -591,7 +593,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                                 {item.attributes.name}
                               </p>
                               <p className="text-sm text-gray-500">
-                                ₦{item.attributes.price}
+                                ₦{item.attributes.amount}
                               </p>
                             </div>
                             <div
@@ -628,7 +630,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                         <div className="flex-1">
                           <p className="font-medium">{item.attributes.name}</p>
                           <p className="text-sm text-gray-500">
-                            ₦{item.attributes.price} per unit
+                            ₦{item.attributes.amount} per unit
                           </p>
                         </div>
                         <div className="flex items-center space-x-4">

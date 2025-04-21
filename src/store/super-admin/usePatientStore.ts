@@ -98,6 +98,7 @@ interface PatientStore {
     perPage?: string,
     endpoint?: string
   ) => Promise<void>;
+  getAllPatientsNoPerPage: () => Promise<void>;
   getPatientById: (id: string) => Promise<void>;
   updatePatient: (id: string, patientData: any) => Promise<any>;
   getPharPatientById: (id: string) => Promise<any>;
@@ -152,6 +153,23 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       console.log("Fetching patients from:", endpoint);
 
       const response = await api.get(endpoint);
+      set({ pagination: response.data.data.pagination });
+      console.log(response.data.data.pagination, "pagination");
+      const fetchedPatients = response.data.data.data;
+      set({ patients: fetchedPatients });
+      console.log(response.data.message);
+    } catch (error: any) {
+      console.error(error.response?.data);
+      // toast.error(error.response?.data?.message || "Failed to fetch patients");
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  getAllPatientsNoPerPage: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get("/medical-report/all-patient");
       set({ pagination: response.data.data.pagination });
       console.log(response.data.data.pagination, "pagination");
       const fetchedPatients = response.data.data.data;
