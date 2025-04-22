@@ -1,3 +1,12 @@
+interface Role {
+  id: number;
+  role: string;
+}
+
+interface RolesState {
+  [key: string]: Role;
+}
+
 import React, { useState, useEffect, useRef } from "react";
 import {
   X,
@@ -22,6 +31,7 @@ import { usePatientStore } from "../store/super-admin/usePatientStore";
 import { useCombinedStore } from "../store/super-admin/useCombinedStore";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { useGlobalStore } from "../store/super-admin/useGlobal";
 
 interface AddPaymentModalProps {
   onClose: () => void;
@@ -31,11 +41,11 @@ interface AddPaymentModalProps {
 
 const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
   onClose,
-  endpoint = "/save-patient-payment",
+  endpoint = "frontdesk/save-patient-payment",
   refreshEndpoint = "/finance/all-revenues",
 }) => {
   const { searchPatients, createPayment, isLoading } = useFinanceStore();
-  const { getAllPatients, getAllPatientsNoPerPage } = usePatientStore();
+  const { getAllPatientsNoPerPage } = usePatientStore();
   const { getAllItems, items } = useCombinedStore();
 
   const [query, setQuery] = useState("");
@@ -70,15 +80,37 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
   const [paymentComplete, setPaymentComplete] = useState(false);
   const [receiptNumber, setReceiptNumber] = useState("");
   const [paymentDate, setPaymentDate] = useState<Date | null>(null);
-
+  const [departmentId, setDepartmentId] = useState("");
+  const [partAmount, setPartAmount] = useState("");
+  const [showPartAmountInput, setShowPartAmountInput] = useState(false);
   const receiptRef = useRef<HTMLDivElement>(null);
+  const { getAllRoles } = useGlobalStore();
+  const roles = useGlobalStore((state) => state.roles) as RolesState;
+  const allowedDepartments = ["pharmacist", "laboratory", "finance"];
+  const getDepartmentOptions = () => {
+    if (!roles) return [];
 
-  const baseEndpoint = "/medical-report/all-patient";
+    return allowedDepartments
+      .filter((dept) => roles[dept])
+      .map((dept) => ({
+        id: roles[dept]?.id.toString(),
+        name: dept.charAt(0).toUpperCase() + dept.slice(1),
+      }));
+  };
+
+  const departmentOptions = getDepartmentOptions();
 
   useEffect(() => {
     getAllPatientsNoPerPage();
     getAllItems();
-  }, [getAllPatientsNoPerPage, getAllItems]);
+    getAllRoles();
+  }, [getAllPatientsNoPerPage, getAllItems, getAllRoles]);
+
+  // Payment type options
+  const paymentTypeOptions = [
+    { value: "full", label: "Full Payment" },
+    { value: "part", label: "Part Payment" },
+  ];
 
   const handleSearch = debounce(async (val) => {
     if (val.length > 2) {
@@ -114,11 +146,18 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
     setPatientOptions([]);
   };
 
+  // Helper function to convert string amounts with commas to numbers
+  const parseAmount = (amountStr: string | undefined): number => {
+    if (!amountStr) return 0;
+    // Remove commas and then parse
+    return parseFloat(amountStr.replace(/,/g, ""));
+  };
+
+  // Update the handleToggleItem function
   const handleToggleItem = (item: {
     id: any;
     attributes: {
-      amount(amount: any): number;
-      price: string;
+      amount: string;
       name?: string;
     };
   }) => {
@@ -129,7 +168,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
         {
           ...item,
           quantity: 1,
-          total: parseFloat(item.attributes.amount?.toString() || "0"),
+          total: parseAmount(item.attributes.amount),
         },
       ]);
       toast.success(`Added ${item.attributes.name || "item"} to selection`);
@@ -139,14 +178,21 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
     }
   };
 
+  // Fix updateQuantity to ensure proper number calculation
   const updateQuantity = (index: number, delta: number) => {
     setSelectedItems((prev) => {
       const updated = [...prev];
       const item = updated[index];
       item.quantity = Math.max(1, item.quantity + delta);
-      item.total =
-        parseFloat(item.attributes.amount?.toString() || "0") * item.quantity;
+      item.total = parseAmount(item.attributes.amount) * item.quantity;
       return updated;
+    });
+  };
+
+  const formatAmount = (amount: number): string => {
+    return amount.toLocaleString("en-NG", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     });
   };
 
@@ -156,20 +202,36 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
     toast.success(`Removed ${itemName} from selection`);
   };
 
+  const handlePaymentTypeChange = (value: string) => {
+    setPaymentType(value);
+
+    if (value === "part") {
+      setShowPartAmountInput(true); // Show input for part amount
+    } else {
+      setShowPartAmountInput(false); // Hide input for full payment
+
+      setPartAmount(""); // Reset part amount
+    }
+  };
+
+  // const totalAmount = selectedItems.reduce((sum, item) => sum + item.total, 0);
   const totalAmount = selectedItems.reduce((sum, item) => sum + item.total, 0);
 
   const handleSubmit = async () => {
     // Format the payload according to the expected backend structure
     const payload = {
+      payment_type: paymentType,
+      total_amount: totalAmount.toString(),
+      part_amount: paymentType === "full" ? null : partAmount,
+      payment_method: paymentMethod,
+      patient_id: Number(selectedPatient?.id),
+      department_id: Number(departmentId),
       payments: selectedItems.map((item) => ({
-        amount: item.total.toString(),
-        purpose_id: item.id,
-        patient_id: selectedPatient?.id ? Number(selectedPatient.id) : 0,
-        payment_method: paymentMethod,
-        payment_type: paymentType,
+        patient_id: Number(selectedPatient?.id),
+        amount: item.total, // Number type
+        service_charge_id: item.id,
       })),
     };
-
     try {
       const success = await createPayment(payload, endpoint, refreshEndpoint);
       if (success) {
@@ -184,93 +246,6 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
       toast.error("Payment processing failed");
     }
   };
-
-  // const handleDownloadPDF = () => {
-  //   if (!receiptRef.current) return;
-
-  //   toast.loading("Generating PDF...");
-
-  //   const receiptElement = receiptRef.current;
-
-  //   html2canvas(receiptElement, {
-  //     scale: 2,
-  //     logging: false,
-  //     useCORS: true,
-  //     backgroundColor: "#ffffff",
-  //   }).then((canvas) => {
-  //     const imgData = canvas.toDataURL("image/png");
-  //     const pdf = new jsPDF({
-  //       orientation: "portrait",
-  //       unit: "mm",
-  //       format: "a4",
-  //     });
-
-  //     const imgWidth = 210; // A4 width in mm
-  //     const pageHeight = 297; // A4 height in mm
-  //     const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-  //     pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-  //     pdf.save(`Receipt-${receiptNumber}.pdf`);
-
-  //     toast.dismiss();
-  //     toast.success("Receipt downloaded as PDF");
-  //   });
-  // };
-
-  // const handleDownloadImage = () => {
-  //   if (!receiptRef.current) return;
-
-  //   toast.loading("Generating image...");
-
-  //   html2canvas(receiptRef.current, {
-  //     scale: 2,
-  //     logging: false,
-  //     useCORS: true,
-  //     backgroundColor: "#ffffff",
-  //   }).then((canvas) => {
-  //     const link = document.createElement("a");
-  //     link.download = `Receipt-${receiptNumber}.png`;
-  //     link.href = canvas.toDataURL("image/png");
-  //     link.click();
-
-  //     toast.dismiss();
-  //     toast.success("Receipt downloaded as image");
-  //   });
-  // };
-
-  // const handlePrint = () => {
-  //   if (!receiptRef.current) return;
-
-  //   const printWindow = window.open("", "_blank");
-  //   if (!printWindow) {
-  //     toast.error("Please allow pop-ups to print receipt");
-  //     return;
-  //   }
-
-  //   const receiptHtml = receiptRef.current.outerHTML;
-
-  //   printWindow.document.write(`
-  //     <html>
-  //       <head>
-  //         <title>Payment Receipt - ${receiptNumber}</title>
-  //         <style>
-  //           body { font-family: Arial, sans-serif; padding: 20px; }
-  //           .receipt { max-width: 100%; margin: 0 auto; }
-  //         </style>
-  //       </head>
-  //       <body>
-  //         <div class="receipt">
-  //           ${receiptHtml}
-  //         </div>
-  //         <script>
-  //           window.onload = function() { window.print(); setTimeout(function() { window.close(); }, 500); }
-  //         </script>
-  //       </body>
-  //     </html>
-  //   `);
-
-  //   printWindow.document.close();
-  // };
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString("en-US", {
@@ -295,7 +270,6 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
   const isItemSelected = (id: any) =>
     selectedItems.some((item) => item.id === id);
 
-  // If payment is complete, show receipt with download options
   if (paymentComplete) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6 backdrop-blur-sm">
@@ -340,89 +314,6 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
             </div>
 
             {/* Receipt */}
-            {/* <div
-              ref={receiptRef}
-              className="border rounded-lg shadow p-6 bg-white"
-            >
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-800">
-                    PAYMENT RECEIPT
-                  </h1>
-                  <p className="text-gray-500">Receipt #: {receiptNumber}</p>
-                  {paymentDate && (
-                    <p className="text-gray-500">
-                      Date: {formatDate(paymentDate)}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="border-t border-b py-4 my-4">
-                <h3 className="font-bold mb-2">Patient Information</h3>
-                {selectedPatient && (
-                  <div>
-                    <p className="text-gray-700">
-                      <span className="font-medium">Name:</span>{" "}
-                      {selectedPatient.attributes.first_name}{" "}
-                      {selectedPatient.attributes.last_name}
-                    </p>
-                    <p className="text-gray-700">
-                      <span className="font-medium">Card ID:</span>{" "}
-                      {selectedPatient.attributes.card_id}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <div className="mb-6">
-                <h3 className="font-bold mb-2">Payment Details</h3>
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="py-2">Description</th>
-                      <th className="py-2">Qty</th>
-                      <th className="py-2">Unit Price</th>
-                      <th className="py-2 text-right">Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {selectedItems.map((item, index) => (
-                      <tr key={index} className="border-b">
-                        <td className="py-2">{item.attributes.name}</td>
-                        <td className="py-2">{item.quantity}</td>
-                        <td className="py-2">₦{item.attributes.price}</td>
-                        <td className="py-2 text-right">
-                          ₦{item.total.toFixed(2)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="flex justify-between items-center border-t pt-4">
-                <div>
-                  <p className="text-gray-700">
-                    <span className="font-medium">Payment Method:</span>{" "}
-                    <span className="capitalize">{paymentMethod}</span>
-                  </p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">Payment Type:</span>{" "}
-                    <span className="capitalize">{paymentType}</span>
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-lg">
-                    Total: ₦{totalAmount.toFixed(2)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-8 pt-8 border-t text-center text-gray-500 text-sm">
-                <p>Thank you for your payment</p>
-              </div>
-            </div> */}
           </div>
 
           {/* Footer */}
@@ -443,8 +334,10 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6 backdrop-blur-sm">
       <div className="bg-white w-full max-w-4xl h-[90%] rounded-xl shadow-lg overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b">
-          <h2 className="text-2xl font-bold text-gray-800">New Payment</h2>
+        <div className="flex justify-between items-center p-6 ">
+          <h2 className="text-lg font-medium text-[#101828]">
+            Add New Payment
+          </h2>
           <button
             onClick={onClose}
             className="p-2 rounded-full hover:bg-gray-100 transition-colors"
@@ -470,51 +363,77 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                 value={query}
                 onChange={handleChange}
                 placeholder="Search patient by name or card ID..."
-                className="w-full border pl-10 pr-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full border border-[#E4E4E7] pl-10 pr-4 py-3 rounded-lg outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                 disabled={isLoading}
               />
             </div>
 
             {patientOptions.length > 0 && (
-              <ul className="mt-1 bg-white border rounded-lg shadow-lg overflow-hidden">
-                {patientOptions.map((p) => (
-                  <li
-                    key={p.id}
-                    onClick={() => handleSelectPatient(p)}
-                    className="px-4 py-3 hover:bg-blue-50 cursor-pointer flex items-center"
-                  >
-                    <User className="h-5 w-5 text-gray-400 mr-2" />
-                    <div>
-                      <p className="font-medium">
-                        {p.attributes.first_name} {p.attributes.last_name}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Card ID: {p.attributes.card_id}
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              <>
+                <ul className="mt-1 bg-white border rounded-lg shadow-lg overflow-hidden">
+                  {patientOptions.map((p) => (
+                    <li
+                      key={p.id}
+                      onClick={() => handleSelectPatient(p)}
+                      className="px-4 py-3 hover:bg-blue-50 cursor-pointer flex items-center"
+                    >
+                      <User className="h-5 w-5 text-gray-400 mr-2" />
+                      <div>
+                        <p className="font-medium">
+                          {p.attributes.first_name} {p.attributes.last_name}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Card ID: {p.attributes.card_id}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </>
             )}
 
             {selectedPatient && (
-              <div className="mt-3 bg-blue-50 border border-blue-100 rounded-lg p-3 flex items-center">
-                <User className="h-5 w-5 text-blue-500 mr-2" />
-                <div>
-                  <p className="font-medium">
-                    {selectedPatient.attributes.first_name}{" "}
-                    {selectedPatient.attributes.last_name}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Card ID: {selectedPatient.attributes.card_id}
-                  </p>
+              <div>
+                <div className="mt-3 bg-[#D0D5DD] border border-[#D0D5DD] rounded-lg p-3 flex items-center">
+                  <User className="h-5 w-5 text-primary mr-2" />
+                  <div>
+                    <p className="font-medium">
+                      {selectedPatient.attributes.first_name}{" "}
+                      {selectedPatient.attributes.last_name}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Card ID: {selectedPatient.attributes.card_id}
+                    </p>
+                  </div>
+                </div>
+                <div className="mb-6">
+                  <label
+                    htmlFor="departmentId"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    Department*
+                  </label>
+                  <select
+                    id="departmentId"
+                    name="departmentId"
+                    value={departmentId}
+                    onChange={(e) => setDepartmentId(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 outline-none focus:ring-primary focus:border-primary bg-white"
+                  >
+                    <option value="">Select Department</option>
+                    {departmentOptions.map((dept) => (
+                      <option key={dept.id} value={dept.id}>
+                        {dept.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             )}
           </div>
 
           {/* Tabs */}
-          <div className="border-b mb-6">
+          <div className=" mb-6">
             <div className="flex space-x-6">
               <button
                 onClick={() => setActiveTab("items")}
@@ -550,7 +469,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                 {/* Custom Select Component */}
                 <div className="relative mb-4">
                   <div
-                    className="border rounded-lg p-3 flex items-center justify-between cursor-pointer"
+                    className="border border-[#D0D5DD] rounded-lg p-3 flex items-center justify-between cursor-pointer"
                     onClick={() => setIsSelectOpen(!isSelectOpen)}
                   >
                     <div className="flex-1">
@@ -583,15 +502,15 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                   </div>
 
                   {isSelectOpen && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-64 overflow-y-auto">
-                      <div className="p-2 sticky top-0 bg-white border-b">
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-[#D0D5DD] rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                      <div className="p-2 sticky top-0 bg-white border-b border-[#D0D5DD]">
                         <input
                           type="search"
                           name="itemSearch"
                           value={itemSearch}
                           onChange={handleChange}
                           placeholder="Search items..."
-                          className="w-full border p-2 rounded"
+                          className="w-full border border-[#D0D5DD] p-2 rounded  outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                         />
                       </div>
                       <ul className="divide-y">
@@ -665,7 +584,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                             </button>
                           </div>
                           <p className="font-medium text-green-600 w-24 text-right">
-                            ₦{item.total}
+                            ₦{formatAmount(item.total)}
                           </p>
                           <button
                             onClick={() => removeItem(index)}
@@ -684,22 +603,22 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
             /* Payment Details Tab */
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#101928] mb-2">
                   Payment Method
                 </label>
-                <div className="grid grid-cols-3 gap-3">
-                  {["cash", "cheque", "transfer"].map((method) => (
+                <div className="grid grid-cols-4 gap-3">
+                  {["cash", "cheque", "transfer", "HMO"].map((method) => (
                     <button
                       key={method}
                       type="button"
                       onClick={() => setPaymentMethod(method)}
-                      className={`flex items-center justify-center border px-4 py-3 rounded-lg hover:bg-gray-50 ${
+                      className={`flex items-center justify-center border px-4 py-3 rounded-lg  ${
                         paymentMethod === method
-                          ? "bg-blue-50 border-blue-500 text-blue-600"
-                          : "border-gray-300"
+                          ? "bg-primary border-primary text-white"
+                          : "border-[#E4E4E7] text-[#A1A1AA]"
                       }`}
                     >
-                      {method === "cash" && (
+                      {/* {method === "cash" && (
                         <DollarSign className="h-5 w-5 mr-2" />
                       )}
                       {method === "cheque" && (
@@ -707,7 +626,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                       )}
                       {method === "transfer" && (
                         <CreditCard className="h-5 w-5 mr-2" />
-                      )}
+                      )} */}
                       <span className="capitalize">{method}</span>
                     </button>
                   ))}
@@ -715,22 +634,22 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#101928] mb-2">
                   Payment Type
                 </label>
                 <div className="grid grid-cols-2 gap-3">
-                  {["half payment", "full payment"].map((type) => (
+                  {paymentTypeOptions.map((type) => (
                     <button
-                      key={type}
+                      key={type.value}
+                      onClick={() => setPaymentType(type.value)}
                       type="button"
-                      onClick={() => setPaymentType(type)}
-                      className={`border px-4 py-3 rounded-lg hover:bg-gray-50 ${
-                        paymentType === type
-                          ? "bg-blue-50 border-blue-500 text-blue-600"
-                          : "border-gray-300"
+                      className={`border px-4 py-3 rounded-lg  ${
+                        paymentType === type.value
+                          ? "bg-primary border-primary text-white"
+                          : "border-[#E4E4E7] text-[#A1A1AA]"
                       }`}
                     >
-                      <span className="capitalize">{type}</span>
+                      <span className="capitalize">{type.label}</span>
                     </button>
                   ))}
                 </div>
@@ -738,19 +657,36 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
 
               {selectedItems.length > 0 && (
                 <div className="bg-gray-50 rounded-lg p-4 mt-6">
-                  <h4 className="font-medium text-gray-700 mb-3">
+                  <h4 className="font-medium text-[#101928] mb-3">
                     Order Summary
                   </h4>
                   <ul className="space-y-2 mb-3">
                     {selectedItems.map((item, index) => (
                       <li key={index} className="flex justify-between text-sm">
-                        <span>
+                        <span className="text-[#98A2B3] text-lg">
                           {item.attributes.name} × {item.quantity}
                         </span>
-                        <span className="font-medium">₦{item.total}</span>
+                        <span className="font-medium text-[#101928]">
+                          ₦{item.total}
+                        </span>
                       </li>
                     ))}
                   </ul>
+                  {paymentType === "part" && (
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Part Amount
+                      </label>
+
+                      <input
+                        type="number"
+                        value={partAmount}
+                        onChange={(e) => setPartAmount(e.target.value)}
+                        placeholder="Enter part amount"
+                        className="w-full border border-gray-300 rounded-md p-2"
+                      />
+                    </div>
+                  )}
                   <div className="border-t pt-3 flex justify-between font-bold">
                     <span>Total</span>
                     <span className="text-green-600">₦{totalAmount}</span>
@@ -765,7 +701,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
         <div className="flex justify-between items-center p-6 border-t bg-gray-50">
           <div>
             <p className="text-xl font-bold text-green-600">
-              Total: ₦{totalAmount}
+              Total: ₦{formatAmount(totalAmount)}
             </p>
             {selectedItems.length > 0 && (
               <p className="text-sm text-gray-500">
@@ -838,6 +774,20 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                 </li>
               ))}
             </ul>
+            {paymentType === "part" && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Part Amount
+                </label>
+                <input
+                  type="number"
+                  value={partAmount}
+                  onChange={(e) => setPartAmount(e.target.value)}
+                  placeholder="Enter part amount"
+                  className="w-full border border-gray-300 rounded-md p-2"
+                />
+              </div>
+            )}
 
             <div className="border-t pt-3 mb-6">
               <div className="flex justify-between items-center">
