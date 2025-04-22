@@ -84,12 +84,7 @@ const Fpayment = ({
         tabs={["All", "full payment", "half payment"]}
       />
 
-      <FpaymentTable
-        pagination={pagination}
-        payments={filteredPayments}
-        isLoading={isLoading}
-        endpoint={refreshEndpoint}
-      />
+      <FpaymentTable payments={filteredPayments} isLoading={isLoading} />
     </div>
   );
 };

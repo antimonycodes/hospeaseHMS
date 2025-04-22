@@ -59,6 +59,7 @@ import ForgotPassword from "./_Auth/ForgotPassword";
 import FrontdeskDeets from "./components/Superadmin/frontdesk/FrontdeskDeets";
 import Category from "./pages/Category";
 import SaInventoryPage from "./components/Superadmin/Inventory/SaInventoryPage";
+import PaymentDetails from "./components/Finance/payment/PaymentDetails";
 
 function App() {
   return (
@@ -130,6 +131,7 @@ function App() {
                 path="medical/patients/:id"
                 element={<MedPatientsDetails />}
               />
+              <Route path="finance/payment/:id" element={<PaymentDetails />} />
               <Route path="nurses" element={<Nurses />} />
               <Route path="nurses/:id" element={<NurseDetails />} />
               <Route
@@ -154,7 +156,6 @@ function App() {
                 element={<Staffs department="front-desk-manager" />}
               />
               <Route path="frontdesk/:id" element={<FrontdeskDeets />} />
-
               <Route
                 path="inventory/staffs"
                 element={<Staffs department="inventory-manager" />}

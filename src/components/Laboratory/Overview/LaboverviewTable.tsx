@@ -22,9 +22,10 @@ type Columns = {
 
 const LaboverviewTable = () => {
   const { patients, getAllPatients, isLoading } = usePatientStore();
+  const baseEndpoint = "/laboratory/patient/all";
 
   useEffect(() => {
-    getAllPatients("/laboratory/patient/all");
+    getAllPatients("1", "10", baseEndpoint);
   }, [getAllPatients]);
 
   // Calculate status counts

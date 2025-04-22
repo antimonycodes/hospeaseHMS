@@ -1,117 +1,135 @@
-import { JSX, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import Table from "../../../Shared/Table";
 import Loader from "../../../Shared/Loader";
 import { useFinanceStore } from "../../../store/staff/useFinanceStore";
+import { useNavigate } from "react-router-dom";
+
+interface PaymentAttributes {
+  patient: { id: number; first_name: string; last_name: string };
+  amount: string;
+  purpose: string;
+  payment_method: string;
+  payment_type?: string;
+  is_active?: boolean;
+  user_id: string;
+  created_at: string;
+  id: number; // Added id
+}
 
 interface PaymentData {
   id: number;
-  attributes: {
-    id: number; // Added for rowKey
-    patient: string;
-    amount: string;
-    purpose: string;
-    payment_method: string;
-    payment_type?: string;
-    is_active?: boolean;
-    user_id: string;
-    created_at: string;
-  };
+  type: string;
+  attributes: PaymentAttributes;
 }
 
-type PaymentAttributes = PaymentData["attributes"];
-
-type Columns = {
-  key: keyof PaymentAttributes;
+type Column<T> = {
+  key: keyof T;
   label: string;
-  render?: (value: any, payment: PaymentAttributes) => JSX.Element;
+  render: (value: any, row: T) => React.ReactNode;
 };
 
 type FpaymentTableProps = {
-  endpoint: string;
   isLoading?: boolean;
   payments: PaymentData[];
-  pagination: {
-    total: number;
-    per_page: number;
-    current_page: number;
-    last_page: number;
-    from: number;
-    to: number;
-  } | null;
 };
 
-const FpaymentTable = ({
-  pagination,
-  payments,
-  isLoading,
-}: // endpoint = "/finance/patient-paymet-history",
-FpaymentTableProps) => {
+const FpaymentTable = ({ payments, isLoading }: FpaymentTableProps) => {
   const { getAllPayments } = useFinanceStore();
-  const [perPage, setPerPage] = useState(pagination?.per_page || 10);
+  const [transformedPayments, setTransformedPayment] = useState<
+    PaymentAttributes[]
+  >([]);
+  const navigate = useNavigate();
 
-  // Debug payments and tableData
-  console.log("Payments received:", payments);
-  const tableData = payments.map((payment) => payment.attributes);
-  console.log("Table data:", tableData);
+  const handleViewMore = (payment: PaymentAttributes) => {
+    console.log("View more clicked for:", payment);
+    navigate(`/dashboard/finance/payment/${payment.id}`);
+  };
 
-  const columns: Columns[] = [
+  useEffect(() => {
+    setTransformedPayment(
+      payments.map((payment) => ({
+        ...payment.attributes,
+        id: payment.id,
+      }))
+    );
+  }, [payments]);
+
+  useEffect(() => {
+    getAllPayments(); // Fetch payments on component mount
+  }, [getAllPayments]);
+
+  const columns: Column<PaymentAttributes>[] = [
     {
       key: "patient",
       label: "Patient Name",
-      render: (_, attributes) => (
+      render: (_, row) => (
         <span className="text-[#667085] text-sm">
-          {attributes.patient || "Unknown"}
+          {row.patient
+            ? `${row.patient.first_name} ${row.patient.last_name}`
+            : "Unknown"}
         </span>
       ),
     },
     {
       key: "amount",
       label: "Amount",
-      render: (_, attributes) => (
-        <span className="text-[#667085] text-sm">
-          {attributes.amount || "N/A"}
-        </span>
+      render: (_, row) => (
+        <span className="text-[#667085] text-sm">{row.amount || "N/A"}</span>
       ),
     },
     {
       key: "purpose",
       label: "Purpose",
-      render: (_, attributes) => (
-        <span className="text-[#667085] text-sm">
-          {attributes.purpose || "N/A"}
-        </span>
+      render: (_, row) => (
+        <span className="text-[#667085] text-sm">{row.purpose || "N/A"}</span>
       ),
     },
     {
       key: "payment_method",
       label: "Payment Method",
-      render: (_, attributes) => (
+      render: (_, row) => (
         <span className="text-[#667085] text-sm">
-          {attributes.payment_method || "N/A"}
+          {row.payment_method || "N/A"}
+        </span>
+      ),
+    },
+    {
+      key: "payment_type",
+      label: "Payment Type",
+      render: (_, row) => (
+        <span className="text-[#667085] text-sm">
+          {row.payment_type || "N/A"}
         </span>
       ),
     },
     {
       key: "created_at",
       label: "Date",
-      render: (_, attributes) => (
+      render: (_, row) => (
         <span className="text-[#667085] text-sm">
-          {attributes.created_at || "N/A"}
+          {row.created_at || "N/A"}
+        </span>
+      ),
+    },
+    {
+      key: "id",
+      label: "",
+      render: (_, row) => (
+        <span
+          className="text-primary text-sm font-medium cursor-pointer"
+          onClick={() => handleViewMore(row)}
+        >
+          View More
         </span>
       ),
     },
   ];
 
-  const handlePageChange = (page: number) => {
-    console.log("Page change to:", page);
-    getAllPayments();
-  };
-
-  if (isLoading && !payments.length) {
+  if (isLoading) {
     return <Loader />;
   }
 
-  if (!tableData.length) {
+  if (!transformedPayments.length) {
     return (
       <div className="mt-10 text-center text-gray-500">No payments found</div>
     );
@@ -119,13 +137,11 @@ FpaymentTableProps) => {
 
   return (
     <Table
-      data={tableData}
+      data={transformedPayments}
       columns={columns}
       rowKey="id"
-      pagination={true}
-      paginationData={pagination}
+      pagination={false} // Set to true if pagination is implemented
       loading={isLoading}
-      onPageChange={handlePageChange}
     />
   );
 };

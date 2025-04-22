@@ -140,7 +140,11 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   selectedAppointment: null,
   labPatients: [],
 
-  getAllPatients: async (page = "1", perPage = "10", baseEndpoint = "") => {
+  getAllPatients: async (
+    page = "1",
+    perPage = "10",
+    baseEndpoint = "/admin/patient/fetch"
+  ) => {
     set({ isLoading: true });
     try {
       // Construct the full endpoint with query parameters
@@ -455,7 +459,6 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
           assigned_by: appt.attributes.assigned_by || "N/A",
           created_at: appt.attributes.created_at || "",
           responded_at: appt.attributes.responded_at || null,
-   
         },
       }));
 
