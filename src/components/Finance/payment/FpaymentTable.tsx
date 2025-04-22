@@ -55,7 +55,7 @@ const FpaymentTable = ({ payments, isLoading }: FpaymentTableProps) => {
   }, [payments]);
 
   useEffect(() => {
-    getAllPayments(); // Fetch payments on component mount
+    getAllPayments();
   }, [getAllPayments]);
 
   const columns: Column<PaymentAttributes>[] = [
@@ -140,7 +140,7 @@ const FpaymentTable = ({ payments, isLoading }: FpaymentTableProps) => {
       data={transformedPayments}
       columns={columns}
       rowKey="id"
-      pagination={false} // Set to true if pagination is implemented
+      pagination={false}
       loading={isLoading}
     />
   );
