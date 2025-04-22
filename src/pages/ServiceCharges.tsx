@@ -53,6 +53,13 @@ const ServiceCharges = () => {
 
   const allowedDepartments = ["pharmacist", "laboratory", "finance"];
 
+  // Map for department display names
+  const departmentDisplayNames = {
+    pharmacist: "Pharmacy",
+    laboratory: "Laboratory",
+    finance: "Others",
+  };
+
   const getDepartmentOptions = () => {
     if (!roles) return [];
 
@@ -60,7 +67,9 @@ const ServiceCharges = () => {
       .filter((dept) => roles[dept])
       .map((dept) => ({
         id: roles[dept]?.id.toString(),
-        name: dept.charAt(0).toUpperCase() + dept.slice(1),
+        name:
+          departmentDisplayNames[dept as keyof typeof departmentDisplayNames] ||
+          dept.charAt(0).toUpperCase() + dept.slice(1),
       }));
   };
 
@@ -158,14 +167,20 @@ const ServiceCharges = () => {
     }).format(price);
   };
 
-  // Get department name by ID
-  const getDepartmentName = (departmentId: number) => {
+  // Get department display name by ID
+  const getDepartmentDisplayName = (departmentId: number) => {
     const department = Object.values(roles || {}).find(
       (role) => role.id === departmentId
     );
-    return department
-      ? department.role.charAt(0).toUpperCase() + department.role.slice(1)
-      : "Unknown";
+
+    if (!department) return "Unknown";
+
+    // Map the department role to its display name
+    const roleName = department.role;
+    return (
+      departmentDisplayNames[roleName as keyof typeof departmentDisplayNames] ||
+      roleName.charAt(0).toUpperCase() + roleName.slice(1)
+    );
   };
 
   if (isLoading) return <Loader />;
@@ -229,48 +244,57 @@ const ServiceCharges = () => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {!isLoading && items?.length > 0 ? (
-              items.map((item, index) => (
-                <tr
-                  key={item.id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {index + 1}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {item.attributes.name}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      #{item.attributes.amount || item.attributes.price}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {item.attributes.department.name}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">
-                    <div className="flex items-center justify-end space-x-3">
-                      <button
-                        onClick={() => openEditModal(item)}
-                        className="text-indigo-600 hover:text-indigo-900"
-                      >
-                        <Edit className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteItem(item.id)}
-                        className="text-red-600 hover:text-red-900"
-                        disabled={isDeleting}
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+              items.map((item, index) => {
+                // Get the role name from department and map to display name
+                const deptRole = item.attributes.department.name?.toLowerCase();
+                const deptDisplayName =
+                  departmentDisplayNames[
+                    deptRole as keyof typeof departmentDisplayNames
+                  ] || item.attributes.department.name;
+
+                return (
+                  <tr
+                    key={item.id}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {index + 1}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {item.attributes.name}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        ₦{item.attributes.amount || item.attributes.price}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {deptDisplayName}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">
+                      <div className="flex items-center justify-end space-x-3">
+                        <button
+                          onClick={() => openEditModal(item)}
+                          className="text-indigo-600 hover:text-indigo-900"
+                        >
+                          <Edit className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteItem(item.id)}
+                          className="text-red-600 hover:text-red-900"
+                          disabled={isDeleting}
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
                 <td colSpan={5} className="px-6 py-12 text-center">

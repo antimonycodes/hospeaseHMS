@@ -222,6 +222,12 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       activeIcon: getImageSrc("patienticonsLight.svg"),
     },
     {
+      name: "Expenses",
+      path: "/dashboard/expenses",
+      icon: getImageSrc("patientsicon.svg"),
+      activeIcon: getImageSrc("patienticonsLight.svg"),
+    },
+    {
       name: "Profile",
       path: "/dashboard/staffprofile",
       icon: getImageSrc("profile.svg"),

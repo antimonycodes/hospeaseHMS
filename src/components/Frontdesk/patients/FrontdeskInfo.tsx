@@ -14,6 +14,7 @@ type FrondeskPatientData = {
   branch: string;
   occupation: string;
   editpatients: string;
+  viewmore: string;
   card_id: string;
   id: string;
 };
@@ -79,12 +80,13 @@ const FrontdeskInfo = ({
     occupation: patient.attributes.occupation,
     editpatients: "editpatients",
     card_id: patient.attributes.card_id,
+    viewmore: "viewmore",
     id: patient.id,
   }));
 
   const handleViewMore = (id: string) => {
     console.log("Navigating to patient ID:", id);
-    navigate(`/patient/${id}`); // Properly format your navigation path
+    navigate(`/dashboard/frontdesk/patient/${id}`); // Properly format your navigation path
   };
 
   const handlePageChange = (page: number) => {
@@ -138,14 +140,14 @@ const FrontdeskInfo = ({
       ),
     },
     {
-      key: "editpatients",
+      key: "viewmore",
       label: "",
       render: (_, patient) => (
         <span
           className="text-primary text-sm font-medium cursor-pointer"
-          onClick={() => setIsEditModalOpen(true)}
+          onClick={() => handleViewMore(patient.id)}
         >
-          <img src={EditIcon} alt="" />
+          View More
         </span>
       ),
     },

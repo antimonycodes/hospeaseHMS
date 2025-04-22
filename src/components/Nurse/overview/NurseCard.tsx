@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import Table from "../../../Shared/Table";
-import { formatPhoneNumber } from "../../../utils/formatPhoneNumber";
+// import { formatPhoneNumber } from "../../../utils/formatPhoneNumber";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 
 const NurseCard = () => {
@@ -44,7 +44,7 @@ const NurseCard = () => {
       label: "Phone",
       render: (_, row) => (
         <span className="text-[#667085] text-sm">
-          {formatPhoneNumber(row.attributes.phone_number)}
+          {row.attributes.phone_number}
         </span>
       ),
     },

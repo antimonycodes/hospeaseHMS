@@ -69,6 +69,7 @@ import Tablehead from "../../ReusablepatientD/Tablehead";
 import { useNavigate } from "react-router-dom";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import Table from "../../../Shared/Table";
+import Loader from "../../../Shared/Loader";
 
 const SaPharnacyPage = () => {
   const { getAllPatients, patients, isLoading, pagination } = usePatientStore();
@@ -121,6 +122,8 @@ const SaPharnacyPage = () => {
 
     completed: "bg-green-100 text-green-800",
   };
+
+  if (isLoading) return <Loader />;
 
   const columns = [
     {

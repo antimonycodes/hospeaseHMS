@@ -3,6 +3,7 @@ import { useFinanceStore } from "../../../store/staff/useFinanceStore";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import Button from "../../../Shared/Button";
+import Loader from "../../../Shared/Loader";
 
 const InfoRow = ({
   label,
@@ -25,10 +26,10 @@ const PaymentStatusBadge = ({ status }: { status: string }) => {
   const getStatusColor = () => {
     switch (status) {
       case "full":
-        return "bg-green-100 text-green-800";
+        return "bg-[#CCFFE7] text-[#009952]";
       case "partial":
       case "part":
-        return "bg-amber-100 text-amber-800";
+        return "bg-[#FEF3CD] text-[#B58A00]";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -65,11 +66,7 @@ const PaymentDetails = () => {
   }, [id, getPaymentById]);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        Loading...
-      </div>
-    );
+    return <Loader />;
   }
 
   if (!selectedPayment) {
@@ -167,9 +164,9 @@ const PaymentDetails = () => {
               Full Payment Made
             </button>
           )}
-          <button className="rounded-sm text-primary border border-primary py-2 px-3">
+          {/* <button className="rounded-sm text-primary border border-primary py-2 px-3">
             View Receipt
-          </button>
+          </button> */}
         </div>
 
         {/* Order Summary */}

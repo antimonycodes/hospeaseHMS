@@ -5,6 +5,8 @@ import { JSX, useEffect } from "react";
 
 const roleComponents: Record<string, JSX.Element> = {
   finance: <Fexpenses />,
+  "front-desk-manager": <Fexpenses />,
+
   // doctor:
   // frontdesk:
 };

@@ -60,6 +60,7 @@ import FrontdeskDeets from "./components/Superadmin/frontdesk/FrontdeskDeets";
 import Category from "./pages/Category";
 import SaInventoryPage from "./components/Superadmin/Inventory/SaInventoryPage";
 import PaymentDetails from "./components/Finance/payment/PaymentDetails";
+import FrontdeskPatientDetails from "./components/Frontdesk/patients/FrontdeskPatientDetails";
 
 function App() {
   return (
@@ -137,6 +138,10 @@ function App() {
               <Route
                 path="/dashboard/nurses/patients/:id"
                 element={<NurseDetail />}
+              />
+              <Route
+                path="/dashboard/frontdesk/patient/:id"
+                element={<FrontdeskPatientDetails />}
               />
               <Route path="pharmacy/info" element={<Pharmacy />} />
               <Route

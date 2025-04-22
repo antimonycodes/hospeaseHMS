@@ -14,6 +14,7 @@ interface PaymentAttributes {
   user_id: string;
   created_at: string;
   id: number; // Added id
+  department: { name: string };
 }
 
 interface PaymentData {
@@ -31,6 +32,35 @@ type Column<T> = {
 type FpaymentTableProps = {
   isLoading?: boolean;
   payments: PaymentData[];
+};
+
+// Badge component for payment type
+const PaymentTypeBadge = ({
+  paymentType,
+}: {
+  paymentType: string | undefined;
+}) => {
+  const type = paymentType?.toLowerCase() || "";
+
+  if (type === "full") {
+    return (
+      <span className="px-2 py-1 bg-[#CCFFE7] text-[#009952] rounded-full text-xs font-medium">
+        Full Payment
+      </span>
+    );
+  } else if (type === "part") {
+    return (
+      <span className="px-2 py-1 bg-[#FEF3CD] text-[#B58A00] rounded-full text-xs font-medium">
+        Part Payment
+      </span>
+    );
+  }
+
+  return (
+    <span className="text-gray-500 text-sm">
+      {paymentType || "N/A"} Payment
+    </span>
+  );
 };
 
 const FpaymentTable = ({ payments, isLoading }: FpaymentTableProps) => {
@@ -72,16 +102,18 @@ const FpaymentTable = ({ payments, isLoading }: FpaymentTableProps) => {
     },
     {
       key: "amount",
-      label: "Amount",
+      label: "Total Amount",
       render: (_, row) => (
         <span className="text-[#667085] text-sm">{row.amount || "N/A"}</span>
       ),
     },
     {
-      key: "purpose",
-      label: "Purpose",
+      key: "department",
+      label: "Department",
       render: (_, row) => (
-        <span className="text-[#667085] text-sm">{row.purpose || "N/A"}</span>
+        <span className="text-[#667085] text-sm">
+          {row.department?.name || "N/A"}
+        </span>
       ),
     },
     {
@@ -96,11 +128,7 @@ const FpaymentTable = ({ payments, isLoading }: FpaymentTableProps) => {
     {
       key: "payment_type",
       label: "Payment Type",
-      render: (_, row) => (
-        <span className="text-[#667085] text-sm">
-          {row.payment_type || "N/A"}
-        </span>
-      ),
+      render: (_, row) => <PaymentTypeBadge paymentType={row.payment_type} />,
     },
     {
       key: "created_at",

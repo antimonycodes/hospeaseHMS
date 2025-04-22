@@ -37,6 +37,12 @@ interface ReportStore {
   singleReport: any[];
   allReports: any[];
   allNotes: any[];
+  deptCreateReport: (formData: {
+    patient_id: string | number | null;
+    note: string;
+    file?: File | null;
+    status: string | null;
+  }) => Promise<any>;
   createNote: (data: any) => Promise<any>;
   getAllReport: (id: any) => Promise<any>;
   getSingleReport: (id: any) => Promise<any>;
@@ -215,6 +221,57 @@ export const useReportStore = create<ReportStore>((set) => ({
       set({ isResponding: false });
     } finally {
       set({ isResponding: false });
+    }
+  },
+  deptCreateReport: async ({ patient_id, note, file, status }) => {
+    set({ isCreating: true });
+    try {
+      const form = new FormData();
+      if (patient_id !== null) {
+        form.append("patient_id", patient_id.toString());
+      } else {
+        throw new Error("patient_id cannot be null");
+      }
+      form.append("note", note);
+
+      // Handle null values properly
+
+      if (file) {
+        form.append("file", file);
+      }
+
+      // For status, don't append if null or use empty string based on backend requirements
+      //   if (status !== null) {
+      form.append("status", status ?? "");
+      //   }
+      // If backend requires a field even when null, use this:
+      // else {
+      //   form.append("status", "");
+      // }
+
+      const response = await api.post(
+        "/medical-report/case-reports/respond",
+        form,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.status === 201) {
+        toast.success(response.data.message);
+        return true;
+      }
+
+      return response.data;
+    } catch (error: any) {
+      const errorMsg = error?.response?.data?.message || "Something went wrong";
+      toast.error(errorMsg);
+      set({ isCreating: false });
+      throw error;
+    } finally {
+      set({ isCreating: false });
     }
   },
   getMedicalNote: async (id, type) => {
