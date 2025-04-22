@@ -6,104 +6,148 @@ import { useInventoryStore } from "../../../store/staff/useInventoryStore";
 
 export type RequestData = {
   id: number;
-  requested_by: string;
-  inventory_id: string;
-  quantity: string;
-  status: string;
-  picture?: string | undefined;
-  first_name: string;
-  last_name: string;
-  user_id: string;
-  item_category: string;
-  item_name: string;
-  created_at: string;
+  type: string;
+  attributes: {
+    requested_by: {
+      id: number;
+      first_name: string;
+      last_name: string;
+    };
+    item_requested: {
+      id: number;
+      item: string;
+      cost: string;
+    };
+    hospital: {
+      id: number;
+      name: string;
+      logo: string;
+    };
+    quantity: number;
+    recorded_by: {
+      id: number;
+      first_name: string;
+      last_name: string;
+    };
+    status: string;
+    created_at: string;
+  };
 };
 
+interface Column<T> {
+  key: keyof T;
+  label: string;
+  render?: (value: any, record: T) => JSX.Element;
+}
+
 const InventoryRequest = () => {
-  const { getAllRequest, requests, isLoading } = useInventoryStore();
+  const { getAllRequest, requests, isLoading } =
+    useInventoryStore() as unknown as {
+      getAllRequest: () => void;
+      requests: { data: RequestData[]; pagination: object } | null;
+      isLoading: boolean;
+    };
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
+    // Fetch data when component mounts
     getAllRequest();
   }, [getAllRequest]);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  type Columns = {
-    key: keyof RequestData;
-    label: string;
-    render?: (value: any, request: RequestData) => JSX.Element;
-  };
+  // Extract actual requests array from the requests state
+  const requestsArray =
+    requests && requests.data && Array.isArray(requests.data)
+      ? requests.data
+      : [];
 
-  const requestsArray = Array.isArray(requests) ? requests : [];
+  console.log("requestsArray length:", requestsArray.length);
+  console.log("First item in requestsArray:", requestsArray[0]);
 
-  const columns: Columns[] = [
+  // Add a dummy type property to enable type checking with 'as'
+  // This is a workaround for TypeScript limitations with deeply nested properties
+  const columns = [
     {
-      key: "picture",
-      label: "Name",
-      render: (value, request) => {
-        const imageSrc = value
-          ? value
+      key: "id" as keyof RequestData, // Use a valid top-level key
+      label: "Requested By",
+      render: (_, request) => {
+        const imageSrc = request.attributes.hospital.logo
+          ? request.attributes.hospital.logo
           : "https://placehold.co/600x400?text=img";
+
         return (
           <div className="flex items-center gap-2">
             <img
               src={imageSrc}
               className="h-10 w-10 border rounded-full object-cover border-gray-300"
+              alt="Staff"
             />
             <h1 className="text-custom-black font-medium">
-              {request.first_name} {request.last_name}
+              {request.attributes.requested_by.first_name}{" "}
+              {request.attributes.requested_by.last_name}
             </h1>
           </div>
         );
       },
     },
     {
-      key: "user_id",
-      label: "Staff ID",
-      render: (value, request) => (
+      key: "type" as keyof RequestData,
+      label: "Category",
+      render: (_, request) => (
+        <span className="text-[#667085] text-sm">{request.type || "N/A"}</span>
+      ),
+    },
+    {
+      key: "id" as keyof RequestData, // Use valid key and rely on render function
+      label: "Item Name",
+      render: (_, request) => (
+        <span className="text-[#667085] text-sm">
+          {request.attributes.item_requested.item}
+        </span>
+      ),
+    },
+    {
+      key: "id" as keyof RequestData,
+      label: "Quantity",
+      render: (_, request) => (
+        <span className="text-[#667085] text-sm">
+          {request.attributes.quantity}
+        </span>
+      ),
+    },
+    {
+      key: "id" as keyof RequestData,
+      label: "Status",
+      render: (_, request) => (
+        <span className="text-[#667085] text-sm">
+          {request.attributes.status}
+        </span>
+      ),
+    },
+    {
+      key: "id" as keyof RequestData,
+      label: "Recorded By",
+      render: (_, request) => (
         <div className="flex flex-col">
-          <span className="text-sm text-gray-500">{request.user_id}</span>
+          <span className="text-sm text-gray-500">
+            {request.attributes.recorded_by.first_name}{" "}
+            {request.attributes.recorded_by.last_name}
+          </span>
         </div>
       ),
     },
     {
-      key: "item_category",
-      label: "Category",
-      render: (value, request) => (
-        <span className="text-[#667085] text-sm">{request.item_category}</span>
-      ),
-    },
-    {
-      key: "item_name",
-      label: "Item Name",
-      render: (value, request) => (
-        <span className="text-[#667085] text-sm">{request.item_name}</span>
-      ),
-    },
-    {
-      key: "quantity",
-      label: "Quantity",
-      render: (value, request) => (
-        <span className="text-[#667085] text-sm">{request.quantity}</span>
-      ),
-    },
-    {
-      key: "status",
-      label: "Status",
-      render: (value, request) => (
-        <span className="text-[#667085] text-sm">{request.status}</span>
-      ),
-    },
-    {
-      key: "created_at",
+      key: "id" as keyof RequestData,
       label: "Date",
-      render: (value, request) => (
-        <span className="text-[#667085] text-sm">{request.created_at}</span>
+      render: (_, request) => (
+        <span className="text-[#667085] text-sm">
+          {request.attributes.created_at}
+        </span>
       ),
     },
-  ];
+  ] as Column<RequestData>[];
 
   return (
     <div>
@@ -113,21 +157,21 @@ const InventoryRequest = () => {
         showButton={true}
         onButtonClick={openModal}
       />
-
       <div className="w-full bg-white rounded-b-[8px] shadow-table">
         {isLoading ? (
           <p>Loading...</p>
+        ) : requestsArray.length === 0 ? (
+          <p className="p-4 text-center text-gray-500">No requests available</p>
         ) : (
           <Table
             data={requestsArray}
             columns={columns}
             rowKey="id"
-            pagination={requestsArray.length > 10}
+            loading={isLoading}
             radius="rounded-none"
           />
         )}
       </div>
-
       {isModalOpen && (
         <AddRequestModal
           onClose={closeModal}

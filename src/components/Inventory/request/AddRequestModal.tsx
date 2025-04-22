@@ -16,7 +16,8 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
   endpoint = "/inventory/requests/create",
   refreshEndpoint = "/inventory/requests/all-records?status=pending",
 }) => {
-  const { searchStaff, createRequest } = useInventoryStore();
+  const { searchStaff, createRequest, getAllStocks, stocks } =
+    useInventoryStore();
   const [formData, setFormData] = useState({
     requested_by: "", // card_id or staff_id
     first_name: "",
@@ -29,6 +30,20 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
   const [staffOptions, setStaffOptions] = useState<any[]>([]);
   const [selectedStaff, setSelectedStaff] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isStaffSelected, setIsStaffSelected] = useState(false);
+
+  const { getAllCategorys, categorys, isLoading } = useInventoryStore();
+  useEffect(() => {
+    getAllCategorys("/inventory/category/all-records");
+    getAllStocks();
+  }, [getAllCategorys, getAllStocks]);
+  useEffect(() => {
+    searchStaff(query).then((results) => {
+      setStaffOptions(results || []);
+    });
+  }, [query, searchStaff]);
+
+  console.log(stocks, "stocks");
 
   // Debounced search function
   const handleSearch = debounce(async (val: string) => {
@@ -43,13 +58,18 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
     // console.log("handleSearch results:", results);
   }, 300);
 
-  // Handle input changes
   const handleChange = (e: { target: { name: any; value: any } }) => {
     const { name, value } = e.target;
-    // console.log(`Input changed: ${name}=${value}`);
     if (name === "query") {
       setQuery(value);
       handleSearch(value);
+      if (
+        isStaffSelected &&
+        value !==
+          `${selectedStaff?.attributes.first_name} ${selectedStaff?.attributes.last_name}`
+      ) {
+        setIsStaffSelected(false); // Reset if user changes the query
+      }
     } else {
       setFormData((prev) => ({
         ...prev,
@@ -65,12 +85,12 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
   }) => {
     console.log("Selected staff:", staff);
     setSelectedStaff(staff);
-    // setFormData((prev) => ({
-    //   ...prev,
-    //   requested_by: staff.attributes.card_id || "",
-    //   first_name: staff.attributes.first_name || "",
-    //   last_name: staff.attributes.last_name || "",
-    // }));
+    setFormData((prev) => ({
+      ...prev,
+      requested_by: staff.id || "",
+      first_name: staff.attributes.first_name || "",
+      last_name: staff.attributes.last_name || "",
+    }));
     setQuery(`${staff.attributes.first_name} ${staff.attributes.last_name}`);
     setStaffOptions([]);
   };
@@ -78,23 +98,27 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
   // Handle form submission
   const handleSubmit = async () => {
     console.log("Submitting formData:", formData);
-    if (
-      !formData.requested_by ||
-      !formData.item_name ||
-      !formData.category ||
-      !formData.quantity
-    ) {
-      toast.error("Please fill all required fields");
-      return;
-    }
+    // if (
+    //   !formData.requested_by ||
+    //   !formData.item_name ||
+    //   !formData.category ||
+    //   !formData.quantity
+    // ) {
+    //   toast.error("Please fill all required fields");
+    //   return;
+    // }
+
     setIsSubmitting(true);
     try {
       const payload = {
         requested_by: formData.requested_by,
         inventory_id: formData.item_name,
         quantity: parseInt(formData.quantity),
-        status: "pending",
+        status: "approved",
       };
+
+      console.log("Sending payload:", payload); // Add this line to debug
+
       const success = await createRequest(payload, endpoint, refreshEndpoint);
       if (success) {
         onClose();
@@ -148,7 +172,8 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
               ))}
             </ul>
           ) : (
-            query && (
+            query &&
+            !isStaffSelected && (
               <p className="absolute z-20 w-full bg-white border rounded-lg mt-1 p-2 text-sm text-gray-500">
                 No results found
               </p>
@@ -158,7 +183,7 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
 
         {/* Form Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          <div>
+          <div className=" hidden">
             <label className="block text-sm font-medium text-custom-black mb-1">
               Card ID
             </label>
@@ -199,18 +224,21 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
           </div>
           <div>
             <label className="block text-sm font-medium text-custom-black mb-1">
-              Item Category
+              Category
             </label>
             <select
-              name="category"
+              name="category_id"
               value={formData.category}
               onChange={handleChange}
-              className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm appearance-none"
+              disabled={isLoading}
+              className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
             >
               <option value="">Select Category</option>
-              <option value="Syringe">Syringe</option>
-              <option value="Bandage">Bandage</option>
-              <option value="Medication">Medication</option>
+              {categorys.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.attributes.name}
+                </option>
+              ))}
             </select>
           </div>
           <div>
@@ -224,9 +252,11 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
               className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm appearance-none"
             >
               <option value="">Select Item</option>
-              <option value="Syringe 5ml">Syringe 5ml</option>
-              <option value="Bandage Roll">Bandage Roll</option>
-              <option value="Paracetamol">Paracetamol</option>
+              {stocks.map((stock) => (
+                <option key={stock.id} value={stock.id}>
+                  {stock.attributes.item}
+                </option>
+              ))}
             </select>
           </div>
           <div>

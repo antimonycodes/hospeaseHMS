@@ -56,7 +56,7 @@ const AddStockModal = ({
     quantity: "",
     category_id: "",
     expiry_date: "",
-    cost: 0,
+    cost: "",
     image: null,
   });
 
@@ -76,6 +76,7 @@ const AddStockModal = ({
   };
 
   // const handleSubmit = async (e: React.FormEvent) => {
+
   //   e.preventDefault();
 
   //   if (
@@ -108,6 +109,7 @@ const AddStockModal = ({
   //     // Error is handled in createStock with toast
   //   }
   // };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -117,16 +119,21 @@ const AddStockModal = ({
       !stock.cost ||
       !stock.quantity ||
       !stock.expiry_date
-    )
+    ) {
+      toast.error("Please fill in all required fields");
       return;
+    }
 
     if (!createStock) {
       console.error("createStock function is not defined");
       return;
     }
 
+    // Correct payload without overriding image
+    const payload = { ...stock };
+
     const success = await createStock(
-      stock,
+      payload,
       endpoint,
       "/inventory/all-inventory-items"
     );
@@ -136,13 +143,12 @@ const AddStockModal = ({
         quantity: "",
         category_id: "",
         expiry_date: "",
-        cost: 0,
-        // image: null,
+        cost: "",
+        image: null,
       });
       onClose();
     }
   };
-
   return (
     <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center z-50 p-6">
       <div className="bg-white rounded-lg shadow-lg overflow-y-auto p-12 h-[90%] w-full max-w-[980px]">
@@ -157,6 +163,19 @@ const AddStockModal = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-custom-black mb-1">
+                Image (Optional)
+              </label>
+              <input
+                type="file"
+                name="image"
+                onChange={handleFileChange}
+                disabled={isLoading}
+                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
+                accept="image/*"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-custom-black mb-1">
                 Item Name
               </label>
               <input
@@ -168,7 +187,6 @@ const AddStockModal = ({
                 className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-custom-black mb-1">
                 Category
@@ -188,7 +206,6 @@ const AddStockModal = ({
                 ))}
               </select>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-custom-black mb-1">
                 Quantity
@@ -202,23 +219,19 @@ const AddStockModal = ({
                 className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-custom-black mb-1">
                 Purchase Cost
               </label>
               <input
-                type="number"
+                type="text"
                 name="cost"
                 value={stock.cost}
                 onChange={handleChange}
                 disabled={isLoading}
                 className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
-                min="0"
-                step="0.01"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-custom-black mb-1">
                 Expiry Date
@@ -232,7 +245,6 @@ const AddStockModal = ({
                 className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
               />
             </div>
-
             {/* <div>
               <label className="block text-sm font-medium text-custom-black mb-1">
                 Image (Optional)

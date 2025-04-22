@@ -2,7 +2,7 @@ import { JSX, useEffect } from "react";
 import Table from "../../../Shared/Table";
 import Loader from "../../../Shared/Loader";
 type StockData = {
-  item_name: string;
+  item: string;
   category: string;
   quantity: string;
   expiry_date: string;
@@ -17,7 +17,7 @@ interface InventoryStockTableProps {
   isLoading: boolean;
   stocks: {
     attributes: {
-      item_name: string;
+      item: string;
       category: string;
       quantity: string;
       expiry_date: string;
@@ -33,7 +33,7 @@ const InventoryStockTable = ({
 }: InventoryStockTableProps) => {
   const formattedStocks = (stocks || []).map((stock) => ({
     id: stock.id,
-    item_name: stock.attributes.item_name,
+    item: stock.attributes.item,
     category: stock.attributes.category,
     quantity: stock.attributes.quantity,
     expiry_date: stock.attributes.expiry_date,
@@ -42,9 +42,9 @@ const InventoryStockTable = ({
 
   const columns: Columns[] = [
     {
-      key: "item_name",
+      key: "item",
       label: "Item Name",
-      render: (_, stock) => <span>{stock.item_name}</span>,
+      render: (_, stock) => <span>{stock.item}</span>,
     },
     {
       key: "category",

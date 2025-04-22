@@ -77,8 +77,8 @@ export interface CreateStockData {
   quantity: string;
   category_id: string;
   expiry_date: string;
-  cost: number;
-  image?: File | null;
+  cost: string;
+  image: File | null;
 }
 
 export interface InventoryStats {
@@ -93,7 +93,7 @@ interface InventoryStore {
   categorys: any[];
   pagination: Pagination | null;
   stocks: any[];
-  requests: any[];
+  requests: { data: any[]; pagination: Pagination }[];
   getInventoryStats: (endpoint?: string) => Promise<void>;
   getAllStocks: (endpoint?: string) => Promise<void>;
   createStock: (
@@ -138,18 +138,54 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       return [];
     }
   },
-
   getAllRequest: async (
     endpoint = "/inventory/requests/all-records?status=pending"
   ) => {
     set({ isLoading: true });
     try {
       const response = await api.get(endpoint);
-      console.log("getAllRequest response:", response.data);
-      set({ requests: response.data.data?.data || [] });
-      toast.success(response.data.message || "Requests fetched successfully");
+
+      // Store the entire response data structure
+      // This includes both the data array and pagination object
+      if (response.data && response.data.data) {
+        set({ requests: response.data.data });
+        toast.success(response.data.message || "Requests fetched successfully");
+      } else {
+        console.error("Unexpected API response structure:", response.data);
+        set({
+          requests: [
+            {
+              data: [],
+              pagination: {
+                total: 0,
+                per_page: 0,
+                current_page: 0,
+                last_page: 0,
+                from: 0,
+                to: 0,
+              },
+            },
+          ],
+        }); // Set empty object as fallback
+        toast.error("Invalid data format received from server");
+      }
     } catch (error: any) {
       console.error("getAllRequest error:", error.response?.data);
+      set({
+        requests: [
+          {
+            data: [],
+            pagination: {
+              total: 0,
+              per_page: 0,
+              current_page: 0,
+              last_page: 0,
+              from: 0,
+              to: 0,
+            },
+          },
+        ],
+      }); // Set empty array with default pagination on error
       toast.error(error.response?.data?.message || "Failed to fetch requests");
     } finally {
       set({ isLoading: false });
@@ -189,7 +225,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       const fetchedCategorys = response.data.data;
       set({ categorys: fetchedCategorys });
       console.log(response.data.message);
-      toast.success("Categories fetched successfully");
+      // toast.success("Categories fetched successfully");
     } catch (error: any) {
       console.error("getCategories error:", error.response?.data);
       toast.error(
@@ -250,9 +286,8 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       form.append("category_id", data.category_id.toString());
       form.append("expiry_date", data.expiry_date);
       form.append("cost", data.cost.toString());
-      if (data.image) {
-        form.append("image", data.image);
-      }
+
+      form.append("image", data.image || "");
 
       const response = await api.post(endpoint, form, {
         headers: { "Content-Type": "multipart/form-data" },

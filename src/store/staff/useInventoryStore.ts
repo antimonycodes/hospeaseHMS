@@ -23,7 +23,7 @@ api.interceptors.request.use(
 
 interface InventoryStore {
   isLoading: boolean;
-  requests: any[]; // Define the 'requests' property
+  requests: any[];
   getAllRequest: (endpoint?: string) => Promise<void>;
 }
 
