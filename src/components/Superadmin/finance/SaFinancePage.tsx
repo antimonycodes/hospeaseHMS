@@ -6,16 +6,9 @@ import Tabs from "../../ReusablepatientD/Tabs";
 import SearchBar from "../../ReusablepatientD/SearchBar";
 import FpaymentTable from "../../Finance/payment/FpaymentTable";
 import { useFinanceStore } from "../../../store/staff/useFinanceStore";
+import FexpensesTable from "../../Finance/expenses/FexpensesTable";
 
-type FpaymentTableProps = {
-  endpoint?: string;
-  refreshEndpoint?: string;
-};
-
-const SaFinancePage = ({
-  endpoint = "/admin/finances/save-patient-payment",
-  refreshEndpoint = "/admin/financs/patient-payment-history",
-}: FpaymentTableProps) => {
+const SaFinancePage = () => {
   const [activeTab, setActiveTab] = useState<
     "Overview" | "Payments" | "Expenses"
   >("Overview");
@@ -43,7 +36,7 @@ const SaFinancePage = ({
         {activeTab === "Payments" && (
           <FpaymentTable payments={payments} isLoading={isLoading} />
         )}
-        {activeTab === "Expenses" && <ExpenseTable />}
+        {activeTab === "Expenses" && <FexpensesTable />}
       </div>
     </div>
   );
