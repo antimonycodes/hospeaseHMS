@@ -4,6 +4,7 @@ import { useMatronNurse } from "../nurse/useMatronNurse";
 import Loader from "../../../Shared/Loader";
 import { ChevronLeft, FileText, Loader2 } from "lucide-react";
 import { useReportStore } from "../../../store/super-admin/useReoprt";
+import MedicalTimeline from "../../../Shared/MedicalTimeline";
 
 interface NextOfKin {
   name: string;
@@ -210,6 +211,13 @@ const MatronPatientDetails = () => {
           </button>
         </div>
       </div>
+      {id && (
+        <MedicalTimeline
+          patientId={id}
+          patient={patient}
+          showDownloadCompleteButton={false}
+        />
+      )}
     </div>
   );
 };
