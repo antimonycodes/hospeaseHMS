@@ -1,8 +1,9 @@
-import React, { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useMatronNurse } from "../nurse/useMatronNurse";
 import Loader from "../../../Shared/Loader";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, FileText, Loader2 } from "lucide-react";
+import { useReportStore } from "../../../store/super-admin/useReoprt";
 
 interface NextOfKin {
   name: string;
@@ -49,7 +50,11 @@ const InfoRow: React.FC<{
 
 const MatronPatientDetails = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { selectedPatient, getPatientById, isLoading } = useMatronNurse();
+  const [reportNote, setReportNote] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const { deptCreateReport, isCreating } = useReportStore();
 
   useEffect(() => {
     if (id) {
@@ -73,11 +78,28 @@ const MatronPatientDetails = () => {
   const patient: PatientAttributes = selectedPatient.attributes;
   const nextOfKinList: NextOfKin[] = patient.next_of_kin || [];
 
+  const handleReportSubmit = async () => {
+    const response = await deptCreateReport({
+      patient_id: id ?? null,
+      note: reportNote,
+      file: file,
+      status: "completed",
+    });
+    if (response) {
+      setReportNote("");
+      setFile(null);
+    }
+    console.log("Report submitted successfully:", response);
+  };
+
   return (
     <div>
       <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
         {/* Back button */}
-        <div className="flex items-center text-gray-600 hover:text-primary mb-5">
+        <div
+          onClick={() => navigate(-1)}
+          className="flex items-center text-gray-600 hover:text-primary mb-5"
+        >
           <ChevronLeft size={16} />
           <span className="ml-1">Patients</span>
         </div>
@@ -139,6 +161,53 @@ const MatronPatientDetails = () => {
               </p>
             )}
           </div>
+        </div>
+      </div>
+      {/*  */}
+      <div className="bg-white rounded-lg custom-shadow mb-6 p-4 sm:p-6">
+        <button
+          className={`flex mb-4 text-primary items-center gap-1 px-3 py-1 rounded-md transition
+                   `}
+          // onClick={() => setActiveTab("report")}
+        >
+          <FileText size={16} />
+          Add Nurse's Report
+        </button>
+
+        {/* <p className="text-gray-500 text-sm mb-4">
+                  Add a report for the patient. You can also upload a file if needed.
+                </p> */}
+        <div className="space-y-4">
+          <textarea
+            rows={5}
+            value={reportNote}
+            onChange={(e) => setReportNote(e.target.value)}
+            placeholder="Enter nurse's report..."
+            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+          <input
+            type="file"
+            accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90"
+          />
+
+          <button
+            onClick={handleReportSubmit}
+            className={`bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition flex items-center justify-center
+                    ${isCreating ? "opacity-50 cursor-not-allowed" : ""}
+                    `}
+            disabled={isCreating}
+          >
+            {isCreating ? (
+              <>
+                Adding
+                <Loader2 className=" size-6 mr-2 animate-spin" />
+              </>
+            ) : (
+              "Add Report"
+            )}
+          </button>
         </div>
       </div>
     </div>
