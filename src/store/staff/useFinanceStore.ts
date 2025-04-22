@@ -245,12 +245,12 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
 
   createPayment: async (
     data: CreatePaymentData,
-    endpoint = "/save-patient-payment",
+    endpoint = "frontdesk/save-patient-payment",
     refreshEndpoint = "/finance/all-revenues"
   ) => {
     set({ isLoading: true });
     try {
-      const response = await api.post(endpoint, data);
+      const response = await api.post("/finance/save-patient-payment", data);
       if (response.status === 201) {
         await useFinanceStore.getState().getAllPayments(refreshEndpoint);
         toast.success(response.data.message || "Payment added successfully");
