@@ -93,7 +93,12 @@ interface InventoryStore {
   categorys: any[];
   pagination: Pagination | null;
   stocks: any[];
-  requests: { data: any[]; pagination: Pagination }[];
+  requests: {
+    attributes: any;
+    id: any;
+    data: any[];
+    pagination: Pagination;
+  }[];
   getInventoryStats: (endpoint?: string) => Promise<void>;
   getAllStocks: (endpoint?: string) => Promise<void>;
   createStock: (
@@ -164,6 +169,8 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
                 from: 0,
                 to: 0,
               },
+              id: undefined,
+              attributes: undefined,
             },
           ],
         }); // Set empty object as fallback
@@ -183,6 +190,8 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
               from: 0,
               to: 0,
             },
+            id: undefined,
+            attributes: undefined,
           },
         ],
       }); // Set empty array with default pagination on error
