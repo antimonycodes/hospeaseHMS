@@ -27,8 +27,8 @@ const FinanceCard = () => {
       <FpaymentTable
         payments={payments}
         isLoading={isLoading}
-        endpoint={""}
-        pagination={null}
+        // endpoint={""}
+        // pagination={null}
       />
     </div>
   );
