@@ -15,10 +15,7 @@ const Fpayment = ({
   refreshEndpoint = "/finance/patient-paymet-history",
 }: FpaymentTableProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<
-    "All" | "half payment" | "full payment"
-  >("All");
-
+  const [activeTab, setActiveTab] = useState<"All" | "part" | "full">("All");
   const { payments, pagination, getAllPayments, isLoading } = useFinanceStore();
 
   useEffect(() => {
@@ -28,18 +25,18 @@ const Fpayment = ({
 
   const getStatusCounts = () => {
     if (!Array.isArray(payments)) {
-      return { All: 0, "half payment": 0, "full payment": 0 };
+      return { All: 0, part: 0, full: 0 };
     }
 
     return payments.reduce(
       (acc, payment) => {
-        const type = payment.attributes?.payment_type?.toLowerCase();
-        if (type === "half payment") acc["half payment"]++;
-        else if (type === "full payment") acc["full payment"]++;
+        const type = payment.attributes?.payment_type;
+        if (type === "part") acc.part++;
+        else if (type === "full") acc.full++;
         acc.All++;
         return acc;
       },
-      { All: 0, "half payment": 0, "full payment": 0 }
+      { All: 0, part: 0, full: 0 }
     );
   };
 
@@ -49,9 +46,7 @@ const Fpayment = ({
     ? activeTab === "All"
       ? payments
       : payments.filter(
-          (payment) =>
-            payment.attributes?.payment_type?.toLowerCase() ===
-            activeTab.toLowerCase()
+          (payment) => payment.attributes?.payment_type === activeTab
         )
     : [];
 
@@ -77,11 +72,11 @@ const Fpayment = ({
         />
       )}
 
-      <Tabs<"All" | "full payment" | "half payment">
+      <Tabs<"All" | "full" | "part">
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         statusCounts={statusCounts}
-        tabs={["All", "full payment", "half payment"]}
+        tabs={["All", "full", "part"]}
       />
 
       <FpaymentTable payments={filteredPayments} isLoading={isLoading} />
