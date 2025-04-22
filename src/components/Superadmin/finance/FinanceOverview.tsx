@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import OverviewCard from "../../ReusabledashboardD/Overviewcard";
 import FinanceBarchart from "./FinanceBarchart";
-import FinanceStatsCards from "./FinanceStatsCards";
 import { useFinanceStore } from "../../../store/staff/useFinanceStore";
 import { getImageSrc } from "../../../utils/imageUtils";
+import FinanceCharts from "../../Finance/overview/FinanceCharts";
 
 const FinanceOverview = () => {
   const { stats, getFinanceStats, isLoading } = useFinanceStore();
@@ -50,7 +50,8 @@ const FinanceOverview = () => {
             data={financeStatsData}
           />
         )}
-        {/* <FinanceCharts />
+        <FinanceCharts />
+        {/* 
         <FinanceCard /> */}
       </div>
     </div>

@@ -77,8 +77,8 @@ export interface CreateStockData {
   quantity: string;
   category_id: string;
   expiry_date: string;
-  cost: string;
-  image: File | null;
+  cost: number;
+  // image: File | null;
 }
 
 export interface InventoryStats {
@@ -287,7 +287,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       form.append("expiry_date", data.expiry_date);
       form.append("cost", data.cost.toString());
 
-      form.append("image", data.image || "");
+      // form.append("image", data.image || "");
 
       const response = await api.post(endpoint, form, {
         headers: { "Content-Type": "multipart/form-data" },
