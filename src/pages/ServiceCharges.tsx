@@ -148,11 +148,11 @@ const ServiceCharges = () => {
     setIsModalOpen(true);
   };
 
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat("en-NG", {
-      style: "currency",
-      currency: "NGN",
-    }).format(price);
+  // const formatPrice = (price: number) =>
+  //   new Intl.NumberFormat("en-NG", {
+  //     style: "currency",
+  //     currency: "NGN",
+  //   }).format(price);
 
   const columns: Column<Item>[] = [
     {
@@ -168,8 +168,7 @@ const ServiceCharges = () => {
     {
       key: "amount",
       label: "Amount",
-      render: (_, row) =>
-        formatPrice(row.attributes.amount || row.attributes.price),
+      render: (_, row) => row.attributes.amount || row.attributes.price,
     },
     {
       key: "department",
