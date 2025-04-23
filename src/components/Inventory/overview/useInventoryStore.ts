@@ -77,7 +77,7 @@ export interface CreateStockData {
   quantity: string;
   category_id: string;
   expiry_date: string;
-  cost: string;
+  cost: number;
   // image: File | null;
 }
 
