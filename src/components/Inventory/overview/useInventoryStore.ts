@@ -156,59 +156,6 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
-  // getAllRequest: async (
-  //   endpoint = "/inventory/requests/all-records?status=pending"
-  // ) => {
-  //   set({ isLoading: true });
-  //   try {
-  //     const response = await api.get(endpoint);
-
-  //     // Store the entire response data structure
-  //     // This includes both the data array and pagination object
-  //     if (response.data && response.data.data) {
-  //       set({ requests: response.data.data });
-  //       toast.success(response.data.message || "Requests fetched successfully");
-  //     } else {
-  //       console.error("Unexpected API response structure:", response.data);
-  //       // set({
-  //       //   requests: [
-  //       //     {
-  //       //       data: [],
-  //       //       pagination: {
-  //       //         total: 0,
-  //       //         per_page: 0,
-  //       //         current_page: 0,
-  //       //         last_page: 0,
-  //       //         from: 0,
-  //       //         to: 0,
-  //       //       },
-  //       //     },
-  //       //   ],
-  //       // }); // Set empty object as fallback
-  //       toast.error("Invalid data format received from server");
-  //     }
-  //   } catch (error: any) {
-  //     console.error("getAllRequest error:", error.response?.data);
-  //     // set({
-  //     //   requests: [
-  //     //     {
-  //     //       data: [],
-  //     //       pagination: {
-  //     //         total: 0,
-  //     //         per_page: 0,
-  //     //         current_page: 0,
-  //     //         last_page: 0,
-  //     //         from: 0,
-  //     //         to: 0,
-  //     //       },
-  //     //     },
-  //     //   ],
-  //     // }); // Set empty array with default pagination on error
-  //     toast.error(error.response?.data?.message || "Failed to fetch requests");
-  //   } finally {
-  //     set({ isLoading: false });
-  //   }
-  // },
 
   createRequest: async (
     data,
