@@ -166,8 +166,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
               },
             },
           ],
-        }); // Set empty object as fallback
-        toast.error("Invalid data format received from server");
+        });
       }
     } catch (error: any) {
       console.error("getAllRequest error:", error.response?.data);
@@ -185,7 +184,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
             },
           },
         ],
-      }); // Set empty array with default pagination on error
+      });
       toast.error(error.response?.data?.message || "Failed to fetch requests");
     } finally {
       set({ isLoading: false });

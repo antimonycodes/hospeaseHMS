@@ -60,8 +60,14 @@ interface CombinedStore {
   isLoading: boolean;
   isDeleting: boolean;
   items: any[];
+  pagination: Pagination | null;
+
   createItem: (data: CreateItem) => Promise<any>;
-  getAllItems: (endpoint?: string) => Promise<any>;
+  getAllItems: (
+    page?: string,
+    perPage?: string,
+    endpoint?: string
+  ) => Promise<any>;
   deleteUser: (id: any) => Promise<any>;
   updateItem: (id: number, data: CreateItem, endpoint?: string) => Promise<any>;
   deleteItem: (id: number) => Promise<any>;
@@ -71,6 +77,7 @@ export const useCombinedStore = create<CombinedStore>((set, get) => ({
   isLoading: false,
   isDeleting: false,
   items: [],
+  pagination: null,
 
   createItem: async (data) => {
     set({ isLoading: true });
@@ -93,14 +100,21 @@ export const useCombinedStore = create<CombinedStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
-  getAllItems: async (endpoint = "/medical-report/service-charge/all") => {
+  getAllItems: async (
+    page = "1",
+    perPage = "20",
+    baseEndpoint = "/medical-report/service-charge/all"
+  ) => {
     set({ isLoading: true });
     try {
+      const endpoint = `${baseEndpoint}?page=${page}&per_page=${perPage}`;
       const response = await api.get(endpoint);
 
       if (isSuccessfulResponse(response)) {
         // toast.success(response.data?.msg);
         set({ items: response.data.data.data });
+        set({ pagination: response.data.data.pagination });
+
         return true;
       }
       return null;

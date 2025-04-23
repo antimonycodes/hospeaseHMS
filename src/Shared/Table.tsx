@@ -3,9 +3,9 @@ import React from "react";
 import Loader from "./Loader";
 
 interface Column<T> {
-  key: keyof T;
+  key: keyof T | string;
   label: React.ReactNode;
-  render?: (value: T[keyof T], row: T) => React.ReactNode;
+  render?: (value: T[keyof T], row: T, rowIndex: number) => React.ReactNode;
 }
 
 // Pagination data interface to match backend response
@@ -130,15 +130,15 @@ const Table = <T extends Record<string, any>>({
               </td>
             </tr>
           ) : (
-            data.map((row) => (
+            data.map((row, rowIndex) => (
               <tr key={String(row[rowKey])}>
-                {columns.map((column, index) => (
+                {columns.map((column, colIndex) => (
                   <td
-                    key={index}
+                    key={colIndex}
                     className="px-6 py-4 whitespace-nowrap text-sm text-[#101828]"
                   >
                     {column.render
-                      ? column.render(row[column.key], row)
+                      ? column.render(row[column.key], row, rowIndex)
                       : String(row[column.key])}
                   </td>
                 ))}

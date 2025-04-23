@@ -78,7 +78,7 @@ const SaFrontDeskTable = ({ frontdesks, isLoading }: Props) => {
       key: "is_active",
       label: "Status",
       render: (value, row) => (
-        <div className="flex items-center">
+        <div className="staff-toggle-tip flex items-center">
           <label className="inline-flex items-center cursor-pointer">
             <input
               type="checkbox"

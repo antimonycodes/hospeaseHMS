@@ -1,11 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Dashboard/Sidebar";
 import TopNav from "../components/Dashboard/TopNav";
 import { BsWhatsapp } from "react-icons/bs";
+import TourOverlay from "../Shared/TourOverlay";
+import { useTourStore } from "../store/super-admin/useTourStore";
 
 const DashboardLayout = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { startTour } = useTourStore();
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      startTour();
+    }, 800); // Slight delay to ensure DOM is ready
+    return () => clearTimeout(timeout);
+  }, [startTour]);
 
   return (
     <div className="flex h-screen ">
@@ -16,7 +26,16 @@ const DashboardLayout = () => {
       <main className="flex-1 bg-[#efefef] overflow-y-auto">
         <TopNav setIsMobileMenuOpen={setIsMobileMenuOpen} />
         <div className="p-3 md:p-6 w-full">
+          {/* <TourOverlay /> */}
           <Outlet />
+          <div className=" fixed bottom-6 left-0 right-0 flex justify-center items-center">
+            {/* <button
+              onClick={startTour}
+              className="px-4 py-2 bg-blue-600 text-white rounded fixed left-0 z-[999]"
+            >
+              Start Tour
+            </button> */}
+          </div>
           <div
             className="fixed bottom-6  right-15 flex justify-center space-x-2 items-center  "
             onClick={() =>

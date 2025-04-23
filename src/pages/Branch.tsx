@@ -31,7 +31,7 @@ const Branch = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
+    <div className=" branch-tab bg-white rounded-lg shadow-lg p-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-xl lg:text-2xl font-bold text-primary">

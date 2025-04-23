@@ -61,10 +61,12 @@ import Category from "./pages/Category";
 import SaInventoryPage from "./components/Superadmin/Inventory/SaInventoryPage";
 import PaymentDetails from "./components/Finance/payment/PaymentDetails";
 import FrontdeskPatientDetails from "./components/Frontdesk/patients/FrontdeskPatientDetails";
+import TourListener from "./Shared/TourListener";
 
 function App() {
   return (
     <div className="font-inter">
+      {/* <TourListener /> */}
       <Suspense fallback={<div className="text-center py-10">Loading...</div>}>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" />} />
