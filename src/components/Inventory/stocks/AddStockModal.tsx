@@ -51,7 +51,7 @@ const AddStockModal = ({
     getAllCategorys(fetchEndpoint || "");
   }, [getAllCategorys, fetchEndpoint]);
 
-  const [stock, setStock] = useState<CreateStockData>({
+  const [stock, setStock] = useState<any>({
     item: "",
     quantity: "",
     category_id: "",
@@ -64,7 +64,7 @@ const AddStockModal = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setStock((prev) => ({
+    setStock((prev: any) => ({
       ...prev,
       [name]: name === "cost" ? parseFloat(value) || 0 : value,
     }));
@@ -72,7 +72,7 @@ const AddStockModal = ({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
-    setStock((prev) => ({ ...prev, image: file }));
+    setStock((prev: any) => ({ ...prev, image: file }));
   };
 
   // const handleSubmit = async (e: React.FormEvent) => {
