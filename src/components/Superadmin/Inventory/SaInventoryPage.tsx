@@ -128,8 +128,10 @@ const SaInventoryPage = () => {
       {isRequestOpen && (
         <AddRequestModal
           onClose={closeRequest}
-          endpoint="/admin/inventory/requests/create"
+          endpoint="/admin/inventory/category/create"
           refreshEndpoint="/admin/inventory/requests/all-records?status=pending"
+          fetchEndpoint="/admin/inventory/category/all-records"
+          stockEndpoint="/admin/inventory/all-inventory-items"
         />
       )}
       {isItemOpen && (
