@@ -90,14 +90,14 @@ const MedAppointment = () => {
       id: appointment.id,
       type: appointment.type,
       ...appointment.attributes,
-      viewMore: `/appointment/medicalDirector/${appointment.id}`,
+      viewMore: "View More",
     }));
   };
 
-  const handleViewMore = (id: string) => {
-    console.log("Navigating to appointment details for ID:", id);
-    navigate(`/appointment/medicalDirector/${id}`);
-  };
+  // const handleViewMore = (id: string) => {
+  //   console.log("Navigating to appointment details for ID:", id);
+  //   navigate(`/medical/appointment/${id}`);
+  // };
 
   const columns: TableColumn<FlattenedAppointment>[] = [
     {
@@ -155,18 +155,18 @@ const MedAppointment = () => {
     //     );
     //   },
     // },
-    {
-      key: "viewMore",
-      label: "",
-      render: (_, data) => (
-        <span
-          className="text-primary text-sm font-medium cursor-pointer"
-          onClick={() => handleViewMore(data.id.toString())}
-        >
-          View More
-        </span>
-      ),
-    },
+    // {
+    //   key: "viewMore",
+    //   label: "",
+    //   render: (_, data) => (
+    //     <span
+    //       className="text-primary text-sm font-medium cursor-pointer"
+    //       onClick={() => handleViewMore(data.id.toString())}
+    //     >
+    //       View More
+    //     </span>
+    //   ),
+    // },
   ];
 
   const getStatusCounts = () => {
