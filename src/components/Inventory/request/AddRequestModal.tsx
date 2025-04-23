@@ -9,12 +9,16 @@ interface AddRequestModalProps {
   onClose: () => void;
   endpoint?: string;
   refreshEndpoint?: string;
+  fetchEndpoint: string;
+  stockEndpoint: string;
 }
 
 const AddRequestModal: React.FC<AddRequestModalProps> = ({
   onClose,
-  endpoint = "/inventory/requests/create",
-  refreshEndpoint = "/inventory/requests/all-records?status=pending",
+  endpoint,
+  refreshEndpoint,
+  fetchEndpoint,
+  stockEndpoint,
 }) => {
   const { searchStaff, createRequest, getAllStocks, stocks } =
     useInventoryStore();
@@ -34,8 +38,8 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
 
   const { getAllCategorys, categorys, isLoading } = useInventoryStore();
   useEffect(() => {
-    getAllCategorys("/inventory/category/all-records");
-    getAllStocks();
+    getAllCategorys(fetchEndpoint);
+    getAllStocks(stockEndpoint);
   }, [getAllCategorys, getAllStocks]);
   useEffect(() => {
     searchStaff(query).then((results) => {
@@ -98,15 +102,15 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
   // Handle form submission
   const handleSubmit = async () => {
     console.log("Submitting formData:", formData);
-    // if (
-    //   !formData.requested_by ||
-    //   !formData.item_name ||
-    //   !formData.category ||
-    //   !formData.quantity
-    // ) {
-    //   toast.error("Please fill all required fields");
-    //   return;
-    // }
+    if (
+      !formData.requested_by ||
+      !formData.item_name ||
+      !formData.category ||
+      !formData.quantity
+    ) {
+      toast.error("Please fill all required fields");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -117,7 +121,7 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
         status: "approved",
       };
 
-      console.log("Sending payload:", payload); // Add this line to debug
+      console.log("Sending payload:", payload);
 
       const success = await createRequest(payload, endpoint, refreshEndpoint);
       if (success) {
@@ -131,7 +135,6 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
     }
   };
 
-  // Cleanup debounce on unmount
   useEffect(() => {
     return () => {
       handleSearch.cancel();

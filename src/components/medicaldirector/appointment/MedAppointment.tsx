@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 interface AppointmentAttributes {
   doctor: string;
-  status: string; // This is "pending", "approved", etc. from your API
+  status: string;
   rescheduled_data: any | null;
   doctor_contact: string | null;
   gender: string;
@@ -37,9 +37,9 @@ const formatStatus = (status: string): "New" | "Accepted" | "Completed" => {
     pending: "New",
     approved: "Accepted",
     accepted: "Accepted",
-    rejected: "Completed", // Mapping "rejected" to "Completed" (adjust if needed)
-    declined: "Completed", // Mapping "declined" to "Completed" (adjust if needed)
-    rescheduled: "New", // Assuming rescheduled is treated as "New"
+    rejected: "Completed",
+    declined: "Completed",
+    rescheduled: "New",
     reschedule: "New",
   };
 
@@ -77,10 +77,10 @@ type FlattenedAppointment = {
 const MedAppointment = () => {
   const [activeTab, setActiveTab] = useState<TabType>("New");
   const { appointments, isLoading, getAllAppointments } = usePatientStore();
-  const navigate = useNavigate(); // Initialize navigate here
-
+  const navigate = useNavigate();
+  const baseEndpoint = "/medical-director/all-appointments";
   useEffect(() => {
-    getAllAppointments("/medical-director/all-appointments");
+    getAllAppointments("1", "10", baseEndpoint);
   }, [getAllAppointments]);
 
   const flattenAppointments = (
@@ -90,14 +90,14 @@ const MedAppointment = () => {
       id: appointment.id,
       type: appointment.type,
       ...appointment.attributes,
-      viewMore: `/appointment/medicalDirector/${appointment.id}`, // Add viewMore property
+      viewMore: "View More",
     }));
   };
 
-  const handleViewMore = (id: string) => {
-    console.log("Navigating to appointment details for ID:", id);
-    navigate(`/appointment/medicalDirector/${id}`); // Update the route to point to MedAppointmentDetails
-  };
+  // const handleViewMore = (id: string) => {
+  //   console.log("Navigating to appointment details for ID:", id);
+  //   navigate(`/medical/appointment/${id}`);
+  // };
 
   const columns: TableColumn<FlattenedAppointment>[] = [
     {
@@ -141,18 +141,6 @@ const MedAppointment = () => {
         <span className="text-[#667085]">{data.occupation || "N/A"}</span>
       ),
     },
-    {
-      key: "viewMore",
-      label: "",
-      render: (_, data) => (
-        <span
-          className="text-primary text-sm font-medium cursor-pointer"
-          onClick={() => handleViewMore(data.id.toString())}
-        >
-          View More
-        </span>
-      ),
-    },
     // {
     //   key: "status",
     //   label: "Status",
@@ -166,6 +154,18 @@ const MedAppointment = () => {
     //       </span>
     //     );
     //   },
+    // },
+    // {
+    //   key: "viewMore",
+    //   label: "",
+    //   render: (_, data) => (
+    //     <span
+    //       className="text-primary text-sm font-medium cursor-pointer"
+    //       onClick={() => handleViewMore(data.id.toString())}
+    //     >
+    //       View More
+    //     </span>
+    //   ),
     // },
   ];
 
@@ -195,7 +195,7 @@ const MedAppointment = () => {
   const statusCounts = getStatusCounts();
 
   const filteredAppointments = (appointments || []).filter(
-    (a) => formatStatus(a.attributes.status) === activeTab
+    (a: AppointmentData) => formatStatus(a.attributes.status) === activeTab
   );
 
   const flattenedAppointments = flattenAppointments(filteredAppointments);

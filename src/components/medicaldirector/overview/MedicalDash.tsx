@@ -61,7 +61,7 @@ const MedicalDash = () => {
           <div>No stats available</div>
         )}
         <MedicalChart />
-        <MedRecent />
+        {/* <MedRecent /> */}
       </div>
     </div>
   );

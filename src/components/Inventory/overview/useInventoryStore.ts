@@ -77,8 +77,8 @@ export interface CreateStockData {
   quantity: string;
   category_id: string;
   expiry_date: string;
-  cost: string;
-  image: File | null;
+  cost: number;
+  // image: File | null;
 }
 
 export interface InventoryStats {
@@ -93,7 +93,8 @@ interface InventoryStore {
   categorys: any[];
   pagination: Pagination | null;
   stocks: any[];
-  requests: { data: any[]; pagination: Pagination }[];
+  requests: any[];
+  // requests: { data: any[]; pagination: Pagination }[];
   getInventoryStats: (endpoint?: string) => Promise<void>;
   getAllStocks: (endpoint?: string) => Promise<void>;
   createStock: (
@@ -138,6 +139,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       return [];
     }
   },
+
   getAllRequest: async (
     endpoint = "/inventory/requests/all-records?status=pending"
   ) => {
@@ -286,7 +288,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       form.append("expiry_date", data.expiry_date);
       form.append("cost", data.cost.toString());
 
-      form.append("image", data.image || "");
+      // form.append("image", data.image || "");
 
       const response = await api.post(endpoint, form, {
         headers: { "Content-Type": "multipart/form-data" },

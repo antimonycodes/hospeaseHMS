@@ -125,7 +125,6 @@ function App() {
                 path="matron/nurses/:id"
                 element={<MatronNurseDetails />}
               />
-              {/* <Route path="laboratory/patients/:id" element={<LabDetaill />} /> */}
               <Route
                 path="laboratory/patients/:id"
                 element={<LabPatientDetails />}

@@ -45,7 +45,7 @@ const AddItemModal = ({
     category_id: "",
     expiry_date: "",
     cost: 0,
-    image: null,
+    // image: null,
   });
 
   const handleChange = (
@@ -92,6 +92,7 @@ const AddItemModal = ({
         category_id: "",
         expiry_date: "",
         cost: 0,
+        // image: "",
       });
       onClose();
     }

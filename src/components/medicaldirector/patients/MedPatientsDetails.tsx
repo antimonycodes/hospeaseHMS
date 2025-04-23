@@ -1,7 +1,7 @@
 import { ChevronLeft } from "lucide-react";
 import React, { useEffect } from "react";
 import Loader from "../../../Shared/Loader";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useMatronNurse } from "../../Matron/nurse/useMatronNurse";
 
 interface NextOfKin {
@@ -49,6 +49,7 @@ const InfoRow: React.FC<{
 
 const MedPatientsDetails = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { selectedPatient, getMedPatientById, isLoading } = useMatronNurse();
 
   useEffect(() => {
@@ -77,7 +78,10 @@ const MedPatientsDetails = () => {
     <div>
       <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
         {/* Back button */}
-        <div className="flex items-center text-gray-600 hover:text-primary mb-5">
+        <div
+          onClick={() => navigate(-1)}
+          className="flex items-center text-gray-600 hover:text-primary mb-5"
+        >
           <ChevronLeft size={16} />
           <span className="ml-1">Patients</span>
         </div>
