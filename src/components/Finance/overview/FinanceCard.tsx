@@ -1,6 +1,4 @@
 import { useEffect } from "react";
-import { Payment, paymentData } from "../../../data/PaymentData";
-import Table from "../../../Shared/Table";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import FpaymentTable from "../payment/FpaymentTable";
 import { useFinanceStore } from "../../../store/staff/useFinanceStore";

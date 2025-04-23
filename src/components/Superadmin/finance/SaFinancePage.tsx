@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import FinanceOverview from "./FinanceOverview";
 import Tabs from "../../ReusablepatientD/Tabs";
 import SearchBar from "../../ReusablepatientD/SearchBar";
 import FpaymentTable from "../../Finance/payment/FpaymentTable";
@@ -10,6 +9,7 @@ import { Plus } from "lucide-react";
 import AddPaymentModal from "../../../Shared/AddPaymentModal";
 import AddExpenseModal from "../../../Shared/AddExpenseModal";
 import Foverview from "../../Finance/overview/Foverview";
+import FinanceOverview from "./FinanceOverview";
 
 type Props = {
   endpoint?: string;
@@ -93,8 +93,8 @@ const SaFinancePage = ({
         </div>
       </div>
       <div className="mt-4">
-        {/* {activeTab === "Overview" && <FinanceOverview />} */}
-        {activeTab === "Overview" && <Foverview />}
+        {activeTab === "Overview" && <FinanceOverview />}
+
         {activeTab === "Payments" && (
           <FpaymentTable payments={payments} isLoading={isLoading} />
         )}

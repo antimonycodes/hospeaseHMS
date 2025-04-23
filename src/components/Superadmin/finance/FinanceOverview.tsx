@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import OverviewCard from "../../ReusabledashboardD/Overviewcard";
-import FinanceBarchart from "./FinanceBarchart";
 import { useFinanceStore } from "../../../store/staff/useFinanceStore";
 import { getImageSrc } from "../../../utils/imageUtils";
 import FinanceCharts from "../../Finance/overview/FinanceCharts";
@@ -34,10 +33,6 @@ const FinanceOverview = () => {
   console.log("Finance Stats Data:", financeStatsData);
 
   return (
-    // <div className="  mt-4 space-y-4">
-    //   <FinanceStatsCards />
-    //   <FinanceBarchart />
-    // </div>
     <div className="font-inter">
       <div className="flex flex-col gap-4">
         {isLoading ? (
@@ -51,8 +46,6 @@ const FinanceOverview = () => {
           />
         )}
         <FinanceCharts />
-        {/* 
-        <FinanceCard /> */}
       </div>
     </div>
   );

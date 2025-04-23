@@ -1,4 +1,4 @@
-import { JSX, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Table from "../../../Shared/Table";
 import Loader from "../../../Shared/Loader";
 import { useFinanceStore } from "../../../store/staff/useFinanceStore";
