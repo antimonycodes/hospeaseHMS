@@ -82,6 +82,7 @@ export interface CreateStockData {
 }
 
 export interface InventoryStats {
+  data: InventoryStats;
   total_inventories: number;
   total_categories: number;
   total_expired_items: number;
@@ -325,6 +326,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
         total_expired_items: 0,
       };
       set({ stats: statsData });
+      console.log(response.data?.data, "efghj");
       toast.success("Inventory stats fetched successfully!");
     } catch (error: any) {
       console.error("Stats fetch error:", error.response?.data);

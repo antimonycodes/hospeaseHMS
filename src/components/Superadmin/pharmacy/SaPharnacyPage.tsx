@@ -81,22 +81,23 @@ const SaPharnacyPage = () => {
     getAllPatients("1", "10", baseEndpoint);
   }, [getAllPatients]);
 
-  const transformedPatients = patients.map((item) => {
-    const attr = item.attributes;
-    const patient = attr.patient;
-
-    return {
-      id: item.id, // case note ID
-      name: `${patient.first_name} ${patient.last_name}`,
-      patientId: patient.card_id,
-      gender: patient.gender,
-      phone: patient.phone_number,
-      status: attr.status,
-      created_at: attr.created_at,
-      caseNoteId: item.id,
-      patientUniqueId: patient.id,
-    };
-  });
+  const transformedPatients = patients
+    .filter((item) => item.attributes?.patient)
+    .map((item) => {
+      const attr = item.attributes;
+      const patient = attr.patient;
+      return {
+        id: item.id,
+        name: `${patient.first_name} ${patient.last_name}`,
+        patientId: patient.card_id,
+        gender: patient.gender,
+        phone: patient.phone_number,
+        status: attr.status,
+        created_at: attr.created_at,
+        caseNoteId: item.id,
+        patientUniqueId: patient.id,
+      };
+    });
 
   const statuses = ["pending", "completed"];
 
@@ -123,7 +124,7 @@ const SaPharnacyPage = () => {
     completed: "bg-green-100 text-green-800",
   };
 
-  if (isLoading) return <Loader />;
+  if (isLoading || !patients) return <Loader />;
 
   const columns = [
     {

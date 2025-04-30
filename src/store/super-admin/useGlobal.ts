@@ -80,8 +80,8 @@ export interface CreateStaff {
 }
 
 export interface AssignShift {
-  user_id: number;
-  shifts: ShiftData[];
+  // user_id: number;
+  // shifts: ShiftData[];
 }
 
 export interface ShiftData {
@@ -89,6 +89,7 @@ export interface ShiftData {
   shift_type: string;
   start_time: string;
   end_time: string;
+  clinical_dept: number;
   department_id: null;
 }
 
@@ -119,7 +120,7 @@ interface Globalstore {
     perPage?: string
   ) => Promise<any>;
   assignShifts: (data: AssignShift, endpoint: any) => Promise<any>;
-  getStaffShifts: (id: any, endpoint: string) => Promise<any>;
+  getStaffShifts: (endpoint: string) => Promise<any>;
   updateShift: (id: any, data: any, update: any) => Promise<any>;
   deleteShift: (id: any, endpoint: any) => Promise<any>;
   getAllRoles: (endpoint?: string) => Promise<any>;
@@ -220,7 +221,7 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
   },
 
   getClinicaldept: async (
-    endpoint = "/admin/department/clinical-department-fetch"
+    endpoint = "/medical-report/clinical-department-fetch"
   ) => {
     set({ isLoading: true });
     try {
@@ -349,7 +350,7 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       set({ isStaffLoading: false });
     }
   },
-  assignShifts: async (data, endpoint = "/admin/shift/assign") => {
+  assignShifts: async (data, endpoint = "/matron/shift/assign") => {
     set({ isLoading: true });
     try {
       const response = await api.post(endpoint, data);
@@ -365,12 +366,12 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       return null;
     }
   },
-  getStaffShifts: async (id, endpoint = `/admin/shift/user-records/${id}`) => {
+  getStaffShifts: async (endpoint = `/matron/shift/user-records`) => {
     set({ isLoading: true });
     try {
       const response = await api.get(endpoint);
       if (response.status === 200) {
-        set({ staffShift: response.data.data.data });
+        set({ staffShift: response.data.data.data.data });
         // toast.success(response.data.message);
         console.log(response.data.data.data);
         return true;
@@ -505,7 +506,7 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
 
       if (isSuccessfulResponse(response)) {
         set({ allStaffs: response.data.data });
-        toast.success(response.data?.message);
+        // toast.success(response.data?.message);
         console.log(response.data.data);
         return true;
       }

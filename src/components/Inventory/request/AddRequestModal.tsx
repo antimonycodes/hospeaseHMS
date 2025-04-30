@@ -102,15 +102,15 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
   // Handle form submission
   const handleSubmit = async () => {
     console.log("Submitting formData:", formData);
-    if (
-      !formData.requested_by ||
-      !formData.item_name ||
-      !formData.category ||
-      !formData.quantity
-    ) {
-      toast.error("Please fill all required fields");
-      return;
-    }
+    // if (
+    //   !formData.requested_by ||
+    //   !formData.item_name ||
+    //   !formData.category ||
+    //   !formData.quantity
+    // ) {
+    //   toast.error("Please fill all required fields");
+    //   return;
+    // }
 
     setIsSubmitting(true);
     try {

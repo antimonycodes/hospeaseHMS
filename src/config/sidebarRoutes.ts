@@ -140,6 +140,12 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
     //   activeIcon: getImageSrc("usersWhite.svg"),
     // },
     {
+      name: "Shifts",
+      path: "/dashboard/shifts",
+      icon: getImageSrc("pharmacyicon.svg"),
+      activeIcon: getImageSrc("pharmacyWhite.svg"),
+    },
+    {
       name: "Service Charges",
       path: "/dashboard/service-charges",
       icon: getImageSrc("usericon.svg"),
@@ -390,6 +396,12 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       activeIcon: getImageSrc("patienticonsLight.svg"),
     },
     {
+      name: "Shifts",
+      path: "/dashboard/shifts",
+      icon: getImageSrc("pharmacyicon.svg"),
+      activeIcon: getImageSrc("pharmacyWhite.svg"),
+    },
+    {
       name: "Profile",
       path: "/dashboard/staffprofile",
       icon: getImageSrc("profile.svg"),
@@ -437,12 +449,12 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       icon: getImageSrc("doctoricon.svg"),
       activeIcon: getImageSrc("doctorsWhite.svg"),
     },
-    // {
-    //   name: "Shifts",
-    //   path: "/dashboard/shifts",
-    //   icon: getImageSrc("appointmentsdark.svg"),
-    //   activeIcon: getImageSrc("appointmentLight.svg"),
-    // },
+    {
+      name: "Shifts",
+      path: "/dashboard/shifts",
+      icon: getImageSrc("appointmentsdark.svg"),
+      activeIcon: getImageSrc("appointmentLight.svg"),
+    },
     {
       name: "Profile",
       path: "/dashboard/staffprofile",

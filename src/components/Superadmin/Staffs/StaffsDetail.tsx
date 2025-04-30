@@ -60,11 +60,11 @@ const StaffsDetail = ({ setShowModal }: any) => {
     });
   };
 
-  useEffect(() => {
-    if (staff) {
-      getStaffShifts(staff.id, `/admin/shift/user-records/${staff.id}`);
-    }
-  }, [staff, getStaffShifts]);
+  // useEffect(() => {
+  //   if (staff) {
+  //     getStaffShifts(staff.id, `/admin/shift/user-records/${staff.id}`);
+  //   }
+  // }, [staff, getStaffShifts]);
 
   // Get department ID dynamically from roles
   const getDepartmentId = () => {
@@ -76,94 +76,94 @@ const StaffsDetail = ({ setShowModal }: any) => {
     return roles[staffRole].id;
   };
 
-  const handleAddShift = async () => {
-    if (!selectedDate || !shiftType || !startTime || !endTime) return;
+  // const handleAddShift = async () => {
+  //   if (!selectedDate || !shiftType || !startTime || !endTime) return;
 
-    const department_id = getDepartmentId();
+  //   const department_id = getDepartmentId();
 
-    if (!department_id) return;
+  //   if (!department_id) return;
 
-    const payload = {
-      user_id: staff.id,
-      shifts: [
-        {
-          date: selectedDate.toISOString().split("T")[0],
-          shift_type: shiftType,
-          start_time: startTime,
-          end_time: endTime,
-          department_id: null,
-        },
-      ],
-    };
+  //   const payload = {
+  //     user_id: staff.id,
+  //     shifts: [
+  //       {
+  //         date: selectedDate.toISOString().split("T")[0],
+  //         shift_type: shiftType,
+  //         start_time: startTime,
+  //         end_time: endTime,
+  //         department_id: null,
+  //       },
+  //     ],
+  //   };
 
-    try {
-      setLoading(true);
-      const response = await assignShifts(payload, "/admin/shift/assign");
-      if (response) {
-        setSelectedDate(null);
-        setShiftType("");
-        setStartTime("");
-        setEndTime("");
-        getStaffShifts(staff.id, `/admin/shift/user-records/${staff.id}`);
-      }
-    } catch (error) {
-      console.error("Shift assignment failed", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //   try {
+  //     setLoading(true);
+  //     const response = await assignShifts(payload, "/admin/shift/assign");
+  //     if (response) {
+  //       setSelectedDate(null);
+  //       setShiftType("");
+  //       setStartTime("");
+  //       setEndTime("");
+  //       getStaffShifts(staff.id, `/admin/shift/user-records/${staff.id}`);
+  //     }
+  //   } catch (error) {
+  //     console.error("Shift assignment failed", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  const handleUpdateShift = async () => {
-    if (
-      !selectedDate ||
-      !shiftType ||
-      !startTime ||
-      !endTime ||
-      !editingShift?.id
-    )
-      return;
+  // const handleUpdateShift = async () => {
+  //   if (
+  //     !selectedDate ||
+  //     !shiftType ||
+  //     !startTime ||
+  //     !endTime ||
+  //     !editingShift?.id
+  //   )
+  //     return;
 
-    const department_id = getDepartmentId();
+  //   const department_id = getDepartmentId();
 
-    if (!department_id) return;
+  //   if (!department_id) return;
 
-    const payload = {
-      user_id: staff.id,
-      department_id,
-      date: selectedDate.toISOString().split("T")[0],
-      shift_type: shiftType,
-      start_time: startTime,
-      end_time: endTime,
-    };
+  //   const payload = {
+  //     user_id: staff.id,
+  //     department_id,
+  //     date: selectedDate.toISOString().split("T")[0],
+  //     shift_type: shiftType,
+  //     start_time: startTime,
+  //     end_time: endTime,
+  //   };
 
-    try {
-      setLoading(true);
-      const response = await updateShift(
-        editingShift.id,
-        payload,
-        `/admin/shift/update/${staff.id}`
-      );
-      if (response) {
-        setIsEditModalOpen(false);
-        setEditingShift(null);
-        getStaffShifts(staff.id, `/admin/shift/user-records/${staff.id}`);
-      }
-    } catch (error: any) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //   try {
+  //     setLoading(true);
+  //     const response = await updateShift(
+  //       editingShift.id,
+  //       payload,
+  //       `/admin/shift/update/${staff.id}`
+  //     );
+  //     if (response) {
+  //       setIsEditModalOpen(false);
+  //       setEditingShift(null);
+  //       getStaffShifts(staff.id, `/admin/shift/user-records/${staff.id}`);
+  //     }
+  //   } catch (error: any) {
+  //     console.error(error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  const handleDeleteShift = async (shiftId: number) => {
-    const response = await deleteShift(
-      shiftId,
-      `/admin/shift/delete/${shiftId}`
-    );
-    if (response) {
-      getStaffShifts(staff.id, `/admin/shift/user-records/${staff.id}`);
-    }
-  };
+  // const handleDeleteShift = async (shiftId: number) => {
+  //   const response = await deleteShift(
+  //     shiftId,
+  //     `/admin/shift/delete/${shiftId}`
+  //   );
+  //   if (response) {
+  //     getStaffShifts(staff.id, `/admin/shift/user-records/${staff.id}`);
+  //   }
+  // };
 
   const handleDelete = async () => {
     const response = await deleteUser(staff.id);
@@ -221,7 +221,7 @@ const StaffsDetail = ({ setShowModal }: any) => {
         </div>
       </div>
 
-      <div className="p-4 bg-white rounded-lg custom-shadow">
+      {/* <div className="p-4 bg-white rounded-lg custom-shadow">
         <h2 className="text-base font-semibold mb-4">Set shifts</h2>
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
@@ -316,9 +316,9 @@ const StaffsDetail = ({ setShowModal }: any) => {
             </tbody>
           </table>
         </div>
-      </div>
+      </div> */}
 
-      {isEditModalOpen && (
+      {/* {isEditModalOpen && (
         <div className="fixed inset-0 z-50  bg-[#1E1E1E40] flex justify-center items-center">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
             <h2 className="text-lg font-semibold mb-4">Edit Shift</h2>
@@ -372,10 +372,10 @@ const StaffsDetail = ({ setShowModal }: any) => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Staff Edit Modal */}
-      {isStaffEditModalOpen && (
+      {/* {isStaffEditModalOpen && (
         <AddStaffModal
           formData={staffFormData}
           handleInputChange={handleStaffInputChange}
@@ -388,7 +388,7 @@ const StaffsDetail = ({ setShowModal }: any) => {
           staffId={staff.id}
           // roles={roles}
         />
-      )}
+      )} */}
     </div>
   );
 };

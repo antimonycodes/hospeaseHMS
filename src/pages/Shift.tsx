@@ -6,8 +6,10 @@ import NurseShifts from "../components/Nurse/shifts/NurseShifts";
 import MatronShifts from "../components/Matron/shifts/MatronShifts";
 import MedDShifts from "../components/medicaldirector/shifts/MedDShifts";
 import PharmShifts from "../components/Pharmacy/shifts/PharmShifts";
+import SaShiftPage from "../components/Superadmin/shift/SaShiftPage";
 
 const roleComponents: Record<string, JSX.Element> = {
+  admin: <SaShiftPage />,
   doctor: <ShiftTable />,
   nurse: <NurseShifts />,
   matron: <MatronShifts />,

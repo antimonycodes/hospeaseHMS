@@ -17,7 +17,7 @@ type PatientsPage = {
 };
 const PatientsPage = ({
   endpoint = "/admin/appointment/all-records",
-  bookEndpoint = "/admin/appointment/book",
+  bookEndpoint = "/admin/appointment/assign",
   refreshEndpoint = "/admin/appointment/all-records",
 }) => {
   const [activeTab, setActiveTab] = useState(0);
@@ -33,7 +33,6 @@ const PatientsPage = ({
     setModalType(activeTab === 0 ? "patient" : "appointment");
     setOpenModal(true);
   };
-
   const {
     getAllPatients,
     patients,
