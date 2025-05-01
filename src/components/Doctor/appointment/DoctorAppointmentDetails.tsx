@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
+import Loader from "../../../Shared/Loader";
 
 // InfoRow reusable component
 const InfoRow = ({
@@ -22,9 +23,13 @@ const InfoRow = ({
 
 const DoctorAppointmentDetails = () => {
   const { id } = useParams<{ id: string }>();
-  const { selectedAppointment, getAppointmentById, manageAppointment } =
-    usePatientStore();
-  const [isLoading, setIsLoading] = useState(true);
+  const {
+    selectedAppointment,
+    getAppointmentById,
+    manageAppointment,
+    isLoading,
+  } = usePatientStore();
+  // const [isLoading, setIsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
@@ -36,12 +41,7 @@ const DoctorAppointmentDetails = () => {
 
   useEffect(() => {
     if (id) {
-      getAppointmentById(id)
-        .then(() => setIsLoading(false))
-        .catch((error) => {
-          console.error("Error fetching appointment:", error);
-          setIsLoading(false);
-        });
+      getAppointmentById(id);
     }
   }, [id, getAppointmentById]);
 
@@ -125,11 +125,7 @@ const DoctorAppointmentDetails = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        Loading...
-      </div>
-    );
+    return <Loader />;
   }
 
   const attributes = selectedAppointment.attributes || {};

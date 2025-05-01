@@ -69,6 +69,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         // Cookies.set("token", token, { expires: 1, secure: true });
         Cookies.set("token", token, { secure: true });
         localStorage.setItem("role", response.data.data.user.attributes.role);
+        localStorage.setItem("uid", response.data.data.user.id);
         toast.success(response.data.message);
         return true;
       }

@@ -375,7 +375,7 @@ const StaffsDetail = ({ setShowModal }: any) => {
       )} */}
 
       {/* Staff Edit Modal */}
-      {/* {isStaffEditModalOpen && (
+      {isStaffEditModalOpen && (
         <AddStaffModal
           formData={staffFormData}
           handleInputChange={handleStaffInputChange}
@@ -388,7 +388,7 @@ const StaffsDetail = ({ setShowModal }: any) => {
           staffId={staff.id}
           // roles={roles}
         />
-      )} */}
+      )}
     </div>
   );
 };

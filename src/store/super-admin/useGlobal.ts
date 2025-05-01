@@ -101,8 +101,10 @@ interface Globalstore {
   staffs: any[];
   pagination: Pagination | null;
   allStaffs: any[];
+  shiftDetails: any[];
   selectedStaff: any | null;
   staffShift: any[];
+  allShifts: any[];
   notifications: any[];
   unreadCount: any;
   roles: Record<string, { id: number; role: string }>;
@@ -120,7 +122,9 @@ interface Globalstore {
     perPage?: string
   ) => Promise<any>;
   assignShifts: (data: AssignShift, endpoint: any) => Promise<any>;
-  getStaffShifts: (endpoint: string) => Promise<any>;
+  getStaffShifts: (id: string) => Promise<any>;
+  getAllShifts: (endpoint: string) => Promise<any>;
+  getShiftDetails: (date: any) => Promise<any>;
   updateShift: (id: any, data: any, update: any) => Promise<any>;
   deleteShift: (id: any, endpoint: any) => Promise<any>;
   getAllRoles: (endpoint?: string) => Promise<any>;
@@ -137,6 +141,8 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
   staffs: [],
   roles: {},
   allStaffs: [],
+  allShifts: [],
+  shiftDetails: [],
   notifications: [],
   isStaffLoading: false,
   selectedStaff: null,
@@ -366,12 +372,12 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       return null;
     }
   },
-  getStaffShifts: async (endpoint = `/matron/shift/user-records`) => {
+  getAllShifts: async (endpoint = `/matron/shift/user-records`) => {
     set({ isLoading: true });
     try {
       const response = await api.get(endpoint);
       if (response.status === 200) {
-        set({ staffShift: response.data.data.data.data });
+        set({ allShifts: response.data.data.data.data });
         // toast.success(response.data.message);
         console.log(response.data.data.data);
         return true;
@@ -385,6 +391,45 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       return null;
     }
   },
+  getShiftDetails: async (date) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(`/medical-report/shift/${date}`);
+      if (response.status === 200) {
+        set({ shiftDetails: response.data.data.doctors });
+        // toast.success(response.data.message);
+        console.log(response.data.data.doctors, "dfghjk");
+        return true;
+      }
+    } catch (error: any) {
+      // toast.error(error.response?.message);
+      console.log(error.response.message);
+      return null;
+    } finally {
+      set({ isLoading: false });
+      return null;
+    }
+  },
+  getStaffShifts: async (id) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(`/medical-report/shift/${id}`);
+      if (response.status === 200) {
+        set({ staffShift: response.data });
+        // toast.success(response.data.message);
+        console.log(response.data.data.data);
+        return true;
+      }
+    } catch (error: any) {
+      // toast.error(error.response?.message);
+      console.log(error.response.message);
+      return null;
+    } finally {
+      set({ isLoading: false });
+      return null;
+    }
+  },
+
   updateShift: async (id, data, endpoint = `/admin/shift/update/${id}`) => {
     set({ isLoading: true });
     try {
@@ -456,6 +501,7 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       const response = await api.get("notification/all");
       if (response.status === 200) {
         set({ notifications: response.data.data });
+        set({ unreadCount: response.data.data[0].unread_count });
         console.log(response.data.data[0].unread_count, "erfgh");
         return true;
       }
@@ -469,7 +515,7 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
     try {
       const response = await api.get("/notification/all-count");
       if (response.status === 200) {
-        set({ unreadCount: response.data.data });
+        // set({ unreadCount: response.data.data });
         console.log(response.data);
         return true;
       }
@@ -489,6 +535,7 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       if (isSuccessfulResponse(response)) {
         // toast.success(response.data?.msg);
         // set({ items: response.data.data });
+        get().getAllNotifications();
         return true;
       }
       return null;

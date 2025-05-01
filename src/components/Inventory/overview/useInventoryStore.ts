@@ -315,7 +315,6 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
-
   getInventoryStats: async (endpoint = "/inventory/stats") => {
     set({ isLoading: true });
     try {

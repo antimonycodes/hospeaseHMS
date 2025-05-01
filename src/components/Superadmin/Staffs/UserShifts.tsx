@@ -1,0 +1,266 @@
+import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useGlobalStore } from "../../../store/super-admin/useGlobal";
+
+// Types
+type UserShift = {
+  date: string; // "YYYY-MM-DD"
+  shiftType: string;
+  startTime: string; // "HH:MM"
+  department: string;
+};
+
+type DayData = {
+  date: Date;
+  shift: {
+    type: string;
+    color: string;
+  } | null;
+  inCurrentMonth: boolean;
+};
+
+const UserShifts = () => {
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [userId, setUserId] = useState("");
+
+  const { getStaffShifts, staffShift, isLoading } = useGlobalStore();
+
+  const formatMonthYear = (date: Date) => {
+    return date.toLocaleString("default", { month: "long", year: "numeric" });
+  };
+
+  const prevMonth = () => {
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
+    );
+  };
+
+  const nextMonth = () => {
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
+    );
+  };
+
+  const goToToday = () => {
+    setCurrentDate(new Date());
+  };
+
+  useEffect(() => {
+    const storedId = localStorage.getItem("uid");
+    if (storedId) {
+      setUserId(storedId);
+      // Fetch staff shifts when userId is available
+      getStaffShifts(storedId);
+    }
+  }, [getStaffShifts]); // Only depend on getStaffShifts to avoid unnecessary API calls
+
+  // Get shift for a specific date from the API data
+  const getShiftForDate = (date: Date) => {
+    if (!staffShift || !Array.isArray(staffShift)) return null;
+
+    const formattedDate = date.toISOString().split("T")[0];
+    const shift = staffShift.find((s) => s.date === formattedDate);
+
+    if (!shift) return null;
+
+    // Map shift types to appropriate colors
+    const colorMap: Record<string, string> = {
+      Morning: "text-[#B13E00] bg-[#FFF3F0]",
+      Afternoon: "text-[#016838] bg-[#E0FFF1]",
+      Night: "text-[#101828] bg-[#EFF4FF]",
+      // Add fallback for any other shift types
+      default: "text-gray-700 bg-gray-100",
+    };
+
+    return {
+      type: shift.shiftType,
+      color: colorMap[shift.shiftType] || colorMap.default,
+    };
+  };
+
+  const generateCalendarData = (year: number, month: number): DayData[] => {
+    const firstDayOfMonth = new Date(year, month, 1);
+    const lastDayOfMonth = new Date(year, month + 1, 0);
+    const daysInMonth = lastDayOfMonth.getDate();
+    const startingDayOfWeek = firstDayOfMonth.getDay();
+
+    const calendarData: DayData[] = [];
+    const prevMonthLastDay = new Date(year, month, 0).getDate();
+
+    // Handle days from the previous month
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      const prevMonthDay = prevMonthLastDay - startingDayOfWeek + i + 1;
+      const date = new Date(year, month - 1, prevMonthDay);
+      calendarData.push({
+        date,
+        shift: getShiftForDate(date),
+        inCurrentMonth: false,
+      });
+    }
+
+    // Handle days for the current month
+    for (let i = 1; i <= daysInMonth; i++) {
+      const date = new Date(year, month, i);
+      calendarData.push({
+        date,
+        shift: getShiftForDate(date),
+        inCurrentMonth: true,
+      });
+    }
+
+    // Handle days from the next month to fill the grid
+    const totalDaysInGrid =
+      Math.ceil((daysInMonth + startingDayOfWeek) / 7) * 7;
+    const remainingDays = totalDaysInGrid - calendarData.length;
+
+    for (let i = 1; i <= remainingDays; i++) {
+      const date = new Date(year, month + 1, i);
+      calendarData.push({
+        date,
+        shift: getShiftForDate(date),
+        inCurrentMonth: false,
+      });
+    }
+
+    return calendarData;
+  };
+
+  const calendarData = generateCalendarData(
+    currentDate.getFullYear(),
+    currentDate.getMonth()
+  );
+
+  const weekdays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+
+  const isToday = (date: Date) => {
+    const today = new Date();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  };
+
+  // Helper function to format time for display
+  const formatTime = (timeString: string) => {
+    if (!timeString) return "";
+
+    const [hours, minutes] = timeString.split(":");
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    const formattedHour = hour % 12 || 12;
+    return `${formattedHour}:${minutes} ${ampm}`;
+  };
+
+  // Find shift details for a specific date
+  const getShiftDetails = (date: Date) => {
+    if (!staffShift || !Array.isArray(staffShift)) return null;
+
+    const formattedDate = date.toISOString().split("T")[0];
+    return staffShift.find((s) => s.date === formattedDate);
+  };
+
+  return (
+    <div className="w-full p-6 bg-white rounded-lg shadow">
+      <div className="flex justify-between items-center px-4 mb-4">
+        <h1 className="text-xl font-bold">My Shifts</h1>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={prevMonth}
+              className="p-1 rounded-full hover:bg-gray-100"
+              aria-label="Previous month"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button
+              className="px-3 py-1 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              onClick={goToToday}
+            >
+              Today
+            </button>
+            <span className="text-sm font-medium min-w-24 text-center">
+              {formatMonthYear(currentDate)}
+            </span>
+            <button
+              onClick={nextMonth}
+              className="p-1 rounded-full hover:bg-gray-100"
+              aria-label="Next month"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <p className="text-gray-500">Loading shifts...</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-7 gap-4 px-4 py-6 border border-[#EAECF0] overflow-x-auto">
+          {weekdays.map((day, index) => (
+            <div
+              key={`weekday-${index}`}
+              className="text-center py-2 text-sm font-semibold"
+            >
+              {day}
+            </div>
+          ))}
+
+          {calendarData.map((dayData, index) => {
+            const shiftDetails = getShiftDetails(dayData.date);
+
+            return (
+              <div
+                key={`day-${index}`}
+                className={`px-2 py-4 border border-[#EAECF0] rounded-md shadow ${
+                  !dayData.inCurrentMonth ? "bg-gray-50" : "bg-white"
+                } ${
+                  isToday(dayData.date) && dayData.inCurrentMonth
+                    ? "ring-2 ring-[#009952]"
+                    : ""
+                }`}
+              >
+                <div
+                  className={`text-right mb-1 font-medium ${
+                    isToday(dayData.date)
+                      ? "text-primary"
+                      : dayData.inCurrentMonth
+                      ? "text-gray-700"
+                      : "text-gray-400"
+                  }`}
+                >
+                  {dayData.date.getDate()}
+                </div>
+
+                {dayData.shift ? (
+                  <div className="space-y-1">
+                    <div
+                      className={`${dayData.shift.color} text-xs p-1 rounded`}
+                    >
+                      <div className="font-medium">{dayData.shift.type}</div>
+                      {shiftDetails && (
+                        <div
+                          className={`text-xs mt-1 ${
+                            dayData.shift.color.split(" ")[0]
+                          }`}
+                        >
+                          {formatTime(shiftDetails.startTime)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="h-10"></div> // Empty space for days without shifts
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default UserShifts;

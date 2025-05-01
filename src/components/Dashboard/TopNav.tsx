@@ -16,15 +16,15 @@ const TopNav: React.FC<TopNavProps> = ({ setIsMobileMenuOpen }) => {
 
   const {
     getAllNotifications,
-    getUnreadNotificationCount,
+    // getUnreadNotificationCount,
     notifications,
     unreadCount,
   } = useGlobalStore();
 
   useEffect(() => {
     getAllNotifications();
-    getUnreadNotificationCount();
-  }, [getAllNotifications, getUnreadNotificationCount]);
+    // getUnreadNotificationCount();
+  }, [getAllNotifications]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -65,9 +65,9 @@ const TopNav: React.FC<TopNavProps> = ({ setIsMobileMenuOpen }) => {
               className="relative p-2 rounded-full hover:bg-gray-100"
             >
               <Bell className="text-gray-700 w-5" />
-              {unreadCount?.all_count > 0 && (
+              {unreadCount > 0 && (
                 <span className="absolute top-0 right-0 inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-red-500 rounded-full">
-                  {unreadCount.all_count > 9 ? "9+" : unreadCount.all_count}
+                  {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
             </button>
@@ -90,24 +90,26 @@ const TopNav: React.FC<TopNavProps> = ({ setIsMobileMenuOpen }) => {
                       <p>No new notifications</p>
                     </div>
                   ) : (
-                    notifications.map((n: any) => (
-                      <div
-                        key={n.data.id}
-                        className="p-3 border-b border-gray-100 hover:bg-gray-50 bg-blue-50"
-                      >
-                        <div className="flex justify-between items-start mb-1">
-                          <h4 className="text-sm font-medium">
-                            {n.data.attributes.title.slice(0, 24)}.
-                          </h4>
-                          <span className="text-xs text-gray-500">
-                            {n.data.attributes.created_at}
-                          </span>
+                    notifications
+                      .slice(0, unreadCount > 0 ? unreadCount : 0)
+                      .map((n: any) => (
+                        <div
+                          key={n.data.id}
+                          className="p-3 border-b border-gray-100 hover:bg-gray-50 bg-blue-50"
+                        >
+                          <div className="flex justify-between items-start mb-1">
+                            <h4 className="text-sm font-medium">
+                              {n.data.attributes.title.slice(0, 24)}.
+                            </h4>
+                            <span className="text-xs text-gray-500">
+                              {n.data.attributes.created_at}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-600 line-clamp-2">
+                            {n.data.attributes.message}
+                          </p>
                         </div>
-                        <p className="text-xs text-gray-600 line-clamp-2">
-                          {n.data.attributes.message}
-                        </p>
-                      </div>
-                    ))
+                      ))
                   )}
                 </div>
 
