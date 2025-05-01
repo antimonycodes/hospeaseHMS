@@ -22,6 +22,7 @@ type DayData = {
 const UserShifts = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [userId, setUserId] = useState("");
+  const [role, setRole] = useState("");
 
   const { getStaffShifts, staffShift, isLoading } = useGlobalStore();
 
@@ -45,14 +46,29 @@ const UserShifts = () => {
     setCurrentDate(new Date());
   };
 
+  const endpointManagent = (role: string, id: string) => {
+    if (role === "nurse") return `/nurses/shift/user-records/${id}`;
+    if (role === "doctor") return `/doctor/my-shifts/${id}`;
+    if (role === "medical-director")
+      return `/medical-director/shift/user-records/${id}`;
+    if (role === "laboratory") return `/laboratory/user-records/${id}`;
+    if (role === "pharmacy") return `/pharmacy/user-records/${id}`;
+  };
+
+  useEffect(() => {
+    const storedRole = localStorage.getItem("role") || "";
+    setRole(storedRole);
+  }, []);
+
+  // `/doctor/my-shifts/${id}`
   useEffect(() => {
     const storedId = localStorage.getItem("uid");
-    if (storedId) {
+    if (storedId && role) {
+      const endpoint = endpointManagent(role, storedId);
       setUserId(storedId);
-      // Fetch staff shifts when userId is available
-      getStaffShifts(storedId);
+      getStaffShifts(storedId, endpoint);
     }
-  }, [getStaffShifts]); // Only depend on getStaffShifts to avoid unnecessary API calls
+  }, [role, getStaffShifts]);
 
   // Get shift for a specific date from the API data
   const getShiftForDate = (date: Date) => {
@@ -62,6 +78,7 @@ const UserShifts = () => {
     const shift = staffShift.find((s) => s.date === formattedDate);
 
     if (!shift) return null;
+    console.log(shift, "shift");
 
     // Map shift types to appropriate colors
     const colorMap: Record<string, string> = {

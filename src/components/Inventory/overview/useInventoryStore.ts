@@ -78,7 +78,7 @@ export interface CreateStockData {
   category_id: string;
   expiry_date: string;
   cost: number;
-  // image: File | null;
+  image: File | null;
 }
 
 export interface InventoryStats {
@@ -152,7 +152,8 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       // This includes both the data array and pagination object
       if (response.data && response.data.data) {
         set({ requests: response.data.data });
-        toast.success(response.data.message || "Requests fetched successfully");
+        console.log(response.data.data);
+        // toast.success(response.data.message || "Requests fetched successfully");
       } else {
         console.error("Unexpected API response structure:", response.data);
         set({
@@ -267,7 +268,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       const response = await api.get(endpoint);
 
       set({ stocks: response.data.data?.data || [] });
-      toast.success(response.data.message || "Stocks fetched successfully");
+      // toast.success(response.data.message || "Stocks fetched successfully");
     } catch (error: any) {
       console.error("getAllStocks error:", error.response?.data);
       toast.error(error.response?.data?.message || "Failed to fetch stocks");
@@ -289,7 +290,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       form.append("expiry_date", data.expiry_date);
       form.append("cost", data.cost.toString());
 
-      // form.append("image", data.image || "");
+      form.append("image", data.image || "");
 
       const response = await api.post(endpoint, form, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -326,7 +327,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       };
       set({ stats: statsData });
       console.log(response.data?.data, "efghj");
-      toast.success("Inventory stats fetched successfully!");
+      // toast.success("Inventory stats fetched successfully!");
     } catch (error: any) {
       console.error("Stats fetch error:", error.response?.data);
       toast.error(error.response?.data?.message || "Failed to fetch stats");

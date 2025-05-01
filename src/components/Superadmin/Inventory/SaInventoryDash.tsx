@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import patientIcon from "../../../assets/hugeicons.png";
 import { useInventoryStore } from "../../Inventory/overview/useInventoryStore";
 import OverviewCard from "../../ReusabledashboardD/Overviewcard";
+import Loader from "../../../Shared/Loader";
 interface StatsData {
   total_inventories: number;
   total_categories: number;
@@ -68,7 +69,7 @@ const SaInventoryDash = () => {
     <div className="font-inter">
       <div className="flex flex-col gap-4">
         {isLoading ? (
-          <p>Loading inventory stats...</p>
+          <Loader />
         ) : (
           <>
             {/* Debug display to verify the data */}

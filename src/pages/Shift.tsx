@@ -11,7 +11,7 @@ import UserShifts from "../components/Superadmin/Staffs/UserShifts";
 
 const roleComponents: Record<string, JSX.Element> = {
   admin: <SaShiftPage />,
-  doctor: <ShiftTable />,
+  doctor: <UserShifts />,
   nurse: <UserShifts />,
   matron: <MatronShifts />,
   "medical-director": <MedDShifts />,

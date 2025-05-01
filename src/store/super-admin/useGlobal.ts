@@ -122,7 +122,7 @@ interface Globalstore {
     perPage?: string
   ) => Promise<any>;
   assignShifts: (data: AssignShift, endpoint: any) => Promise<any>;
-  getStaffShifts: (id: string) => Promise<any>;
+  getStaffShifts: (id: string, endpoint: any) => Promise<any>;
   getAllShifts: (endpoint: string) => Promise<any>;
   getShiftDetails: (date: any) => Promise<any>;
   updateShift: (id: any, data: any, update: any) => Promise<any>;
@@ -410,12 +410,12 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       return null;
     }
   },
-  getStaffShifts: async (id) => {
+  getStaffShifts: async (id, endpoint) => {
     set({ isLoading: true });
     try {
-      const response = await api.get(`/medical-report/shift/${id}`);
+      const response = await api.get(endpoint);
       if (response.status === 200) {
-        set({ staffShift: response.data });
+        set({ staffShift: response.data.data.data.data });
         // toast.success(response.data.message);
         console.log(response.data.data.data);
         return true;

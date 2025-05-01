@@ -20,7 +20,7 @@ type SaInventoryStockProps = {
   isLoading: boolean;
   stocks: {
     attributes: {
-      item_name: string;
+      item: string;
       category: string;
       quantity: string;
       expiry_date: string;
@@ -32,7 +32,7 @@ type SaInventoryStockProps = {
 const SaInventorySettings = ({ stocks, isLoading }: SaInventoryStockProps) => {
   const formattedStocks = (stocks || []).map((stock) => ({
     id: stock.id,
-    item_name: stock.attributes.item_name,
+    item_name: stock.attributes.item,
     category: stock.attributes.category,
     quantity: stock.attributes.quantity,
     expiry_date: stock.attributes.expiry_date,
