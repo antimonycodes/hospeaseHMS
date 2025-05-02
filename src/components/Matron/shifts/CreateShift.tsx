@@ -304,7 +304,7 @@ const CreateShift = () => {
   const handleDepartmentChange = (
     moduleId: string,
     shiftId: string,
-    deptId: string,
+    deptId: any,
     checked: boolean
   ) => {
     setStaffModules((modules) =>
