@@ -93,6 +93,12 @@ export interface ShiftData {
   department_id: null;
 }
 
+export interface ShiftType {
+  shift_type: string;
+  start_time: string;
+  end_time: string;
+}
+
 interface Globalstore {
   isLoading: boolean;
   isStaffLoading: boolean;
@@ -104,6 +110,7 @@ interface Globalstore {
   shiftDetails: any[];
   selectedStaff: any | null;
   staffShift: any[];
+  shiftTypes: any[];
   allShifts: any[];
   notifications: any[];
   unreadCount: any;
@@ -121,6 +128,9 @@ interface Globalstore {
     page?: string,
     perPage?: string
   ) => Promise<any>;
+  createShiftType: (data: ShiftType) => Promise<any>;
+  updateShiftType: (id: any, data: ShiftType) => Promise<any>;
+  getShiftType: (endpoint?: string) => Promise<any>;
   assignShifts: (data: AssignShift, endpoint: any) => Promise<any>;
   getStaffShifts: (id: string, endpoint: any) => Promise<any>;
   getAllShifts: (endpoint: string) => Promise<any>;
@@ -141,6 +151,7 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
   staffs: [],
   roles: {},
   allStaffs: [],
+  shiftTypes: [],
   allShifts: [],
   shiftDetails: [],
   notifications: [],
@@ -354,6 +365,71 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       return null;
     } finally {
       set({ isStaffLoading: false });
+    }
+  },
+  createShiftType: async (data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.post("admin/shift/schedule", data);
+      if (response.status === 201) {
+        console.log(response.data.data, "shift type");
+        toast.success(response.data.message);
+        await get().getShiftType();
+        return true;
+      }
+      console.log(response.data.message);
+      return null;
+    } catch (error: any) {
+      console.error(error.response?.data);
+      toast.error(error.response.data.message);
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  updateShiftType: async (id, data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.put(
+        `/admin/update/schedule-shift/${id}`,
+        data
+      );
+      if (response.status === 200) {
+        toast.success(response.data.message);
+        await get().getShiftType();
+        return true;
+      }
+      console.log(response.data.message);
+      return null;
+    } catch (error: any) {
+      console.error(error.response?.data);
+      toast.error(error.response.data.message);
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  getShiftType: async (endpoint = "/admin/schedule-all") => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(endpoint);
+      if (response.status === 200) {
+        set({ shiftTypes: response.data.data.data });
+        console.log(response.data.data);
+        return true;
+      }
+      console.log(response.data.data?.data);
+      toast.success(response.data.message);
+      return null;
+    } catch (error: any) {
+      console.error(
+        "Error changing status:",
+        error.response?.data || error.message
+      );
+      //   toast.error(error.response?.data?.message || "Failed");
+      return null; // Indicate failure
+    } finally {
+      set({ isLoading: false });
     }
   },
   assignShifts: async (data, endpoint = "/matron/shift/assign") => {

@@ -213,9 +213,11 @@ const ShiftManagementCalendar = () => {
   if (isLoading) return <Loader />;
 
   return (
-    <div className="w-full p-6 bg-white rounded-lg shadow">
-      <div className="flex justify-between items-center px-4 mb-4">
-        <h1 className="text-xl font-bold">Shift Management</h1>
+    <div className="w-full  bg-white rounded-lg ">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-xl lg:text-2xl font-bold text-primary">
+          Shift Management
+        </h1>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <button

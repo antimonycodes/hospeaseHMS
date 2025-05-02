@@ -14,12 +14,12 @@ import {
   useGlobalStore,
 } from "../../../store/super-admin/useGlobal";
 
-// Define types
+// Updated types
 interface Shift {
   id: string;
   date: string;
   shiftType: string;
-  department: string;
+  departments: any[];
   startTime: string;
   endTime: string;
 }
@@ -50,26 +50,64 @@ interface Department {
   };
 }
 
-// Format data for backend submission - Fixed version
-const formatDataForSubmission = (staffModules: any[]): AssignShift => {
-  // The backend expects an array of objects, not AssignShift type
-  return staffModules.map((module) => {
-    // Each object should have user_id and shifts properties
-    return {
-      user_id: parseInt(module.staffId, 10),
-      shifts: module.shifts.map((shift: Shift) => ({
-        date: shift.date,
-        shift_type: shift.shiftType,
-        start_time: shift.startTime,
-        end_time: shift.endTime,
-        department_id: null,
-        clinical_dept: parseInt(shift.department, 10) || null,
-      })),
-    };
-  });
+// Updated shift type interface to match the actual API response structure
+interface ShiftType {
+  id: number;
+  type: string;
+  attributes: {
+    shift_type: string;
+    start_time: string;
+    end_time: string;
+    created_at: string;
+  };
+}
+
+const padTime = (timeStr: string) => {
+  const [hour, minute] = timeStr.split(":");
+  const paddedHour = hour.padStart(2, "0");
+  const paddedMinute = minute.padStart(2, "0");
+  return `${paddedHour}:${paddedMinute}`;
 };
 
-// Main component
+const formatDataForSubmission = (
+  staffModules: StaffModule[],
+  shiftTypesData: any[]
+): AssignShift[] => {
+  return staffModules.map((module) => ({
+    user_id: parseInt(module.staffId, 10),
+    shifts: module.shifts.map((shift) => {
+      // Find the shift type object by ID to get the actual shift_type value
+      const shiftTypeObj = shiftTypesData.find(
+        (st) => st.id.toString() === shift.shiftType
+      );
+      const shiftTypeName = shiftTypeObj
+        ? shiftTypeObj.attributes.shift_type
+        : "";
+
+      // Format time to ensure H:i format (hour:minute)
+      const formatTimeToHi = (timeString: string) => {
+        if (!timeString) return "";
+        try {
+          // Extract hours and minutes from the time string
+          const [hours, minutes] = timeString.split(":");
+          return `${hours}:${minutes}`;
+        } catch (e) {
+          return timeString;
+        }
+      };
+
+      return {
+        date: shift.date,
+        shift_type: shiftTypeName, // Send the name instead of ID
+        start_time: padTime(shift.startTime),
+        end_time: padTime(shift.endTime),
+        department_id: null,
+        clinical_dept: shift.departments.map((id) => parseInt(id, 10)),
+      };
+    }),
+  }));
+};
+
 const CreateShift = () => {
   const [staffModules, setStaffModules] = useState<StaffModule[]>([
     {
@@ -82,7 +120,7 @@ const CreateShift = () => {
           id: "1-1",
           date: "",
           shiftType: "",
-          department: "",
+          departments: [],
           startTime: "",
           endTime: "",
         },
@@ -90,7 +128,6 @@ const CreateShift = () => {
     },
   ]);
 
-  // Separate search terms state for each module
   const [searchTerms, setSearchTerms] = useState<{ [key: string]: string }>({});
   const [showSuggestions, setShowSuggestions] = useState<{
     [key: string]: boolean;
@@ -98,26 +135,36 @@ const CreateShift = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Get staffs from global store
   const {
     getAllStaffs,
     allStaffs,
     clinicaldepts,
     getClinicaldept,
     assignShifts,
+    getShiftType,
+    shiftTypes,
   } = useGlobalStore();
+
   const [staffsLoaded, setStaffsLoaded] = useState(false);
+  const [role, setRole] = useState("superadmin");
 
-  // Define shift types as simple strings
-  const shiftTypes = ["Morning", "Afternoon", "Night", "On-Call"];
+  useEffect(() => {
+    const storedRole = localStorage.getItem("role") || "superadmin";
+    setRole(storedRole);
+  }, []);
 
-  // Load clinicaldepts and staff data on component mount
+  const endpointManagement = () => {
+    if (role === "admin") return "/admin/shift/assign";
+    if (role === "matron") return "/matron/shift/assign";
+    if (role === "medical-director") return "/medical-director/shift/assign";
+    return "/admin/staff-shift";
+  };
+
   useEffect(() => {
     const initializeData = async () => {
       try {
         setIsLoading(true);
-        // Fetch both departments and staff data in parallel
-        await Promise.all([getClinicaldept(), getAllStaffs()]);
+        await Promise.all([getClinicaldept(), getAllStaffs(), getShiftType()]);
         setStaffsLoaded(true);
       } catch (error) {
         console.error("Error initializing data:", error);
@@ -128,9 +175,8 @@ const CreateShift = () => {
     };
 
     initializeData();
-  }, [getAllStaffs, getClinicaldept]);
+  }, [getAllStaffs, getClinicaldept, getShiftType]);
 
-  // Toggle collapse state of a module
   const toggleCollapse = (moduleId: string) => {
     setStaffModules((modules) =>
       modules.map((module) =>
@@ -141,7 +187,6 @@ const CreateShift = () => {
     );
   };
 
-  // Add a new shift to a staff module
   const addShift = (moduleId: string) => {
     setStaffModules((modules) =>
       modules.map((module) =>
@@ -154,7 +199,7 @@ const CreateShift = () => {
                   id: `${moduleId}-${module.shifts.length + 1}`,
                   date: "",
                   shiftType: "",
-                  department: "",
+                  departments: [],
                   startTime: "",
                   endTime: "",
                 },
@@ -165,7 +210,6 @@ const CreateShift = () => {
     );
   };
 
-  // Remove a shift from a staff module
   const removeShift = (moduleId: string, shiftId: string) => {
     setStaffModules((modules) =>
       modules.map((module) =>
@@ -179,7 +223,6 @@ const CreateShift = () => {
     );
   };
 
-  // Add a new staff module
   const addStaffModule = () => {
     const newId = (staffModules.length + 1).toString();
     setStaffModules([
@@ -194,7 +237,7 @@ const CreateShift = () => {
             id: `${newId}-1`,
             date: "",
             shiftType: "",
-            department: "",
+            departments: [],
             startTime: "",
             endTime: "",
           },
@@ -203,13 +246,11 @@ const CreateShift = () => {
     ]);
   };
 
-  // Remove a staff module
   const removeStaffModule = (moduleId: string) => {
     setStaffModules((modules) =>
       modules.filter((module) => module.id !== moduleId)
     );
 
-    // Clean up any search terms for this module
     setSearchTerms((prev) => {
       const newTerms = { ...prev };
       delete newTerms[moduleId];
@@ -223,12 +264,10 @@ const CreateShift = () => {
     });
   };
 
-  // Update a shift's field
   const updateShift = (
     moduleId: string,
     shiftId: string,
-    field: keyof Shift,
-    value: string
+    updates: Partial<Shift>
   ) => {
     setStaffModules((modules) =>
       modules.map((module) =>
@@ -236,7 +275,7 @@ const CreateShift = () => {
           ? {
               ...module,
               shifts: module.shifts.map((shift) =>
-                shift.id === shiftId ? { ...shift, [field]: value } : shift
+                shift.id === shiftId ? { ...shift, ...updates } : shift
               ),
             }
           : module
@@ -244,7 +283,51 @@ const CreateShift = () => {
     );
   };
 
-  // Format date for display
+  const handleShiftTypeChange = (
+    moduleId: string,
+    shiftId: string,
+    shiftTypeId: string
+  ) => {
+    // Fixed to work with the new shift type structure
+    const selectedShift = shiftTypes.find(
+      (st) => st.id.toString() === shiftTypeId
+    );
+    if (selectedShift) {
+      updateShift(moduleId, shiftId, {
+        shiftType: shiftTypeId,
+        startTime: selectedShift.attributes.start_time,
+        endTime: selectedShift.attributes.end_time,
+      });
+    }
+  };
+
+  const handleDepartmentChange = (
+    moduleId: string,
+    shiftId: string,
+    deptId: string,
+    checked: boolean
+  ) => {
+    setStaffModules((modules) =>
+      modules.map((module) =>
+        module.id === moduleId
+          ? {
+              ...module,
+              shifts: module.shifts.map((shift) =>
+                shift.id === shiftId
+                  ? {
+                      ...shift,
+                      departments: checked
+                        ? [...shift.departments, deptId]
+                        : shift.departments.filter((id) => id !== deptId),
+                    }
+                  : shift
+              ),
+            }
+          : module
+      )
+    );
+  };
+
   const formatDate = (dateString: string | number | Date) => {
     if (!dateString) return "";
 
@@ -261,23 +344,18 @@ const CreateShift = () => {
     }
   };
 
-  // Handle search input change
   const handleSearchChange = (moduleId: string, term: string) => {
-    // Update the search term for this specific module
     setSearchTerms((prev) => ({
       ...prev,
       [moduleId]: term,
     }));
 
-    // Show suggestions when typing
     setShowSuggestions((prev) => ({
       ...prev,
       [moduleId]: true,
     }));
 
-    // When searching, update only the displayed name but don't clear the staffId yet
     if (!term) {
-      // Only clear staffId and name if the search is completely empty
       setStaffModules((modules) =>
         modules.map((module) =>
           module.id === moduleId
@@ -288,12 +366,10 @@ const CreateShift = () => {
     }
   };
 
-  // Handle staff selection from suggestions
   const selectStaff = (moduleId: string, staff: StaffData) => {
     const fullName =
       `${staff.attributes.first_name} ${staff.attributes.last_name}`.trim();
 
-    // Update the staff module with the selected staff
     setStaffModules((modules) =>
       modules.map((module) =>
         module.id === moduleId
@@ -302,7 +378,6 @@ const CreateShift = () => {
       )
     );
 
-    // Clear search term and hide suggestions
     setSearchTerms((prev) => ({
       ...prev,
       [moduleId]: "",
@@ -314,7 +389,6 @@ const CreateShift = () => {
     }));
   };
 
-  // Filter staff suggestions based on search term
   const getFilteredSuggestions = (term: string) => {
     if (!term || term.length < 2) return [];
     if (!allStaffs || !Array.isArray(allStaffs)) return [];
@@ -322,7 +396,6 @@ const CreateShift = () => {
     const lowercaseTerm = term.toLowerCase();
 
     return allStaffs.filter((staff) => {
-      // Check if staff and attributes exist
       if (!staff || !staff.attributes) return false;
 
       const firstName = staff.attributes.first_name || "";
@@ -337,65 +410,28 @@ const CreateShift = () => {
     });
   };
 
-  // Save shifts for an individual staff module
-  const saveModuleShifts = (moduleId: string) => {
-    const module = staffModules.find((m) => m.id === moduleId);
-    if (
-      !module ||
-      !module.staffId ||
-      module.shifts.some((s) => !s.date || !s.department || !s.shiftType)
-    ) {
-      // alert("Please fill in all required fields before saving.");
-      return;
-    }
-
-    // Could implement individual module save logic here
-    // alert(`Saved shifts for ${module.staffName}`);
-  };
-  const [role, setRole] = useState("superadmin");
-
-  useEffect(() => {
-    const storedRole = localStorage.getItem("role") || "superadmin";
-    setRole(storedRole);
-  }, []);
-
-  const endpointManagent = () => {
-    if (role === "admin") return "/admin/shift/assign";
-    if (role === "matron") return "/matron/shift/assign";
-    if (role === "medical-director") return "/medical-director/shift/assign";
-    return "/admin/staff-shift";
-  };
-
-  // Submit all shifts to backend
-  // Submit all shifts to backend - Fixed version
   const handleSubmit = async () => {
-    // Validate data before submission
     const hasEmptyFields = staffModules.some(
       (module) =>
         !module.staffName ||
         !module.staffId ||
         module.shifts.some(
           (shift) =>
-            !shift.date ||
-            !shift.department ||
-            !shift.shiftType ||
-            !shift.startTime ||
-            !shift.endTime
+            !shift.date || shift.departments.length === 0 || !shift.shiftType
         )
     );
 
     if (hasEmptyFields) {
-      // alert("Please fill in all required fields before submitting.");
+      setError("Please fill in all required fields before submitting.");
       return;
     }
 
-    // Filter out modules with no shifts
     const validModules = staffModules.filter(
       (module) => module.staffId && module.shifts.length > 0
     );
 
     if (validModules.length === 0) {
-      // alert("No valid shifts to submit.");
+      setError("No valid shifts to submit.");
       return;
     }
 
@@ -403,14 +439,11 @@ const CreateShift = () => {
     setError(null);
 
     try {
-      // Format data for backend submission
-      const formattedData = formatDataForSubmission(validModules);
+      // Pass shiftTypes to formatDataForSubmission to access shift type names
+      const formattedData = formatDataForSubmission(validModules, shiftTypes);
+      console.log("Formatted data before submission:", formattedData);
 
-      console.log("Submitting data:", formattedData); // Debug logging
-
-      // FIXED: Submit the entire array of data in a single request
-      // const endpoint = "/matron/shift/assign";
-      const response = await assignShifts(formattedData, endpointManagent());
+      const response = await assignShifts(formattedData, endpointManagement());
       console.log("Shift assignment response:", response);
 
       // Reset form after successful submission
@@ -424,7 +457,7 @@ const CreateShift = () => {
               id: "1-1",
               date: "",
               shiftType: "",
-              department: "",
+              departments: [],
               startTime: "",
               endTime: "",
             },
@@ -432,10 +465,6 @@ const CreateShift = () => {
           isCollapsed: false,
         },
       ]);
-
-      // alert("Shifts assigned successfully!");
-      // Optional: redirect after submission
-      // window.location.href = '/shifts';
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "An unknown error occurred"
@@ -446,7 +475,6 @@ const CreateShift = () => {
     }
   };
 
-  // Handle clicks outside of the suggestions dropdown
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -463,7 +491,6 @@ const CreateShift = () => {
 
   return (
     <div className=" p-6 bg-white rounded-lg shadow">
-      {/* Header */}
       <div className="flex items-center mb-6">
         <button
           onClick={() => window.history.back()}
@@ -474,7 +501,6 @@ const CreateShift = () => {
         </button>
       </div>
 
-      {/* Loading indicator */}
       {isLoading && !staffsLoaded && (
         <div className="p-4 mb-4 text-center bg-blue-50 rounded-lg">
           <div className="inline-flex items-center">
@@ -503,20 +529,17 @@ const CreateShift = () => {
         </div>
       )}
 
-      {/* Error message */}
       {error && (
         <div className="p-4 mb-4 text-red-700 bg-red-50 rounded-lg">
           {error}
         </div>
       )}
 
-      {/* Staff modules */}
       {staffModules.map((module) => (
         <div
           key={module.id}
           className="mb-6 border border-[#e4e4e7] rounded-lg overflow-hidden"
         >
-          {/* Module header */}
           <div className="flex items-center justify-between bg-green-50 p-4">
             <div className="flex items-center">
               <button
@@ -538,10 +561,8 @@ const CreateShift = () => {
             </button>
           </div>
 
-          {/* Module content (shown when not collapsed) */}
           {!module.isCollapsed && (
             <div className="p-4">
-              {/* Staff search */}
               <div className="mb-4 relative staff-search-container">
                 <label
                   htmlFor={`staff-search-${module.id}`}
@@ -569,7 +590,6 @@ const CreateShift = () => {
                   />
                 </div>
 
-                {/* Staff suggestions dropdown */}
                 {showSuggestions[module.id] && (
                   <div className="absolute z-10 mt-1 w-full bg-white border border-[#e4e4e7] rounded-lg shadow-lg max-h-48 overflow-y-auto">
                     {isLoading ? (
@@ -612,14 +632,12 @@ const CreateShift = () => {
                 )}
               </div>
 
-              {/* Selected staff info */}
               {module.staffId && (
                 <div className="mb-4 px-3 py-2 bg-blue-50 rounded-lg text-primary text-sm">
                   Selected: {module.staffName}
                 </div>
               )}
 
-              {/* Shifts */}
               {module.shifts.map((shift, shiftIndex) => (
                 <div
                   key={shift.id}
@@ -642,7 +660,6 @@ const CreateShift = () => {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
-                    {/* Date picker */}
                     <div>
                       <label
                         htmlFor={`date-${shift.id}`}
@@ -658,12 +675,9 @@ const CreateShift = () => {
                             type="date"
                             value={shift.date}
                             onChange={(e) =>
-                              updateShift(
-                                module.id,
-                                shift.id,
-                                "date",
-                                e.target.value
-                              )
+                              updateShift(module.id, shift.id, {
+                                date: e.target.value,
+                              })
                             }
                             className="w-full border border-none focus:outline-none text-sm"
                             placeholder="Select date"
@@ -672,7 +686,6 @@ const CreateShift = () => {
                       </div>
                     </div>
 
-                    {/* Shift type dropdown */}
                     <div>
                       <label
                         htmlFor={`shiftType-${shift.id}`}
@@ -684,108 +697,83 @@ const CreateShift = () => {
                         id={`shiftType-${shift.id}`}
                         value={shift.shiftType}
                         onChange={(e) =>
-                          updateShift(
+                          handleShiftTypeChange(
                             module.id,
                             shift.id,
-                            "shiftType",
                             e.target.value
                           )
                         }
                         className="w-full border border-[#e4e4e7] rounded-lg px-3 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                       >
                         <option value="">Select shift type</option>
-                        {shiftTypes.map((type) => (
-                          <option key={type} value={type}>
-                            {type}
-                          </option>
-                        ))}
+                        {Array.isArray(shiftTypes) &&
+                          shiftTypes.map((type) => (
+                            <option key={type.id} value={type.id}>
+                              {type.attributes.shift_type}
+                            </option>
+                          ))}
                       </select>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
-                    {/* Department dropdown */}
                     <div>
-                      <label
-                        htmlFor={`department-${shift.id}`}
-                        className="block text-sm font-medium text-[#98A2B3] mb-1"
-                      >
-                        Select Department
+                      <label className="block text-sm font-medium text-[#98A2B3] mb-2">
+                        Select Departments
                       </label>
-                      <select
-                        id={`department-${shift.id}`}
-                        value={shift.department}
-                        onChange={(e) =>
-                          updateShift(
-                            module.id,
-                            shift.id,
-                            "department",
-                            e.target.value
-                          )
-                        }
-                        className="w-full border border-[#e4e4e7] rounded-lg px-3 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                      >
-                        <option value="">Select department</option>
-                        {clinicaldepts &&
-                          clinicaldepts.map((dept) => (
-                            <option key={dept.id} value={dept.id}>
-                              {dept.attributes.name}
-                            </option>
-                          ))}
-                      </select>
+                      <div className="grid grid-cols-2 gap-2">
+                        {clinicaldepts?.map((dept) => (
+                          <label
+                            key={dept.id}
+                            className="flex items-center space-x-2"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={shift.departments.includes(dept.id)}
+                              onChange={(e) =>
+                                handleDepartmentChange(
+                                  module.id,
+                                  shift.id,
+                                  dept.id,
+                                  e.target.checked
+                                )
+                              }
+                              className="form-checkbox h-4 w-4 text-primary rounded focus:ring-primary"
+                            />
+                            <span className="text-sm">
+                              {dept.attributes?.name}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
                     </div>
 
-                    {/* Time pickers */}
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label
-                          htmlFor={`startTime-${shift.id}`}
-                          className="block text-sm font-medium text-[#98A2B3] mb-1"
-                        >
-                          Start Time
-                        </label>
-                        <div className="flex items-center border border-[#e4e4e7] rounded-lg px-3 py-4">
-                          <Clock className="w-4 h-4 text-gray-400 mr-2" />
-                          <input
-                            id={`startTime-${shift.id}`}
-                            type="time"
-                            value={shift.startTime}
-                            onChange={(e) =>
-                              updateShift(
-                                module.id,
-                                shift.id,
-                                "startTime",
-                                e.target.value
-                              )
-                            }
-                            className="w-full border border-none focus:outline-none text-sm"
-                          />
+                    <div>
+                      <label className="block text-sm font-medium text-[#98A2B3] mb-1">
+                        Shift Times
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <div className="flex items-center border border-[#e4e4e7] rounded-lg px-3 py-4 bg-gray-100">
+                            <Clock className="w-4 h-4 text-gray-400 mr-2" />
+                            <input
+                              type="text"
+                              value={shift.startTime}
+                              readOnly
+                              className="w-full bg-transparent border-none focus:outline-none text-sm"
+                            />
+                          </div>
                         </div>
-                      </div>
-
-                      <div>
-                        <label
-                          htmlFor={`endTime-${shift.id}`}
-                          className="block text-sm font-medium text-[#98A2B3] mb-1"
-                        >
-                          End Time
-                        </label>
-                        <div className="flex items-center border border-[#e4e4e7] rounded-lg px-3 py-4">
-                          <Clock className="w-4 h-4 text-gray-400 mr-2" />
-                          <input
-                            id={`endTime-${shift.id}`}
-                            type="time"
-                            value={shift.endTime}
-                            onChange={(e) =>
-                              updateShift(
-                                module.id,
-                                shift.id,
-                                "endTime",
-                                e.target.value
-                              )
-                            }
-                            className="w-full border border-none focus:outline-none text-sm"
-                          />
+                        <div>
+                          <div className="flex items-center border border-[#e4e4e7] rounded-lg px-3 py-4 bg-gray-100">
+                            <Clock className="w-4 h-4 text-gray-400 mr-2" />
+                            <input
+                              type="text"
+                              value={shift.endTime}
+                              readOnly
+                              className="w-full bg-transparent border-none focus:outline-none text-sm"
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -793,7 +781,6 @@ const CreateShift = () => {
                 </div>
               ))}
 
-              {/* Module actions */}
               <div className="flex justify-between mt-4">
                 <button
                   onClick={() => addShift(module.id)}
@@ -801,20 +788,12 @@ const CreateShift = () => {
                 >
                   <Plus className="w-4 h-4 mr-1" /> Add More
                 </button>
-                {/* 
-                <button
-                  onClick={() => saveModuleShifts(module.id)}
-                  className="text-sm bg-primary text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700"
-                >
-                  Save
-                </button> */}
               </div>
             </div>
           )}
         </div>
       ))}
 
-      {/* Global actions */}
       <div className="flex flex-col xs:flex-row justify-between mt-6">
         <button
           onClick={addStaffModule}
