@@ -12,9 +12,9 @@ import AddHeadModal from "../Heads/AddHeadModal";
 import StaffsList from "../Staffs/StaffsList";
 
 const SaUsersPage = () => {
-  const [activeTab, setActiveTab] = useState<"Matron" | "Medical-director">(
-    "Matron"
-  );
+  const [activeTab, setActiveTab] = useState<
+    "Matron" | "Medical-director" | "Admin"
+  >("Matron");
   const [openModal, setOpenModal] = useState(false);
   const [modalType, setModalType] = useState<"Matron" | "Medical-director">(
     "Matron"
@@ -88,6 +88,16 @@ const SaUsersPage = () => {
             onClick={() => setActiveTab("Medical-director")}
           >
             Medical-director
+          </button>
+          <button
+            className={`px-4 py-2 font-semibold  ${
+              activeTab === "Admin"
+                ? "text-primary border-b-2 border-primary"
+                : "text-[#667185]"
+            }`}
+            onClick={() => setActiveTab("Admin")}
+          >
+            Admin
           </button>
         </div>
 

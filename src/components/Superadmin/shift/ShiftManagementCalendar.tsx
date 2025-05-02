@@ -30,7 +30,7 @@ type DoctorShift = {
   shift_type: string;
   doctor: string;
   start_time: string;
-  clinical_department: string;
+  clinical_department: any[];
 };
 
 const ShiftManagementCalendar = () => {
@@ -405,8 +405,17 @@ const ShiftManagementCalendar = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                             {doctor.doctor}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {doctor.clinical_department}
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 grid grid-cols-3 gap-y-2">
+                            {doctor.clinical_department.map((dept: any) => {
+                              return (
+                                <span
+                                  key={dept}
+                                  className="px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-800 mr-1"
+                                >
+                                  {dept}
+                                </span>
+                              );
+                            })}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             <span
