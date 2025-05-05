@@ -13,7 +13,7 @@ interface BookAppointmentModalProps {
 
 const BookAppointmentModal = ({
   onClose,
-  endpoint = "/admin/appointment/assign",
+  // endpoint = "/admin/appointment/assign",
   refreshEndpoint = "/admin/appointment/all-records",
 }: BookAppointmentModalProps) => {
   const { searchPatients, bookAppointment, isLoading } = usePatientStore();
@@ -127,7 +127,7 @@ const BookAppointmentModal = ({
 
     console.log("Final Payload:", finalAppointmentData);
 
-    const success = await bookAppointment(finalAppointmentData, endpoint);
+    const success = await bookAppointment(finalAppointmentData);
     if (success) {
       onClose();
     }

@@ -110,14 +110,9 @@ interface PatientStore {
     endpoint?: string,
     refreshendpoint?: string
   ) => Promise<boolean | null>;
-  getAllAppointments: (
-    page?: string,
-    perPage?: string,
-    endpoint?: string
-  ) => Promise<void>;
+  getAllAppointments: (page?: string, perPage?: string) => Promise<void>;
   bookAppointment: (
     data: BookAppointmentData,
-    endpoint?: string,
     refreshEndpoint?: string
   ) => Promise<boolean>; // Updated signature
   getAppointmentById: (id: string, endpoint: string) => Promise<void>;
@@ -438,17 +433,10 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   },
 
   // In usePatientStore.ts
-  getAllAppointments: async (
-    page = "1",
-    perPage = "10",
-    baseEndpoint = "/front-desk/appointment/all-records"
-  ) => {
+  getAllAppointments: async (page = "1", perPage = "10") => {
     set({ isLoading: true, appointments: [], pagination: null });
     try {
-      const endpoint = `${baseEndpoint}?page=${page}&per_page=${perPage}`;
-      console.log("Fetching appointments from:", endpoint);
-
-      const response = await api.get(endpoint);
+      const response = await api.get("/medical-report/appointment/all-records");
       if (!response.data?.data) {
         throw new Error("Invalid response structure");
       }
@@ -503,12 +491,12 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   },
   bookAppointment: async (
     data: BookAppointmentData,
-    endpoint = "/admin/appointment/assign",
+
     refreshEndpoint = "/admin/appointment/all-records"
   ) => {
     set({ isLoading: true });
     try {
-      const response = await api.post(endpoint, data);
+      const response = await api.post("/medical-report/appointment/book", data);
       if (response.status === 201) {
         console.log(response.data.message);
         toast.success(response.data.message);
