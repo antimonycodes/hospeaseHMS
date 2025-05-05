@@ -46,7 +46,7 @@ const PatientsPage = ({
   }, []);
 
   useEffect(() => {
-    getAllAppointments("1", "10", endpoint);
+    getAllAppointments("1", "10");
   }, [getAllAppointments, endpoint]);
 
   return (

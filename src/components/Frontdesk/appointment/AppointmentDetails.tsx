@@ -172,7 +172,7 @@ const AppointmentDetails = ({
   // appointment/frontdesk/:id
 
   const handlePageChange = (page: number) => {
-    getAllAppointments(page.toString(), perPage.toString(), endpoint);
+    getAllAppointments(page.toString(), perPage.toString());
   };
 
   const getStatusCounts = () => {

@@ -37,11 +37,14 @@ const BookAppointmentModal = ({
     // Extract only doctor and nurse roles
     const doctorRole = roles.doctor;
     const nurseRole = roles.nurse;
+    const laboratoryRole = roles.laboratory;
 
     // Return as array of filtered departments
     const filteredRoles = [];
     if (doctorRole) filteredRoles.push({ id: doctorRole.id, name: "Doctor" });
     if (nurseRole) filteredRoles.push({ id: nurseRole.id, name: "Nurse" });
+    if (laboratoryRole)
+      filteredRoles.push({ id: laboratoryRole.id, name: "laboratory" });
 
     return filteredRoles;
   };
