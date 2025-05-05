@@ -79,6 +79,12 @@ export interface CreateStaff {
   phone: string;
 }
 
+export interface CreateSubAdmin {
+  first_name: string;
+  last_name: string;
+  email: string;
+}
+
 export interface AssignShift {
   // user_id: number;
   // shifts: ShiftData[];
@@ -105,6 +111,7 @@ interface Globalstore {
   branches: Branch[];
   clinicaldepts: Clinicaldept[];
   staffs: any[];
+  subAdmins: any[];
   pagination: Pagination | null;
   allStaffs: any[];
   shiftDetails: any[];
@@ -122,6 +129,8 @@ interface Globalstore {
   getClinicaldept: (endpoint?: string) => Promise<any>;
   createClinicaldept: (data: CreateClinicaldeptData) => Promise<any>;
   createStaff: (data: CreateStaff, role: string) => Promise<any>;
+  createSubAdmin: (data: CreateSubAdmin) => Promise<any>;
+  getSubAdmin: () => Promise<any>;
   updateStaff: (data: any, id: any) => Promise<any>;
   getDeptStaffs: (
     data: string,
@@ -159,6 +168,7 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
   selectedStaff: null,
   staffShift: [],
   pagination: null,
+  subAdmins: [],
 
   unreadCount: 0,
   setSelectedStaff: (staff) => set({ selectedStaff: staff }),
@@ -320,6 +330,45 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
       return null;
     } finally {
       set({ isLoading: false });
+    }
+  },
+  createSubAdmin: async (data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.post("/admin/platform-manager/create", data);
+      if (response.status === 200) {
+        toast.success(response.data.message);
+        return true;
+      }
+      console.log(response.data.message);
+      return null;
+    } catch (error: any) {
+      console.error(error.response?.data);
+      toast.error(error.response.data.message);
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  getSubAdmin: async () => {
+    set({ isStaffLoading: true });
+    try {
+      const response = await api.get(`/admin/platform-manager/all`);
+      if (response.status === 200) {
+        // toast.success(response.data.message);
+        set({ subAdmins: response.data.data });
+        console.log(response.data.data.data, "subAdmins");
+
+        return response.data.data;
+      }
+      console.log(response.data.message);
+      return null;
+    } catch (error: any) {
+      console.error(error.response?.data);
+      toast.error(error.response.data.message);
+      return null;
+    } finally {
+      set({ isStaffLoading: false });
     }
   },
   updateStaff: async (id, data) => {

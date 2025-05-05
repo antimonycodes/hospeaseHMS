@@ -2,8 +2,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import { useEffect } from "react";
 import Loader from "../../../Shared/Loader";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, StickyNote, StickyNoteIcon } from "lucide-react";
 import MedicalTimeline from "../../../Shared/MedicalTimeline";
+import { useStickyNoteStore } from "../../../store/super-admin/useStickyNote";
 
 interface InfoRowItem {
   label: string;
@@ -36,6 +37,8 @@ const FrontdeskPatientDetails = () => {
   const { id } = useParams<{ id: string }>();
   const { selectedPatient, getFdeskPatientById, isLoading } = usePatientStore();
   const navigate = useNavigate();
+  const { show } = useStickyNoteStore();
+
   useEffect(() => {
     if (id) {
       console.log("Fetching patient with ID:", id);
@@ -57,8 +60,20 @@ const FrontdeskPatientDetails = () => {
   const nextOfKinList: NextOfKin[] = patient.next_of_kin || [];
 
   return (
-    <div>
-      <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+    <div className=" ">
+      <div className="bg-white rounded-lg shadow-sm p-6 mb-6 relative">
+        <div className=" absolute top-0 right-8">
+          <div className="absolute top-4 right-6 z-[99999]">
+            <button
+              onClick={show}
+              className="bg-yellow-200 hover:bg-yellow-300 p-2 rounded-full shadow-md"
+              title="Open Sticky Note"
+            >
+              <StickyNoteIcon className="w-5 h-5 text-yellow-800" />
+            </button>
+          </div>
+          {/* <StickyNote /> */}
+        </div>
         {/* Back button */}
         <div
           className="flex items-center text-gray-600 hover:text-primary mb-5"
@@ -67,7 +82,7 @@ const FrontdeskPatientDetails = () => {
           <ChevronLeft size={16} />
           <span className="ml-1">Patients</span>
         </div>
-        <div className="grid gap-6">
+        <div className="grid gap-6 relative">
           <div>
             <h2 className="text-lg font-semibold mb-4">Patient Details</h2>
             <InfoRow

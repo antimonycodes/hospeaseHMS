@@ -5,6 +5,7 @@ import TopNav from "../components/Dashboard/TopNav";
 import { BsWhatsapp } from "react-icons/bs";
 import TourOverlay from "../Shared/TourOverlay";
 import { useTourStore } from "../store/super-admin/useTourStore";
+import StickyNote from "../Shared/StickyNote";
 
 const DashboardLayout = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -27,6 +28,7 @@ const DashboardLayout = () => {
         <TopNav setIsMobileMenuOpen={setIsMobileMenuOpen} />
         <div className="p-3 md:p-6 w-full">
           {/* <TourOverlay /> */}
+          <StickyNote />
           <Outlet />
           <div className=" fixed bottom-6 left-0 right-0 flex justify-center items-center">
             {/* <button

@@ -42,7 +42,7 @@ interface Column<T> {
   render?: (value: any, record: T) => JSX.Element;
 }
 
-const SaInventoryRequest = () => {
+const PharmacyStocks = () => {
   const { getAllRequest, requests, isLoading } =
     useInventoryStore() as unknown as {
       getAllRequest: (endpoint?: string) => void;
@@ -150,7 +150,7 @@ const SaInventoryRequest = () => {
   return (
     <div>
       <Tablehead
-        tableTitle="All Inventory Requests"
+        tableTitle="Pharmacy Stocks"
         showButton={false}
         onButtonClick={openModal}
       />
@@ -173,4 +173,4 @@ const SaInventoryRequest = () => {
   );
 };
 
-export default SaInventoryRequest;
+export default PharmacyStocks;

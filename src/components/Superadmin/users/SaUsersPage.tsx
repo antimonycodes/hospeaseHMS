@@ -16,9 +16,9 @@ const SaUsersPage = () => {
     "Matron" | "Medical-director" | "Admin"
   >("Matron");
   const [openModal, setOpenModal] = useState(false);
-  const [modalType, setModalType] = useState<"Matron" | "Medical-director">(
-    "Matron"
-  );
+  const [modalType, setModalType] = useState<
+    "Matron" | "Medical-director" | "Admin"
+  >("Matron");
 
   const [formData, setFormData] = useState<CreateStaff>({
     first_name: "",
@@ -61,7 +61,13 @@ const SaUsersPage = () => {
   console.log(roles, "roles");
 
   const handleOpenModal = () => {
-    setModalType(activeTab === "Matron" ? "Matron" : "Medical-director");
+    setModalType(
+      activeTab === "Matron"
+        ? "Matron"
+        : activeTab === "Medical-director"
+        ? "Medical-director"
+        : "Admin"
+    );
     setOpenModal(true);
   };
   return (
@@ -127,18 +133,22 @@ const SaUsersPage = () => {
       </div>
 
       {/* tables */}
-      {/* {activeTab === "Matron" ? <AdministratorTable /> : <DepartmentTable />} */}
-      <StaffsList
-        staffs={staffs}
-        isStaffLoading={isStaffLoading}
-        pagination={pagination}
-        getDeptStaffs={getDeptStaffs}
-      />
+      {activeTab === "Admin" ? (
+        <AdministratorTable />
+      ) : (
+        <StaffsList
+          staffs={staffs}
+          isStaffLoading={isStaffLoading}
+          pagination={pagination}
+          getDeptStaffs={getDeptStaffs}
+        />
+      )}
+
       {/* modals */}
-      {/* {openModal && modalType === "Medical-director" && (
+      {openModal && modalType === "Admin" && (
         <AddDepartmentModal onClose={() => setOpenModal(false)} />
-      )} */}
-      {openModal && (
+      )}
+      {openModal && modalType !== "Admin" && (
         <AddHeadModal
           formData={formData}
           onClose={() => setOpenModal(false)}

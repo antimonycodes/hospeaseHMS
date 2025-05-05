@@ -22,6 +22,28 @@ export const ReportItem = ({ report }: { report: any }) => {
       </div>
 
       <p className="text-sm text-gray-600 mb-2">{report.attributes.note}</p>
+      {report.attributes.requested_pharmacy_items === true && (
+        <div className="p-4 shadow rounded-lg mt-4">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            Selected Drugs
+          </h2>
+
+          {report.attributes.requested_items.map((item: any, index: any) => (
+            <div
+              key={index}
+              className="flex justify-between items-center p-4 bg-white border border-gray-300 rounded-md shadow-sm mb-2"
+            >
+              <span className="font-medium text-gray-700">
+                {item.inventory.item}
+              </span>
+              <span className="text-gray-500">
+                Qty: {item.pharmacy_stock_request_quantity}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
       {report.attributes.file && (
         <FileAttachment url={report.attributes.file} />
       )}

@@ -78,7 +78,7 @@ const PaymentDetails = () => {
   }
 
   const attributes = selectedPayment.attributes || {};
-  const serviceCharges = attributes.service_charges || [];
+  const serviceCharges = attributes.purchased_item || [];
 
   // Calculate financial values
   const totalAmount = parseFloat(attributes.amount?.replace(/,/g, "") || "0");
@@ -148,12 +148,14 @@ const PaymentDetails = () => {
               </div>
             }
           />
-          <InfoRow
-            label="Outstanding"
-            value={`₦${outstanding
-              .toFixed(2)
-              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`}
-          />
+          {partAmount !== 0 && (
+            <InfoRow
+              label="Outstanding"
+              value={`₦${outstanding
+                .toFixed(2)
+                .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`}
+            />
+          )}
           <InfoRow label="Payment Method" value={attributes.payment_method} />
           <InfoRow label="Date" value={attributes.created_at} />
         </div>
@@ -177,7 +179,7 @@ const PaymentDetails = () => {
             {serviceCharges.map((item: any) => (
               <div key={item.id} className="flex justify-between">
                 <span className="text-gray-600">
-                  {item.attributes.service_charge?.name}
+                  {item.attributes.items_purchased}
                   {item.attributes.quantity
                     ? ` x${item.attributes.quantity}`
                     : ""}

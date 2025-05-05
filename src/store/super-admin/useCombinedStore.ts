@@ -102,7 +102,7 @@ export const useCombinedStore = create<CombinedStore>((set, get) => ({
   },
   getAllItems: async (
     page = "1",
-    perPage = "20",
+    perPage = "1000",
     baseEndpoint = "/medical-report/service-charge/all"
   ) => {
     set({ isLoading: true });

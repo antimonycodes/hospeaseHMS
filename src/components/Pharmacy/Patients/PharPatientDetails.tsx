@@ -68,7 +68,7 @@ const PharPatientDetails = () => {
     });
   };
 
-  if (isReportLoading) return <Loader />;
+  if (isReportLoading || !selectedPatient) return <Loader />;
 
   return (
     <div className="max-w-5xl mx-auto p-4">
@@ -126,7 +126,7 @@ const PharPatientDetails = () => {
             .filter(
               (report) =>
                 report.attributes?.department?.name?.toLowerCase() ===
-                "pharmacy"
+                  "pharmacy" && report.attributes?.status !== "pending"
             )
             .map((report) => (
               <div
@@ -137,6 +137,23 @@ const PharPatientDetails = () => {
                 <p className="text-gray-700 mb-4">
                   {report.attributes.note || ""}
                 </p>
+                {report.attributes.requested_pharmacy_items === true && (
+                  <div className="p-4 shadow  rounded-lg mt-4">
+                    <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                      Selected Drugs
+                    </h2>
+
+                    <div className="flex justify-between items-center p-4 bg-white border border-gray-300 rounded-md shadow-sm">
+                      <span className="font-medium text-gray-700">
+                        {report.attributes.requested_items.item}
+                      </span>
+                      <span className="text-gray-500">
+                        Qty:{" "}
+                        {report.attributes.requested_items.requested_quantity}
+                      </span>
+                    </div>
+                  </div>
+                )}
                 {report.attributes.file && (
                   <a
                     href={report.attributes.file}
@@ -165,7 +182,7 @@ const PharPatientDetails = () => {
                     View Attachment
                   </a>
                 )}
-                <div className="flex items-center mt-2">
+                <div className="flex items-center mt-4">
                   <div className="w-8 h-8 rounded-full bg-gray-300 mr-2 flex items-center justify-center text-gray-700">
                     {report.attributes.staff_details?.first_name?.[0] || "D"}
                   </div>
