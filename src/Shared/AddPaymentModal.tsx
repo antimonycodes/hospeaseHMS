@@ -105,6 +105,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
   const paymentTypeOptions = [
     { value: "full", label: "Full Payment" },
     { value: "part", label: "Part Payment" },
+    { value: "pending", label: "Pending" },
   ];
 
   const handleSearch = debounce(async (val) => {
