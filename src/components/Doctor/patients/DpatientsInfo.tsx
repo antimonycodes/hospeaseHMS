@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Table from "../../../Shared/Table";
 
 type DpatientsData = {
+  id: any;
   name: string;
   patientId: string;
   age: number;
@@ -67,7 +68,7 @@ const DpatientsInfo = ({
   }));
   const handleViewMore = (id: string) => {
     console.log("Navigating to patient ID:", id);
-    navigate(`/dashboard/doctor/patients/${patients[0].id}`);
+    navigate(`/dashboard/doctor/patients/${id}`);
   };
 
   const columns: Columns[] = [
@@ -119,7 +120,7 @@ const DpatientsInfo = ({
       render: (_, patient) => (
         <span
           className="text-primary text-sm font-medium cursor-pointer"
-          onClick={() => handleViewMore(patient.patientId)}
+          onClick={() => handleViewMore(patient.id)}
         >
           View More
         </span>

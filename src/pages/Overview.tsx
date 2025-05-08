@@ -15,6 +15,7 @@ import MedicalDash from "../components/medicaldirector/overview/MedicalDash";
 
 const roleComponents: Record<string, JSX.Element> = {
   admin: <SuperAdminOverview />,
+  "platform-manager": <SuperAdminOverview />,
   doctor: <DoctorOverview />,
   "front-desk-manager": <FrontdeskOverview />,
   laboratory: <Laboverview />,

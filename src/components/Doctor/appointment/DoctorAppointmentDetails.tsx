@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
+import Loader from "../../../Shared/Loader";
 
 // InfoRow reusable component
 const InfoRow = ({
@@ -22,28 +23,49 @@ const InfoRow = ({
 
 const DoctorAppointmentDetails = () => {
   const { id } = useParams<{ id: string }>();
-  const { selectedAppointment, getAppointmentById, manageAppointment } =
-    usePatientStore();
-  const [isLoading, setIsLoading] = useState(true);
+  const {
+    selectedAppointment,
+    getAppointmentById,
+    manageAppointment,
+    isLoading,
+  } = usePatientStore();
   const [actionLoading, setActionLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [reason, setReason] = useState("");
   const [showRescheduleForm, setShowRescheduleForm] = useState(false);
   const [showDeclineForm, setShowDeclineForm] = useState(false);
+  const [role, setRole] = useState("");
 
   const timeOptions = generateTimeOptions();
 
+  const endpointManagent = (role: string) => {
+    if (role === "nurse") return "/nurses/my-appointments";
+    if (role === "doctor") return "/doctor/my-appointments";
+    if (role === "medical-director")
+      return "/medical-director/shift/user-records";
+    return ""; // fallback
+  };
+
+  const manageEndpoint = (role: string) => {
+    if (role === "nurse") return "/nurse/manage-appointment";
+    if (role === "doctor") return "/doctor/manage-appointment";
+    if (role === "medical-director")
+      return "/medical-director/shift/user-records";
+    return ""; // fallback
+  };
   useEffect(() => {
-    if (id) {
-      getAppointmentById(id)
-        .then(() => setIsLoading(false))
-        .catch((error) => {
-          console.error("Error fetching appointment:", error);
-          setIsLoading(false);
-        });
+    const storedRole = localStorage.getItem("role") || "";
+    setRole(storedRole);
+  }, []);
+
+  useEffect(() => {
+    if (id && role) {
+      const endpoint = endpointManagent(role);
+      console.log("Using endpoint:", endpoint);
+      getAppointmentById(id, endpoint);
     }
-  }, [id, getAppointmentById]);
+  }, [id, role, getAppointmentById]);
 
   // Handle approval directly without reason
   const handleApprove = async () => {
@@ -51,7 +73,9 @@ const DoctorAppointmentDetails = () => {
     setActionLoading(true);
 
     try {
-      await manageAppointment(id, { status: "accepted" });
+      await manageAppointment(id, manageEndpoint(role), {
+        status: "accepted",
+      });
     } catch (error) {
       console.error("Error approving appointment:", error);
     } finally {
@@ -65,7 +89,7 @@ const DoctorAppointmentDetails = () => {
     setActionLoading(true);
 
     try {
-      const result = await manageAppointment(id, {
+      const result = await manageAppointment(id, manageEndpoint(role), {
         status: "rejected",
         reason: reason,
       });
@@ -87,7 +111,7 @@ const DoctorAppointmentDetails = () => {
     setActionLoading(true);
 
     try {
-      const result = await manageAppointment(id, {
+      const result = await manageAppointment(id, manageEndpoint(role), {
         status: "reschedule",
         reason: reason || undefined,
         reschedule_data: {
@@ -124,27 +148,33 @@ const DoctorAppointmentDetails = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        Loading...
-      </div>
-    );
+  if (isLoading || !selectedAppointment) {
+    return <Loader />;
   }
 
-  const attributes = selectedAppointment.attributes || {};
-  const patient = attributes.patient?.attributes || {};
-  const status = selectedAppointment.attributes.status || {};
-  const doctor = attributes.doctor?.attributes || {};
+  // FIX: Get the first appointment from the array if selectedAppointment is an array
+  const appointmentData = Array.isArray(selectedAppointment)
+    ? selectedAppointment[0]
+    : selectedAppointment;
+
+  // Extract the attributes from the selected appointment
+  const attributes = appointmentData?.attributes || {};
+
+  // Extract the status from attributes
+  const status = attributes?.status || "pending";
+
+  // Extract patient data, adding fallbacks
+  const patient = attributes?.patient?.attributes || {};
+
+  // Extract doctor data
+  const doctor = attributes?.doctor?.attributes || {};
+
+  // Extract next of kin data with fallback
   const nextOfKin =
-    patient.next_of_kin && patient.next_of_kin.length > 0
-      ? patient.next_of_kin[0]
-      : {};
+    patient?.next_of_kin?.length > 0 ? patient.next_of_kin[0] : {};
 
-  const formattedDate = formatDate(attributes.date);
-  const formattedTime = formatTime(attributes.time);
-
-  console.log(selectedAppointment.attributes.status, "selectedAppointment");
+  const formattedDate = formatDate(attributes?.date);
+  const formattedTime = formatTime(attributes?.time);
 
   return (
     <div className="">
@@ -154,53 +184,57 @@ const DoctorAppointmentDetails = () => {
       <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
         <InfoRow
           items={[
-            { label: "First Name", value: patient.first_name },
-            { label: "Last Name", value: patient.last_name },
-            { label: "Patient ID", value: patient.card_id },
-            { label: "Age", value: patient.age },
+            { label: "First Name", value: patient?.first_name },
+            { label: "Last Name", value: patient?.last_name },
+            { label: "Patient ID", value: patient?.card_id },
+            { label: "Age", value: patient?.age },
           ]}
         />
         <InfoRow
           items={[
-            { label: "Gender", value: patient.gender },
-            { label: "Branch", value: patient.branch },
-            { label: "Occupation", value: patient.occupation },
+            { label: "Gender", value: patient?.gender },
+            { label: "Branch", value: patient?.branch },
+            { label: "Occupation", value: patient?.occupation },
             { label: "Religion", value: "Christian" }, // hardcoded
           ]}
         />
         <InfoRow
           columns="grid-cols-2 md:grid-cols-4"
           items={[
-            { label: "Phone", value: patient.phone_number },
-            { label: "House Address", value: patient.address },
+            { label: "Phone", value: patient?.phone_number },
+            { label: "House Address", value: patient?.address },
           ]}
         />
 
-        {/* Next of Kin */}
-        <hr className="my-6 border-gray-200" />
-        <h3 className="font-semibold mb-4">Next of Kin</h3>
-        <InfoRow
-          items={[
-            { label: "First Name", value: nextOfKin.name },
-            { label: "Last Name", value: nextOfKin.last_name },
-            { label: "Gender", value: nextOfKin.gender },
-            { label: "Occupation", value: nextOfKin.occupation },
-          ]}
-        />
-        <InfoRow
-          items={[
-            { label: "Religion", value: "Christian" },
-            { label: "Phone", value: nextOfKin.phone },
-            {
-              label: "Relationship with Patient",
-              value: nextOfKin.relationship,
-            },
-            { label: "House Address", value: nextOfKin.address },
-          ]}
-        />
+        {/* Next of Kin - Only render if nextOfKin is available */}
+        {nextOfKin && Object.keys(nextOfKin).length > 0 && (
+          <>
+            <hr className="my-6 border-gray-200" />
+            <h3 className="font-semibold mb-4">Next of Kin</h3>
+            <InfoRow
+              items={[
+                { label: "First Name", value: nextOfKin?.name },
+                { label: "Last Name", value: nextOfKin?.last_name },
+                { label: "Gender", value: nextOfKin?.gender },
+                { label: "Occupation", value: nextOfKin?.occupation },
+              ]}
+            />
+            <InfoRow
+              items={[
+                { label: "Religion", value: "Christian" },
+                { label: "Phone", value: nextOfKin?.phone },
+                {
+                  label: "Relationship with Patient",
+                  value: nextOfKin?.relationship,
+                },
+                { label: "House Address", value: nextOfKin?.address },
+              ]}
+            />
+          </>
+        )}
       </div>
 
-      {/* Appointment Details */}
+      {/* Appointment Details - Only show if status is not accepted */}
       {status !== "accepted" && (
         <div className="bg-white rounded-lg shadow-sm p-6 text-[#667085]">
           <h3 className="font-semibold mb-4">Appointment Details</h3>

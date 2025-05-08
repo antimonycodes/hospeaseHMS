@@ -25,7 +25,7 @@ const FrondeskAppointmentTable = ({
   const baseEndpoint = "/front-desk/appointment/all-records";
 
   useEffect(() => {
-    getAllAppointments("1", "10", baseEndpoint);
+    getAllAppointments("1", "10");
   }, [getAllAppointments]);
 
   const handleOpenModal = () => {

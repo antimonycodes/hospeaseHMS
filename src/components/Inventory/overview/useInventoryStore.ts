@@ -2,7 +2,6 @@ import { create } from "zustand";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
-import { Cat } from "lucide-react";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_URL,
@@ -73,15 +72,18 @@ export interface Request {
   created_at: string;
 }
 export interface CreateStockData {
-  item: string;
+  service_item_name: string;
+  service_charge_id: any;
   quantity: string;
   category_id: string;
   expiry_date: string;
   cost: number;
-  // image: File | null;
+  image: File | null;
+  service_item_price: string;
 }
 
 export interface InventoryStats {
+  data: InventoryStats;
   total_inventories: number;
   total_categories: number;
   total_expired_items: number;
@@ -94,9 +96,12 @@ interface InventoryStore {
   pagination: Pagination | null;
   stocks: any[];
   requests: any[];
+  stockActivities: any[];
   // requests: { data: any[]; pagination: Pagination }[];
   getInventoryStats: (endpoint?: string) => Promise<void>;
   getAllStocks: (endpoint?: string) => Promise<void>;
+  // getPharmacyStocks: () => Promise<any>;
+  pharmacyStocks: any[];
   createStock: (
     data: CreateStockData,
     endpoint?: string,
@@ -110,6 +115,7 @@ interface InventoryStore {
     endpoint?: string,
     refreshEndpoint?: string
   ) => Promise<boolean>;
+  getStockActivity: () => Promise<any>;
   createCategory: (
     data: { name: string },
     Catendpoint?: string,
@@ -124,6 +130,8 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
   stocks: [],
   requests: [],
   categorys: [],
+  pharmacyStocks: [],
+  stockActivities: [],
 
   searchStaff: async (query: string) => {
     try {
@@ -141,7 +149,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
   },
 
   getAllRequest: async (
-    endpoint = "/inventory/requests/all-records?status=pending"
+    endpoint = "/medical-report/department-request-records"
   ) => {
     set({ isLoading: true });
     try {
@@ -151,7 +159,8 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       // This includes both the data array and pagination object
       if (response.data && response.data.data) {
         set({ requests: response.data.data });
-        toast.success(response.data.message || "Requests fetched successfully");
+        console.log(response.data.data);
+        // toast.success(response.data.message || "Requests fetched successfully");
       } else {
         console.error("Unexpected API response structure:", response.data);
         set({
@@ -238,14 +247,16 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
   },
   createCategory: async (
     data: { name: string },
-    fetchEndpoint = "/inventory/category/all-records",
-    createEndpoint = "/inventory/category/create"
+    fetchEndpoint = "/admin/inventory/category/all-records",
+    createEndpoint = "/admin/inventory/category/create"
   ) => {
     set({ isLoading: true });
     try {
       const response = await api.post(createEndpoint, data);
       console.log("createCategory response:", response.data);
-      if (response.status === 201) {
+      if (response.status === 201 || response.status === 200) {
+        // set({ categorys: response.data.data.data });
+        console.log(response.data.data, "categorys check");
         await get().getAllCategorys(fetchEndpoint);
         toast.success(response.data.message || "Category created successfully");
         return true;
@@ -260,13 +271,13 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
     }
   },
 
-  getAllStocks: async (endpoint = "/inventory/all-inventory-items") => {
+  getAllStocks: async (endpoint = "/admin/inventory/all-inventory-items") => {
     set({ isLoading: true });
     try {
       const response = await api.get(endpoint);
 
       set({ stocks: response.data.data?.data || [] });
-      toast.success(response.data.message || "Stocks fetched successfully");
+      // toast.success(response.data.message || "Stocks fetched successfully");
     } catch (error: any) {
       console.error("getAllStocks error:", error.response?.data);
       toast.error(error.response?.data?.message || "Failed to fetch stocks");
@@ -282,13 +293,16 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
     set({ isLoading: true });
     try {
       const form = new FormData();
-      form.append("item", data.item);
+      form.append("service_item_name", data.service_item_name);
       form.append("quantity", data.quantity.toString());
-      form.append("category_id", data.category_id.toString());
+      form.append("category_id", data.category_id);
       form.append("expiry_date", data.expiry_date);
       form.append("cost", data.cost.toString());
+      form.append("service_charge_id", data.service_charge_id);
+      form.append("service_item_price", data.service_item_price);
 
-      // form.append("image", data.image || "");
+      // Always append image to payload, even if null
+      form.append("image", data.image || "");
 
       const response = await api.post(endpoint, form, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -314,7 +328,24 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
-
+  getStockActivity: async () => {
+    set({ isLoading: false });
+    try {
+      const response = await api.get("/medical-report/stock-activity-logs");
+      if (response.status === 201 || response.status === 200) {
+        set({ stockActivities: response.data.data });
+        console.log(response.data.data);
+        // toast.success(response.data.message);
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.log(" error:", error.response?.data);
+      toast.error(error.response?.data?.message);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
   getInventoryStats: async (endpoint = "/inventory/stats") => {
     set({ isLoading: true });
     try {
@@ -325,7 +356,8 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
         total_expired_items: 0,
       };
       set({ stats: statsData });
-      toast.success("Inventory stats fetched successfully!");
+      console.log(response.data?.data, "efghj");
+      // toast.success("Inventory stats fetched successfully!");
     } catch (error: any) {
       console.error("Stats fetch error:", error.response?.data);
       toast.error(error.response?.data?.message || "Failed to fetch stats");

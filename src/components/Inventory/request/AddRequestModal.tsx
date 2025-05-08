@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import debounce from "lodash.debounce";
+import Select from "react-select";
 import toast from "react-hot-toast";
 import { useInventoryStore } from "../../Inventory/overview/useInventoryStore";
 import Button from "../../../Shared/Button";
+import { useGlobalStore } from "../../../store/super-admin/useGlobal";
 
 interface AddRequestModalProps {
   onClose: () => void;
@@ -20,93 +21,87 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
   fetchEndpoint,
   stockEndpoint,
 }) => {
-  const { searchStaff, createRequest, getAllStocks, stocks } =
+  const { createRequest, getAllStocks, stocks, isLoading } =
     useInventoryStore();
+  const { allStaffs, getAllStaffs } = useGlobalStore();
+  const { getAllRoles, roles } = useGlobalStore();
+
   const [formData, setFormData] = useState({
-    requested_by: "", // card_id or staff_id
+    requested_by: "",
+    requested_department_id: "",
     first_name: "",
     last_name: "",
     item_name: "",
-    category: "",
     quantity: "",
   });
-  const [query, setQuery] = useState("");
-  const [staffOptions, setStaffOptions] = useState<any[]>([]);
-  const [selectedStaff, setSelectedStaff] = useState<any>(null);
+
+  const [requestedType, setRequestedType] = useState<"staff" | "department">(
+    "staff"
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isStaffSelected, setIsStaffSelected] = useState(false);
+  const [selectedStaff, setSelectedStaff] = useState<any>(null);
+  const [selectedStock, setSelectedStock] = useState<any>(null);
 
-  const { getAllCategorys, categorys, isLoading } = useInventoryStore();
+  // Custom styles for React Select
+  const customStyles = {
+    control: (provided: any) => ({
+      ...provided,
+      padding: "0.5rem",
+      borderColor: "#D0D5DD",
+      borderRadius: "0.375rem",
+    }),
+  };
+
   useEffect(() => {
-    getAllCategorys(fetchEndpoint);
+    getAllRoles();
     getAllStocks(stockEndpoint);
-  }, [getAllCategorys, getAllStocks]);
-  useEffect(() => {
-    searchStaff(query).then((results) => {
-      setStaffOptions(results || []);
-    });
-  }, [query, searchStaff]);
+    getAllStaffs();
+  }, [getAllRoles, getAllStocks, getAllStaffs, stockEndpoint, fetchEndpoint]);
 
-  console.log(stocks, "stocks");
-
-  // Debounced search function
-  const handleSearch = debounce(async (val: string) => {
-    // console.log("handleSearch triggered with value:", val);
-    if (val.length > 2) {
-      const results = await searchStaff(val);
-      setStaffOptions(results || []);
-    } else {
-      setStaffOptions([]);
-    }
-
-    // console.log("handleSearch results:", results);
-  }, 300);
-
-  const handleChange = (e: { target: { name: any; value: any } }) => {
-    const { name, value } = e.target;
-    if (name === "query") {
-      setQuery(value);
-      handleSearch(value);
-      if (
-        isStaffSelected &&
-        value !==
-          `${selectedStaff?.attributes.first_name} ${selectedStaff?.attributes.last_name}`
-      ) {
-        setIsStaffSelected(false); // Reset if user changes the query
-      }
-    } else {
+  console.log(allStaffs, "allStaffs");
+  const handleDepartmentSelect = (option: any) => {
+    if (!option) {
       setFormData((prev) => ({
         ...prev,
-        [name]: value,
+        requested_department_id: "",
       }));
+      return;
     }
-  };
 
-  // Handle staff selection
-  const handleSelectStaff = (staff: {
-    id: string;
-    attributes: { first_name: string; last_name: string; card_id: string };
-  }) => {
-    console.log("Selected staff:", staff);
-    setSelectedStaff(staff);
     setFormData((prev) => ({
       ...prev,
-      requested_by: staff.id || "",
-      first_name: staff.attributes.first_name || "",
-      last_name: staff.attributes.last_name || "",
+      requested_department_id: option.value,
+      requested_by: "",
+      first_name: "",
+      last_name: "",
     }));
-    setQuery(`${staff.attributes.first_name} ${staff.attributes.last_name}`);
-    setStaffOptions([]);
   };
 
-  // Handle form submission
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleRequestTypeChange = (type: "staff" | "department") => {
+    setRequestedType(type);
+    setFormData((prev) => ({
+      ...prev,
+      requested_by: "",
+      requested_department_id: "",
+      first_name: "",
+      last_name: "",
+    }));
+    setSelectedStaff(null);
+  };
+
   const handleSubmit = async () => {
-    console.log("Submitting formData:", formData);
     if (
-      !formData.requested_by ||
       !formData.item_name ||
-      !formData.category ||
-      !formData.quantity
+      !formData.quantity ||
+      (requestedType === "staff" && !formData.requested_by) ||
+      (requestedType === "department" && !formData.requested_department_id)
     ) {
       toast.error("Please fill all required fields");
       return;
@@ -115,31 +110,29 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
     setIsSubmitting(true);
     try {
       const payload = {
-        requested_by: formData.requested_by,
+        requested_by: requestedType === "staff" ? formData.requested_by : null,
+        requested_department_id:
+          requestedType === "department"
+            ? formData.requested_department_id
+            : null,
         inventory_id: formData.item_name,
         quantity: parseInt(formData.quantity),
         status: "approved",
       };
 
-      console.log("Sending payload:", payload);
-
       const success = await createRequest(payload, endpoint, refreshEndpoint);
-      if (success) {
-        onClose();
-      }
+      if (success) onClose();
     } catch (error: any) {
-      console.error("Error creating request:", error);
       toast.error(error.response?.data?.message || "Failed to create request");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  useEffect(() => {
-    return () => {
-      handleSearch.cancel();
-    };
-  }, [handleSearch]);
+  const departmentOptions = Object.values(roles).map((dept) => ({
+    value: dept.id,
+    label: dept.role,
+  }));
 
   return (
     <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center z-50 p-6">
@@ -151,116 +144,152 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
           </button>
         </div>
 
-        {/* Staff Search */}
-        <div className="mt-4 relative">
-          <input
-            type="search"
-            name="query"
-            value={query}
-            onChange={handleChange}
-            placeholder="Search staff by name or card ID..."
-            className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
-          />
-          {staffOptions.length > 0 ? (
-            <ul className="absolute z-20 w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg max-h-60 overflow-y-auto">
-              {staffOptions.map((staff) => (
-                <li
-                  key={staff.id}
-                  onClick={() => handleSelectStaff(staff)}
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                >
-                  {staff.attributes.first_name} {staff.attributes.last_name} —{" "}
-                  {staff.attributes.card_id}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            query &&
-            !isStaffSelected && (
-              <p className="absolute z-20 w-full bg-white border rounded-lg mt-1 p-2 text-sm text-gray-500">
-                No results found
-              </p>
-            )
-          )}
+        {/* Request Type Toggle */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-custom-black mb-2">
+            Request Type
+          </label>
+          <div className="flex space-x-4">
+            <div
+              className={`px-4 py-2 rounded-md cursor-pointer border ${
+                requestedType === "staff"
+                  ? "bg-primary text-white border-primary"
+                  : "bg-white text-gray-700 border-gray-300"
+              }`}
+              onClick={() => handleRequestTypeChange("staff")}
+            >
+              Staff
+            </div>
+            <div
+              className={`px-4 py-2 rounded-md cursor-pointer border ${
+                requestedType === "department"
+                  ? "bg-primary text-white border-primary"
+                  : "bg-white text-gray-700 border-gray-300"
+              }`}
+              onClick={() => handleRequestTypeChange("department")}
+            >
+              Department
+            </div>
+          </div>
         </div>
 
-        {/* Form Fields */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          <div className=" hidden">
+        {/* Staff or Department */}
+        {requestedType === "staff" ? (
+          <div className="mb-6">
             <label className="block text-sm font-medium text-custom-black mb-1">
-              Card ID
+              Select Staff
             </label>
-            <input
-              type="text"
-              name="requested_by"
-              value={formData.requested_by}
-              onChange={handleChange}
-              disabled={!!selectedStaff}
-              className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm disabled:bg-gray-100"
+            <Select
+              styles={customStyles}
+              options={allStaffs.map((person) => ({
+                label: `${person.attributes.first_name} ${person.attributes.last_name}`,
+                value: person.id,
+              }))}
+              isDisabled={isLoading}
+              onChange={(selected) => {
+                const selectedPerson = allStaffs.find(
+                  (person) => person.id === selected?.value
+                );
+                if (selectedPerson) {
+                  setSelectedStaff(selectedPerson);
+                  setFormData((prev) => ({
+                    ...prev,
+                    requested_by: selectedPerson.id,
+                    requested_department_id: "",
+                    first_name: selectedPerson.attributes.first_name || "",
+                    last_name: selectedPerson.attributes.last_name || "",
+                  }));
+                } else {
+                  setSelectedStaff(null);
+                  setFormData((prev) => ({
+                    ...prev,
+                    requested_by: "",
+                    first_name: "",
+                    last_name: "",
+                  }));
+                }
+              }}
             />
           </div>
-          <div>
+        ) : (
+          <div className="mb-6">
             <label className="block text-sm font-medium text-custom-black mb-1">
-              First Name
+              Select Department
             </label>
-            <input
-              type="text"
-              name="first_name"
-              value={formData.first_name}
-              onChange={handleChange}
-              disabled={!!selectedStaff}
-              className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm disabled:bg-gray-100"
+            <Select
+              styles={customStyles}
+              classNamePrefix="react-select"
+              placeholder="Select a department"
+              isClearable
+              options={departmentOptions}
+              onChange={handleDepartmentSelect}
+              noOptionsMessage={() => "No departments found"}
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-custom-black mb-1">
-              Last Name
-            </label>
-            <input
-              type="text"
-              name="last_name"
-              value={formData.last_name}
-              onChange={handleChange}
-              disabled={!!selectedStaff}
-              className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm disabled:bg-gray-100"
-            />
+        )}
+
+        {/* Staff Info */}
+        {requestedType === "staff" && selectedStaff && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-custom-black mb-1">
+                First Name
+              </label>
+              <input
+                type="text"
+                name="first_name"
+                value={formData.first_name}
+                disabled
+                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm bg-gray-100"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-custom-black mb-1">
+                Last Name
+              </label>
+              <input
+                type="text"
+                name="last_name"
+                value={formData.last_name}
+                disabled
+                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm bg-gray-100"
+              />
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-custom-black mb-1">
-              Category
-            </label>
-            <select
-              name="category_id"
-              value={formData.category}
-              onChange={handleChange}
-              disabled={isLoading}
-              className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
-            >
-              <option value="">Select Category</option>
-              {categorys.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.attributes.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        )}
+
+        {/* Item and Quantity */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
             <label className="block text-sm font-medium text-custom-black mb-1">
               Item Name
             </label>
-            <select
-              name="item_name"
-              value={formData.item_name}
-              onChange={handleChange}
-              className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm appearance-none"
-            >
-              <option value="">Select Item</option>
-              {stocks.map((stock) => (
-                <option key={stock.id} value={stock.id}>
-                  {stock.attributes.item}
-                </option>
-              ))}
-            </select>
+            <Select
+              styles={customStyles}
+              options={stocks.map((stock) => ({
+                label: stock.attributes.service_item_name,
+                value: stock.id,
+              }))}
+              isDisabled={isLoading}
+              onChange={(selected) => {
+                const selectedItem = stocks.find(
+                  (stock) => stock.id === selected?.value
+                );
+                if (selectedItem) {
+                  setSelectedStock(selectedItem);
+                  setFormData((prev) => ({
+                    ...prev,
+                    item_name: selectedItem.id.toString(),
+                  }));
+                } else {
+                  setSelectedStock(null);
+                  setFormData((prev) => ({
+                    ...prev,
+                    item_name: "",
+                  }));
+                }
+              }}
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-custom-black mb-1">
@@ -276,14 +305,13 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
           </div>
         </div>
 
-        {/* Submit Button */}
-        <div className="mt-6 flex justify-end gap-4">
+        {/* Submit */}
+        <div className="mt-6 flex justify-end">
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting}
             variant="primary"
           >
-            {" "}
             {isSubmitting ? "Adding..." : "Add Request"}
           </Button>
         </div>

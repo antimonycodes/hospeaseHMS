@@ -33,7 +33,7 @@ const NotificationPage = () => {
       setLocalNotifications(mapped);
     }
     markAllAsRead();
-  }, [notifications, markAllAsRead]);
+  }, []);
 
   const handleMarkAsRead = (id: string) => {
     setLocalNotifications((prev) =>

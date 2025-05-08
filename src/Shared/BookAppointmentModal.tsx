@@ -13,7 +13,7 @@ interface BookAppointmentModalProps {
 
 const BookAppointmentModal = ({
   onClose,
-  endpoint = "/admin/appointment/assign",
+  // endpoint = "/admin/appointment/assign",
   refreshEndpoint = "/admin/appointment/all-records",
 }: BookAppointmentModalProps) => {
   const { searchPatients, bookAppointment, isLoading } = usePatientStore();
@@ -37,11 +37,14 @@ const BookAppointmentModal = ({
     // Extract only doctor and nurse roles
     const doctorRole = roles.doctor;
     const nurseRole = roles.nurse;
+    const laboratoryRole = roles.laboratory;
 
     // Return as array of filtered departments
     const filteredRoles = [];
     if (doctorRole) filteredRoles.push({ id: doctorRole.id, name: "Doctor" });
     if (nurseRole) filteredRoles.push({ id: nurseRole.id, name: "Nurse" });
+    if (laboratoryRole)
+      filteredRoles.push({ id: laboratoryRole.id, name: "laboratory" });
 
     return filteredRoles;
   };
@@ -127,7 +130,7 @@ const BookAppointmentModal = ({
 
     console.log("Final Payload:", finalAppointmentData);
 
-    const success = await bookAppointment(finalAppointmentData, endpoint);
+    const success = await bookAppointment(finalAppointmentData);
     if (success) {
       onClose();
     }

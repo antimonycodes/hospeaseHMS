@@ -5,15 +5,8 @@ import {
   CreateStockData,
   useInventoryStore,
 } from "../overview/useInventoryStore";
-
-// export interface AddStockData {
-//   item: string;
-//   quantity: string;
-//   category_id: string;
-//   expiry_date: string;
-//   cost: number;
-//   image: File | null;
-// }
+import { useCombinedStore } from "../../../store/super-admin/useCombinedStore";
+import Select from "react-select";
 
 export interface Category {
   id: number;
@@ -46,18 +39,24 @@ const AddStockModal = ({
   createEndpoint,
 }: AddStockModalProps) => {
   const { getAllCategorys, categorys } = useInventoryStore();
+  const { getAllItems, items } = useCombinedStore();
 
   useEffect(() => {
-    getAllCategorys(fetchEndpoint || "");
+    getAllCategorys("/admin/inventory/category/all-records");
+    getAllItems();
   }, [getAllCategorys, fetchEndpoint]);
 
+  console.log(items, "items");
+
   const [stock, setStock] = useState<any>({
-    item: "",
+    service_item_name: "",
     quantity: "",
-    category_id: "",
+    category_id: null,
     expiry_date: "",
     cost: "",
     image: null,
+    service_charge_id: "",
+    service_item_price: "",
   });
 
   const handleChange = (
@@ -74,51 +73,19 @@ const AddStockModal = ({
     const file = e.target.files?.[0] || null;
     setStock((prev: any) => ({ ...prev, image: file }));
   };
-
-  // const handleSubmit = async (e: React.FormEvent) => {
-
-  //   e.preventDefault();
-
-  //   if (
-  //     !stock.item ||
-  //     !stock.category_id ||
-  //     !stock.cost ||
-  //     !stock.quantity ||
-  //     !stock.expiry_date
-  //   ) {
-  //     toast.error("Please fill in all required fields");
-  //     return;
-  //   }
-
-  //   console.log("Submitting stock data:", stock);
-
-  //   try {
-  //     const success = await createStock(stock);
-  //     if (success) {
-  //       setStock({
-  //         item: "",
-  //         quantity: "",
-  //         category_id: "",
-  //         expiry_date: "",
-  //         cost: 0,
-  //         image: null,
-  //       });
-  //       onClose();
-  //     }
-  //   } catch (error) {
-  //     // Error is handled in createStock with toast
-  //   }
-  // };
+  console.log(categorys, "categoryssss");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (
-      !stock.item ||
+      !stock.service_item_name ||
       !stock.category_id ||
       !stock.cost ||
       !stock.quantity ||
-      !stock.expiry_date
+      !stock.expiry_date ||
+      !stock.service_charge_id ||
+      !stock.service_item_price
     ) {
       toast.error("Please fill in all required fields");
       return;
@@ -135,19 +102,55 @@ const AddStockModal = ({
     const success = await createStock(
       payload,
       endpoint,
-      "/inventory/all-inventory-items"
+      "/admin/inventory/all-inventory-items"
     );
     if (success) {
       setStock({
-        item: "",
+        service_item_name: "",
         quantity: "",
         category_id: "",
         expiry_date: "",
         cost: "",
         image: null,
+        service_charge_id: "",
+        service_item_price: "",
       });
       onClose();
     }
+  };
+
+  const customStyles = {
+    control: (provided: any, state: any) => ({
+      ...provided,
+      width: "100%",
+      padding: "6px 12px",
+      border: "1px solid #D0D5DD",
+      borderRadius: "0.375rem", // Tailwind: rounded-md
+      fontSize: "0.875rem", // Tailwind: text-sm
+      boxShadow: "none",
+      "&:hover": {
+        borderColor: "#D0D5DD",
+      },
+    }),
+    menu: (provided: any) => ({
+      ...provided,
+      zIndex: 50,
+    }),
+    option: (provided: any, state: any) => ({
+      ...provided,
+      backgroundColor: state.isFocused ? "#F3F4F6" : "#fff", // hover
+      color: "#111827",
+      fontSize: "0.875rem",
+    }),
+    placeholder: (provided: any) => ({
+      ...provided,
+      fontSize: "0.875rem",
+      color: "#6B7280",
+    }),
+    singleValue: (provided: any) => ({
+      ...provided,
+      fontSize: "0.875rem",
+    }),
   };
   return (
     <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center z-50 p-6">
@@ -176,15 +179,29 @@ const AddStockModal = ({
             </div>
             <div>
               <label className="block text-sm font-medium text-custom-black mb-1">
-                Item Name
+                Item name
               </label>
-              <input
-                type="text"
-                name="item"
-                value={stock.item}
-                onChange={handleChange}
-                disabled={isLoading}
-                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
+              <Select
+                styles={customStyles}
+                options={items.map((item) => ({
+                  label: item.attributes.name,
+                  value: item.id,
+                }))}
+                isDisabled={isLoading}
+                onChange={(selected) => {
+                  const selectedItem = items.find(
+                    (item) => item.id === selected?.value
+                  );
+                  if (selectedItem) {
+                    setStock((prev: any) => ({
+                      ...prev,
+                      service_item_name: selectedItem.attributes.name,
+                      service_charge_id: selectedItem.id,
+                      service_item_price:
+                        selectedItem.attributes.amount.replace(/,/g, ""),
+                    }));
+                  }
+                }}
               />
             </div>
             <div>
@@ -199,7 +216,7 @@ const AddStockModal = ({
                 className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
               >
                 <option value="">Select Category</option>
-                {categorys.map((category) => (
+                {categorys?.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.attributes.name}
                   </option>
@@ -232,6 +249,19 @@ const AddStockModal = ({
                 className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
               />
             </div>
+            <div className=" hidden">
+              <label className="block text-sm font-medium text-custom-black mb-1">
+                Item Price
+              </label>
+              <input
+                type="text"
+                name="service_item_price"
+                value={stock.service_item_price}
+                onChange={handleChange}
+                disabled={true}
+                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm bg-gray-100"
+              />
+            </div>
             <div>
               <label className="block text-sm font-medium text-custom-black mb-1">
                 Expiry Date
@@ -245,19 +275,6 @@ const AddStockModal = ({
                 className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
               />
             </div>
-            {/* <div>
-              <label className="block text-sm font-medium text-custom-black mb-1">
-                Image (Optional)
-              </label>
-              <input
-                type="file"
-                name="image"
-                onChange={handleFileChange}
-                disabled={isLoading}
-                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
-                accept="image/*"
-              />
-            </div> */}
           </div>
 
           <div className="mt-6">

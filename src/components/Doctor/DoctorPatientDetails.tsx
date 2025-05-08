@@ -4,7 +4,6 @@ import {
   ChevronDown,
   ChevronUp,
   User,
-  // Loader,
   FileText,
   StickyNote,
   Download,
@@ -12,6 +11,9 @@ import {
   Calendar,
   Clock,
   Loader2,
+  Check,
+  Plus,
+  Minus,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { usePatientStore } from "../../store/super-admin/usePatientStore";
@@ -20,12 +22,8 @@ import EditPatientModal from "../../Shared/EditPatientModal";
 import { useReportStore } from "../../store/super-admin/useReoprt";
 import toast from "react-hot-toast";
 import { useGlobalStore } from "../../store/super-admin/useGlobal";
-import {
-  downloadDateReportAsPDF,
-  downloadDateReportAsImage,
-  downloadCompletePDF,
-} from "../../utils/reportDownload";
 import Loader from "../../Shared/Loader";
+import MedicalTimeline from "../../Shared/MedicalTimeline";
 
 const DoctorPatientDetails = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -54,15 +52,162 @@ const DoctorPatientDetails = () => {
     allNotes,
     isLoading,
     isCreating,
+    getPharmacyStocks,
+    pharmacyStocks,
+    getLaboratoryItems,
+    labItems,
   } = useReportStore();
   const { getAllRoles, roles } = useGlobalStore();
-  // const [isLoading] = useState(false);
+  const [itemSearch, setItemSearch] = useState("");
+  const [isSelectOpen, setIsSelectOpen] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<
+    {
+      service_item_name: string;
+      id: any;
+      request_pharmacy_id: any;
+      attributes: {
+        amount?: any;
+        name?: string;
+      };
+      quantity: number;
+      item: {
+        id: number;
+        item: string;
+      };
+    }[]
+  >([]);
+  const [labTestSearch, setLabTestSearch] = useState("");
+  const [isLabSelectOpen, setIsLabSelectOpen] = useState(false);
+  const [selectedLabTests, setSelectedLabTests] = useState<
+    {
+      id: number;
+      name: string;
+      amount: string;
+      quantity: number;
+    }[]
+  >([]);
 
-  // Group data by date utility function
+  const handleChange = (e: { target: { name: any; value: any } }) => {
+    const { name, value } = e.target;
+    if (name === "itemSearch") {
+      setItemSearch(value);
+    } else if (name === "labTestSearch") {
+      setLabTestSearch(value);
+    }
+  };
+
+  const filteredItems = pharmacyStocks?.filter((stock) =>
+    stock.service_item_name?.toLowerCase().includes(itemSearch.toLowerCase())
+  );
+
+  const filteredLabTests = labItems?.filter((test) =>
+    test.name?.toLowerCase().includes(labTestSearch.toLowerCase())
+  );
+
+  const handleToggleItem = (item: any) => {
+    const exists = selectedItems.find(
+      (i) => i.request_pharmacy_id === item.request_pharmacy_id
+    );
+    if (!exists) {
+      setSelectedItems((prev) => [
+        ...prev,
+        {
+          ...item,
+          quantity: 1,
+        },
+      ]);
+      toast.success(`Added ${item.service_item_name || "item"} to selection`);
+    } else {
+      setSelectedItems((prev) =>
+        prev.filter((i) => i.request_pharmacy_id !== item.request_pharmacy_id)
+      );
+      toast.success(
+        `Removed ${item.service_item_name || "item"} from selection`
+      );
+    }
+  };
+
+  const handleToggleLabTest = (test: any) => {
+    const exists = selectedLabTests.find((t) => t.id === test.id);
+    if (!exists) {
+      setSelectedLabTests((prev) => [
+        ...prev,
+        {
+          ...test,
+          quantity: 1,
+        },
+      ]);
+      toast.success(`Added ${test.name || "test"} to selection`);
+    } else {
+      setSelectedLabTests((prev) => prev.filter((t) => t.id !== test.id));
+      toast.success(`Removed ${test.name || "test"} from selection`);
+    }
+  };
+
+  const isItemSelected = (request_pharmacy_id: any) =>
+    selectedItems.some(
+      (item) => item.request_pharmacy_id === request_pharmacy_id
+    );
+
+  const isLabTestSelected = (id: any) =>
+    selectedLabTests.some((test) => test.id === id);
+
+  const handleQuantityChange = (
+    request_pharmacy_id: any,
+    action: "increase" | "decrease"
+  ) => {
+    setSelectedItems((prevItems) =>
+      prevItems.map((item) => {
+        if (item.request_pharmacy_id === request_pharmacy_id) {
+          const stock = pharmacyStocks?.find(
+            (s) => s.request_pharmacy_id === request_pharmacy_id
+          );
+          const maxAvailable = stock?.requested_quantity || 0;
+
+          if (action === "increase") {
+            return {
+              ...item,
+              quantity:
+                item.quantity < maxAvailable
+                  ? item.quantity + 1
+                  : item.quantity,
+            };
+          } else {
+            return {
+              ...item,
+              quantity: item.quantity > 1 ? item.quantity - 1 : 1,
+            };
+          }
+        }
+        return item;
+      })
+    );
+  };
+
+  const handleQuantityInput = (request_pharmacy_id: any, value: string) => {
+    const numValue = parseInt(value, 10);
+    if (isNaN(numValue)) return;
+
+    setSelectedItems((prevItems) =>
+      prevItems.map((item) => {
+        if (item.request_pharmacy_id === request_pharmacy_id) {
+          const stock = pharmacyStocks?.find(
+            (s) => s.request_pharmacy_id === request_pharmacy_id
+          );
+          const maxAvailable = stock?.quantity || 0;
+
+          const quantity = Math.min(Math.max(1, numValue), maxAvailable);
+          return { ...item, quantity };
+        }
+        return item;
+      })
+    );
+  };
+
   const groupByDate = (data: any[]) => {
     return data.reduce((acc: { [key: string]: any[] }, item) => {
       const rawDate = new Date(item.attributes?.created_at);
-      const date = rawDate.toLocaleDateString("en-CA"); // Format: yyyy-mm-dd (ISO format but local)
+      const date = rawDate.toLocaleDateString("en-CA");
       if (!acc[date]) acc[date] = [];
       acc[date].push(item);
       return acc;
@@ -87,7 +232,7 @@ const DoctorPatientDetails = () => {
             date,
             reports: groupedReports[date] || [],
             notes: groupedNotes[date] || [],
-            isExpanded: true, // Set initially expanded
+            isExpanded: true,
           }))
           .sort(
             (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -100,8 +245,11 @@ const DoctorPatientDetails = () => {
 
   useEffect(() => {
     getAllRoles();
-  }, [getAllRoles]);
+    getPharmacyStocks();
+    getLaboratoryItems();
+  }, [getAllRoles, getPharmacyStocks, getLaboratoryItems]);
 
+  console.log(id);
   useEffect(() => {
     if (id) {
       getPatientByIdDoc(id);
@@ -118,12 +266,21 @@ const DoctorPatientDetails = () => {
 
     const departmentId = roles[selectedDepartment]?.id;
     if (!departmentId) {
-      toast.error("Invalid department selected");
       return;
     }
 
     try {
-      const response = await createReport({
+      let reportData: {
+        patient_id: string;
+        note: string;
+        department_id: number;
+        parent_id: null;
+        file: File | null;
+        status: string;
+        role: string;
+        pharmacy_stocks?: { id: any; quantity: number }[];
+        laboratory_service_charge?: { id: any; quantity: number }[];
+      } = {
         patient_id: id ?? "",
         note: reportNote,
         department_id: departmentId,
@@ -131,17 +288,45 @@ const DoctorPatientDetails = () => {
         file,
         status: "pending",
         role: selectedDepartment,
-      });
+      };
+
+      if (selectedDepartment === "pharmacist" && selectedItems.length > 0) {
+        const pharmacyStocksArray = selectedItems.map((item) => ({
+          id: item.request_pharmacy_id,
+          quantity: item.quantity,
+        }));
+        reportData = {
+          ...reportData,
+          pharmacy_stocks: pharmacyStocksArray,
+        };
+      }
+
+      if (selectedDepartment === "laboratory" && selectedLabTests.length > 0) {
+        const laboratoryTestsArray = selectedLabTests.map((test) => ({
+          id: test.id,
+          quantity: test.quantity,
+        }));
+        reportData = {
+          ...reportData,
+          laboratory_service_charge: laboratoryTestsArray,
+        };
+      }
+
+      const response = await createReport(reportData);
 
       if (response) {
-        // toast.success("Report submitted successfully");
         setReportNote("");
         setFile(null);
         setSelectedDepartment("");
+        setSelectedItems([]);
+        setSelectedLabTests([]);
+        setItemSearch("");
+        setLabTestSearch("");
         getAllReport(id);
+        toast.success("Report sent successfully");
       }
     } catch (error) {
-      // toast.error("Failed to submit report");
+      // Error handling is done in the toast already
     }
   };
 
@@ -158,16 +343,13 @@ const DoctorPatientDetails = () => {
       });
 
       if (response) {
-        // toast.success("Note added successfully");
         setNote("");
         getMedicalNote(id, "doctor");
       }
     } catch (error) {
-      // toast.error("Failed to add note");
+      // Error handling is done in the toast already
     }
   };
-
-  console.log(mergedData, "fcx");
 
   const toggleDateExpansion = (index: number) => {
     const updatedData = [...mergedData];
@@ -183,9 +365,7 @@ const DoctorPatientDetails = () => {
     <div className="px-2 sm:px-0">
       <div className="bg-white rounded-lg custom-shadow mb-6">
         <div className="p-4 sm:p-6">
-          {/*  */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 sm:mb-12 gap-4">
-            {/* Back button */}
             <Link
               to="/dashboard/patients"
               className="flex items-center text-gray-600 hover:text-primary"
@@ -193,28 +373,9 @@ const DoctorPatientDetails = () => {
               <ChevronLeft size={16} />
               <span className="ml-1">Patients</span>
             </Link>
-            {/*  */}
-            {/* <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-              <Button
-                variant="edit"
-                rounded="lg"
-                onClick={() => setIsEditModalOpen(true)}
-                className="text-xs sm:text-sm flex-1 sm:flex-none"
-              >
-                Edit Patient
-              </Button>
-              <Button
-                variant="delete"
-                className="text-xs sm:text-sm flex-1 sm:flex-none"
-              >
-                Delete Patient
-              </Button>
-            </div> */}
           </div>
-          {/* Patient information card */}
 
           <div className="grid gap-6">
-            {/* Patient Info */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
               <InfoRow label="First Name" value={patient.first_name} />
               <InfoRow label="Last Name" value={patient.last_name} />
@@ -236,9 +397,7 @@ const DoctorPatientDetails = () => {
                 value={patient.address}
               />
             </div>
-            {/*  */}
             <hr className="text-[#979797]" />
-            {/* Next of Kin */}
             <div className="">
               <div className="">
                 <h3 className="text-sm font-medium text-gray-800 mb-4">
@@ -268,9 +427,7 @@ const DoctorPatientDetails = () => {
         </div>
       </div>
 
-      {/* Report & Note */}
       <div className="bg-white rounded-lg custom-shadow mb-6 p-4 sm:p-6">
-        {/* Tabs */}
         <div className="flex gap-6 mb-4 text-sm font-medium text-[#667185]">
           <button
             className={`flex items-center gap-1 px-3 py-1 rounded-md transition ${
@@ -296,8 +453,7 @@ const DoctorPatientDetails = () => {
           </button>
         </div>
 
-        {/* Content */}
-        {activeTab === "note" ? (
+        {activeTab === "note" && (
           <div className="space-y-4">
             <textarea
               rows={5}
@@ -315,15 +471,349 @@ const DoctorPatientDetails = () => {
               {isCreating ? (
                 <>
                   Adding
-                  <Loader2 className=" size-6 mr-2 animate-spin" />
+                  <Loader2 className="size-6 mr-2 animate-spin" />
                 </>
               ) : (
                 <>Add note</>
               )}
             </button>
           </div>
-        ) : (
+        )}
+        {activeTab === "report" && (
           <div className="space-y-4">
+            <div className="flex gap-2 mb-4">
+              {roles && Object.keys(roles).length > 0 ? (
+                <>
+                  {roles["pharmacist"] && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedDepartment("pharmacist")}
+                      className={`px-4 py-2 rounded-lg transition ${
+                        selectedDepartment === "pharmacist"
+                          ? "bg-primary text-white"
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      Pharmacy
+                    </button>
+                  )}
+                  {roles["laboratory"] && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedDepartment("laboratory")}
+                      className={`px-4 py-2 rounded-lg transition ${
+                        selectedDepartment === "laboratory"
+                          ? "bg-primary text-white"
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      Laboratory
+                    </button>
+                  )}
+                  {roles["nurse"] && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedDepartment("nurse")}
+                      className={`px-4 py-2 rounded-lg transition ${
+                        selectedDepartment === "nurse"
+                          ? "bg-primary text-white"
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      Nurse
+                    </button>
+                  )}
+                </>
+              ) : (
+                <div className="flex items-center text-gray-500">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading departments...
+                </div>
+              )}
+            </div>
+
+            {activeTab === "report" && selectedDepartment === "pharmacist" && (
+              <div>
+                <h1 className="text-lg font-medium mb-2">Pharmacy Store</h1>
+                <h2 className="text-sm text-gray-600 mb-4">
+                  Check and select drugs from pharmacy for the patient here
+                </h2>
+
+                <div className="relative mb-4">
+                  <div
+                    className="border border-[#D0D5DD] rounded-lg p-3 flex items-center justify-between cursor-pointer"
+                    onClick={() => setIsSelectOpen(!isSelectOpen)}
+                  >
+                    <div className="flex-1">
+                      {selectedItems.length === 0 ? (
+                        <span className="text-gray-500">Select items...</span>
+                      ) : (
+                        <span>{selectedItems.length} item(s) selected</span>
+                      )}
+                    </div>
+                    <div
+                      className={`transform transition-transform ${
+                        isSelectOpen ? "rotate-180" : ""
+                      }`}
+                    >
+                      <svg
+                        width="12"
+                        height="8"
+                        viewBox="0 0 12 8"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M1 1L6 6L11 1"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  {isSelectOpen && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-[#D0D5DD] rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                      <div className="p-2 sticky top-0 bg-white border-b border-[#D0D5DD]">
+                        <input
+                          type="search"
+                          name="itemSearch"
+                          value={itemSearch}
+                          onChange={handleChange}
+                          placeholder="Search items..."
+                          className="w-full border border-[#D0D5DD] p-2 rounded outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                        />
+                      </div>
+                      <ul className="divide-y">
+                        {filteredItems?.length > 0 ? (
+                          filteredItems.map((item) => (
+                            <li
+                              key={item.request_pharmacy_id}
+                              onClick={() => handleToggleItem(item)}
+                              className="px-4 py-3 hover:bg-blue-50 cursor-pointer flex items-center justify-between"
+                            >
+                              <div>
+                                <p className="font-medium">
+                                  {item.service_item_name}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                  Available: {item.requested_quantity}
+                                </p>
+                              </div>
+                              <div
+                                className={`w-5 h-5 rounded border flex items-center justify-center ${
+                                  isItemSelected(item.request_pharmacy_id)
+                                    ? "bg-blue-500 border-blue-500"
+                                    : "border-gray-300"
+                                }`}
+                              >
+                                {isItemSelected(item.request_pharmacy_id) && (
+                                  <Check className="h-4 w-4 text-white" />
+                                )}
+                              </div>
+                            </li>
+                          ))
+                        ) : (
+                          <li className="px-4 py-3 text-gray-500">
+                            No items found
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                {selectedItems.length > 0 && (
+                  <div className="mt-4 border border-[#D0D5DD] rounded-lg p-4">
+                    <h3 className="font-medium mb-3">Selected Items</h3>
+                    <ul className="divide-y">
+                      {selectedItems.map((item) => {
+                        const stock = pharmacyStocks?.find(
+                          (s) =>
+                            s.request_pharmacy_id === item.request_pharmacy_id
+                        );
+                        const maxQuantity = stock?.requested_quantity || 0;
+
+                        return (
+                          <li
+                            key={item.request_pharmacy_id}
+                            className="py-3 flex items-center justify-between"
+                          >
+                            <div>
+                              <p className="font-medium">
+                                {item.service_item_name}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {maxQuantity} available
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleQuantityChange(
+                                    item.request_pharmacy_id,
+                                    "decrease"
+                                  )
+                                }
+                                className="p-1 rounded-md bg-gray-100 hover:bg-gray-200"
+                                disabled={item.quantity <= 1}
+                              >
+                                <Minus className="h-4 w-4" />
+                              </button>
+                              <input
+                                type="number"
+                                min="1"
+                                max={maxQuantity}
+                                value={item.quantity}
+                                onChange={(e) =>
+                                  handleQuantityInput(
+                                    item.request_pharmacy_id,
+                                    e.target.value
+                                  )
+                                }
+                                className="w-12 text-center border border-gray-300 rounded-md p-1"
+                              />
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleQuantityChange(
+                                    item.request_pharmacy_id,
+                                    "increase"
+                                  )
+                                }
+                                className="p-1 rounded-md bg-gray-100 hover:bg-gray-200"
+                                disabled={item.quantity >= maxQuantity}
+                              >
+                                <Plus className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === "report" && selectedDepartment === "laboratory" && (
+              <div>
+                <h1 className="text-lg font-medium mb-2">Laboratory Tests</h1>
+                <h2 className="text-sm text-gray-600 mb-4">
+                  Check and select tests from laboratory for the patient here
+                </h2>
+
+                <div className="relative mb-4">
+                  <div
+                    className="border border-[#D0D5DD] rounded-lg p-3 flex items-center justify-between cursor-pointer"
+                    onClick={() => setIsLabSelectOpen(!isLabSelectOpen)}
+                  >
+                    <div className="flex-1">
+                      {selectedLabTests.length === 0 ? (
+                        <span className="text-gray-500">Select tests...</span>
+                      ) : (
+                        <span>{selectedLabTests.length} test(s) selected</span>
+                      )}
+                    </div>
+                    <div
+                      className={`transform transition-transform ${
+                        isLabSelectOpen ? "rotate-180" : ""
+                      }`}
+                    >
+                      <svg
+                        width="12"
+                        height="8"
+                        viewBox="0 0 12 8"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M1 1L6 6L11 1"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  {isLabSelectOpen && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-[#D0D5DD] rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                      <div className="p-2 sticky top-0 bg-white border-b border-[#D0D5DD]">
+                        <input
+                          type="search"
+                          name="labTestSearch"
+                          value={labTestSearch}
+                          onChange={handleChange}
+                          placeholder="Search tests..."
+                          className="w-full border border-[#D0D5DD] p-2 rounded outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                        />
+                      </div>
+                      <ul className="divide-y">
+                        {filteredLabTests?.length > 0 ? (
+                          filteredLabTests.map((test) => (
+                            <li
+                              key={test.id}
+                              onClick={() => handleToggleLabTest(test)}
+                              className="px-4 py-3 hover:bg-blue-50 cursor-pointer flex items-center justify-between"
+                            >
+                              <div>
+                                <p className="font-medium">{test.name}</p>
+                                {/* <p className="text-sm text-gray-500">
+                                  Amount: {test.amount}
+                                </p> */}
+                              </div>
+                              <div
+                                className={`w-5 h-5 rounded border flex items-center justify-center ${
+                                  isLabTestSelected(test.id)
+                                    ? "bg-blue-500 border-blue-500"
+                                    : "border-gray-300"
+                                }`}
+                              >
+                                {isLabTestSelected(test.id) && (
+                                  <Check className="h-4 w-4 text-white" />
+                                )}
+                              </div>
+                            </li>
+                          ))
+                        ) : (
+                          <li className="px-4 py-3 text-gray-500">
+                            No tests found
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                {selectedLabTests.length > 0 && (
+                  <div className="mt-4 border border-[#D0D5DD] rounded-lg p-4">
+                    <h3 className="font-medium mb-3">Selected Tests</h3>
+                    <ul className="divide-y">
+                      {selectedLabTests.map((test) => (
+                        <li
+                          key={test.id}
+                          className="py-3 flex items-center justify-between"
+                        >
+                          <div>
+                            <p className="font-medium">{test.name}</p>
+                            {/* <p className="text-xs text-gray-500">
+                              Amount: {test.amount}
+                            </p> */}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="w-12 text-center border border-gray-300 rounded-md p-1">
+                              {test.quantity}
+                            </span>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
             <textarea
               rows={5}
               value={reportNote}
@@ -331,217 +821,48 @@ const DoctorPatientDetails = () => {
               placeholder="Enter doctor's report..."
               className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-primary"
             />
+
             <input
               type="file"
               accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
               onChange={(e) => setFile(e.target.files?.[0] || null)}
               className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90"
             />
-            <select
-              value={selectedDepartment}
-              onChange={(e) => setSelectedDepartment(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-primary"
-            >
-              <option value="">Select a department</option>
-              {roles && Object.keys(roles).length > 0 ? (
-                <>
-                  {roles["pharmacist"] && (
-                    <option value="pharmacist">Pharmacy</option>
-                  )}
-                  {roles["laboratory"] && (
-                    <option value="laboratory">Laboratory</option>
-                  )}
-                </>
-              ) : (
-                <>
-                  <option value="loading" disabled>
-                    Loading departments...
-                  </option>
-                </>
-              )}
-            </select>
+
             <button
               onClick={handleReportSubmit}
               className={`bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition flex items-center justify-center
-            ${isCreating ? "opacity-50 cursor-not-allowed" : ""}
-            `}
-              disabled={isCreating}
+                ${
+                  isCreating || !selectedDepartment
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                }`}
+              disabled={isCreating || !selectedDepartment}
             >
               {isCreating ? (
                 <>
                   Adding
-                  <Loader2 className=" size-6 mr-2 animate-spin" />
+                  <Loader2 className="size-6 mr-2 animate-spin" />
                 </>
               ) : (
-                "Add Report"
+                `Send Report to ${
+                  selectedDepartment
+                    ? departmentLabels[selectedDepartment] || "..."
+                    : "..."
+                }`
               )}
             </button>
           </div>
         )}
       </div>
 
-      {/* Merged EMR Timeline */}
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-medium text-gray-800">
-            Medical Timeline
-          </h3>
-          {/* <div className="flex gap-2">
-            <button
-              onClick={() => {
-                downloadCompletePDF(mergedData, patient);
-              }}
-              className="flex items-center gap-1 text-sm bg-primary text-white px-3 py-1.5 rounded-md hover:bg-primary/90 transition"
-            >
-              <Download size={16} />
-              <span>Download Complete Report</span>
-            </button>
-          </div> */}
-        </div>
-
-        <div className="timeline-container bg-white p-6 rounded-lg custom-shadow">
-          <div className="patient-report-header mb-6 border-b pb-4">
-            <h2 className="text-xl font-bold text-primary mb-1">
-              {patient.first_name} {patient.last_name} - Medical Report
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">
-              {/* <InfoRow label="Card ID" value={patient.} /> */}
-              <InfoRow label="Card ID" value={patient.card_id} />
-              <InfoRow label="Age" value={patient.age?.toString()} />
-              <InfoRow label="Gender" value={patient.gender} />
-              <InfoRow label="Phone" value={patient.phone_number} />
-            </div>
-          </div>
-
-          {mergedData.map((day, index) => (
-            <div
-              key={day.date}
-              className="timeline-day mb-4 border rounded-lg overflow-hidden bg-white"
-            >
-              <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
-                <div
-                  className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 px-2 py-1 rounded-md"
-                  onClick={() => toggleDateExpansion(index)}
-                >
-                  <Calendar className="text-black w-5 h-5" />
-                  <h3 className="font-medium text-gray-700">
-                    {new Date(day.date).toLocaleDateString("en-US", {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </h3>
-                  {day.isExpanded ? (
-                    <ChevronUp className="text-gray-500 w-5 h-5" />
-                  ) : (
-                    <ChevronDown className="text-gray-500 w-5 h-5" />
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs bg-[#CFFFE9] text-[#009952] px-2 py-1 rounded-full">
-                    {day.reports.length + day.notes.length} entries
-                  </span>
-                  {/* <div className="flex gap-1">
-                    <button
-                      onClick={() => {
-                        toast.loading("Generating PDF...", { id: "date-pdf" });
-                        downloadDateReportAsPDF(day, patient)
-                          .then(() =>
-                            toast.success("PDF downloaded", { id: "date-pdf" })
-                          )
-                          .catch(() =>
-                            toast.error("Failed to download PDF", {
-                              id: "date-pdf",
-                            })
-                          );
-                      }}
-                      className="flex items-center gap-1 text-xs bg-primary text-white px-2 py-1 rounded-md hover:bg-blue-700"
-                      title="Download as PDF"
-                    >
-                      <Download size={14} />
-                      <span>PDF</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        toast.loading("Generating image...", {
-                          id: "date-img",
-                        });
-                        downloadDateReportAsImage(day, patient)
-                          .then(() =>
-                            toast.success("Image downloaded", {
-                              id: "date-img",
-                            })
-                          )
-                          .catch(() =>
-                            toast.error("Failed to download image", {
-                              id: "date-img",
-                            })
-                          );
-                      }}
-                      className="flex items-center gap-1 text-xs bg-gray-700 text-white px-2 py-1 rounded-md hover:bg-gray-600"
-                      title="Download as Image"
-                    >
-                      <Printer size={14} />
-                      <span>IMG</span>
-                    </button>
-                  </div> */}
-                </div>
-              </div>
-
-              {day.isExpanded && (
-                <div className="p-4 space-y-4">
-                  {/* Timeline items with vertical connector */}
-                  <div className="relative timeline-items">
-                    {[...day.reports, ...day.notes]
-                      .sort(
-                        (a, b) =>
-                          new Date(b.attributes.created_at).getTime() -
-                          new Date(a.attributes.created_at).getTime()
-                      )
-                      .map((item, itemIdx) => {
-                        const isReport = "case_report_id" in item;
-                        return (
-                          <div
-                            key={isReport ? item.case_report_id : item.id}
-                            className="timeline-item relative pl-8 pb-4 mb-4"
-                          >
-                            {/* Vertical line */}
-                            {itemIdx !==
-                              [...day.reports, ...day.notes].length - 1 && (
-                              <div className="absolute left-3 top-6 bottom-0 w-0.5 bg-gray-200"></div>
-                            )}
-
-                            {/* Time dot */}
-                            <div className="absolute left-0 top-0 bg-[#DFE0E0] rounded-full w-6 h-6 flex items-center justify-center">
-                              <Clock className="text-white w-3 h-3" />
-                            </div>
-
-                            {/* Time */}
-                            <div className="text-xs text-gray-500 mb-1">
-                              {new Date(
-                                item.attributes.created_at
-                              ).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </div>
-
-                            {isReport ? (
-                              <ReportItem report={item} />
-                            ) : (
-                              <NoteItem note={item} />
-                            )}
-                          </div>
-                        );
-                      })}
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+      {id && (
+        <MedicalTimeline
+          patientId={id}
+          patient={patient}
+          showDownloadCompleteButton={false}
+        />
+      )}
 
       <EditPatientModal
         isLoading={false}
@@ -556,94 +877,6 @@ const DoctorPatientDetails = () => {
   );
 };
 
-// Report Item Component
-const ReportItem = ({ report }: { report: any }) => {
-  const staff = report.attributes.staff_details;
-  const department = report.attributes.department?.name || "Unknown Department";
-
-  return (
-    <div className="p-4 bg-gray-50 rounded-lg border hover:shadow-md transition">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <div className="bg-gray-100 p-2 rounded-full">
-            {staff?.image ? (
-              <img
-                src={staff.image}
-                alt="Staff"
-                className="w-6 h-6 rounded-full"
-              />
-            ) : (
-              <User className="text-white w-5 h-5" />
-            )}
-          </div>
-          <div>
-            <p className="font-medium text-sm">
-              {staff?.first_name} {staff?.last_name}
-            </p>
-            <p className="text-xs text-gray-500">{department}</p>
-          </div>
-        </div>
-        <span
-          className={`text-xs px-2 py-1 rounded-full ${
-            report.attributes.status === "completed" ||
-            report.attributes.status === "sent"
-              ? "bg-[#CCFFE7] text-[#009952]"
-              : "bg-[#FFEBAA] text-[#B58A00]"
-          }`}
-        >
-          {report.attributes.status}
-        </span>
-      </div>
-
-      <p className="text-sm text-gray-600 mb-2">{report.attributes.note}</p>
-
-      {report.attributes.file && (
-        <a
-          href={report.attributes.file}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center text-blue-600 text-sm hover:underline"
-        >
-          <FileText className="w-4 h-4 mr-2" />
-          View Attachment
-        </a>
-      )}
-    </div>
-  );
-};
-
-// Note Item Component
-const NoteItem = ({ note }: { note: any }) => {
-  const staff = note.attributes;
-  console.log(staff, "kjhg");
-  console.log(note);
-
-  return (
-    <div className="p-4 bg-white rounded-lg border-l-4 border border-blue-200 border-l-primary hover:shadow-md transition">
-      <div className="flex items-center gap-3 mb-3">
-        <div className="bg-blue-100 p-2 rounded-full">
-          {staff?.image ? (
-            <img
-              src={staff.image}
-              alt="Staff"
-              className="w-6 h-6 rounded-full"
-            />
-          ) : (
-            <User className="text-white w-5 h-5" />
-          )}
-        </div>
-        <div>
-          <p className="font-medium text-sm">{staff?.doctor_name}</p>
-          <p className="text-xs text-gray-500">Doctor's Note</p>
-        </div>
-      </div>
-
-      <p className="text-sm text-gray-600">{note.attributes.note}</p>
-    </div>
-  );
-};
-
-// Reusable InfoRow Component (Keep existing)
 const InfoRow = ({ label, value, className = "" }: any) => (
   <div className={className}>
     <p className="text-xs text-gray-500">{label}</p>
@@ -652,3 +885,9 @@ const InfoRow = ({ label, value, className = "" }: any) => (
 );
 
 export default DoctorPatientDetails;
+
+const departmentLabels: Record<string, string> = {
+  pharmacist: "Pharmacy",
+  laboratory: "Laboratory",
+  nurse: "Nurse",
+};

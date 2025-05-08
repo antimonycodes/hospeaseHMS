@@ -177,7 +177,7 @@ const InventoryRequest = () => {
           onClose={closeModal}
           endpoint="/inventory/requests/create"
           refreshEndpoint="/inventory/requests/all-records?status=pending"
-          fetchEndpoint="/inventory/category/all-records"
+          fetchEndpoint="/medical-report/department-request-records"
           stockEndpoint="/inventory/all-inventory-items"
         />
       )}

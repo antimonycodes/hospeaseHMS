@@ -62,6 +62,7 @@ import SaInventoryPage from "./components/Superadmin/Inventory/SaInventoryPage";
 import PaymentDetails from "./components/Finance/payment/PaymentDetails";
 import FrontdeskPatientDetails from "./components/Frontdesk/patients/FrontdeskPatientDetails";
 import TourListener from "./Shared/TourListener";
+import CreateShift from "./components/Matron/shifts/CreateShift";
 
 function App() {
   return (
@@ -172,6 +173,7 @@ function App() {
               <Route path="payment" element={<Payment />} />
               <Route path="profile" element={<Profile />} />
               <Route path="shifts" element={<Shift />} />
+              <Route path="create-shift" element={<CreateShift />} />
               <Route path="inventory" element={<Inventory />} />
               <Route path="category" element={<Category />} />
               <Route path="stocks" element={<Stocks />} />

@@ -15,7 +15,9 @@ const Fpayment = ({
   refreshEndpoint = "/finance/patient-paymet-history",
 }: FpaymentTableProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"All" | "part" | "full">("All");
+  const [activeTab, setActiveTab] = useState<
+    "All" | "part" | "full" | "pending"
+  >("All");
   const { payments, pagination, getAllPayments, isLoading } = useFinanceStore();
 
   useEffect(() => {
@@ -72,11 +74,11 @@ const Fpayment = ({
         />
       )}
 
-      <Tabs<"All" | "full" | "part">
+      <Tabs<"All" | "full" | "part" | "pending">
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         statusCounts={statusCounts}
-        tabs={["All", "full", "part"]}
+        tabs={["All", "full", "part", "pending"]}
       />
 
       <FpaymentTable payments={filteredPayments} isLoading={isLoading} />

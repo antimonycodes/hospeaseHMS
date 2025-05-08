@@ -5,10 +5,7 @@ import { Loader } from "lucide-react";
 import Table from "../../../Shared/Table";
 type StockData = {
   item_name: string;
-  category: string;
-  quantity: string;
-  expiry_date: string;
-  cost: number;
+  id: number;
 };
 type Columns = {
   key: keyof StockData;
@@ -18,58 +15,29 @@ type Columns = {
 
 type SaInventoryStockProps = {
   isLoading: boolean;
-  stocks: {
+  categorys: {
     attributes: {
-      item_name: string;
-      category: string;
-      quantity: string;
-      expiry_date: string;
-      cost: number;
+      name: string;
     };
     id: number;
   }[];
 };
-const SaInventorySettings = ({ stocks, isLoading }: SaInventoryStockProps) => {
-  const formattedStocks = (stocks || []).map((stock) => ({
-    id: stock.id,
-    item_name: stock.attributes.item_name,
-    category: stock.attributes.category,
-    quantity: stock.attributes.quantity,
-    expiry_date: stock.attributes.expiry_date,
-    cost: stock.attributes.cost,
+const SaInventorySettings = ({
+  categorys,
+  isLoading,
+}: SaInventoryStockProps) => {
+  const formattedStocks = (categorys || []).map((category) => ({
+    id: category.id,
+    item_name: category.attributes.name,
   }));
+  console.log(categorys, "categorys");
 
   const columns: Columns[] = [
     {
       key: "item_name",
       label: "Item Name",
-      render: (_, stock) => <span>{stock.item_name}</span>,
+      render: (_, category) => <span>{category.item_name}</span>,
     },
-    {
-      key: "category",
-      label: "Item Category",
-      render: (_, stock) => <span>{stock.category}</span>,
-    },
-    {
-      key: "quantity",
-      label: "Quantity",
-      render: (_, stock) => <span>{stock.quantity}</span>,
-    },
-    {
-      key: "expiry_date",
-      label: "Expiry Date",
-      render: (_, stock) => <span>{stock.expiry_date}</span>,
-    },
-    {
-      key: "cost",
-      label: "Purchase Cost",
-      render: (_, stock) => <span>{stock.cost}</span>,
-    },
-    // {
-    //   key: "id",
-    //   label: "",
-    //   render: (_, stock) => <span> </span>,
-    // },
   ];
 
   if (isLoading) return <Loader />;

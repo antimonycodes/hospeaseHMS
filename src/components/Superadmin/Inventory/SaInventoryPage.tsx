@@ -19,7 +19,14 @@ const SaInventoryPage = () => {
   >("Overview");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { getAllStocks, stocks, isLoading, createStock } = useInventoryStore();
+  const {
+    getAllStocks,
+    stocks,
+    isLoading,
+    createStock,
+    getAllCategorys,
+    categorys,
+  } = useInventoryStore();
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -64,14 +71,14 @@ const SaInventoryPage = () => {
     if (activeTab === "Settings") {
       return (
         <div className="flex gap-2">
-          <Button
+          {/* <Button
             variant="primary"
             className="flex items-center text-[12px] gap-2 px-2 md:px-4"
             onClick={openItem}
           >
             Add Item
             <Plus size={20} />
-          </Button>
+          </Button> */}
           <Button
             variant="primary"
             className="flex items-center text-[12px] gap-2 px-2 md:px-4"
@@ -88,6 +95,7 @@ const SaInventoryPage = () => {
 
   useEffect(() => {
     getAllStocks("/admin/inventory/all-inventory-items");
+    getAllCategorys("/admin/inventory/category/all-records");
   }, [getAllStocks]);
   // console.log("fetched", stocks);
 
@@ -111,7 +119,7 @@ const SaInventoryPage = () => {
         )}
         {activeTab === "Requests" && <SaInventoryRequest />}
         {activeTab === "Settings" && (
-          <SaInventorySettings stocks={stocks} isLoading={isLoading} />
+          <SaInventorySettings categorys={categorys} isLoading={isLoading} />
         )}
       </div>
       {isModalOpen && (
@@ -121,16 +129,16 @@ const SaInventoryPage = () => {
           createStock={createStock}
           endpoint="/admin/inventory/upload-item"
           refreshEndpoint="/admin/inventory/all-inventory-items"
-          fetchEndpoint="/admin/inventory/category/all-records"
+          fetchEndpoint="/admin/inventory/all-inventory-items"
           createEndpoint="/admin/inventory/category/create"
         />
       )}
       {isRequestOpen && (
         <AddRequestModal
           onClose={closeRequest}
-          endpoint="/admin/inventory/category/create"
-          refreshEndpoint="/admin/inventory/requests/all-records?status=pending"
-          fetchEndpoint="/admin/inventory/category/all-records"
+          endpoint="/admin/inventory/requests/create"
+          refreshEndpoint="/medical-report/department-request-records"
+          fetchEndpoint="/medical-report/department-request-records"
           stockEndpoint="/admin/inventory/all-inventory-items"
         />
       )}

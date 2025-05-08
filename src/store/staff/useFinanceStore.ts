@@ -263,8 +263,10 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
     refreshEndpoint = "/finance/all-revenues"
   ) => {
     set({ isLoading: true });
+
     try {
       const response = await api.post("/finance/save-patient-payment", data);
+
       if (response.status === 201) {
         await useFinanceStore.getState().getAllPayments(refreshEndpoint);
         toast.success(response.data.message || "Payment added successfully");
@@ -275,7 +277,7 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
       console.error("Error response:", error.response?.data);
       const errorMessage =
         error.response?.data?.message?.[0] || "Failed to create payment";
-      // toast.error(errorMessage);
+      toast.error(errorMessage);
       return false;
     } finally {
       set({ isLoading: false });

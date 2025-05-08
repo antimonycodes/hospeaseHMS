@@ -8,6 +8,8 @@ import { ChevronLeft, FileText, Loader2 } from "lucide-react";
 import { useNurseStore } from "../../../store/super-admin/useNuseStore";
 import { useReportStore } from "../../../store/super-admin/useReoprt";
 import MedicalTimeline from "../../../Shared/MedicalTimeline";
+import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
+import Button from "../../../Shared/Button";
 
 interface NextOfKin {
   name: string;
@@ -59,6 +61,7 @@ const NurseDetail = () => {
   const { selectedPatient, getPatientById, isLoading } = useNurseStore();
   const { deptCreateReport, isCreating } = useReportStore();
   const navigate = useNavigate();
+  const [openModal, setOpenModal] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -106,6 +109,8 @@ const NurseDetail = () => {
           <ChevronLeft size={16} />
           <span className="ml-1">Patients</span>
         </div>
+        <Button onClick={() => setOpenModal(true)}>Transfer To doctor</Button>
+
         <div className="grid gap-6">
           <div>
             <h2 className="text-lg font-semibold mb-4">Patient Details</h2>
@@ -219,6 +224,14 @@ const NurseDetail = () => {
           patientId={id}
           patient={patient}
           showDownloadCompleteButton={false}
+        />
+      )}
+
+      {openModal && (
+        <BookAppointmentModal
+          onClose={() => setOpenModal(false)}
+          // endpoint={bookEndpoint}
+          // refreshEndpoint={refreshEndpoint}
         />
       )}
     </div>

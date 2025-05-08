@@ -17,7 +17,7 @@ interface InventoryStockTableProps {
   isLoading: boolean;
   stocks: {
     attributes: {
-      item: string;
+      service_item_name: string;
       category: string;
       quantity: string;
       expiry_date: string;
@@ -33,12 +33,14 @@ const InventoryStockTable = ({
 }: InventoryStockTableProps) => {
   const formattedStocks = (stocks || []).map((stock) => ({
     id: stock.id,
-    item: stock.attributes.item,
+    item: stock.attributes.service_item_name,
     category: stock.attributes.category,
     quantity: stock.attributes.quantity,
     expiry_date: stock.attributes.expiry_date,
     cost: stock.attributes.cost,
   }));
+
+  console.log(stocks, "ty");
 
   const columns: Columns[] = [
     {
