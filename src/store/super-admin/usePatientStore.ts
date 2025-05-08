@@ -80,13 +80,12 @@ interface PatientStats {
   men_total_count: number;
   ladies_total_count: number;
   children_count: number;
-  // graph_appointment_representation: Record<string, number>;
 }
 
 interface PatientStore {
   isLoading: boolean;
   patients: any[];
-  stats: PatientStats | null;
+
   pagination: Pagination | null;
   selectedPatient: any | null;
   appointments: any[];
@@ -111,17 +110,23 @@ interface PatientStore {
     endpoint?: string,
     refreshendpoint?: string
   ) => Promise<boolean | null>;
-  getAllAppointments: (page?: string, perPage?: string) => Promise<void>;
+  getAllAppointments: (
+    page?: string,
+    perPage?: string,
+    endpoint?: string
+  ) => Promise<void>;
   bookAppointment: (
     data: BookAppointmentData,
+    endpoint?: string,
     refreshEndpoint?: string
   ) => Promise<boolean>; // Updated signature
-  getAppointmentById: (id: string, endpoint: string) => Promise<void>;
-  manageAppointment: (id: string, endpoint: string, data: any) => Promise<any>;
+  getAppointmentById: (id: string) => Promise<void>;
+  manageAppointment: (id: string, data: any) => Promise<any>;
   searchPatients: (query: string) => Promise<any[]>;
   getLabPatients: (endpoint?: string) => Promise<void>; // New function for lab patients
   searchPatientsappointment: (query: string) => Promise<any[]>;
   getFrontdeskStats: () => Promise<void>;
+  stats: PatientStats | null;
   getDeskByIdDoc: (id: string) => Promise<any>;
 }
 
@@ -183,27 +188,10 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
     set({ isLoading: true });
     try {
       const response = await api.get("/front-desk/stats");
-      const statsData = response.data?.data || {
-        total_patient: 0,
-        men_total_count: 0,
-        ladies_total_count: 0,
-        children_count: 0,
-        // graph_appointment_representation: {
-        //   Jan: 0,
-        //   Feb: 0,
-        //   Mar: 0,
-        //   Apr: 0,
-        //   May: 0,
-        //   Jun: 0,
-        //   Jul: 0,
-        //   Aug: 0,
-        //   Sep: 0,
-        //   Oct: 0,
-        //   Nov: 0,
-        //   Dec: 0,
-        // },
-      };
-      set({ stats: statsData });
+      if (response.status === 200) {
+        set({ stats: response.data.data });
+        // toast.success(response.data.message);
+      }
     } catch (error: any) {
       console.error(
         "Error fetching front-desk stats:",
@@ -450,10 +438,17 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   },
 
   // In usePatientStore.ts
-  getAllAppointments: async (page = "1", perPage = "10") => {
+  getAllAppointments: async (
+    page = "1",
+    perPage = "10",
+    baseEndpoint = "/front-desk/appointment/all-records"
+  ) => {
     set({ isLoading: true, appointments: [], pagination: null });
     try {
-      const response = await api.get("/medical-report/appointment/all-records");
+      const endpoint = `${baseEndpoint}?page=${page}&per_page=${perPage}`;
+      console.log("Fetching appointments from:", endpoint);
+
+      const response = await api.get(endpoint);
       if (!response.data?.data) {
         throw new Error("Invalid response structure");
       }
@@ -508,12 +503,12 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   },
   bookAppointment: async (
     data: BookAppointmentData,
-
+    endpoint = "/admin/appointment/assign",
     refreshEndpoint = "/admin/appointment/all-records"
   ) => {
     set({ isLoading: true });
     try {
-      const response = await api.post("/medical-report/appointment/book", data);
+      const response = await api.post(endpoint, data);
       if (response.status === 201) {
         console.log(response.data.message);
         toast.success(response.data.message);
@@ -532,12 +527,12 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
     }
   },
 
-  getAppointmentById: async (id, endpoint) => {
+  getAppointmentById: async (id) => {
     set({ isLoading: true });
     try {
-      const response = await api.get(endpoint);
-      set({ selectedAppointment: response.data.data.data });
-      console.log(response.data.data.data, "selectedAppointment");
+      const response = await api.get(`/doctor/my-appointments/${id}`);
+      set({ selectedAppointment: response.data.data });
+      console.log(response.data.data, "selectedAppointment");
     } catch (error: any) {
       console.error(error.response?.data);
       toast.error(
@@ -548,13 +543,16 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
     }
   },
 
-  manageAppointment: async (id, endpoint, data) => {
+  manageAppointment: async (id, data) => {
     set({ isLoading: true });
     try {
-      const response = await api.patch(endpoint, data);
+      const response = await api.patch(
+        `/doctor/manage-appointment/${id}`,
+        data
+      );
       if (response.status === 200) {
         toast.success(response.data.message);
-        // await get().getAllAppointments();
+        await get().getAllAppointments();
         return true;
       }
       return null;
