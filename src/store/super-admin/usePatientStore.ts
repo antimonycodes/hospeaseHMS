@@ -80,12 +80,13 @@ interface PatientStats {
   men_total_count: number;
   ladies_total_count: number;
   children_count: number;
+  // graph_appointment_representation: Record<string, number>;
 }
 
 interface PatientStore {
   isLoading: boolean;
   patients: any[];
-
+  stats: PatientStats | null;
   pagination: Pagination | null;
   selectedPatient: any | null;
   appointments: any[];
@@ -126,7 +127,6 @@ interface PatientStore {
   getLabPatients: (endpoint?: string) => Promise<void>; // New function for lab patients
   searchPatientsappointment: (query: string) => Promise<any[]>;
   getFrontdeskStats: () => Promise<void>;
-  stats: PatientStats | null;
   getDeskByIdDoc: (id: string) => Promise<any>;
 }
 
@@ -188,10 +188,27 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
     set({ isLoading: true });
     try {
       const response = await api.get("/front-desk/stats");
-      if (response.status === 200) {
-        set({ stats: response.data.data });
-        // toast.success(response.data.message);
-      }
+      const statsData = response.data?.data || {
+        total_patient: 0,
+        men_total_count: 0,
+        ladies_total_count: 0,
+        children_count: 0,
+        // graph_appointment_representation: {
+        //   Jan: 0,
+        //   Feb: 0,
+        //   Mar: 0,
+        //   Apr: 0,
+        //   May: 0,
+        //   Jun: 0,
+        //   Jul: 0,
+        //   Aug: 0,
+        //   Sep: 0,
+        //   Oct: 0,
+        //   Nov: 0,
+        //   Dec: 0,
+        // },
+      };
+      set({ stats: statsData });
     } catch (error: any) {
       console.error(
         "Error fetching front-desk stats:",

@@ -319,7 +319,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
     set({ isLoading: true });
     try {
       const response = await api.get(endpoint);
-      const statsData = response.data?.data || {
+      const statsData = response.data.data || {
         total_inventories: 0,
         total_categories: 0,
         total_expired_items: 0,
