@@ -521,7 +521,7 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
     try {
       const response = await api.get(`/medical-report/shift/${date}`);
       if (response.status === 200) {
-        set({ shiftDetails: response.data.data.doctors });
+        set({ shiftDetails: response.data.data.shifts });
         // toast.success(response.data.message);
         console.log(response.data.data.doctors, "dfghjk");
         return true;

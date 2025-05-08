@@ -67,7 +67,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         console.log(response.data.data.user.id, "idd");
         console.log(response.data.data.user.id, "idd");
         // Cookies.set("token", token, { expires: 1, secure: true });
-        Cookies.set("token", token, { secure: true });
+        Cookies.set("token", token, { expires: 30, secure: true });
         localStorage.setItem("role", response.data.data.user.attributes.role);
         localStorage.setItem("uid", response.data.data.user.id);
         toast.success(response.data.message);

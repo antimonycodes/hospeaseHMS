@@ -25,8 +25,10 @@ export interface ReportStore {
   isResponding: boolean;
   isReportLoading: boolean;
   pharmacyStocks: any[];
+  labItems: any[];
 
   getPharmacyStocks: () => Promise<any>;
+  getLaboratoryItems: () => Promise<any>;
   createReport: (formData: {
     patient_id: string | number | null;
     note: string;
@@ -36,6 +38,10 @@ export interface ReportStore {
     status: string | null;
     role: any;
     pharmacy_stocks?: Array<{ id: number; quantity: number }> | null;
+    laboratory_service_charge?: Array<{
+      id: number;
+      quantity: number | null;
+    }> | null;
   }) => Promise<any>;
   singleReport: any[];
   allReports: any[];
@@ -69,6 +75,7 @@ export const useReportStore = create<ReportStore>((set) => ({
   allReports: [],
   allNotes: [],
   pharmacyStocks: [],
+  labItems: [],
   getPharmacyStocks: async () => {
     set({ isLoading: true });
     try {
@@ -85,7 +92,22 @@ export const useReportStore = create<ReportStore>((set) => ({
       set({ isLoading: false });
     }
   },
+  getLaboratoryItems: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(
+        "/medical-report/laboratory-service-charges"
+      );
 
+      set({ labItems: response.data || [] });
+      // toast.success(response.data.message || "Stocks fetched successfully");
+    } catch (error: any) {
+      console.error("getAllStocks error:", error.response?.data);
+      toast.error(error.response?.data?.message || "Failed to fetch stocks");
+    } finally {
+      set({ isLoading: false });
+    }
+  },
   createReport: async ({
     patient_id,
     note,
@@ -95,6 +117,7 @@ export const useReportStore = create<ReportStore>((set) => ({
     status,
     role,
     pharmacy_stocks = null, // Array of items with id and quantity
+    laboratory_service_charge = null,
   }) => {
     set({ isCreating: true });
     try {
@@ -136,6 +159,23 @@ export const useReportStore = create<ReportStore>((set) => ({
           form.append(`pharmacy_stocks[${index}][id]`, item.id.toString());
           form.append(
             `pharmacy_stocks[${index}][quantity]`,
+            item.quantity.toString()
+          );
+        });
+      }
+      // Add laboratory items if present
+      if (
+        role === "laboratory" &&
+        laboratory_service_charge !== null &&
+        laboratory_service_charge.length > 0
+      ) {
+        laboratory_service_charge.forEach((item: any, index: any) => {
+          form.append(
+            `laboratory_service_charge[${index}][id]`,
+            item.id.toString()
+          );
+          form.append(
+            `laboratory_service_charge[${index}][quantity]`,
             item.quantity.toString()
           );
         });

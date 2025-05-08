@@ -794,14 +794,14 @@ const CreateShift = () => {
         </div>
       ))}
 
-      <div className="flex flex-col xs:flex-row justify-between mt-6">
-        <button
+      <div className="flex flex-col justify-between mt-6">
+        {/* <button
           onClick={addStaffModule}
           className="flex items-center text-sm text-green-600 border border-[#e4e4e7] px-4 py-2 rounded-lg font-medium hover:bg-green-50"
           disabled={isLoading}
         >
           <Plus className="w-4 h-4 mr-1" /> Add Staff Member
-        </button>
+        </button> */}
 
         <button
           onClick={handleSubmit}

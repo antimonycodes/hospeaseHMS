@@ -4,7 +4,6 @@ import {
   ChevronDown,
   ChevronUp,
   User,
-  // Loader,
   FileText,
   StickyNote,
   Download,
@@ -23,7 +22,6 @@ import EditPatientModal from "../../Shared/EditPatientModal";
 import { useReportStore } from "../../store/super-admin/useReoprt";
 import toast from "react-hot-toast";
 import { useGlobalStore } from "../../store/super-admin/useGlobal";
-
 import Loader from "../../Shared/Loader";
 import MedicalTimeline from "../../Shared/MedicalTimeline";
 
@@ -56,9 +54,10 @@ const DoctorPatientDetails = () => {
     isCreating,
     getPharmacyStocks,
     pharmacyStocks,
+    getLaboratoryItems,
+    labItems,
   } = useReportStore();
   const { getAllRoles, roles } = useGlobalStore();
-  const [query, setQuery] = useState("");
   const [itemSearch, setItemSearch] = useState("");
   const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<
@@ -77,14 +76,32 @@ const DoctorPatientDetails = () => {
       };
     }[]
   >([]);
+  const [labTestSearch, setLabTestSearch] = useState("");
+  const [isLabSelectOpen, setIsLabSelectOpen] = useState(false);
+  const [selectedLabTests, setSelectedLabTests] = useState<
+    {
+      id: number;
+      name: string;
+      amount: string;
+      quantity: number;
+    }[]
+  >([]);
 
   const handleChange = (e: { target: { name: any; value: any } }) => {
     const { name, value } = e.target;
-    setItemSearch(value);
+    if (name === "itemSearch") {
+      setItemSearch(value);
+    } else if (name === "labTestSearch") {
+      setLabTestSearch(value);
+    }
   };
 
   const filteredItems = pharmacyStocks?.filter((stock) =>
     stock.service_item_name?.toLowerCase().includes(itemSearch.toLowerCase())
+  );
+
+  const filteredLabTests = labItems?.filter((test) =>
+    test.name?.toLowerCase().includes(labTestSearch.toLowerCase())
   );
 
   const handleToggleItem = (item: any) => {
@@ -110,10 +127,30 @@ const DoctorPatientDetails = () => {
     }
   };
 
+  const handleToggleLabTest = (test: any) => {
+    const exists = selectedLabTests.find((t) => t.id === test.id);
+    if (!exists) {
+      setSelectedLabTests((prev) => [
+        ...prev,
+        {
+          ...test,
+          quantity: 1,
+        },
+      ]);
+      toast.success(`Added ${test.name || "test"} to selection`);
+    } else {
+      setSelectedLabTests((prev) => prev.filter((t) => t.id !== test.id));
+      toast.success(`Removed ${test.name || "test"} from selection`);
+    }
+  };
+
   const isItemSelected = (request_pharmacy_id: any) =>
     selectedItems.some(
       (item) => item.request_pharmacy_id === request_pharmacy_id
     );
+
+  const isLabTestSelected = (id: any) =>
+    selectedLabTests.some((test) => test.id === id);
 
   const handleQuantityChange = (
     request_pharmacy_id: any,
@@ -128,7 +165,6 @@ const DoctorPatientDetails = () => {
           const maxAvailable = stock?.requested_quantity || 0;
 
           if (action === "increase") {
-            // Don't exceed available stock
             return {
               ...item,
               quantity:
@@ -137,7 +173,6 @@ const DoctorPatientDetails = () => {
                   : item.quantity,
             };
           } else {
-            // Don't go below 1
             return {
               ...item,
               quantity: item.quantity > 1 ? item.quantity - 1 : 1,
@@ -161,7 +196,6 @@ const DoctorPatientDetails = () => {
           );
           const maxAvailable = stock?.quantity || 0;
 
-          // Ensure quantity is between 1 and max available
           const quantity = Math.min(Math.max(1, numValue), maxAvailable);
           return { ...item, quantity };
         }
@@ -170,11 +204,10 @@ const DoctorPatientDetails = () => {
     );
   };
 
-  // Group data by date utility function
   const groupByDate = (data: any[]) => {
     return data.reduce((acc: { [key: string]: any[] }, item) => {
       const rawDate = new Date(item.attributes?.created_at);
-      const date = rawDate.toLocaleDateString("en-CA"); // Format: yyyy-mm-dd (ISO format but local)
+      const date = rawDate.toLocaleDateString("en-CA");
       if (!acc[date]) acc[date] = [];
       acc[date].push(item);
       return acc;
@@ -199,7 +232,7 @@ const DoctorPatientDetails = () => {
             date,
             reports: groupedReports[date] || [],
             notes: groupedNotes[date] || [],
-            isExpanded: true, // Set initially expanded
+            isExpanded: true,
           }))
           .sort(
             (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -213,8 +246,10 @@ const DoctorPatientDetails = () => {
   useEffect(() => {
     getAllRoles();
     getPharmacyStocks();
-  }, [getAllRoles, getPharmacyStocks]);
+    getLaboratoryItems();
+  }, [getAllRoles, getPharmacyStocks, getLaboratoryItems]);
 
+  console.log(id);
   useEffect(() => {
     if (id) {
       getPatientByIdDoc(id);
@@ -235,7 +270,6 @@ const DoctorPatientDetails = () => {
     }
 
     try {
-      // Base report data structure
       let reportData: {
         patient_id: string;
         note: string;
@@ -245,6 +279,7 @@ const DoctorPatientDetails = () => {
         status: string;
         role: string;
         pharmacy_stocks?: { id: any; quantity: number }[];
+        laboratory_service_charge?: { id: any; quantity: number }[];
       } = {
         patient_id: id ?? "",
         note: reportNote,
@@ -255,22 +290,28 @@ const DoctorPatientDetails = () => {
         role: selectedDepartment,
       };
 
-      // If sending to pharmacy, include the pharmacy_stocks array
       if (selectedDepartment === "pharmacist" && selectedItems.length > 0) {
-        // Create pharmacy_stocks array with id and quantity for each selected item
         const pharmacyStocksArray = selectedItems.map((item) => ({
           id: item.request_pharmacy_id,
           quantity: item.quantity,
         }));
-
-        // Add pharmacy_stocks array to the report data
         reportData = {
           ...reportData,
           pharmacy_stocks: pharmacyStocksArray,
         };
       }
 
-      // Send a single report with all data
+      if (selectedDepartment === "laboratory" && selectedLabTests.length > 0) {
+        const laboratoryTestsArray = selectedLabTests.map((test) => ({
+          id: test.id,
+          quantity: test.quantity,
+        }));
+        reportData = {
+          ...reportData,
+          laboratory_service_charge: laboratoryTestsArray,
+        };
+      }
+
       const response = await createReport(reportData);
 
       if (response) {
@@ -278,6 +319,9 @@ const DoctorPatientDetails = () => {
         setFile(null);
         setSelectedDepartment("");
         setSelectedItems([]);
+        setSelectedLabTests([]);
+        setItemSearch("");
+        setLabTestSearch("");
         getAllReport(id);
         toast.success("Report sent successfully");
       }
@@ -321,9 +365,7 @@ const DoctorPatientDetails = () => {
     <div className="px-2 sm:px-0">
       <div className="bg-white rounded-lg custom-shadow mb-6">
         <div className="p-4 sm:p-6">
-          {/*  */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 sm:mb-12 gap-4">
-            {/* Back button */}
             <Link
               to="/dashboard/patients"
               className="flex items-center text-gray-600 hover:text-primary"
@@ -333,9 +375,7 @@ const DoctorPatientDetails = () => {
             </Link>
           </div>
 
-          {/* Patient information card */}
           <div className="grid gap-6">
-            {/* Patient Info */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
               <InfoRow label="First Name" value={patient.first_name} />
               <InfoRow label="Last Name" value={patient.last_name} />
@@ -357,9 +397,7 @@ const DoctorPatientDetails = () => {
                 value={patient.address}
               />
             </div>
-            {/*  */}
             <hr className="text-[#979797]" />
-            {/* Next of Kin */}
             <div className="">
               <div className="">
                 <h3 className="text-sm font-medium text-gray-800 mb-4">
@@ -389,9 +427,7 @@ const DoctorPatientDetails = () => {
         </div>
       </div>
 
-      {/* Report & Note */}
       <div className="bg-white rounded-lg custom-shadow mb-6 p-4 sm:p-6">
-        {/* Tabs */}
         <div className="flex gap-6 mb-4 text-sm font-medium text-[#667185]">
           <button
             className={`flex items-center gap-1 px-3 py-1 rounded-md transition ${
@@ -417,7 +453,6 @@ const DoctorPatientDetails = () => {
           </button>
         </div>
 
-        {/* Content */}
         {activeTab === "note" && (
           <div className="space-y-4">
             <textarea
@@ -446,7 +481,6 @@ const DoctorPatientDetails = () => {
         )}
         {activeTab === "report" && (
           <div className="space-y-4">
-            {/* Department Tabs */}
             <div className="flex gap-2 mb-4">
               {roles && Object.keys(roles).length > 0 ? (
                 <>
@@ -476,6 +510,19 @@ const DoctorPatientDetails = () => {
                       Laboratory
                     </button>
                   )}
+                  {roles["nurse"] && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedDepartment("nurse")}
+                      className={`px-4 py-2 rounded-lg transition ${
+                        selectedDepartment === "nurse"
+                          ? "bg-primary text-white"
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      Nurse
+                    </button>
+                  )}
                 </>
               ) : (
                 <div className="flex items-center text-gray-500">
@@ -492,7 +539,6 @@ const DoctorPatientDetails = () => {
                   Check and select drugs from pharmacy for the patient here
                 </h2>
 
-                {/* Custom Select Component */}
                 <div className="relative mb-4">
                   <div
                     className="border border-[#D0D5DD] rounded-lg p-3 flex items-center justify-between cursor-pointer"
@@ -526,7 +572,6 @@ const DoctorPatientDetails = () => {
                       </svg>
                     </div>
                   </div>
-                  {/*  */}
                   {isSelectOpen && (
                     <div className="absolute z-10 w-full mt-1 bg-white border border-[#D0D5DD] rounded-lg shadow-lg max-h-64 overflow-y-auto">
                       <div className="p-2 sticky top-0 bg-white border-b border-[#D0D5DD]">
@@ -578,7 +623,6 @@ const DoctorPatientDetails = () => {
                   )}
                 </div>
 
-                {/* Selected Items with Quantity Controls */}
                 {selectedItems.length > 0 && (
                   <div className="mt-4 border border-[#D0D5DD] rounded-lg p-4">
                     <h3 className="font-medium mb-3">Selected Items</h3>
@@ -653,7 +697,123 @@ const DoctorPatientDetails = () => {
               </div>
             )}
 
-            {/* Report Textarea */}
+            {activeTab === "report" && selectedDepartment === "laboratory" && (
+              <div>
+                <h1 className="text-lg font-medium mb-2">Laboratory Tests</h1>
+                <h2 className="text-sm text-gray-600 mb-4">
+                  Check and select tests from laboratory for the patient here
+                </h2>
+
+                <div className="relative mb-4">
+                  <div
+                    className="border border-[#D0D5DD] rounded-lg p-3 flex items-center justify-between cursor-pointer"
+                    onClick={() => setIsLabSelectOpen(!isLabSelectOpen)}
+                  >
+                    <div className="flex-1">
+                      {selectedLabTests.length === 0 ? (
+                        <span className="text-gray-500">Select tests...</span>
+                      ) : (
+                        <span>{selectedLabTests.length} test(s) selected</span>
+                      )}
+                    </div>
+                    <div
+                      className={`transform transition-transform ${
+                        isLabSelectOpen ? "rotate-180" : ""
+                      }`}
+                    >
+                      <svg
+                        width="12"
+                        height="8"
+                        viewBox="0 0 12 8"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M1 1L6 6L11 1"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  {isLabSelectOpen && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-[#D0D5DD] rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                      <div className="p-2 sticky top-0 bg-white border-b border-[#D0D5DD]">
+                        <input
+                          type="search"
+                          name="labTestSearch"
+                          value={labTestSearch}
+                          onChange={handleChange}
+                          placeholder="Search tests..."
+                          className="w-full border border-[#D0D5DD] p-2 rounded outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                        />
+                      </div>
+                      <ul className="divide-y">
+                        {filteredLabTests?.length > 0 ? (
+                          filteredLabTests.map((test) => (
+                            <li
+                              key={test.id}
+                              onClick={() => handleToggleLabTest(test)}
+                              className="px-4 py-3 hover:bg-blue-50 cursor-pointer flex items-center justify-between"
+                            >
+                              <div>
+                                <p className="font-medium">{test.name}</p>
+                                {/* <p className="text-sm text-gray-500">
+                                  Amount: {test.amount}
+                                </p> */}
+                              </div>
+                              <div
+                                className={`w-5 h-5 rounded border flex items-center justify-center ${
+                                  isLabTestSelected(test.id)
+                                    ? "bg-blue-500 border-blue-500"
+                                    : "border-gray-300"
+                                }`}
+                              >
+                                {isLabTestSelected(test.id) && (
+                                  <Check className="h-4 w-4 text-white" />
+                                )}
+                              </div>
+                            </li>
+                          ))
+                        ) : (
+                          <li className="px-4 py-3 text-gray-500">
+                            No tests found
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                {selectedLabTests.length > 0 && (
+                  <div className="mt-4 border border-[#D0D5DD] rounded-lg p-4">
+                    <h3 className="font-medium mb-3">Selected Tests</h3>
+                    <ul className="divide-y">
+                      {selectedLabTests.map((test) => (
+                        <li
+                          key={test.id}
+                          className="py-3 flex items-center justify-between"
+                        >
+                          <div>
+                            <p className="font-medium">{test.name}</p>
+                            {/* <p className="text-xs text-gray-500">
+                              Amount: {test.amount}
+                            </p> */}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="w-12 text-center border border-gray-300 rounded-md p-1">
+                              {test.quantity}
+                            </span>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
             <textarea
               rows={5}
               value={reportNote}
@@ -662,7 +822,6 @@ const DoctorPatientDetails = () => {
               className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-primary"
             />
 
-            {/* File Input */}
             <input
               type="file"
               accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
@@ -670,7 +829,6 @@ const DoctorPatientDetails = () => {
               className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90"
             />
 
-            {/* Submit Button */}
             <button
               onClick={handleReportSubmit}
               className={`bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition flex items-center justify-center
@@ -689,9 +847,7 @@ const DoctorPatientDetails = () => {
               ) : (
                 `Send Report to ${
                   selectedDepartment
-                    ? selectedDepartment === "pharmacist"
-                      ? "Pharmacy"
-                      : "Laboratory"
+                    ? departmentLabels[selectedDepartment] || "..."
                     : "..."
                 }`
               )}
@@ -700,7 +856,6 @@ const DoctorPatientDetails = () => {
         )}
       </div>
 
-      {/* Merged EMR Timeline */}
       {id && (
         <MedicalTimeline
           patientId={id}
@@ -722,7 +877,6 @@ const DoctorPatientDetails = () => {
   );
 };
 
-// Reusable InfoRow Component
 const InfoRow = ({ label, value, className = "" }: any) => (
   <div className={className}>
     <p className="text-xs text-gray-500">{label}</p>
@@ -731,3 +885,9 @@ const InfoRow = ({ label, value, className = "" }: any) => (
 );
 
 export default DoctorPatientDetails;
+
+const departmentLabels: Record<string, string> = {
+  pharmacist: "Pharmacy",
+  laboratory: "Laboratory",
+  nurse: "Nurse",
+};
