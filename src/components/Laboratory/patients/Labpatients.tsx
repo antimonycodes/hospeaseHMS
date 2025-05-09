@@ -22,7 +22,7 @@ const Labpatients = () => {
     const patient = attr.patient;
 
     return {
-      id: item.id, // case note ID
+      id: item.id,
       name: `${patient.first_name} ${patient.last_name}`,
       patientId: patient.card_id,
       gender: patient.gender,
@@ -158,7 +158,7 @@ const Labpatients = () => {
       <Table
         columns={columns}
         data={filteredPatients}
-        rowKey="patientId"
+        rowKey="id"
         pagination={true}
         paginationData={pagination}
         onPageChange={handlePageChange}

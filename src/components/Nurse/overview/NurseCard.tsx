@@ -1,23 +1,18 @@
 import React, { useEffect } from "react";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import Table from "../../../Shared/Table";
-// import { formatPhoneNumber } from "../../../utils/formatPhoneNumber";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
+import Loader from "../../../Shared/Loader";
 
 const NurseCard = () => {
-  const { patients, getAllPatients, isLoading } = usePatientStore();
+  const { patients, getAllPatients, isLoading, pagination } = usePatientStore();
 
-  // Fetch patients when component mounts
+  const baseEndpoint = "/nurses/all-patients";
+
   useEffect(() => {
-    getAllPatients("/nurses/all-patients");
+    getAllPatients("1", "10", baseEndpoint);
   }, [getAllPatients]);
 
-  // Filter for only Pending and Completed patients
-  // const filteredPatients = patients.filter((patient) =>
-  //   ["Pending", "Completed"].includes(patient.attributes.status)
-  // );
-
-  // Define columns matching the UI/UX from the original NurseCard
   const columns: {
     key: string;
     label: string;
@@ -64,21 +59,6 @@ const NurseCard = () => {
         </span>
       ),
     },
-    {
-      key: "status",
-      label: "Status",
-      render: (_, row) => (
-        <span
-          className={`text-sm px-2 py-1 rounded-full ${
-            row.attributes.status === "Pending"
-              ? "bg-[#FBE1E1] text-[#F83E41]"
-              : "bg-[#CFFFE9] text-[#009952]"
-          }`}
-        >
-          {row.attributes.status}
-        </span>
-      ),
-    },
   ];
 
   return (
@@ -92,14 +72,15 @@ const NurseCard = () => {
         tableCount={patients.length}
       />
       {isLoading ? (
-        <div className="p-4 text-gray-500">Loading patients...</div>
+        <div>
+          <Loader />
+        </div>
       ) : (
         <Table
           data={patients.slice(0, 3)}
           columns={columns}
           rowKey="id"
-          // pagination={filteredPatients.length > 5} // Adjust as needed
-          radius="rounded-lg"
+          pagination={pagination !== null}
         />
       )}
     </div>

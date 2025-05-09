@@ -40,7 +40,8 @@ const ConsultantTable = () => {
   const [activeTab, setActiveTab] = useState<TabType>("Pending");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { getAllAppointments, appointments } = usePatientStore();
+  const { getAllAppointments, appointments, pagination } =
+    useAppointmentStore();
 
   const transformedPatients: Patient[] = appointments.map((item: any) => {
     const rawStatus = item.attributes.status?.toLowerCase() ?? "";
@@ -71,8 +72,10 @@ const ConsultantTable = () => {
 
   const statusCounts = getStatusCounts(transformedPatients);
 
+  const baseEndpoint = "/consultant/my-appointments";
+
   useEffect(() => {
-    getAllAppointments("/consultant/my-appointments");
+    getAllAppointments("1", "10", baseEndpoint);
   }, [getAllAppointments]);
 
   const navigate = useNavigate();
@@ -100,6 +103,13 @@ const ConsultantTable = () => {
     activeTab === "Pending"
       ? transformedPatients.filter((p) => p.status === "Pending")
       : transformedPatients.filter((p) => p.status === activeTab);
+
+  const [perPage, setPerPage] = useState(pagination?.per_page || 10);
+
+  const handlePageChange = (page: number) => {
+    // Call getAllPatients with the page number, perPage value, and the current baseEndpoint
+    getAllAppointments(page.toString(), perPage.toString(), baseEndpoint);
+  };
 
   return (
     <div className="w-full h-full bg-white rounded-[8px] shadow overflow-hidden">
@@ -154,6 +164,8 @@ const ConsultantTable = () => {
         data={filteredPatients}
         rowKey="patientId"
         pagination={true}
+        paginationData={pagination}
+        onPageChange={handlePageChange}
       />
     </div>
   );

@@ -32,6 +32,15 @@ type Column<T> = {
 type FpaymentTableProps = {
   isLoading?: boolean;
   payments: PaymentData[];
+  pagination: {
+    total: number;
+    per_page: number;
+    current_page: number;
+    last_page: number;
+    from: number;
+    to: number;
+  } | null;
+  baseEndpoint?: string;
 };
 
 // Badge component for payment type
@@ -69,7 +78,12 @@ const PaymentTypeBadge = ({
   );
 };
 
-const FpaymentTable = ({ payments, isLoading }: FpaymentTableProps) => {
+const FpaymentTable = ({
+  payments,
+  isLoading,
+  pagination,
+  baseEndpoint,
+}: FpaymentTableProps) => {
   const { getAllPayments } = useFinanceStore();
   const [transformedPayments, setTransformedPayment] = useState<
     PaymentAttributes[]
@@ -91,8 +105,14 @@ const FpaymentTable = ({ payments, isLoading }: FpaymentTableProps) => {
   }, [payments]);
 
   useEffect(() => {
-    getAllPayments();
+    getAllPayments("1", "10", baseEndpoint);
   }, [getAllPayments]);
+
+  const [perPage, setPerPage] = useState(pagination?.per_page || 10);
+
+  const handlePageChange = (page: number) => {
+    getAllPayments(page.toString(), perPage.toString(), baseEndpoint);
+  };
 
   const columns: Column<PaymentAttributes>[] = [
     {
@@ -174,8 +194,10 @@ const FpaymentTable = ({ payments, isLoading }: FpaymentTableProps) => {
       data={transformedPayments}
       columns={columns}
       rowKey="id"
-      pagination={false}
+      pagination={true}
+      paginationData={pagination}
       loading={isLoading}
+      onPageChange={handlePageChange}
     />
   );
 };

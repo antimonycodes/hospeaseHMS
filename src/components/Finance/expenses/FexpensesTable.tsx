@@ -1,4 +1,4 @@
-import { JSX, useEffect } from "react";
+import { JSX, useEffect, useState } from "react";
 import Table from "../../../Shared/Table";
 import { useFinanceStore } from "../../../store/staff/useFinanceStore";
 import Loader from "../../../Shared/Loader";
@@ -14,10 +14,13 @@ type ExpenseApiData = {
 };
 
 const FexpensesTable = () => {
-  const { expenses, getAllExpenses, isLoading } = useFinanceStore();
+  const { expenses, getAllExpenses, isLoading, pagination } = useFinanceStore();
+  const [perPage, setPerPage] = useState(pagination?.per_page || 10);
+
+  const baseEndpoint = "/finance/all-expenses";
 
   useEffect(() => {
-    getAllExpenses("/finance/all-expenses"); // Fetch the data
+    getAllExpenses("1", "10", baseEndpoint);
   }, [getAllExpenses]);
 
   // Transform API data into the correct format
@@ -80,6 +83,9 @@ const FexpensesTable = () => {
       ),
     },
   ];
+  const handlePageChange = (page: number) => {
+    getAllExpenses(page.toString(), perPage.toString(), baseEndpoint);
+  };
   if (isLoading) return <Loader />;
 
   return (
@@ -89,6 +95,9 @@ const FexpensesTable = () => {
         columns={columns}
         rowKey="id"
         radius="rounded-none"
+        pagination={true}
+        paginationData={pagination}
+        onPageChange={handlePageChange}
       />
     </div>
   );

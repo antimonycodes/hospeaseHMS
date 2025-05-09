@@ -19,11 +19,12 @@ const Fpayment = ({
     "All" | "part" | "full" | "pending"
   >("All");
   const { payments, pagination, getAllPayments, isLoading } = useFinanceStore();
+  const baseEndpoint = "/medical-report/patient-payment-history";
 
   useEffect(() => {
     console.log("Fetching payments with endpoint:", refreshEndpoint);
-    getAllPayments();
-  }, [getAllPayments, refreshEndpoint]);
+    getAllPayments("1", "10", baseEndpoint);
+  }, [getAllPayments, baseEndpoint]);
 
   const getStatusCounts = () => {
     if (!Array.isArray(payments)) {
@@ -81,7 +82,12 @@ const Fpayment = ({
         tabs={["All", "full", "part", "pending"]}
       />
 
-      <FpaymentTable payments={filteredPayments} isLoading={isLoading} />
+      <FpaymentTable
+        pagination={pagination}
+        payments={filteredPayments}
+        isLoading={isLoading}
+        baseEndpoint={baseEndpoint}
+      />
     </div>
   );
 };

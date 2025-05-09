@@ -11,7 +11,7 @@ type NursePatientData = {
   phone: string;
   occupation: string;
   viewmore: string;
-  status: string;
+
   id: number;
 };
 
@@ -30,7 +30,7 @@ type NursePatientDataProps = {
       card_id: string;
       gender: string;
       phone_number: string;
-      status: string;
+
       occupation: string;
     };
     id: number;
@@ -62,7 +62,6 @@ const NursePatientTable = ({
     gender: patient.attributes.gender,
     phone: patient.attributes.phone_number,
     occupation: patient.attributes.occupation,
-    status: patient.attributes.status || "Pending",
 
     viewmore: "viewmore",
     id: patient.id,
@@ -119,13 +118,7 @@ const NursePatientTable = ({
         <span className="text-[#667085]">{patient.occupation}</span>
       ),
     },
-    {
-      key: "status",
-      label: "Status",
-      render: (_, patient) => (
-        <span className="text-[#667085]">{patient.status}</span>
-      ),
-    },
+
     {
       key: "viewmore",
       label: "",

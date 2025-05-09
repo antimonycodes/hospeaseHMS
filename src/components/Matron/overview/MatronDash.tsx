@@ -62,7 +62,7 @@ const MatronDash = () => {
         ) : (
           <div>No stats available</div>
         )}
-        <MatronCharts />
+        {/* <MatronCharts /> */}
         <MatronCard />
       </div>
     </div>
