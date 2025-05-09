@@ -7,7 +7,7 @@ const FrontdeskOverview = () => {
     <div className=" font-inter">
       <div className=" flex flex-col gap-4">
         <FrontdeskCards />
-        <FrontdeskChart />
+        {/* <FrontdeskChart /> */}
         <FrontdeskTable />
       </div>
     </div>

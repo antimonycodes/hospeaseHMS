@@ -4,14 +4,13 @@ import FpaymentTable from "../payment/FpaymentTable";
 import { useFinanceStore } from "../../../store/staff/useFinanceStore";
 
 const FinanceCard = () => {
-  const { payments = [], getAllPayments, isLoading } = useFinanceStore();
+  const { payments, getAllPayments, isLoading } = useFinanceStore();
 
   useEffect(() => {
     getAllPayments("/finance/all-revenues");
   }, [getAllPayments]);
 
   console.log("Payments in FinanceCard:", payments);
-  if (isLoading) return <div>Loading payments...</div>;
 
   return (
     <div>
@@ -22,12 +21,7 @@ const FinanceCard = () => {
         showControls={false}
       />
 
-      <FpaymentTable
-        payments={payments}
-        isLoading={isLoading}
-        // endpoint={""}
-        // pagination={null}
-      />
+      <FpaymentTable payments={payments.slice(0, 5)} isLoading={isLoading} />
     </div>
   );
 };
