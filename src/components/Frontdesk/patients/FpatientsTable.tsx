@@ -24,14 +24,10 @@ const FpatientsTable = () => {
 
   useEffect(() => {
     if (searchQuery) {
-      // Call searchPatients when there's a search query
       searchPatients(searchQuery).then((fetchedPatients) => {
-        // Assuming searchPatients returns an array of patients
-        // Update patients state directly
         usePatientStore.setState({ patients: fetchedPatients });
       });
     } else {
-      // Call getAllPatients with baseEndpoint when search query is empty
       getAllPatients("1", "10", baseEndpoint);
     }
   }, [getAllPatients, searchPatients, searchQuery]);

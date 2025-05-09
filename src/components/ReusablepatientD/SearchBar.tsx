@@ -1,4 +1,3 @@
-// SearchBar.tsx
 import { getImageSrc } from "../../utils/imageUtils";
 import { useState } from "react";
 
