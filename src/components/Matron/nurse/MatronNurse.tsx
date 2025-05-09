@@ -20,11 +20,13 @@ const MatronNurse = () => {
     age: "",
   });
 
-  const { isLoading, getNurses, nurses, createNurse } = useMatronNurse();
+  const { isLoading, getNurses, nurses, createNurse, pagination } =
+    useMatronNurse();
 
+  const baseEndpoint = "/matron/nurse/fetch";
   useEffect(() => {
-    getNurses();
-  }, []);
+    getNurses("1", "10", baseEndpoint);
+  }, [getNurses]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -56,7 +58,12 @@ const MatronNurse = () => {
         </div> */}
       </div>
 
-      <MatronNurseTable nurses={nurses} isLoading={isLoading} />
+      <MatronNurseTable
+        nurses={nurses}
+        isLoading={isLoading}
+        pagination={pagination}
+        baseEndpoint={baseEndpoint}
+      />
       {/* 
       {showModal && (
         <MatronNurseModal

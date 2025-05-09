@@ -96,7 +96,11 @@ const SaFinancePage = ({
         {activeTab === "Overview" && <FinanceOverview />}
 
         {activeTab === "Payments" && (
-          <FpaymentTable payments={payments} isLoading={isLoading} />
+          <FpaymentTable
+            payments={payments}
+            isLoading={isLoading}
+            pagination={pagination}
+          />
         )}
         {activeTab === "Expenses" && <FexpensesTable />}
       </div>

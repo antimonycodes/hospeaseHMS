@@ -1,8 +1,8 @@
 import Table from "../../../Shared/Table";
 
-import { Nurse, NurseAttributes } from "./useMatronNurse";
+import { Nurse, NurseAttributes, useMatronNurse } from "./useMatronNurse";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useGlobalStore } from "../../../store/super-admin/useGlobal";
 import Loader from "../../../Shared/Loader";
 
@@ -15,12 +15,28 @@ type Column<T> = {
 interface Props {
   isLoading: boolean;
   nurses: Nurse[];
+  pagination: {
+    total: number;
+    per_page: number;
+    current_page: number;
+    last_page: number;
+    from: number;
+    to: number;
+  } | null;
+  baseEndpoint?: string;
 }
 
-const MatronNurseTable = ({ nurses, isLoading }: Props) => {
+const MatronNurseTable = ({
+  nurses,
+  isLoading,
+  pagination,
+  baseEndpoint,
+}: Props) => {
   const [transformedNurses, setTransformedNurses] = useState<NurseAttributes[]>(
     []
   );
+  const { getNurses } = useMatronNurse();
+
   const navigate = useNavigate();
   const { togglestatus } = useGlobalStore();
 
@@ -38,6 +54,12 @@ const MatronNurseTable = ({ nurses, isLoading }: Props) => {
     );
   }, [nurses]);
 
+  const [perPage, setPerPage] = useState(pagination?.per_page || 10);
+
+  const handlePageChange = (page: number) => {
+    // Call getAllPatients with the page number, perPage value, and the current baseEndpoint
+    getNurses(page.toString(), perPage.toString(), baseEndpoint);
+  };
   if (isLoading) return <Loader />;
 
   const nursesColumn: Column<NurseAttributes>[] = [
@@ -127,6 +149,8 @@ const MatronNurseTable = ({ nurses, isLoading }: Props) => {
         data={transformedNurses}
         rowKey="id"
         pagination={true}
+        paginationData={pagination}
+        onPageChange={handlePageChange}
       />
     </div>
   );

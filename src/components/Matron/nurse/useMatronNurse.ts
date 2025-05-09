@@ -136,10 +136,15 @@ interface MatronStore {
   patients: PatientAttributes[];
   selectedPatient: any | null;
   isLoading: boolean;
+  pagination: Pagination | null;
   nurses: Nurse[];
   selectedNurse: any | null;
   stats: MatronStats | null; // Add stats state
-  getNurses: () => Promise<any>;
+  getNurses: (
+    page?: string,
+    perPage?: string,
+    endpoint?: string
+  ) => Promise<any>;
   getNurseById: (id: string) => Promise<any>;
   createNurse: (data: CreateNurseData) => Promise<any>;
   getMatronStats: () => Promise<void>; // Add stats fetch function
@@ -154,12 +159,23 @@ export const useMatronNurse = create<MatronStore>((set, get) => ({
   selectedNurse: null,
   patients: [],
   selectedPatient: null,
+  pagination: null,
   stats: null, // Initialize stats as null
 
-  getNurses: async () => {
+  getNurses: async (
+    page = "1",
+    perPage = "10",
+    baseEndpoint = "/matron/nurse/fetch"
+  ) => {
     set({ isLoading: true });
     try {
-      const response = await api.get("/matron/nurse/fetch");
+      const endpoint = `${baseEndpoint}?page=${page}&per_page=${perPage}`;
+
+      console.log("Fetching patients from:", endpoint);
+
+      const response = await api.get(endpoint);
+      set({ pagination: response.data.data.pagination });
+      console.log(response.data.data.pagination, "pagination");
       if (response.status === 200 || response.status === 201) {
         console.log(response.data.data);
         set({ nurses: response.data.data.data });

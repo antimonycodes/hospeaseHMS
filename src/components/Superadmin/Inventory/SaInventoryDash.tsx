@@ -24,7 +24,7 @@ const SaInventoryDash = () => {
 
   // Try multiple approaches to extract the data
   const statsData: Partial<StatsData> =
-    (stats && typeof stats === "object" ? stats.data ?? stats : {}) || {};
+    (stats && typeof stats === "object" ? stats : {}) || {};
 
   console.log("Extracted statsData:", statsData);
 
