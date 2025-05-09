@@ -35,8 +35,10 @@ const SaFinancePage = ({
   const openExpense = () => setIsExpenseOpen(true);
   const closeExpense = () => setIsExpenseOpen(false);
 
+  const baseEndpoint = "/medical-report/patient-payment-history";
+
   useEffect(() => {
-    getAllPayments();
+    getAllPayments("1", "10", baseEndpoint);
   }, [getAllPayments]);
   console.log("Fetching payments with endpoint:", payments);
   const { createExpense, isLoading, getAllExpenses } = useFinanceStore();
@@ -100,6 +102,7 @@ const SaFinancePage = ({
             payments={payments}
             isLoading={isLoading}
             pagination={pagination}
+            baseEndpoint={baseEndpoint}
           />
         )}
         {activeTab === "Expenses" && <FexpensesTable />}

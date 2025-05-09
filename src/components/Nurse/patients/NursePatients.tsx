@@ -1,7 +1,6 @@
 // NursePatients.tsx
 import React, { useEffect, useState, useMemo } from "react";
 import Tablehead from "../../ReusablepatientD/Tablehead";
-import Tabs from "../../ReusablepatientD/Tabs";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import NursePatientTable from "./NursePatientTable";
 

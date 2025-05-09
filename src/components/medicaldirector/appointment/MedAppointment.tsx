@@ -80,7 +80,7 @@ const MedAppointment = () => {
   const navigate = useNavigate();
   const baseEndpoint = "/medical-director/all-appointments";
   useEffect(() => {
-    getAllAppointments("1", "10");
+    getAllAppointments("1", "10", baseEndpoint);
   }, [getAllAppointments]);
 
   const flattenAppointments = (
