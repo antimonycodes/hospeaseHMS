@@ -2,6 +2,10 @@ import { create } from "zustand";
 import axios from "axios";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
+import {
+  handleErrorToast,
+  isSuccessfulResponse,
+} from "../../utils/responseHandler";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_URL,
@@ -83,6 +87,7 @@ interface FinanceStore {
   isLoading: boolean;
   expenses: any[];
   payments: any[];
+  isUpdating: boolean;
   selectedPayment: any | null;
   pagination: Pagination | null;
   stats: (FinanceStats & LabStats) | null;
@@ -107,6 +112,7 @@ interface FinanceStore {
     endpoint?: string,
     refreshEndpoint?: string
   ) => Promise<boolean | null>;
+  updatePayment: (id: any, data: any) => Promise<any>;
   getFinanceStats: (endpoint?: string) => Promise<void>;
   getLabStats: (endpoint?: string) => Promise<void>;
   searchPatients: (query: string) => Promise<any[]>;
@@ -114,6 +120,7 @@ interface FinanceStore {
 
 export const useFinanceStore = create<FinanceStore>((set) => ({
   isLoading: false,
+  isUpdating: false,
   expenses: [],
   payments: [],
   stats: null,
@@ -244,6 +251,26 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
       return false;
     } finally {
       set({ isLoading: false });
+    }
+  },
+  updatePayment: async (id, data) => {
+    set({ isUpdating: true });
+    try {
+      const response = await api.post(
+        `/medical-report/change-payment-status/${id}`,
+        data
+      );
+
+      if (isSuccessfulResponse(response)) {
+        toast.success(response.data?.message);
+        return true;
+      }
+      return null;
+    } catch (error) {
+      handleErrorToast(error);
+      return null;
+    } finally {
+      set({ isUpdating: false });
     }
   },
 
