@@ -71,6 +71,8 @@ interface CombinedStore {
   deleteUser: (id: any) => Promise<any>;
   updateItem: (id: number, data: CreateItem, endpoint?: string) => Promise<any>;
   deleteItem: (id: number) => Promise<any>;
+  updateHmoPercentage: (id: any, data: any) => Promise<any>;
+  hmoPercentage: () => Promise<any>;
 }
 
 export const useCombinedStore = create<CombinedStore>((set, get) => ({
@@ -171,6 +173,40 @@ export const useCombinedStore = create<CombinedStore>((set, get) => ({
     set({ isDeleting: true });
     try {
       const response = await api.delete(`/admin/delete-user/${id}`);
+
+      if (isSuccessfulResponse(response)) {
+        toast.success(response.data?.message);
+        return true;
+      }
+      return null;
+    } catch (error) {
+      handleErrorToast(error);
+      return null;
+    } finally {
+      set({ isDeleting: false });
+    }
+  },
+  updateHmoPercentage: async (id, data) => {
+    set({ isDeleting: true });
+    try {
+      const response = await api.put(`/admin/update-hmo-settings/${id}`, data);
+
+      if (isSuccessfulResponse(response)) {
+        // toast.success(response.data?.message);
+        return true;
+      }
+      return null;
+    } catch (error) {
+      handleErrorToast(error);
+      return null;
+    } finally {
+      set({ isDeleting: false });
+    }
+  },
+  hmoPercentage: async () => {
+    set({ isDeleting: true });
+    try {
+      const response = await api.get(`/admin/hmo-settings`);
 
       if (isSuccessfulResponse(response)) {
         toast.success(response.data?.message);
