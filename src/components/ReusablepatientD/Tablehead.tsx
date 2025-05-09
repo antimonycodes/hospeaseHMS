@@ -11,6 +11,7 @@ interface TableheadProps {
   showButton?: boolean;
   typebutton?: string;
   onButtonClick?: () => void;
+  searchBar?: React.ReactNode;
 }
 
 const Tablehead: React.FC<TableheadProps> = ({
@@ -21,10 +22,11 @@ const Tablehead: React.FC<TableheadProps> = ({
   showSearchBar = false,
   showButton = false,
   onButtonClick,
+  searchBar,
 }) => {
   return (
     <div className="w-full font-inter  bg-white rounded-t-[8px] shadow overflow-hidden">
-      <div className="p-6 flex md:items-center flex-col md:flex-row justify-between space-x-3">
+      <div className="p-6 flex md:items-center flex-col md:flex-row justify-between space-x-3 space-y-3">
         <div className="min-w-[15%] ">
           <h1 className="text-base sm:text-[18px]    font-medium">
             {tableTitle}
@@ -36,20 +38,22 @@ const Tablehead: React.FC<TableheadProps> = ({
           </h1>
         </div>
         {/*  */}
-        <div className="flex   flex-grow justify-end items-center space-x-4">
-          {showSearchBar && (
-            <div className="w-full md:w-[300px] lg:w-[400px]">
-              <SearchBar />
-            </div>
-          )}
+        <div className="flex   flex-grow justify-end items-center space-x-6 ">
+          <div className="flex items-center space-x-4 min-w-[70%]  ">
+            {showSearchBar && (
+              <div className="w-full ">
+                {searchBar || <SearchBar onSearch={() => {}} />}
+              </div>
+            )}
 
-          {showControls && (
-            <button className="cursor-pointer">
-              <img src={getImageSrc("filter.svg")} alt="Filter" />
-            </button>
-          )}
+            {showControls && (
+              <button className="cursor-pointer">
+                <img src={getImageSrc("filter.svg")} alt="Filter" />
+              </button>
+            )}
+          </div>
           {showButton && (
-            <div className="w-full flex justify-end  ">
+            <div className=" ">
               <Button
                 variant="primary"
                 // size="md"
