@@ -394,6 +394,12 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       activeIcon: getImageSrc("patienticonsLight.svg"),
     },
     {
+      name: "Shifts",
+      path: "/dashboard/shifts",
+      icon: getImageSrc("pharmacyicon.svg"),
+      activeIcon: getImageSrc("pharmacyWhite.svg"),
+    },
+    {
       name: "Profile",
       path: "/dashboard/staffprofile",
       icon: getImageSrc("profile.svg"),
@@ -420,6 +426,12 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       activeIcon: getImageSrc("patienticonsLight.svg"),
     },
     {
+      name: "Shifts",
+      path: "/dashboard/shifts",
+      icon: getImageSrc("pharmacyicon.svg"),
+      activeIcon: getImageSrc("pharmacyWhite.svg"),
+    },
+    {
       name: "Profile",
       path: "/dashboard/staffprofile",
       icon: getImageSrc("profile.svg"),
@@ -444,6 +456,12 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       path: "/dashboard/expenses",
       icon: getImageSrc("patientsicon.svg"),
       activeIcon: getImageSrc("patienticonsLight.svg"),
+    },
+    {
+      name: "Shifts",
+      path: "/dashboard/shifts",
+      icon: getImageSrc("pharmacyicon.svg"),
+      activeIcon: getImageSrc("pharmacyWhite.svg"),
     },
     {
       name: "Profile",
@@ -516,6 +534,12 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       activeIcon: getImageSrc("pharmacyWhite.svg"),
     },
     {
+      name: "Shifts",
+      path: "/dashboard/shifts",
+      icon: getImageSrc("pharmacyicon.svg"),
+      activeIcon: getImageSrc("pharmacyWhite.svg"),
+    },
+    {
       name: "Profile",
       path: "/dashboard/staffprofile",
       icon: getImageSrc("profile.svg"),
@@ -547,6 +571,7 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       icon: getImageSrc("pharmacyicon.svg"),
       activeIcon: getImageSrc("pharmacyWhite.svg"),
     },
+
     {
       name: "Profile",
       path: "/dashboard/staffprofile",
@@ -593,6 +618,7 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       icon: getImageSrc("patientsicon.svg"),
       activeIcon: getImageSrc("patienticonsLight.svg"),
     },
+
     {
       name: "Profile",
       path: "/dashboard/staffprofile",

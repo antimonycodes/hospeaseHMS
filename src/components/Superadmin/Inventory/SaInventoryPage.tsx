@@ -101,14 +101,14 @@ const SaInventoryPage = () => {
 
   return (
     <div>
-      <div className=" flex w-full bg-white pt-10 pb-3 pr-2 md:pr-4 rounded-xl custom-shadow  ">
+      <div className=" flex flex-col gap-4 md:flex-row w-full bg-white pt-10 pb-3 pr-2 md:pr-4 rounded-xl custom-shadow  ">
         <Tabs<"Overview" | "Stock" | "Requests" | "Settings">
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           tabs={["Overview", "Stock", "Requests", "Settings"]}
         />
 
-        <div className="flex justify-end w-full max-w-2xl">
+        <div className="flex justify-end w-full md:max-w-2xl">
           {renderButtons()}
         </div>
       </div>

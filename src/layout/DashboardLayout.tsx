@@ -39,7 +39,7 @@ const DashboardLayout = () => {
             </button> */}
           </div>
           <div
-            className="fixed bottom-6  right-15 flex justify-center space-x-2 items-center  "
+            className="fixed bottom-0 right-0 flex justify-center space-x-2 items-center  "
             onClick={() =>
               window.open("https://wa.me/+2348114675297", "_blank")
             }

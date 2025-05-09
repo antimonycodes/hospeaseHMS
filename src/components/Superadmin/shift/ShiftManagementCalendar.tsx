@@ -516,7 +516,7 @@ const ShiftManagementCalendar = () => {
       {/* Modal for shift details - Responsive */}
       {showModal && (
         <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center z-50 p-1 md:p-6">
-          <div className="bg-white rounded-lg p-3 md:p-6 w-full max-w-2xl max-h-screen overflow-y-auto">
+          <div className="bg-white rounded-lg p-3 md:p-6 w-full max-w-2xl max-h-[80%] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg md:text-xl font-bold truncate">
                 Shift Details -{" "}

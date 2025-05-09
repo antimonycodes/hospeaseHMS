@@ -3,7 +3,7 @@ import PharmacyStocks from "../../Superadmin/pharmacy/PharmacyStocks";
 import StockActivity from "../../Superadmin/pharmacy/StockActivity";
 
 const PharmacyStockPage = () => {
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(1);
 
   return (
     <div className=" space-y-4">
@@ -23,8 +23,6 @@ const PharmacyStockPage = () => {
               }`}
             ></div>
           </h1>
-          {/*  */}
-
           {/*  */}
           <h1
             className={`relative inline-block flex-none cursor-pointer text-sm md:text-base font-semibold ${

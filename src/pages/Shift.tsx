@@ -13,9 +13,11 @@ const roleComponents: Record<string, JSX.Element> = {
   admin: <SaShiftPage />,
   doctor: <UserShifts />,
   nurse: <UserShifts />,
-  matron: <MatronShifts />,
-  "medical-director": <MedDShifts />,
-  pharmacist: <PharmShifts />,
+  matron: <UserShifts />,
+  "medical-director": <UserShifts />,
+  pharmacist: <UserShifts />,
+  "front-desk-manager": <UserShifts />,
+  finance: <UserShifts />,
 };
 
 const Shift = () => {
