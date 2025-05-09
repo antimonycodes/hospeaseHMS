@@ -82,6 +82,7 @@ export interface CreateStockData {
 }
 
 export interface InventoryStats {
+  data: InventoryStats;
   total_inventories: number;
   total_categories: number;
   total_expired_items: number;
