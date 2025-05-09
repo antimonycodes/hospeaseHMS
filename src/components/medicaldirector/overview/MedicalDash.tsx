@@ -8,6 +8,7 @@ import OverviewCard from "../../ReusabledashboardD/Overviewcard";
 import { useMedicalStore } from "../useMedicalStore";
 import MedicalChart from "./MedicalChart";
 import MedRecent from "./MedRecent";
+import Loader from "../../../Shared/Loader";
 
 const MedicalDash = () => {
   const { stats, getMedStats, isLoading } = useMedicalStore();
@@ -49,16 +50,14 @@ const MedicalDash = () => {
     <div className="font-inter">
       <div className="flex flex-col gap-4">
         {isLoading ? (
-          <div>Loading stats...</div>
-        ) : MedicalStatsData.length > 0 ? (
+          <Loader />
+        ) : (
           <OverviewCard
             cardTitle="Doctor's Dashboard"
             category="lab"
             limit={4}
             data={MedicalStatsData}
           />
-        ) : (
-          <div>No stats available</div>
         )}
         <MedicalChart />
         {/* <MedRecent /> */}

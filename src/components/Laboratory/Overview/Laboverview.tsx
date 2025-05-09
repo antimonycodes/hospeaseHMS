@@ -65,7 +65,7 @@ const Laboverview = () => {
             data={LabStats}
           />
         )}
-        <OverviewChart ChartTitle="Laboratory Tests Overview" />
+        {/* <OverviewChart ChartTitle="Laboratory Tests Overview" /> */}
         <LaboverviewTable />
       </div>
     </div>

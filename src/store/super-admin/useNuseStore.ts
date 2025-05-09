@@ -350,20 +350,13 @@ export const useNurseStore = create<NurseStore>((set, get) => ({
     set({ isLoading: true });
     try {
       const response = await api.get("/nurses/stats");
-      const statsData = response.data || {
-        total_patient: 0,
-        clinic_total_appointment: 0,
-        nurse_assigned_appointment: 0,
-        children_count: 0,
-        male_count: 0,
-        female_count: 0,
-        matron_assigned_appointment: 0,
-      };
+      console.log("API Response:", response.data);
+      // Handle nested data if necessary
+      const statsData = response.data || response.data.data;
       set({ stats: statsData });
-      console.log("Nurses Stats fetched:", statsData);
+      // console.log("API Response:", statsData);
     } catch (error: any) {
       console.error("Stats fetch error:", error.response?.data);
-      // toast.error(error.response?.data?.message || "Failed to fetch stats");
       set({ stats: null });
     } finally {
       set({ isLoading: false });

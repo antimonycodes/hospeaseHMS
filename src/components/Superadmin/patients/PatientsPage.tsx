@@ -4,16 +4,13 @@ import AppointmentsTable from "./AppointmentsTable";
 import Button from "../../../Shared/Button";
 import { Plus, Search } from "lucide-react";
 import AddPatientModal from "../../../Shared/AddPatientModal";
-// import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
-// import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
 
 type PatientsPage = {
-  endpoint?: string; // Allow custom endpoint
-  bookEndpoint?: string; // Endpoint for booking appointments
-  refreshEndpoint?: string; // Endpoint for refreshing after booking
-  // tableTitle?: string; // Custom table title
+  endpoint?: string;
+  bookEndpoint?: string;
+  refreshEndpoint?: string;
 };
 const PatientsPage = ({
   endpoint = "/admin/appointment/all-records",
@@ -43,10 +40,10 @@ const PatientsPage = ({
 
   useEffect(() => {
     getAllPatients();
-  }, []);
+  }, [getAllPatients]);
 
   useEffect(() => {
-    getAllAppointments("1", "10");
+    getAllAppointments("1", "10", endpoint);
   }, [getAllAppointments, endpoint]);
 
   return (

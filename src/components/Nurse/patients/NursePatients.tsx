@@ -8,12 +8,7 @@ import NursePatientTable from "./NursePatientTable";
 type PatientStatus = "Pending" | "Completed";
 
 const NursePatients = () => {
-  const {
-    getAllPatients,
-    patients = [],
-    isLoading,
-    pagination,
-  } = usePatientStore();
+  const { getAllPatients, patients, isLoading, pagination } = usePatientStore();
   const [activeTab, setActiveTab] = React.useState<"Pending" | "Completed">(
     "Pending"
   );

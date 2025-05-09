@@ -31,12 +31,25 @@ api.interceptors.request.use(
 //   address: string;
 //   relationship: string;
 // }
+export interface Pagination {
+  total: number;
+  per_page: number;
+  current_page: number;
+  last_page: number;
+  from: number;
+  to: number;
+}
 
 interface AppointmentStore {
   isLoading: boolean;
   appointments: any[];
+  pagination: Pagination | null;
   selectedAppointment: any | null;
-  getAllAppointments: (endpoint?: string) => Promise<void>;
+  getAllAppointments: (
+    page?: string,
+    perPage?: string,
+    endpoint?: string
+  ) => Promise<void>;
   getAppointmentById: (id: string) => Promise<void>;
   createAppointment: (data: any, endpoint?: string) => Promise<void>;
   updateAppointment: (
@@ -51,11 +64,21 @@ export const useAppointmentStore = create<AppointmentStore>((set) => ({
   isLoading: false,
   appointments: [],
   selectedAppointment: null,
-
-  getAllAppointments: async (endpoint: string = "/doctor/my-appointments") => {
+  pagination: null,
+  getAllAppointments: async (
+    page: string = "1",
+    perPage: string = "10",
+    baseEndpoint: string = "/doctor/my-appointments"
+  ) => {
     set({ isLoading: true });
     try {
+      const endpoint = `${baseEndpoint}?page=${page}&per_page=${perPage}`;
+
+      console.log("Fetching patients from:", endpoint);
+
       const response = await api.get(endpoint);
+      set({ pagination: response.data.data.pagination });
+      console.log(response.data.data.pagination, "pagination");
       set({ appointments: response.data.data.data });
       console.log(response.data.data, "dfgh");
       console.log(response.data.message);

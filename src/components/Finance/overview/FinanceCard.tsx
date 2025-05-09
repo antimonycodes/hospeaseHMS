@@ -4,7 +4,7 @@ import FpaymentTable from "../payment/FpaymentTable";
 import { useFinanceStore } from "../../../store/staff/useFinanceStore";
 
 const FinanceCard = () => {
-  const { payments, getAllPayments, isLoading } = useFinanceStore();
+  const { payments, getAllPayments, isLoading, pagination } = useFinanceStore();
 
   useEffect(() => {
     getAllPayments("/finance/all-revenues");
@@ -21,7 +21,11 @@ const FinanceCard = () => {
         showControls={false}
       />
 
-      <FpaymentTable payments={payments.slice(0, 5)} isLoading={isLoading} />
+      <FpaymentTable
+        payments={payments.slice(0, 5)}
+        isLoading={isLoading}
+        pagination={pagination}
+      />
     </div>
   );
 };

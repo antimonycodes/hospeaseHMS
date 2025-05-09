@@ -7,63 +7,61 @@ import childrenIcon from "../../../assets/hugeicons_doctor-03.png";
 import femaleIcon from "../../../assets/femaleIcon.png";
 import maleIcon from "../../../assets/maleIcon.png";
 import totalIcon from "../../../assets/totalIcon.png";
-import { useMedicalStore } from "../../medicaldirector/useMedicalStore";
-
 const NurseDash = () => {
-  // const { stats, getNurseStats, isLoading } = useNurseStore();
-  const { stats, getMedStats, isLoading } = useMedicalStore();
+  const { stats, getNurseStats, isLoading } = useNurseStore();
 
-  // useEffect(() => {
-  //   getNurseStats();
-  // }, [getNurseStats]);
   useEffect(() => {
-    getMedStats("/nurses/stats");
-  }, [getMedStats]);
+    getNurseStats();
+  }, [getNurseStats]);
+
+  // console.log("Nurse Stats:", stats);
+  // console.log("Nurse Data:", getNurseStats);
 
   const NurseStatsData = stats
     ? [
         {
           title: "Total Patients",
-          number: stats.total_patient.toString(),
+          number: String(stats.total_patient),
           icon: totalIcon,
           category: "finance",
         },
         {
           title: "Male Patients",
-          number: stats.male_count.toString(),
+          number: String(stats.male_count),
           icon: maleIcon,
           category: "finance",
         },
         {
           title: "Female Patients",
-          number: stats.female_count.toString(),
+          number: String(stats.female_count),
           icon: femaleIcon,
           category: "finance",
         },
         {
           title: "Children",
-          number: stats.children_count.toString(),
+          number: String(stats.children_count),
           icon: childrenIcon,
           category: "finance",
         },
       ]
     : [];
+
+  // console.log("NurseStatsData:", NurseStatsData);
+
   return (
     <div className="font-inter">
-      <div className=" flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         {isLoading ? (
           <div>Loading stats...</div>
-        ) : NurseStatsData.length > 0 ? (
+        ) : (
           <OverviewCard
             cardTitle="Nurse Dashboard"
             category="lab"
             limit={4}
             data={NurseStatsData}
           />
-        ) : (
-          <div>No stats available</div>
         )}
-        <Nursechart />
+        {/* <Nursechart /> */}
         <NurseCard />
       </div>
     </div>

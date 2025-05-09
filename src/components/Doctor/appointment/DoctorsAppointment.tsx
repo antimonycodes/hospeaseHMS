@@ -47,7 +47,8 @@ const DoctorsAppointment = () => {
   const [activeTab, setActiveTab] = useState<TabType>("Pending");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { getAllAppointments, appointments } = useAppointmentStore();
+  const { getAllAppointments, appointments, pagination } =
+    useAppointmentStore();
 
   const transformedPatients: Patient[] = appointments.map((item: any) => {
     const rawStatus = item.attributes.status.toLowerCase();
@@ -86,13 +87,18 @@ const DoctorsAppointment = () => {
   });
 
   const statusCounts = getStatusCounts(transformedPatients);
-
+  const baseEndpoint = "/doctor/my-appointments";
   useEffect(() => {
-    getAllAppointments("/doctor/my-appointments");
+    getAllAppointments("1", "10", baseEndpoint);
   }, [getAllAppointments]);
 
   const navigate = useNavigate();
+  const [perPage, setPerPage] = useState(pagination?.per_page || 10);
 
+  const handlePageChange = (page: number) => {
+    // Call getAllPatients with the page number, perPage value, and the current baseEndpoint
+    getAllAppointments(page.toString(), perPage.toString(), baseEndpoint);
+  };
   const details = (id: string) => {
     navigate(`/dashboard/appointment/doctor/${id}`);
   };
@@ -165,6 +171,8 @@ const DoctorsAppointment = () => {
         data={filteredPatients}
         rowKey="patientId"
         pagination={true}
+        paginationData={pagination}
+        onPageChange={handlePageChange}
       />
 
       {/* <FrontdeskAppointmentModal isOpen={isModalOpen} onClose={closeModal} /> */}

@@ -65,7 +65,7 @@ const PaymentTypeBadge = ({
 };
 
 const LabPaymnets = () => {
-  const { getAllPayments, payments, isLoading } = useFinanceStore();
+  const { getAllPayments, payments, isLoading, pagination } = useFinanceStore();
   const [transformedPayments, setTransformedPayment] = useState<
     PaymentAttributes[]
   >([]);
@@ -85,8 +85,12 @@ const LabPaymnets = () => {
     );
   }, [payments]);
 
+  // const baseEndpoint = "/medical-report/patient-payment-history";
+
+  const [perPage, setPerPage] = useState(pagination?.per_page || 10);
+
   useEffect(() => {
-    getAllPayments();
+    getAllPayments("1", "10");
   }, [getAllPayments]);
 
   const columns: Column<PaymentAttributes>[] = [
@@ -153,7 +157,14 @@ const LabPaymnets = () => {
       ),
     },
   ];
-
+  const handlePageChange = (page: number) => {
+    // Call getAllPatients with the page number, perPage value, and the current baseEndpoint
+    getAllPayments(
+      page.toString(),
+      perPage.toString(),
+      "/medical-report/patient-payment-history"
+    );
+  };
   if (isLoading) {
     return <Loader />;
   }
@@ -176,7 +187,9 @@ const LabPaymnets = () => {
         data={transformedPayments}
         columns={columns}
         rowKey="id"
-        pagination={false}
+        pagination={true}
+        paginationData={pagination}
+        onPageChange={handlePageChange}
         loading={isLoading}
       />
     </div>

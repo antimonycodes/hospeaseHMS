@@ -47,7 +47,10 @@ const NurseAppointment = () => {
   const [activeTab, setActiveTab] = useState<TabType>("Pending");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { getAllAppointments, appointments } = useAppointmentStore();
+  const { getAllAppointments, appointments, isLoading, pagination } =
+    useAppointmentStore();
+
+  const baseEndpoint = "nurses/my-appointments";
 
   const transformedPatients: Patient[] = appointments.map((item: any) => {
     const rawStatus = item.attributes.status.toLowerCase();
@@ -88,8 +91,8 @@ const NurseAppointment = () => {
   const statusCounts = getStatusCounts(transformedPatients);
 
   useEffect(() => {
-    getAllAppointments("nurses/my-appointments");
-  }, [getAllAppointments]);
+    getAllAppointments("1", "10", baseEndpoint);
+  }, [getAllAppointments, baseEndpoint]);
 
   const navigate = useNavigate();
 
@@ -165,6 +168,8 @@ const NurseAppointment = () => {
         data={filteredPatients}
         rowKey="patientId"
         pagination={true}
+        paginationData={pagination}
+        loading={isLoading}
       />
 
       {/* <FrontdeskAppointmentModal isOpen={isModalOpen} onClose={closeModal} /> */}

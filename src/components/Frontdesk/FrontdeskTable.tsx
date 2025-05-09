@@ -1,8 +1,10 @@
 import { JSX, useEffect } from "react";
+import { motion } from "framer-motion";
 
 import Table from "../../Shared/Table";
 import Tablehead from "../ReusablepatientD/Tablehead";
 import { usePatientStore } from "../../store/super-admin/usePatientStore";
+import Loader from "../../Shared/Loader";
 
 type PatientData = {
   name: string;
@@ -78,13 +80,15 @@ const FrontdeskTable = () => {
         typebutton="Add New"
       />
       {isLoading ? (
-        <div className="p-4 text-center">Loading patients...</div>
+        <div>
+          <Loader />
+        </div>
       ) : (
         <Table
           data={displayedPatients}
           columns={columns}
           rowKey="id"
-          pagination={false} // No pagination since we're only showing 3 records
+          pagination={false}
           radius="rounded-none"
         />
       )}
