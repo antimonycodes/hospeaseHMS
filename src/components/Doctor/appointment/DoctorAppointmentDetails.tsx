@@ -63,7 +63,7 @@ const DoctorAppointmentDetails = () => {
     if (id && role) {
       const endpoint = endpointManagent(role);
       console.log("Using endpoint:", endpoint);
-      getAppointmentById(id, endpoint);
+      getAppointmentById(id);
     }
   }, [id, role, getAppointmentById]);
 
@@ -73,7 +73,7 @@ const DoctorAppointmentDetails = () => {
     setActionLoading(true);
 
     try {
-      await manageAppointment(id, manageEndpoint(role), {
+      await manageAppointment(id, {
         status: "accepted",
       });
     } catch (error) {
@@ -89,7 +89,7 @@ const DoctorAppointmentDetails = () => {
     setActionLoading(true);
 
     try {
-      const result = await manageAppointment(id, manageEndpoint(role), {
+      const result = await manageAppointment(id, {
         status: "rejected",
         reason: reason,
       });
@@ -111,7 +111,7 @@ const DoctorAppointmentDetails = () => {
     setActionLoading(true);
 
     try {
-      const result = await manageAppointment(id, manageEndpoint(role), {
+      const result = await manageAppointment(id, {
         status: "reschedule",
         reason: reason || undefined,
         reschedule_data: {

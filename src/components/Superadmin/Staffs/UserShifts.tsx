@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Menu, Calendar, List } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Menu,
+  Calendar,
+  List,
+  X,
+} from "lucide-react";
 import { useGlobalStore } from "../../../store/super-admin/useGlobal";
 
 // Types
@@ -42,14 +49,27 @@ type ShiftListItem = {
   }[];
 };
 
+// Modal data type
+type ModalData = {
+  isOpen: boolean;
+  date: Date | null;
+  shifts: {
+    type: string;
+    color: string;
+    startTime?: string;
+    endTime?: string;
+    departments?: string[];
+  }[];
+};
+
 // Shift type colors mapping
 const shiftColors: { [key: string]: string } = {
   Morning: "text-[#B13E00] bg-[#FFF3F0]",
   Afternoon: "text-[#016838] bg-[#E0FFF1]",
   Night: "text-[#101828] bg-[#EFF4FF]",
-  night: "text-[#101828] bg-[#EFF4FF]", // Handle lowercase variant
-  morning: "text-[#B13E00] bg-[#FFF3F0]", // Handle lowercase variant
-  afternoon: "text-[#016838] bg-[#E0FFF1]", // Handle lowercase variant
+  night: "text-[#101828] bg-[#EFF4FF]",
+  morning: "text-[#B13E00] bg-[#FFF3F0]",
+  afternoon: "text-[#016838] bg-[#E0FFF1]",
   default: "text-gray-700 bg-gray-100",
 };
 
@@ -61,6 +81,13 @@ const UserShifts = () => {
   const [processedShifts, setProcessedShifts] = useState<StaffShiftData>({});
   const [viewMode, setViewMode] = useState("month"); // "month" or "list"
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Modal state
+  const [modalData, setModalData] = useState<ModalData>({
+    isOpen: false,
+    date: null,
+    shifts: [],
+  });
 
   const { getStaffShifts, staffShift, isLoading } = useGlobalStore();
 
@@ -118,13 +145,6 @@ const UserShifts = () => {
       getStaffShifts(storedId, endpoint);
     }
   }, [role, getStaffShifts]);
-
-  // Process shifts data when it's loaded
-  // useEffect(() => {
-  //   if (staffShift) {
-  //     setProcessedShifts(staffShift);
-  //   }
-  // }, [staffShift]);
 
   // Format date for lookup
   const formatDate = (date: Date) => {
@@ -270,6 +290,35 @@ const UserShifts = () => {
     return shiftType.charAt(0).toUpperCase() + shiftType.slice(1);
   };
 
+  // Open modal with day data
+  const openDayModal = (dayData: DayData) => {
+    setModalData({
+      isOpen: true,
+      date: dayData.date,
+      shifts: dayData.shifts,
+    });
+  };
+
+  // Close modal
+  const closeModal = () => {
+    setModalData({
+      isOpen: false,
+      date: null,
+      shifts: [],
+    });
+  };
+
+  // Format date for modal header
+  const formatModalDate = (date: Date | null) => {
+    if (!date) return "";
+    return date.toLocaleDateString(undefined, {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
   return (
     <div className="w-full p-2 md:p-4 bg-white rounded-lg shadow">
       {/* Mobile Header */}
@@ -371,7 +420,14 @@ const UserShifts = () => {
                       isToday(dayData.date) && dayData.inCurrentMonth
                         ? "ring-2 ring-[#009952]"
                         : ""
+                    } ${
+                      dayData.shifts.length > 0
+                        ? "cursor-pointer hover:bg-gray-50 transition-colors"
+                        : ""
                     }`}
+                    onClick={() =>
+                      dayData.shifts.length > 0 && openDayModal(dayData)
+                    }
                   >
                     <div
                       className={`text-right text-xs md:text-sm mb-1 font-medium ${
@@ -444,12 +500,13 @@ const UserShifts = () => {
           {viewMode === "list" && (
             <div className="border border-[#EAECF0] rounded-md divide-y divide-gray-200">
               {listViewData.length > 0 ? (
-                listViewData.map((dayData) => (
+                listViewData.map((dayData: any) => (
                   <div
                     key={`list-${dayData.dateString}`}
                     className={`p-3 ${
                       isToday(dayData.date) ? "bg-gray-50" : ""
-                    }`}
+                    } cursor-pointer hover:bg-gray-50 transition-colors`}
+                    onClick={() => openDayModal(dayData)}
                   >
                     <div className="flex items-center">
                       <div
@@ -467,7 +524,7 @@ const UserShifts = () => {
                     </div>
 
                     <div className="mt-2 space-y-3">
-                      {dayData.shifts.map((shift, shiftIndex) => (
+                      {dayData.shifts.map((shift: any, shiftIndex: any) => (
                         <div
                           key={`list-shift-${shiftIndex}`}
                           className={`${shift.color} p-3 rounded-md`}
@@ -504,6 +561,95 @@ const UserShifts = () => {
                   No shifts scheduled for this month
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Shift Details Modal */}
+          {modalData.isOpen && (
+            <div className="fixed inset-0 bg-[#1E1E1E40]  bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-lg shadow-lg w-full max-w-lg max-h-[90vh] overflow-auto">
+                <div className="flex justify-between items-center border-b p-4">
+                  <h2 className="text-lg font-semibold">
+                    {formatModalDate(modalData.date)}
+                  </h2>
+                  <button
+                    onClick={closeModal}
+                    className="p-1 rounded-full hover:bg-gray-100"
+                    aria-label="Close modal"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="p-4">
+                  {modalData.shifts.length > 0 ? (
+                    <div className="space-y-4">
+                      {modalData.shifts.map((shift, index) => (
+                        <div
+                          key={`modal-shift-${index}`}
+                          className={`${shift.color} p-4 rounded-lg`}
+                        >
+                          <h3 className="text-lg font-medium">
+                            {formatShiftType(shift.type)} Shift
+                          </h3>
+
+                          <div className="mt-2 grid grid-cols-2 gap-2">
+                            {shift.startTime && (
+                              <div>
+                                <p className="text-sm font-medium text-gray-600">
+                                  Start Time
+                                </p>
+                                <p>{formatTime(shift.startTime)}</p>
+                              </div>
+                            )}
+
+                            {shift.endTime && (
+                              <div>
+                                <p className="text-sm font-medium text-gray-600">
+                                  End Time
+                                </p>
+                                <p>{formatTime(shift.endTime)}</p>
+                              </div>
+                            )}
+                          </div>
+
+                          {shift.departments &&
+                            shift.departments.length > 0 && (
+                              <div className="mt-4 border-t pt-2">
+                                <p className="text-sm font-medium text-gray-600">
+                                  Departments
+                                </p>
+                                <ul className="mt-1 list-disc pl-5">
+                                  {shift.departments.map((dept, deptIndex) => (
+                                    <li
+                                      key={`dept-${deptIndex}`}
+                                      className="text-sm"
+                                    >
+                                      {dept}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-center text-gray-500 py-8">
+                      No shifts scheduled for this day
+                    </p>
+                  )}
+                </div>
+
+                <div className="border-t p-4 flex justify-end">
+                  <button
+                    onClick={closeModal}
+                    className="px-4 py-2 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </>

@@ -256,7 +256,7 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
   updatePayment: async (id, data) => {
     set({ isUpdating: true });
     try {
-      const response = await api.post(
+      const response = await api.put(
         `/medical-report/change-payment-status/${id}`,
         data
       );
