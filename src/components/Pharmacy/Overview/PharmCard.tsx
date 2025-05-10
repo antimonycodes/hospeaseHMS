@@ -137,7 +137,7 @@ const PharmCard = () => {
         showControls={false}
       />
       {/*  Tabs */}
-      {/* <div className="w-full bg-white flex space-x-2 md:space-x-6 px-6">
+      <div className="w-full bg-white flex space-x-2 md:space-x-6 px-6">
         {statuses.map((status) => (
           <button
             key={status}
@@ -154,10 +154,10 @@ const PharmCard = () => {
             </span>
           </button>
         ))}
-      </div> */}
+      </div>
       <Table
         columns={columns}
-        data={patients.slice(0, 5)}
+        data={filteredPatients.slice(0, 5)}
         rowKey="id"
         pagination={false}
         paginationData={pagination}
