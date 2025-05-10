@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import {
-  CreateStockData,
+  // CreateStockData,
   useInventoryStore,
 } from "../components/Inventory/overview/useInventoryStore";
 
@@ -16,7 +16,7 @@ interface AddStockModalProps {
   onClose: () => void;
   isLoading?: boolean;
   createStock?: (
-    data: CreateStockData,
+    data: any,
     endpoint?: string,
     refreshEndpoint?: string
   ) => Promise<boolean | null>;
