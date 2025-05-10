@@ -72,17 +72,21 @@ export interface Request {
   item_name: string;
   created_at: string;
 }
-export interface CreateStockData {
-  service_item_name?: string;
-  item?: string; // Support legacy naming
-  quantity: number;
-  category_id: number;
-  expiry_date: string;
-  service_item_price?: number | string;
-  cost: number;
-  service_charge_id?: number | string; // Added service charge ID
-  image?: File | null;
-}
+// export interface CreateStockData {
+//   service_item_name?: string;
+//   item?: string; // Support legacy naming
+//   quantity: number;
+//   category_id: number;
+//   expiry_date: string;
+//   service_item_price?: number | string;
+//   cost: number;
+//   service_charge_id?: number | string; // Added service charge ID
+//   image?: File | null;
+// }
+
+// export interface CreateStockData {
+//   any: any;
+// }
 
 export interface InventoryStats {
   data: InventoryStats;
@@ -102,7 +106,7 @@ interface InventoryStore {
   getInventoryStats: (endpoint?: string) => Promise<void>;
   getAllStocks: (endpoint?: string) => Promise<void>;
   createStock: (
-    data: CreateStockData,
+    data: any,
     endpoint?: string,
     refreshEndpoint?: string
   ) => Promise<boolean | null>;
@@ -280,7 +284,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
   },
 
   createStock: async (
-    data: CreateStockData,
+    data: any,
     endpoint = "/inventory/upload-item",
     refreshEndpoint = "/admin/inventory/all-inventory-items"
   ) => {
