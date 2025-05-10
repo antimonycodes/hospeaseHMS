@@ -32,7 +32,7 @@ type Column<T> = {
 type FpaymentTableProps = {
   isLoading?: boolean;
   payments: PaymentData[];
-  pagination: {
+  pagination?: {
     total: number;
     per_page: number;
     current_page: number;
