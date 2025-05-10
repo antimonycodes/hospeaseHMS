@@ -1,8 +1,9 @@
-import React, { useEffect, JSX } from "react";
+import React, { useEffect } from "react";
 import { useInventoryStore } from "../../Inventory/overview/useInventoryStore";
 import Table from "../../../Shared/Table";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import Loader from "../../../Shared/Loader";
+
 export type StockActivityType = {
   id: number;
   type: string;
@@ -35,7 +36,7 @@ export type StockActivityType = {
 interface Column<T> {
   key: keyof T;
   label: string;
-  render?: (value: any, record: T) => JSX.Element;
+  render?: (value: any, record: T) => React.ReactNode;
 }
 
 const columns: Column<StockActivityType>[] = [
@@ -55,16 +56,6 @@ const columns: Column<StockActivityType>[] = [
       <span className="text-[#667085] text-sm">{item.attributes.patient}</span>
     ),
   },
-  // {
-  //   key: "id",
-  //   label: "Requested By",
-  //   render: (_, item) => (
-  //     <span className="text-[#667085] text-sm">
-  //       {item.attributes.requested_by.first_name}{" "}
-  //       {item.attributes.requested_by.last_name}
-  //     </span>
-  //   ),
-  // },
   {
     key: "id",
     label: "Recorded By",
@@ -75,7 +66,6 @@ const columns: Column<StockActivityType>[] = [
       </span>
     ),
   },
-
   {
     key: "id",
     label: "Quantity Deducted",
@@ -108,7 +98,7 @@ const columns: Column<StockActivityType>[] = [
 const StockActivity = () => {
   const { stockActivities, getStockActivity, isLoading } =
     useInventoryStore() as unknown as {
-      stockActivities: { data: StockActivityType[]; pagination: object } | null;
+      stockActivities: { data: StockActivityType[] } | null;
       getStockActivity: () => void;
       isLoading: boolean;
     };
@@ -117,7 +107,13 @@ const StockActivity = () => {
     getStockActivity();
   }, [getStockActivity]);
 
-  const stockArray = stockActivities?.data ?? [];
+  // Debug logging to see what data is being received
+  console.log("Loading state:", isLoading);
+  console.log("Stock activities:", stockActivities);
+
+  // Extract activities from the nested structure
+  const activities = stockActivities?.data || [];
+  console.log("Extracted activities:", activities);
 
   return (
     <div>
@@ -125,13 +121,13 @@ const StockActivity = () => {
       <div className="w-full bg-white rounded-b-[8px] shadow-table">
         {isLoading ? (
           <Loader />
-        ) : Array.isArray(stockArray) && stockArray.length === 0 ? (
+        ) : activities.length === 0 ? (
           <p className="p-4 text-center text-gray-500">
             No stock activity found
           </p>
         ) : (
           <Table
-            data={stockArray}
+            data={activities}
             columns={columns}
             rowKey="id"
             loading={isLoading}

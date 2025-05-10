@@ -102,6 +102,7 @@ interface InventoryStore {
   pagination: Pagination | null;
   stocks: any[];
   requests: any[];
+  stockActivities: any[];
   // requests: { data: any[]; pagination: Pagination }[];
   getInventoryStats: (endpoint?: string) => Promise<void>;
   getAllStocks: (endpoint?: string) => Promise<void>;
@@ -132,6 +133,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
   stocks: [],
   requests: [],
   categorys: [],
+  stockActivities: [],
 
   searchStaff: async (query: string) => {
     try {
@@ -274,7 +276,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       const response = await api.get(endpoint);
 
       set({ stocks: response.data.data?.data || [] });
-      toast.success(response.data.message || "Stocks fetched successfully");
+      // toast.success(response.data.message || "Stocks fetched successfully");
     } catch (error: any) {
       console.error("getAllStocks error:", error.response?.data);
       toast.error(error.response?.data?.message || "Failed to fetch stocks");
@@ -358,6 +360,22 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       toast.error(error.response?.data?.message || "Failed to fetch stats");
       set({ stats: null });
     } finally {
+      set({ isLoading: false });
+    }
+  },
+  getStockActivity: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get("/medical-report/stock-activity-logs");
+      console.log("API Response:", response.data);
+
+      // Make sure we're setting the correct data structure
+      set({
+        stockActivities: response.data.data,
+        isLoading: false,
+      });
+    } catch (error: any) {
+      console.log("Error fetching stock activities:", error);
       set({ isLoading: false });
     }
   },
