@@ -123,6 +123,7 @@ interface PatientStore {
   getAppointmentById: (id: string, endpoint: any) => Promise<void>;
   manageAppointment: (id: string, data: any, endpoint: any) => Promise<any>;
   searchPatients: (query: string) => Promise<any[]>;
+  searchAppointment: (query: string) => Promise<any[]>;
   getLabPatients: (endpoint?: string) => Promise<void>; // New function for lab patients
   searchPatientsappointment: (query: string) => Promise<any[]>;
   getFrontdeskStats: () => Promise<void>;
@@ -421,6 +422,26 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
 
       usePatientStore.setState({
         patients: response.data.data.data || response.data.data,
+        pagination: response.data.data.pagination || null,
+      });
+      return response.data.data.data || response.data.data;
+    } catch (error: any) {
+      console.error(error.response?.data);
+      // toast.error(error.response?.data?.message || "Search failed");
+      return [];
+    }
+  },
+  searchAppointment: async (query: string, page = "1", perPage = "10") => {
+    try {
+      const response = await api.get(
+        `/medical-report/all-patient?search=${encodeURIComponent(
+          query
+        )}&page=${page}&per_page=${perPage}`
+      );
+      console.log(response.data.data);
+
+      usePatientStore.setState({
+        appointments: response.data.data.data || response.data.data,
         pagination: response.data.data.pagination || null,
       });
       return response.data.data.data || response.data.data;
