@@ -15,7 +15,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
   };
 
   return (
-    <div className="flex w-full items-center gap-2 border border-gray-200 py-2 px-4 rounded-[10px]">
+    <div className="flex w-full items-center gap-2 border border-gray-200 py-3 px-4 rounded-[10px]">
       <img src={getImageSrc("search.svg")} alt="Search" />
       <input
         type="search"

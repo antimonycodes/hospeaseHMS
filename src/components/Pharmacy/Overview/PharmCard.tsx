@@ -5,15 +5,17 @@ import { formatPhoneNumber } from "../../../utils/formatPhoneNumber";
 import { useNavigate } from "react-router-dom";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import Loader from "../../../Shared/Loader";
+import Tablehead from "../../ReusablepatientD/Tablehead";
 
 const PharmCard = () => {
-  const { getAllPatients, patients, isLoading } = usePatientStore();
+  const { getAllPatients, patients, isLoading, pagination } = usePatientStore();
   const [activeStatus, setActiveStatus] = useState("pending");
   const navigate = useNavigate();
+  const baseEndpoint = "/pharmacy/patient/all";
 
   useEffect(() => {
-    getAllPatients("pharmacy/patient/all");
-  }, []);
+    getAllPatients("1", "10", baseEndpoint);
+  }, [getAllPatients]);
 
   const transformedPatients = patients.map((item) => {
     const attr = item.attributes;
@@ -121,13 +123,46 @@ const PharmCard = () => {
 
   if (isLoading) return <Loader />;
 
+  const handlePageChange = (page: number) => {
+    // Use the stored baseEndpoint for consistency when changing pages
+    getAllPatients(page.toString(), "10", baseEndpoint);
+  };
+
   return (
     <div>
+      {/*  Table Header */}
+      <Tablehead
+        tableTitle="Recent Patients"
+        showSearchBar={false}
+        showControls={false}
+      />
+      {/*  Tabs */}
+      <div className="w-full bg-white flex space-x-2 md:space-x-6 px-6">
+        {statuses.map((status) => (
+          <button
+            key={status}
+            onClick={() => setActiveStatus(status)}
+            className={`pb-2 text-xs md:text-sm font-medium capitalize ${
+              activeStatus === status
+                ? "text-green-600 border-b-2 border-green-600"
+                : "text-gray-500"
+            }`}
+          >
+            {status}
+            <span className="text-xs bg-primary text-white py-0.5 px-3 rounded-xl ml-1">
+              {statusCounts[status] || 0}
+            </span>
+          </button>
+        ))}
+      </div>
       <Table
         columns={columns}
-        data={filteredPatients}
-        rowKey="patientId"
-        pagination={true}
+        data={filteredPatients.slice(0, 5)}
+        rowKey="id"
+        pagination={false}
+        paginationData={pagination}
+        onPageChange={handlePageChange}
+        loading={isLoading}
       />
     </div>
   );

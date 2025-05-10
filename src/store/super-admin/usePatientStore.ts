@@ -418,7 +418,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
         )}&page=${page}&per_page=${perPage}`
       );
       console.log(response.data.data);
-      // Assuming response includes pagination data
+
       usePatientStore.setState({
         patients: response.data.data.data || response.data.data,
         pagination: response.data.data.pagination || null,

@@ -1,16 +1,28 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import MedpatientInfo from "./MedpatientInfo";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
+import SearchBar from "../../ReusablepatientD/SearchBar";
 
 const MedicalPatient = () => {
-  const { patients, getAllPatients, isLoading, pagination } = usePatientStore();
+  const [searchQuery, setSearchQuery] = useState("");
+  const { patients, getAllPatients, searchPatients, isLoading, pagination } =
+    usePatientStore();
   const baseEndpoint = "/medical-director/patient";
 
   useEffect(() => {
-    getAllPatients("1", "10", baseEndpoint);
-  }, [getAllPatients]);
+    if (searchQuery) {
+      searchPatients(searchQuery).then((fetchedPatients) => {
+        usePatientStore.setState({ patients: fetchedPatients });
+      });
+    } else {
+      getAllPatients("1", "10", baseEndpoint);
+    }
+  }, [getAllPatients, searchPatients, searchQuery]);
 
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
   return (
     <div>
       <Tablehead
@@ -18,6 +30,7 @@ const MedicalPatient = () => {
         tableCount={patients.length}
         showSearchBar={true}
         showControls={true}
+        searchBar={<SearchBar onSearch={handleSearch} />}
       />
       <MedpatientInfo
         patients={patients}

@@ -20,6 +20,7 @@ const FrondeskAppointmentTable = ({
   tableTitle = "Appointment",
 }: FrondeskAppointmentTableProps) => {
   const [openModal, setOpenModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const {
     appointments,
     searchPatients,
@@ -27,7 +28,7 @@ const FrondeskAppointmentTable = ({
     isLoading,
     getAllAppointments,
   } = usePatientStore();
-  const [searchQuery, setSearchQuery] = useState("");
+
   const baseEndpoint = "/front-desk/appointment/all-records";
 
   // useEffect(() => {

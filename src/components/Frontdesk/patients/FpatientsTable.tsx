@@ -18,10 +18,6 @@ const FpatientsTable = () => {
   } = usePatientStore();
   const baseEndpoint = "/front-desk/patient/fetch";
 
-  // useEffect(() => {
-  //   getAllPatients("1", "10", baseEndpoint);
-  // }, [getAllPatients]);
-
   useEffect(() => {
     if (searchQuery) {
       searchPatients(searchQuery).then((fetchedPatients) => {
