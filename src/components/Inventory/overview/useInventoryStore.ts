@@ -72,14 +72,17 @@ export interface Request {
   item_name: string;
   created_at: string;
 }
-export interface CreateStockData {
-  item: string;
-  quantity: string;
-  category_id: string;
+type CreateStockData = {
+  service_item_name?: string;
+  item?: string; // Support legacy naming
+  quantity: number;
+  category_id: number;
   expiry_date: string;
+  service_item_price?: number | string;
   cost: number;
-  // image: File | null;
-}
+  service_charge_id?: number | string; // Added service charge ID
+  image?: File | null;
+};
 
 export interface InventoryStats {
   data: InventoryStats;
