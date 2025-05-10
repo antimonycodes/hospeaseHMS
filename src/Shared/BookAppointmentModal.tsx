@@ -13,9 +13,9 @@ interface BookAppointmentModalProps {
 
 const BookAppointmentModal = ({
   onClose,
-  // endpoint = "/admin/appointment/assign",
-  refreshEndpoint = "/admin/appointment/all-records",
-}: BookAppointmentModalProps) => {
+}: // endpoint = "/admin/appointment/assign",
+// refreshEndpoint = "/admin/appointment/all-records",
+BookAppointmentModalProps) => {
   const { searchPatients, bookAppointment, isLoading } = usePatientStore();
   const { getAllStaffs, allStaffs, getAllRoles, roles } = useGlobalStore();
 
@@ -133,6 +133,7 @@ const BookAppointmentModal = ({
     const success = await bookAppointment(finalAppointmentData);
     if (success) {
       onClose();
+      window.location.reload();
     }
   };
 

@@ -120,8 +120,8 @@ interface PatientStore {
     endpoint?: string,
     refreshEndpoint?: string
   ) => Promise<boolean>; // Updated signature
-  getAppointmentById: (id: string) => Promise<void>;
-  manageAppointment: (id: string, data: any) => Promise<any>;
+  getAppointmentById: (id: string, endpoint: any) => Promise<void>;
+  manageAppointment: (id: string, data: any, endpoint: any) => Promise<any>;
   searchPatients: (query: string) => Promise<any[]>;
   getLabPatients: (endpoint?: string) => Promise<void>; // New function for lab patients
   searchPatientsappointment: (query: string) => Promise<any[]>;
@@ -511,8 +511,8 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   },
   bookAppointment: async (
     data: BookAppointmentData,
-    endpoint = "/admin/appointment/assign",
-    refreshEndpoint = "/admin/appointment/all-records"
+    endpoint = "/medical-report/appointment/book",
+    refreshEndpoint = "/medical-report/appointment/all-records"
   ) => {
     set({ isLoading: true });
     try {
@@ -535,29 +535,34 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
     }
   },
 
-  getAppointmentById: async (id) => {
+  getAppointmentById: async (id, endpoint) => {
     set({ isLoading: true });
     try {
-      const response = await api.get(`/doctor/my-appointments/${id}`);
+      // Use the provided endpoint parameter in the API call
+      const response = await api.get(`${endpoint}/${id}`);
       set({ selectedAppointment: response.data.data });
       console.log(response.data.data, "selectedAppointment");
+      return response.data.data;
     } catch (error: any) {
       console.error(error.response?.data);
       toast.error(
         error.response?.data?.message || "Failed to fetch appointment details"
       );
+      return null;
     } finally {
       set({ isLoading: false });
     }
   },
 
-  manageAppointment: async (id, data) => {
+  // Updated to match how it's called in the handler functions
+  manageAppointment: async (
+    id,
+    data,
+    endpoint = "/doctor/manage-appointment"
+  ) => {
     set({ isLoading: true });
     try {
-      const response = await api.patch(
-        `/doctor/manage-appointment/${id}`,
-        data
-      );
+      const response = await api.patch(`${endpoint}/${id}`, data);
       if (response.status === 200) {
         toast.success(response.data.message);
         await get().getAllAppointments();

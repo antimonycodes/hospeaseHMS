@@ -39,21 +39,19 @@ const DoctorAppointmentDetails = () => {
 
   const timeOptions = generateTimeOptions();
 
-  const endpointManagent = (role: string) => {
+  const endpointManagement = (role: string) => {
     if (role === "nurse") return "/nurses/my-appointments";
     if (role === "doctor") return "/doctor/my-appointments";
-    if (role === "medical-director")
-      return "/medical-director/shift/user-records";
-    return ""; // fallback
+    return "";
   };
 
   const manageEndpoint = (role: string) => {
     if (role === "nurse") return "/nurse/manage-appointment";
     if (role === "doctor") return "/doctor/manage-appointment";
-    if (role === "medical-director")
-      return "/medical-director/shift/user-records";
-    return ""; // fallback
+    return "";
   };
+
+  // Component hooks and handlers
   useEffect(() => {
     const storedRole = localStorage.getItem("role") || "";
     setRole(storedRole);
@@ -61,9 +59,9 @@ const DoctorAppointmentDetails = () => {
 
   useEffect(() => {
     if (id && role) {
-      const endpoint = endpointManagent(role);
+      const endpoint = endpointManagement(role);
       console.log("Using endpoint:", endpoint);
-      getAppointmentById(id);
+      getAppointmentById(id, endpoint);
     }
   }, [id, role, getAppointmentById]);
 
@@ -71,28 +69,37 @@ const DoctorAppointmentDetails = () => {
   const handleApprove = async () => {
     if (!id) return;
     setActionLoading(true);
-
     try {
-      await manageAppointment(id, {
-        status: "accepted",
-      });
+      const endpoint = manageEndpoint(role);
+      await manageAppointment(
+        id,
+        {
+          status: "accepted",
+        },
+        endpoint
+      );
     } catch (error) {
       console.error("Error approving appointment:", error);
     } finally {
       setActionLoading(false);
     }
   };
+  console.log(role);
 
   // Handle decline with reason
   const handleDecline = async () => {
     if (!id || !reason) return;
     setActionLoading(true);
-
     try {
-      const result = await manageAppointment(id, {
-        status: "rejected",
-        reason: reason,
-      });
+      const endpoint = manageEndpoint(role);
+      const result = await manageAppointment(
+        id,
+        {
+          status: "rejected",
+          reason: reason,
+        },
+        endpoint
+      );
 
       if (result) {
         setReason("");
@@ -109,16 +116,20 @@ const DoctorAppointmentDetails = () => {
   const handleReschedule = async () => {
     if (!id || !selectedDate || !selectedTime) return;
     setActionLoading(true);
-
     try {
-      const result = await manageAppointment(id, {
-        status: "reschedule",
-        reason: reason || undefined,
-        reschedule_data: {
-          date: selectedDate,
-          time: selectedTime,
+      const endpoint = manageEndpoint(role);
+      const result = await manageAppointment(
+        id,
+        {
+          status: "reschedule",
+          reason: reason || undefined,
+          reschedule_data: {
+            date: selectedDate,
+            time: selectedTime,
+          },
         },
-      });
+        endpoint
+      );
 
       if (result) {
         setSelectedDate("");

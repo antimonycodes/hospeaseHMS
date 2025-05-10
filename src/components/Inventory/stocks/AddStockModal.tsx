@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import toast from "react-hot-toast";
 import {
-  CreateStockData,
+  // CreateStockData,
   useInventoryStore,
 } from "../overview/useInventoryStore";
 import { useCombinedStore } from "../../../store/super-admin/useCombinedStore";
@@ -19,7 +19,7 @@ interface AddStockModalProps {
   onClose: () => void;
   isLoading?: boolean;
   createStock?: (
-    data: CreateStockData,
+    data: any,
     endpoint?: string,
     refreshEndpoint?: string
   ) => Promise<boolean | null>;
