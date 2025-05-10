@@ -88,7 +88,11 @@ const SaFinancePage = ({
         />
         <div className=" flex flex-grow w-full gap-2 ">
           <span className="flex-grow">
-            <SearchBar />
+            <SearchBar
+              onSearch={function (query: string): void {
+                throw new Error("Function not implemented.");
+              }}
+            />
           </span>
 
           <span className="flex justify-end  max-w-2xl">{renderButtons()}</span>
