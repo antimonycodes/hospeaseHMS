@@ -72,7 +72,7 @@ export interface Request {
   item_name: string;
   created_at: string;
 }
-type CreateStockData = {
+export interface CreateStockData {
   service_item_name?: string;
   item?: string; // Support legacy naming
   quantity: number;
@@ -82,7 +82,7 @@ type CreateStockData = {
   cost: number;
   service_charge_id?: number | string; // Added service charge ID
   image?: File | null;
-};
+}
 
 export interface InventoryStats {
   data: InventoryStats;
