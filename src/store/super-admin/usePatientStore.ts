@@ -486,6 +486,8 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
         },
       }));
 
+      console.log("Normalized appointments:", normalizedAppointments);
+
       // Normalize pagination data
       const paginationData = response.data.data.pagination || {
         total: rawAppointments.length,

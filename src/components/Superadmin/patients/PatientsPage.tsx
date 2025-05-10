@@ -14,7 +14,7 @@ type PatientsPage = {
   refreshEndpoint?: string;
 };
 const PatientsPage = ({
-  endpoint = "/medical-report/appointment",
+  endpoint = "/medical-report/appointment/all-records",
   bookEndpoint = "/medical-report/appointment/book",
   refreshEndpoint = "/admin/appointment/all-records",
 }) => {
