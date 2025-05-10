@@ -278,18 +278,32 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
 
   createStock: async (
     data: CreateStockData,
-    endpoint = "/inventory/upload-item"
+    endpoint = "/inventory/upload-item",
+    refreshEndpoint = "/admin/inventory/all-inventory-items"
   ) => {
     set({ isLoading: true });
     try {
       const form = new FormData();
-      form.append("item", data.item);
+
+      // Append all the required fields
+      form.append("service_item_name", data.service_item_name || data.item); // Support both naming conventions
       form.append("quantity", data.quantity.toString());
       form.append("category_id", data.category_id.toString());
       form.append("expiry_date", data.expiry_date);
+      form.append(
+        "service_item_price",
+        data.service_item_price?.toString() || "0"
+      ); // Include price with fallback
       form.append("cost", data.cost.toString());
+      form.append(
+        "service_charge_id",
+        data.service_charge_id?.toString() || ""
+      ); // Add service charge ID
 
-      // form.append("image", data.image || "");
+      // Only append image if it exists
+      if (data.image) {
+        form.append("image", data.image);
+      }
 
       const response = await api.post(endpoint, form, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -297,7 +311,11 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
 
       if (response.status === 201) {
         toast.success(response.data.message || "Stock added successfully");
-        await get().getAllStocks();
+        if (refreshEndpoint) {
+          await get().getAllStocks(refreshEndpoint);
+        } else {
+          await get().getAllStocks();
+        }
         return true;
       }
       return false;
@@ -305,6 +323,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       console.error("createStock error:", error);
       const errorMessage =
         error?.response?.data?.message || "Failed to add stock";
+
       if (Array.isArray(errorMessage)) {
         errorMessage.forEach((msg) => toast.error(msg));
       } else {
