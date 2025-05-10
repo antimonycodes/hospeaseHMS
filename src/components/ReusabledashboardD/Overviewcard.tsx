@@ -4,7 +4,7 @@ import { getImageSrc } from "../../utils/imageUtils";
 interface CardData {
   title: string;
   number: string;
-  icon: any;
+  icon: string;
   category: string;
 }
 
@@ -36,9 +36,9 @@ const OverviewCard: React.FC<OverviewCardProps> = ({
       <div className="flex flex-col md:flex md:flex-row gap-[21px] w-full">
         {filteredCards.length > 0 ? (
           filteredCards.map(({ title, number, icon }, index) => {
-            let imageSrc = "/docstaticon.svg"; // Default fallback
+            let imageSrc = "/docstaticon.svg";
             try {
-              imageSrc = getImageSrc(icon); // Resolves the icon
+              imageSrc = getImageSrc(icon);
             } catch (error) {
               console.error(`Error loading icon ${icon}:`, error);
             }

@@ -49,29 +49,31 @@ export const useMedicalStore = create<MedicalStore>((set) => ({
     set({ isLoading: true });
     try {
       const response = await api.get(endpoint);
-      const statsData = response.data || {
-        total_patient: 0,
-        men_total_count: 0,
-        ladies_total_count: 0,
-        children_count: 0,
-        male_count: 0,
-        female_count: 0,
-        doctorAppointmentCount: 0,
-        graph_appointment_representation: {
-          Jan: 0,
-          Feb: 0,
-          Mar: 0,
-          Apr: 0,
-          May: 0,
-          Jun: 0,
-          Jul: 0,
-          Aug: 0,
-          Sep: 0,
-          Oct: 0,
-          Nov: 0,
-          Dec: 0,
-        },
-      };
+      console.log("Full API Response Med stats:", response);
+      const statsData = response.data.data ||
+        response.data || {
+          total_patient: 0,
+          men_total_count: 0,
+          ladies_total_count: 0,
+          children_count: 0,
+          male_count: 0,
+          female_count: 0,
+          doctorAppointmentCount: 0,
+          graph_appointment_representation: {
+            Jan: 0,
+            Feb: 0,
+            Mar: 0,
+            Apr: 0,
+            May: 0,
+            Jun: 0,
+            Jul: 0,
+            Aug: 0,
+            Sep: 0,
+            Oct: 0,
+            Nov: 0,
+            Dec: 0,
+          },
+        };
       set({ stats: statsData });
       console.log("Medical Stats fetched:", statsData);
     } catch (error: any) {

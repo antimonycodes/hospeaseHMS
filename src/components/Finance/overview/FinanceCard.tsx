@@ -21,11 +21,7 @@ const FinanceCard = () => {
         showControls={false}
       />
 
-      <FpaymentTable
-        payments={payments.slice(0, 5)}
-        isLoading={isLoading}
-        pagination={pagination}
-      />
+      <FpaymentTable payments={payments.slice(0, 5)} isLoading={isLoading} />
     </div>
   );
 };

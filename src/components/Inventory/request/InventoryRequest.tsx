@@ -15,8 +15,11 @@ export type RequestData = {
     };
     item_requested: {
       id: number;
-      item: string;
-      cost: string;
+      inventory: {
+        id: 10;
+        service_item_name: string;
+        service_item_price: string;
+      };
     };
     hospital: {
       id: number;
@@ -50,14 +53,12 @@ const InventoryRequest = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    // Fetch data when component mounts
     getAllRequest();
   }, [getAllRequest]);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  // Extract actual requests array from the requests state
   const requestsArray =
     requests && requests.data && Array.isArray(requests.data)
       ? requests.data
@@ -66,16 +67,16 @@ const InventoryRequest = () => {
   console.log("requestsArray length:", requestsArray.length);
   console.log("First item in requestsArray:", requestsArray[0]);
 
-  // Add a dummy type property to enable type checking with 'as'
-  // This is a workaround for TypeScript limitations with deeply nested properties
   const columns = [
     {
-      key: "id" as keyof RequestData, // Use a valid top-level key
+      key: "id" as keyof RequestData,
       label: "Requested By",
       render: (_, request) => {
         const imageSrc = request.attributes.hospital.logo
           ? request.attributes.hospital.logo
           : "https://placehold.co/600x400?text=img";
+
+        const requestedBy = request.attributes.requested_by;
 
         return (
           <div className="flex items-center gap-2">
@@ -85,8 +86,9 @@ const InventoryRequest = () => {
               alt="Staff"
             />
             <h1 className="text-custom-black font-medium">
-              {request.attributes.requested_by.first_name}{" "}
-              {request.attributes.requested_by.last_name}
+              {requestedBy
+                ? `${requestedBy.first_name} ${requestedBy.last_name}`
+                : "N/A"}
             </h1>
           </div>
         );
@@ -100,11 +102,20 @@ const InventoryRequest = () => {
       ),
     },
     {
-      key: "id" as keyof RequestData, // Use valid key and rely on render function
+      key: "id" as keyof RequestData,
       label: "Item Name",
       render: (_, request) => (
         <span className="text-[#667085] text-sm">
-          {request.attributes.item_requested.item}
+          {request.attributes.item_requested.inventory.service_item_name}
+        </span>
+      ),
+    },
+    {
+      key: "id" as keyof RequestData,
+      label: "Item Price",
+      render: (_, request) => (
+        <span className="text-[#667085] text-sm">
+          {request.attributes.item_requested.inventory.service_item_price}
         </span>
       ),
     },
@@ -117,15 +128,15 @@ const InventoryRequest = () => {
         </span>
       ),
     },
-    {
-      key: "id" as keyof RequestData,
-      label: "Status",
-      render: (_, request) => (
-        <span className="text-[#667085] text-sm">
-          {request.attributes.status}
-        </span>
-      ),
-    },
+    // {
+    //   key: "id" as keyof RequestData,
+    //   label: "Status",
+    //   render: (_, request) => (
+    //     <span className="text-[#667085] text-sm">
+    //       {request.attributes.status}
+    //     </span>
+    //   ),
+    // },
     {
       key: "id" as keyof RequestData,
       label: "Recorded By",

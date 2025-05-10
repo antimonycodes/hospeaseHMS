@@ -4,6 +4,7 @@ import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import AppointmentDetails from "./AppointmentDetails";
 import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
+import SearchBar from "../../ReusablepatientD/SearchBar";
 
 type FrondeskAppointmentTableProps = {
   endpoint?: string; // Allow custom endpoint
@@ -19,19 +20,38 @@ const FrondeskAppointmentTable = ({
   tableTitle = "Appointment",
 }: FrondeskAppointmentTableProps) => {
   const [openModal, setOpenModal] = useState(false);
-  const { appointments, pagination, isLoading, getAllAppointments } =
-    usePatientStore();
+  const [searchQuery, setSearchQuery] = useState("");
+  const {
+    appointments,
+    searchPatients,
+    pagination,
+    isLoading,
+    getAllAppointments,
+  } = usePatientStore();
 
   const baseEndpoint = "/front-desk/appointment/all-records";
 
+  // useEffect(() => {
+  //   getAllAppointments("1", "10");
+  // }, [getAllAppointments]);
+
   useEffect(() => {
-    getAllAppointments("1", "10");
-  }, [getAllAppointments]);
+    if (searchQuery) {
+      searchPatients(searchQuery).then((fetchedPatients) => {
+        usePatientStore.setState({ patients: fetchedPatients });
+      });
+    } else {
+      getAllAppointments("1", "10", baseEndpoint);
+    }
+  }, [getAllAppointments, searchPatients, searchQuery]);
 
   const handleOpenModal = () => {
     setOpenModal(true);
   };
   const refreshEndpoint = "/front-desk/appointment/all-records";
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
 
   return (
     <div>
@@ -41,6 +61,7 @@ const FrondeskAppointmentTable = ({
         typebutton="Book Appointment"
         onButtonClick={handleOpenModal}
         showSearchBar={true}
+        searchBar={<SearchBar onSearch={handleSearch} />}
         showControls={true}
       />
 

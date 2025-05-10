@@ -1,26 +1,34 @@
-import React, { JSX, useEffect } from "react";
+import React, { JSX, useEffect, useState } from "react";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import MatronPatientTable from "./MatronPatientTable";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import Tabs from "../../ReusablepatientD/Tabs";
+import SearchBar from "../../ReusablepatientD/SearchBar";
 
 const MatronPatients = () => {
   // const { getAllPatients, patients, isLoading } = usePatientStore();
-  const {
-    getAllPatients,
-    patients = [],
-    isLoading,
-    pagination,
-  } = usePatientStore();
+  const [searchQuery, setSearchQuery] = useState("");
+  const { getAllPatients, searchPatients, patients, isLoading, pagination } =
+    usePatientStore();
   const [activeTab, setActiveTab] = React.useState<"Pending" | "Completed">(
     "Pending"
   );
 
   const baseEndpoint = "/matron/all-patients";
 
+  // useEffect(() => {
+  //   getAllPatients("1", "10", baseEndpoint);
+  // }, [getAllPatients]);
+
   useEffect(() => {
-    getAllPatients("1", "10", baseEndpoint);
-  }, [getAllPatients]);
+    if (searchQuery) {
+      searchPatients(searchQuery).then((fetchedPatients) => {
+        usePatientStore.setState({ patients: fetchedPatients });
+      });
+    } else {
+      getAllPatients("1", "10", baseEndpoint);
+    }
+  }, [getAllPatients, searchPatients, searchQuery]);
 
   const filteredPatients = patients.filter(
     (patient) =>
@@ -36,6 +44,10 @@ const MatronPatients = () => {
     { Pending: 0, Completed: 0 }
   );
 
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
   return (
     <div>
       <Tablehead
@@ -43,6 +55,7 @@ const MatronPatients = () => {
         tableCount={patients.length}
         showControls={true}
         showSearchBar={true}
+        searchBar={<SearchBar onSearch={handleSearch} />}
       />
       <Tabs<"Pending" | "Completed">
         activeTab={activeTab}

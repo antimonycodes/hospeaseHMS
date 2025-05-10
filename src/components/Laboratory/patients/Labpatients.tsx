@@ -6,16 +6,29 @@ import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import { useNavigate } from "react-router-dom";
 import Table from "../../../Shared/Table";
 import Loader from "../../../Shared/Loader";
+import SearchBar from "../../ReusablepatientD/SearchBar";
 
 const Labpatients = () => {
-  const { patients, getAllPatients, isLoading, pagination } = usePatientStore();
+  const { patients, getAllPatients, searchPatients, isLoading, pagination } =
+    usePatientStore();
+  const [searchQuery, setSearchQuery] = useState("");
   const [activeStatus, setActiveStatus] = useState("pending");
   const navigate = useNavigate();
   const baseEndpoint = "/laboratory/patient/all";
 
+  // useEffect(() => {
+  //   getAllPatients("1", "10", baseEndpoint);
+  // }, [getAllPatients]);
+
   useEffect(() => {
-    getAllPatients("1", "10", baseEndpoint);
-  }, [getAllPatients]);
+    if (searchQuery) {
+      searchPatients(searchQuery).then((fetchedPatients) => {
+        usePatientStore.setState({ patients: fetchedPatients });
+      });
+    } else {
+      getAllPatients("1", "10", baseEndpoint);
+    }
+  }, [getAllPatients, searchPatients, searchQuery]);
 
   const transformedPatients = patients.map((item) => {
     const attr = item.attributes;
@@ -123,7 +136,9 @@ const Labpatients = () => {
     // Use the stored baseEndpoint for consistency when changing pages
     getAllPatients(page.toString(), "10", baseEndpoint);
   };
-
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
   if (isLoading) return <Loader />;
 
   return (
@@ -133,6 +148,7 @@ const Labpatients = () => {
         tableTitle="Patients"
         showSearchBar={true}
         showControls={true}
+        searchBar={<SearchBar onSearch={handleSearch} />}
         tableCount={patients.length}
       />
       {/*  Tabs */}

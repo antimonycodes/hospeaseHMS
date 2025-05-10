@@ -6,6 +6,7 @@ import { Plus, Search } from "lucide-react";
 import AddPatientModal from "../../../Shared/AddPatientModal";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
+import SearchBar from "../../ReusablepatientD/SearchBar";
 
 type PatientsPage = {
   endpoint?: string;
@@ -17,6 +18,7 @@ const PatientsPage = ({
   bookEndpoint = "/medical-report/appointment/book",
   refreshEndpoint = "/admin/appointment/all-records",
 }) => {
+  const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState(0);
   const [openModal, setOpenModal] = useState(false);
   const [modalType, setModalType] = useState<"patient" | "appointment">(
@@ -32,33 +34,50 @@ const PatientsPage = ({
   };
   const {
     getAllPatients,
+    searchPatients,
     patients,
     createPatient,
     getPatientById,
     selectedPatient,
   } = usePatientStore();
 
+  // useEffect(() => {
+  //   getAllPatients();
+  // }, [getAllPatients]);
   useEffect(() => {
-    getAllPatients();
-  }, [getAllPatients]);
+    if (searchQuery) {
+      searchPatients(searchQuery).then((fetchedPatients) => {
+        usePatientStore.setState({ patients: fetchedPatients });
+      });
+    } else {
+      getAllPatients();
+    }
+  }, [getAllPatients, searchPatients, searchQuery]);
 
   useEffect(() => {
     getAllAppointments("1", "10", endpoint);
   }, [getAllAppointments, endpoint]);
 
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
   return (
     <div className=" bg-white custom-shadow p-4">
       <div className=" flex flex-col xl:flex-row-reverse gap-4 xl:gap-24">
         {/* Search and Button */}
+
         <div className=" w-full flex-1 flex flex-col md:flex-row items-center gap-2">
-          <div className="relative w-full flex-1">
+          <div className="flex items-center space-x-4 min-w-[70%]  ">
+            <SearchBar onSearch={handleSearch} />
+          </div>
+          {/* <div className="relative w-full flex-1">
             <input
               type="text"
               placeholder="Type to search"
               className="w-full border border-gray-200 py-2 pl-10 pr-4 rounded-lg"
             />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1AA] size-4" />
-          </div>
+          </div> */}
 
           <div
             className={`w-full md:w-auto ${
@@ -83,7 +102,7 @@ const PatientsPage = ({
           >
             <Button
               variant="primary"
-              size="md"
+              size="sm"
               onClick={handleOpenModal}
               className="flex items-center gap-2 px-4"
             >

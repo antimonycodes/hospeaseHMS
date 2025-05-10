@@ -170,7 +170,7 @@ const PharmPatients = () => {
       <Table
         columns={columns}
         data={filteredPatients}
-        rowKey="patientId"
+        rowKey="id"
         pagination={true}
         paginationData={pagination}
         onPageChange={handlePageChange}

@@ -35,7 +35,7 @@ type MedpatientInfoProps = {
     };
     id: number;
   }[];
-  pagination: {
+  pagination?: {
     total: number;
     per_page: number;
     current_page: number;
