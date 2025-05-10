@@ -75,24 +75,30 @@ export interface LabPatient {
   gender: string;
   status: "Pending" | "Ongoing" | "Completed";
 }
-interface PatientStats {
+export interface PatientStats {
   total_patient: number;
   men_total_count: number;
   ladies_total_count: number;
   children_count: number;
+  graph_appointment_representation?: Record<string, number>;
 }
 
 interface PatientStore {
   isLoading: boolean;
   patients: any[];
-
   pagination: Pagination | null;
   selectedPatient: any | null;
   appointments: any[];
   selectedAppointment: any | null;
   labPatients: LabPatient[];
 
-  // Updated function signature to match implementation
+  // stats: {
+  //   total_patient: number;
+  //   men_total_count: number;
+  //   ladies_total_count: number;
+  //   children_count: number;
+  //   graph_appointment_representation?: Record<string, number>;
+  // } | null;
   getAllPatients: (
     page?: string,
     perPage?: string,
@@ -119,7 +125,7 @@ interface PatientStore {
     data: BookAppointmentData,
     endpoint?: string,
     refreshEndpoint?: string
-  ) => Promise<boolean>; // Updated signature
+  ) => Promise<boolean>;
   getAppointmentById: (id: string, endpoint: any) => Promise<void>;
   manageAppointment: (id: string, data: any, endpoint: any) => Promise<any>;
   searchPatients: (query: string) => Promise<any[]>;

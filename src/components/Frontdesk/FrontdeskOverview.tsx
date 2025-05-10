@@ -2,23 +2,23 @@ import { useEffect } from "react";
 import FrontdeskCards from "./FrontdeskCards";
 import FrontdeskChart from "./FrontdeskChart";
 import FrontdeskTable from "./FrontdeskTable";
-import { useStatsStore } from "../../store/super-admin/useStatsStore";
+import { usePatientStore } from "../../store/super-admin/usePatientStore";
 
 const FrontdeskOverview = () => {
-  // const { getStats, doctorStats, isLoading } = useStatsStore();
+  const { stats, isLoading, getFrontdeskStats } = usePatientStore();
 
-  // useEffect(() => {
-  //   getStats("/doctor/stats");
-  // }, [getStats]);
+  useEffect(() => {
+    getFrontdeskStats();
+  }, [getFrontdeskStats]);
 
   return (
     <div className=" font-inter">
       <div className=" flex flex-col gap-4">
         <FrontdeskCards />
-        {/* <FrontdeskChart
-          doctorStats={doctorStats || { graph_appointment_representation: {} }}
+        <FrontdeskChart
+          patientStats={stats || { graph_appointment_representation: {} }}
           isLoading={isLoading}
-        /> */}
+        />
         <FrontdeskTable />
       </div>
     </div>

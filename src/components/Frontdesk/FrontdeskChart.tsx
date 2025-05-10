@@ -9,16 +9,16 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-interface DoctorStats {
+interface PatientStats {
   graph_appointment_representation?: Record<string, number>;
 }
 
 interface Props {
-  doctorStats: DoctorStats;
+  patientStats: PatientStats;
   isLoading: boolean;
 }
 
-const FrontdeskChart = ({ doctorStats, isLoading }: Props) => {
+const FrontdeskChart = ({ patientStats, isLoading }: Props) => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -31,8 +31,8 @@ const FrontdeskChart = ({ doctorStats, isLoading }: Props) => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const formattedData = doctorStats?.graph_appointment_representation
-    ? Object.entries(doctorStats.graph_appointment_representation).map(
+  const formattedData = patientStats?.graph_appointment_representation
+    ? Object.entries(patientStats.graph_appointment_representation).map(
         ([month, count]) => ({
           month,
           appointments: count,
