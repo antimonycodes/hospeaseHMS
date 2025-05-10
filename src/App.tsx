@@ -63,6 +63,7 @@ import PaymentDetails from "./components/Finance/payment/PaymentDetails";
 import FrontdeskPatientDetails from "./components/Frontdesk/patients/FrontdeskPatientDetails";
 import TourListener from "./Shared/TourListener";
 import CreateShift from "./components/Matron/shifts/CreateShift";
+import NurseAppointmentDetails from "./components/Nurse/Appointment/NurseAppointmentDetails";
 
 function App() {
   return (
@@ -109,6 +110,10 @@ function App() {
               <Route
                 path="appointment/doctor/:id"
                 element={<DoctorAppointmentDetails />}
+              />{" "}
+              <Route
+                path="appointment/nurse/:id"
+                element={<NurseAppointmentDetails />}
               />
               <Route
                 path="appointment/medicalDirector/:id"

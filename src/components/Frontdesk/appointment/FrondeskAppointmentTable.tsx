@@ -13,9 +13,9 @@ type FrondeskAppointmentTableProps = {
 };
 
 const FrondeskAppointmentTable = ({
-  endpoint = "/front-desk/appointment/all-records",
+  endpoint = "/medical-report/appointment",
   bookEndpoint = "/front-desk/appointment/book",
-  refreshEndpoint = "/front-desk/appointment/all-records",
+
   tableTitle = "Appointment",
 }: FrondeskAppointmentTableProps) => {
   const [openModal, setOpenModal] = useState(false);
@@ -31,6 +31,7 @@ const FrondeskAppointmentTable = ({
   const handleOpenModal = () => {
     setOpenModal(true);
   };
+  const refreshEndpoint = "/front-desk/appointment/all-records";
 
   return (
     <div>

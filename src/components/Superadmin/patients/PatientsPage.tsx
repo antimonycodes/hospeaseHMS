@@ -13,8 +13,8 @@ type PatientsPage = {
   refreshEndpoint?: string;
 };
 const PatientsPage = ({
-  endpoint = "/admin/appointment/all-records",
-  bookEndpoint = "/admin/appointment/assign",
+  endpoint = "/medical-report/appointment",
+  bookEndpoint = "/medical-report/appointment/book",
   refreshEndpoint = "/admin/appointment/all-records",
 }) => {
   const [activeTab, setActiveTab] = useState(0);
