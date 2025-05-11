@@ -28,7 +28,13 @@ const InventoryCatTable = () => {
         onButtonClick={handleOpenModal}
       />
       <InvenCategory categorys={categorys} isLoading={isLoading} />
-      {openModal && <AddCategoryModal onClose={() => setOpenModal(false)} />}
+      {openModal && (
+        <AddCategoryModal
+          createEndpoint="/inventory/category/create"
+          onClose={() => setOpenModal(false)}
+          createCategory={createCategory}
+        />
+      )}
     </div>
   );
 };

@@ -24,6 +24,7 @@ const SaInventoryPage = () => {
     stocks,
     isLoading,
     createStock,
+    createCategory,
     getAllCategorys,
     categorys,
   } = useInventoryStore();
@@ -153,7 +154,14 @@ const SaInventoryPage = () => {
           createEndpoint="/admin/inventory/category/create"
         />
       )}
-      {isCategoryOpen && <AddCategoryModal onClose={closeCategory} />}
+      {isCategoryOpen && (
+        <AddCategoryModal
+          createEndpoint="/admin/inventory/category/create"
+          Catendpoint="/admin/inventory/category/all-records"
+          onClose={closeCategory}
+          createCategory={createCategory}
+        />
+      )}
     </div>
   );
 };
