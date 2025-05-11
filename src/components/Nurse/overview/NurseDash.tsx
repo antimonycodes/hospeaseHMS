@@ -86,7 +86,10 @@ const NurseDash = () => {
             </div>
           </div>
         )}
-        <Nursechart />
+        <Nursechart
+          nurseStats={stats || { graph_appointment_representation: {} }}
+          isLoading={isLoading}
+        />
         <NurseCard />
       </div>
     </div>
