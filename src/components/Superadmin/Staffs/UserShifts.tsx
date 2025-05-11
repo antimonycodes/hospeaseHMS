@@ -76,9 +76,7 @@ const shiftColors: { [key: string]: string } = {
 const UserShifts = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [userId, setUserId] = useState("");
-  const [role, setRole] = useState("");
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [processedShifts, setProcessedShifts] = useState<StaffShiftData>({});
   const [viewMode, setViewMode] = useState("month"); // "month" or "list"
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -120,31 +118,17 @@ const UserShifts = () => {
   // Go to today
   const goToToday = () => setCurrentDate(new Date());
 
-  // Determine endpoint based on role
-  const endpointManagent = (role: string, id: string) => {
-    if (role === "nurse") return `/nurses/shift/user-records/${id}`;
-    if (role === "doctor") return `/doctor/my-shifts/${id}`;
-    if (role === "medical-director")
-      return `/medical-director/shift/user-records/${id}`;
-    if (role === "laboratory") return `/laboratory/user-records/${id}`;
-    if (role === "pharmacy") return `/pharmacy/user-records/${id}`;
-  };
-
-  // Get role from localStorage
+  // Fetch shifts data using userId from localStorage
   useEffect(() => {
-    const storedRole = localStorage.getItem("role") || "";
-    setRole(storedRole);
-  }, []);
-
-  // Fetch shifts data
-  useEffect(() => {
+    // Get user ID from localStorage immediately when component mounts
     const storedId = localStorage.getItem("uid");
-    if (storedId && role) {
-      const endpoint = endpointManagent(role, storedId);
+
+    if (storedId) {
       setUserId(storedId);
-      getStaffShifts(storedId, endpoint);
+      // Call getStaffShifts with the userId directly
+      getStaffShifts(storedId);
     }
-  }, [role, getStaffShifts]);
+  }, [getStaffShifts]); // Only depend on getStaffShifts, not on role
 
   // Format date for lookup
   const formatDate = (date: Date) => {

@@ -18,6 +18,8 @@ const roleComponents: Record<string, JSX.Element> = {
   pharmacist: <UserShifts />,
   "front-desk-manager": <UserShifts />,
   finance: <UserShifts />,
+  laboratory: <UserShifts />,
+  "inventory-manager": <UserShifts />,
 };
 
 const Shift = () => {
