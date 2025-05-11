@@ -1,16 +1,25 @@
 import { X } from "lucide-react";
 import React, { useState } from "react";
-
 import toast from "react-hot-toast";
-import { useInventoryStore } from "../components/Inventory/overview/useInventoryStore";
 
 interface AddCategoryModalProps {
   onClose: () => void;
+  createEndpoint: string;
+  Catendpoint?: string;
+  createCategory: (
+    data: { name: string },
+    Catendpoint?: string,
+    createEndpoint?: string
+  ) => Promise<boolean>;
 }
 
-const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ onClose }) => {
+const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
+  Catendpoint,
+  onClose,
+  createCategory,
+  createEndpoint,
+}) => {
   const [name, setName] = useState("");
-  const { createCategory } = useInventoryStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +29,7 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ onClose }) => {
       return;
     }
 
-    const success = await createCategory({ name });
+    const success = await createCategory({ name }, Catendpoint, createEndpoint);
     if (success) {
       setName(""); // Reset input
       onClose(); // Close modal
