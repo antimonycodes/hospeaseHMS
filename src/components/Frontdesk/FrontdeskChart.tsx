@@ -57,7 +57,7 @@ const FrontdeskChart = ({ patientStats, isLoading }: Props) => {
   };
 
   return (
-    <div className="w-full bg-white rounded-lg p-10 font-jakarta">
+    <div className="w-full bg-white shadow-custom rounded-lg p-10 font-jakarta">
       <div className="flex items-center justify-between pb-10">
         <h1>Appointment Chart</h1>
         {/* <button>Guess</button> */}

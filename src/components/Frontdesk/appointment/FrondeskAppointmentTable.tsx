@@ -21,8 +21,13 @@ const FrondeskAppointmentTable = ({
 }: FrondeskAppointmentTableProps) => {
   const [openModal, setOpenModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const { appointments, pagination, isLoading, getAllAppointments } =
-    usePatientStore();
+  const {
+    appointments,
+
+    pagination,
+    isLoading,
+    getAllAppointments,
+  } = usePatientStore();
 
   const baseEndpoint = "medical-report/appointment/all-records";
 

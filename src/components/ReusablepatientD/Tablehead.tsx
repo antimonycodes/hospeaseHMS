@@ -26,7 +26,7 @@ const Tablehead: React.FC<TableheadProps> = ({
 }) => {
   return (
     <div className="w-full font-inter  bg-white rounded-t-[8px] shadow overflow-hidden">
-      <div className="p-6 flex md:items-center flex-col md:flex-row justify-between space-x-3 space-y-3">
+      <div className="p-5 flex md:items-center flex-col md:flex-row justify-between space-x-3 space-y-3">
         <div className="min-w-[15%] ">
           <h1 className="text-base sm:text-[18px]    font-medium">
             {tableTitle}

@@ -86,7 +86,7 @@ const NurseDash = () => {
             </div>
           </div>
         )}
-        {/* <Nursechart /> */}
+        <Nursechart />
         <NurseCard />
       </div>
     </div>

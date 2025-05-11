@@ -72,7 +72,7 @@ const FrontdeskTable = () => {
   ];
 
   return (
-    <div className="w-full h-full bg-white rounded-[8px] shadow overflow-hidden">
+    <div className="w-full h-full  bg-white rounded-[8px] shadow overflow-hidden">
       <Tablehead
         tableTitle="Recent Patients"
         showSearchBar={false}

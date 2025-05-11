@@ -47,7 +47,7 @@ const FrontdeskCards = () => {
           {QuickStatCards.map(({ title, number, icon }, index) => (
             <div
               key={index}
-              className="bg-white rounded-lg border-0 border-gray-200 py-[15px] pl-[43px] pr-[15px] flex flex-col gap-2 relative"
+              className="bg-white shadow-custom rounded-lg border-0 border-gray-200 py-[15px] pl-[43px] pr-[15px] flex flex-col gap-2 relative"
             >
               <div className="flex items-center justify-between">
                 <img src={getImageSrc(icon)} alt="" width={40} height={40} />
