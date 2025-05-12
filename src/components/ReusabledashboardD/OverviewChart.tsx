@@ -18,18 +18,18 @@ type DataPoint = {
 };
 
 const data: DataPoint[] = [
-  { month: "Jan", value1: 350, value2: 450, value3: 400 },
-  { month: "Feb", value1: 500, value2: 650, value3: 200 },
-  { month: "Mar", value1: 400, value2: 550, value3: 450 },
-  { month: "Apr", value1: 600, value2: 600, value3: 580 },
-  { month: "May", value1: 650, value2: 680, value3: 600 },
-  { month: "Jun", value1: 300, value2: 600, value3: 400 },
-  { month: "Jul", value1: 400, value2: 750, value3: 350 },
-  { month: "Aug", value1: 750, value2: 750, value3: 450 },
-  { month: "Sep", value1: 500, value2: 700, value3: 400 },
-  { month: "Oct", value1: 450, value2: 700, value3: 500 },
-  { month: "Nov", value1: 400, value2: 350, value3: 380 },
-  { month: "Dec", value1: 550, value2: 800, value3: 520 },
+  { month: "Jan", value1: 0, value2: 0, value3: 0 },
+  { month: "Feb", value1: 0, value2: 0, value3: 0 },
+  { month: "Mar", value1: 0, value2: 0, value3: 0 },
+  { month: "Apr", value1: 0, value2: 0, value3: 0 },
+  { month: "May", value1: 0, value2: 0, value3: 0 },
+  { month: "Jun", value1: 0, value2: 0, value3: 0 },
+  { month: "Jul", value1: 0, value2: 0, value3: 0 },
+  { month: "Aug", value1: 0, value2: 0, value3: 0 },
+  { month: "Sep", value1: 0, value2: 0, value3: 0 },
+  { month: "Oct", value1: 0, value2: 0, value3: 0 },
+  { month: "Nov", value1: 0, value2: 0, value3: 0 },
+  { month: "Dec", value1: 0, value2: 0, value3: 0 },
 ];
 
 interface OverviewChartProps {

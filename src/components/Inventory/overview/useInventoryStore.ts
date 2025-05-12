@@ -93,6 +93,7 @@ export interface InventoryStats {
   total_inventories: number;
   total_categories: number;
   total_expired_items: number;
+  graph_appointment_representation?: Record<string, number>;
 }
 
 interface InventoryStore {

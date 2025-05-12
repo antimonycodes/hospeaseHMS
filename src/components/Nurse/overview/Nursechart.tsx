@@ -8,7 +8,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-// import { NurseStats } from "../../../store/super-admin/useNuseStore";
 
 interface NurseStats {
   graph_appointment_representation?: Record<string, number>;
@@ -18,6 +17,7 @@ interface Props {
   nurseStats: NurseStats;
   isLoading: boolean;
 }
+
 const Nursechart = ({ nurseStats, isLoading }: Props) => {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -61,34 +61,39 @@ const Nursechart = ({ nurseStats, isLoading }: Props) => {
     <div className="w-full bg-white shadow-custom rounded-lg p-10 font-jakarta">
       <div className="flex items-center justify-between pb-10">
         <h1>Stocks</h1>
-        {/* <button>Guess</button> */}
       </div>
       <div className="h-[350px] md:h-[400px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={formattedData}
-            margin={{
-              top: 20,
-              right: isMobile ? 10 : 10,
-              left: isMobile ? 0 : 0,
-              bottom: 5,
-            }}
-            barSize={10}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="month"
-              tick={{ fontSize: isMobile ? 12 : 14, fill: "black" }}
-              interval={0}
-            />
-            <YAxis
-              tick={{ fontSize: isMobile ? 12 : 14, fill: "black" }}
-              width={isMobile ? 30 : 40}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="appointments" name="Appointments" fill="#3354F4" />
-          </BarChart>
-        </ResponsiveContainer>
+        {formattedData.length > 0 ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={formattedData}
+              margin={{
+                top: 20,
+                right: isMobile ? 10 : 10,
+                left: isMobile ? 0 : 0,
+                bottom: 5,
+              }}
+              barSize={10}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                dataKey="month"
+                tick={{ fontSize: isMobile ? 12 : 14, fill: "black" }}
+                interval={0}
+              />
+              <YAxis
+                tick={{ fontSize: isMobile ? 12 : 14, fill: "black" }}
+                width={isMobile ? 30 : 40}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="appointments" name="Appointments" fill="#3354F4" />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <p className="text-center text-gray-500 justify-center flex items-center h-full">
+            Graph Data Not Available
+          </p>
+        )}
       </div>
     </div>
   );

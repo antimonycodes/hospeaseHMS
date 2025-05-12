@@ -77,7 +77,11 @@ const InventoryDash = () => {
             </div>
           </div>
         )}
-        {/* <InventoryChart /> */}
+        {/* <InventoryChart
+          invenStats={stats || { graph_appointment_representation: {} }}
+          isLoading={isLoading}
+        /> */}
+        <InventoryChart />
         <InventoryCard />
       </div>
     </div>
