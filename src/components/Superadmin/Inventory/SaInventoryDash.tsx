@@ -3,6 +3,7 @@ import patientIcon from "../../../assets/hugeicons.png";
 import { useInventoryStore } from "../../Inventory/overview/useInventoryStore";
 import OverviewCard from "../../ReusabledashboardD/Overviewcard";
 import Loader from "../../../Shared/Loader";
+import InventoryChart from "../../Inventory/overview/InventoryChart";
 interface StatsData {
   total_inventories: number;
   total_categories: number;
@@ -84,27 +85,9 @@ const SaInventoryDash = () => {
               limit={3}
               data={InventoryStatsData}
             />
-
-            {/* Alternative card that doesn't filter by category */}
-            {/* <div className="mt-4">
-              <h2 className="font-medium text-lg mb-2">
-                Direct Stats Display (Debug)
-              </h2>
-              <div className="grid grid-cols-3 gap-4">
-                {InventoryStatsData.map((item, index) => (
-                  <div
-                    key={index}
-                    className="bg-white p-4 border rounded shadow"
-                  >
-                    <h3>{item.title}</h3>
-                    <p className="text-xl font-bold">{item.number}</p>
-                    <p className="text-sm">Category: {item.category}</p>
-                  </div>
-                ))}
-              </div>
-            </div> */}
           </>
         )}
+        <InventoryChart />
       </div>
     </div>
   );
