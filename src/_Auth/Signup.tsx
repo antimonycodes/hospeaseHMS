@@ -53,7 +53,7 @@ const Signup = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen w-full">
+    <div className="flex flex-col md:flex-row h-screen w-full">
       {/* Banner Image */}
       <div className="hidden md:block md:w-1/2 md:h-screen">
         <img
@@ -64,7 +64,7 @@ const Signup = () => {
       </div>
 
       {/* Form Section */}
-      <div className="w-full md:w-1/2 min-h-screen bg-[#E3FFF2] flex items-center justify-center py-2 px-4">
+      <div className="w-full md:w-1/2 min-h-screen bg-[#E3FFF2] flex items-center justify-center py-2 px-4 overflow-y-scroll">
         <div className="flex flex-col items-center gap-4 w-full max-w-md">
           {/* Logo */}
           <div className="w-48 sm:w-32 mb-">
@@ -74,7 +74,7 @@ const Signup = () => {
           {/* Form Container */}
           <div className="bg-white py-6 px-4 sm:py-4 sm:px-7 border border-[#D0D5DD] rounded-[10px] w-full shadow-sm overflow-y-auto">
             <h1 className="text-center text-[#101928] text-xl sm:text-3xl font-semibold mb-2">
-              Welcome Onboard
+              Welcome To Ease
             </h1>
             <p className="text-sm text-center text-[#667185]">
               Enter your credentials to get registered

@@ -103,7 +103,6 @@ const MedicalTimeline: React.FC<MedicalTimelineProps> = ({
   }, [patientId, getAllReport, getMedicalNote, externalMergedData]);
 
   useEffect(() => {
-    // Skip processing if using external data
     if (externalMergedData) return;
 
     if (allReports.length > 0 || allNotes.length > 0) {

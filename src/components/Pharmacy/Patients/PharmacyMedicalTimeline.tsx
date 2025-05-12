@@ -250,7 +250,7 @@ const PharmacyMedicalTimeline: React.FC<PharmacyMedicalTimelineProps> = ({
                 <span className="text-xs bg-[#CFFFE9] text-[#009952] px-2 py-1 rounded-full">
                   {day.reports.length + day.notes.length} entries
                 </span>
-                <div className="flex gap-1">
+                {/* <div className="flex gap-1">
                   <button
                     onClick={() => {
                       toast.loading("Generating PDF...", { id: "date-pdf" });
@@ -293,7 +293,7 @@ const PharmacyMedicalTimeline: React.FC<PharmacyMedicalTimelineProps> = ({
                     <Printer size={14} />
                     <span>IMG</span>
                   </button>
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -338,9 +338,6 @@ const PharmacyMedicalTimeline: React.FC<PharmacyMedicalTimelineProps> = ({
                           {isReport ? (
                             <div className="bg-white border rounded-md p-4">
                               <ReportItem report={item} />
-                              {item.attributes.requested_pharmacy_items && (
-                                <PharmacyItemsList report={item} />
-                              )}
                             </div>
                           ) : (
                             <NoteItem note={item} />
