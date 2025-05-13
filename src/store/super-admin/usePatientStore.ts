@@ -476,7 +476,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   getAllAppointments: async (
     page = "1",
     perPage = "10",
-    baseEndpoint = "/front-desk/appointment/all-records"
+    baseEndpoint = "/medical-report/appointment/all-records"
   ) => {
     set({ isLoading: true, appointments: [], pagination: null });
     try {
@@ -526,7 +526,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       };
 
       set({
-        appointments: normalizedAppointments,
+        appointments: response.data.data,
         pagination: paginationData,
       });
       console.log("Appointments loaded:", normalizedAppointments);
@@ -549,7 +549,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       if (response.status === 201) {
         console.log(response.data.message);
         toast.success(response.data.message);
-        await get().getAllAppointments(refreshEndpoint); // Refresh with front desk endpoint
+        await get().getAllAppointments(refreshEndpoint);
         return true;
       }
       return false;
@@ -591,7 +591,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   ) => {
     set({ isLoading: true });
     try {
-      const response = await api.patch(`${endpoint}/${id}`, data);
+      const response = await api.put(`${endpoint}/${id}`, data);
       if (response.status === 200) {
         // toast.success(response.data.message);
         await get().getAllAppointments();

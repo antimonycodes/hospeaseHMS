@@ -83,7 +83,9 @@ const NurseAppointment = () => {
       gender: item.attributes.patient.attributes.gender ?? "N/A",
       phone: item.attributes.patient.attributes.phone_number,
       occupation: item.attributes.patient.attributes.occupation ?? "N/A",
-      doctor: `Dr ${item.attributes.doctor?.attributes.last_name}`,
+      doctor: ` ${
+        item.attributes.doctor?.attributes.last_name ?? "Departmnet"
+      }`,
       status,
     };
   });
@@ -97,7 +99,7 @@ const NurseAppointment = () => {
   const navigate = useNavigate();
 
   const details = (id: string) => {
-    navigate(`/dashboard/appointment/doctor/${id}`);
+    navigate(`/dashboard/appointment/nurse/${id}`);
   };
 
   const columns = getUserColumns(details, transformedPatients, false);

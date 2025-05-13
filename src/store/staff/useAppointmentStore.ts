@@ -68,7 +68,7 @@ export const useAppointmentStore = create<AppointmentStore>((set) => ({
   getAllAppointments: async (
     page: string = "1",
     perPage: string = "10",
-    baseEndpoint: string = "/doctor/my-appointments"
+    baseEndpoint: string = "/medical-report/appointment/all-records"
   ) => {
     set({ isLoading: true });
     try {
@@ -93,7 +93,7 @@ export const useAppointmentStore = create<AppointmentStore>((set) => ({
     set({ isLoading: true });
     try {
       const response = await api.get(
-        `/front-desk/appointment/all-records/${id}`
+        `/medical-report/appointment/all-records/${id}`
       );
       set({ selectedAppointment: response.data.data });
     } catch (error: any) {

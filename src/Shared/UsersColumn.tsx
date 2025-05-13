@@ -68,7 +68,7 @@ export const getUserColumns = (
     },
     {
       key: "doctor",
-      label: "Doctor Assigned",
+      label: "Assigned To",
       render: (_, data) => (
         <span className="text-[#667085] text-sm">{data.doctor}</span>
       ),

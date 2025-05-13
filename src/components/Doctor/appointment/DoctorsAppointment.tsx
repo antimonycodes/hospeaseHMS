@@ -81,7 +81,9 @@ const DoctorsAppointment = () => {
       gender: item.attributes.patient.attributes.gender ?? "N/A",
       phone: item.attributes.patient.attributes.phone_number,
       occupation: item.attributes.patient.attributes.occupation ?? "N/A",
-      doctor: `Dr ${item.attributes.doctor?.attributes.last_name}`,
+      doctor: ` ${
+        item.attributes.doctor?.attributes.last_name ?? "Department"
+      }`,
       status,
     };
   });

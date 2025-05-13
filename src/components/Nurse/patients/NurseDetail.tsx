@@ -1,15 +1,12 @@
-// Nurse patients detail page
-
 import { useEffect, useState } from "react";
 import Loader from "../../../Shared/Loader";
 import { useNavigate, useParams } from "react-router-dom";
-import { useMatronNurse } from "../../Matron/nurse/useMatronNurse";
 import { ChevronLeft, FileText, Loader2 } from "lucide-react";
 import { useNurseStore } from "../../../store/super-admin/useNuseStore";
 import { useReportStore } from "../../../store/super-admin/useReoprt";
 import MedicalTimeline from "../../../Shared/MedicalTimeline";
-import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
 import Button from "../../../Shared/Button";
+import TransferToDoc from "../Appointment/TransferToDoc";
 
 interface NextOfKin {
   name: string;
@@ -176,15 +173,11 @@ const NurseDetail = () => {
         <button
           className={`flex mb-4 text-primary items-center gap-1 px-3 py-1 rounded-md transition
            `}
-          // onClick={() => setActiveTab("report")}
         >
           <FileText size={16} />
           Add Nurse's Report
         </button>
 
-        {/* <p className="text-gray-500 text-sm mb-4">
-          Add a report for the patient. You can also upload a file if needed.
-        </p> */}
         <div className="space-y-4">
           <textarea
             rows={5}
@@ -228,10 +221,9 @@ const NurseDetail = () => {
       )}
 
       {openModal && (
-        <BookAppointmentModal
+        <TransferToDoc
           onClose={() => setOpenModal(false)}
-          // endpoint={bookEndpoint}
-          // refreshEndpoint={refreshEndpoint}
+          patient={selectedPatient}
         />
       )}
     </div>

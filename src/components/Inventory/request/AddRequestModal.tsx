@@ -36,7 +36,7 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
   });
 
   const [requestedType, setRequestedType] = useState<"staff" | "department">(
-    "staff"
+    "department"
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<any>(null);
@@ -151,7 +151,7 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
           </label>
           <div className="flex space-x-4">
             <div
-              className={`px-4 py-2 rounded-md cursor-pointer border ${
+              className={` hidden px-4 py-2 rounded-md cursor-pointer border ${
                 requestedType === "staff"
                   ? "bg-primary text-white border-primary"
                   : "bg-white text-gray-700 border-gray-300"

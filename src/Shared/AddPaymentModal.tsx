@@ -65,6 +65,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
         amount?: string | number | null;
         name?: string;
         isPharmacy?: boolean;
+        availableQuantity?: string | number;
       };
       quantity: number;
       total: number;
@@ -81,6 +82,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
   const [paymentDate, setPaymentDate] = useState<Date | null>(null);
   const [departmentId, setDepartmentId] = useState("");
   const [partAmount, setPartAmount] = useState("");
+  const [hmoDiscount, setHmoDiscount] = useState(0);
 
   const allowedDepartments = ["pharmacist", "laboratory", "finance"];
   const getDepartmentOptions = () => {
@@ -100,6 +102,12 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
     getAllItems();
     getAllRoles();
     getPharmacyStocks();
+
+    // Get HMO discount rate from localStorage if available
+    const storedHmoDiscount = localStorage.getItem("hmo");
+    if (storedHmoDiscount) {
+      setHmoDiscount(Number(storedHmoDiscount));
+    }
   }, [getAllPatientsNoPerPage, getAllItems, getAllRoles, getPharmacyStocks]);
 
   const paymentTypeOptions = [
@@ -163,6 +171,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
       service_item_name?: string;
       service_item_price?: string | number | null;
       isPharmacy?: boolean;
+      availableQuantity?: string | number;
     };
   }) => {
     const exists = selectedItems.find((i) => i.id === item.id);
@@ -199,7 +208,23 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
     setSelectedItems((prev) => {
       const updated = [...prev];
       const item = updated[index];
-      item.quantity = Math.max(1, item.quantity + delta);
+      const newQuantity = Math.max(1, item.quantity + delta);
+
+      // Check if item is a pharmacy product and if we have enough stock
+      if (item.attributes.isPharmacy && delta > 0) {
+        const availableQuantity = parseInt(
+          String(item.attributes.availableQuantity || "0")
+        );
+
+        if (newQuantity > availableQuantity) {
+          toast.error(
+            `Cannot add more than available stock (${availableQuantity} units)`
+          );
+          return prev;
+        }
+      }
+
+      item.quantity = newQuantity;
       item.total = parseAmount(item.attributes.amount) * item.quantity;
       return updated;
     });
@@ -218,7 +243,24 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
     toast.success(`Removed ${itemName} from selection`);
   };
 
-  const totalAmount = selectedItems.reduce((sum, item) => sum + item.total, 0);
+  // Calculate the final total amount considering HMO discount if applicable
+  const calculateFinalTotal = () => {
+    const rawTotal = selectedItems.reduce((sum, item) => sum + item.total, 0);
+
+    if (paymentMethod === "HMO" && hmoDiscount > 0) {
+      // Patient pays only the exact discount amount
+      // For example, if rawTotal is 1000 and hmoDiscount is 10%, they pay 100
+      return (hmoDiscount / 100) * rawTotal;
+    }
+
+    return rawTotal;
+  };
+
+  const totalAmount = calculateFinalTotal();
+  const rawTotalAmount = selectedItems.reduce(
+    (sum, item) => sum + item.total,
+    0
+  );
 
   const handleSubmit = async () => {
     const payload = {
@@ -288,6 +330,9 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
         ? item.service_item_price
         : undefined,
       isPharmacy: isPharmacySelected,
+      availableQuantity: isPharmacySelected
+        ? item.requested_quantity
+        : undefined,
     },
   }));
 
@@ -505,6 +550,8 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                                 {formatAmount(
                                   parseAmount(item.attributes.amount)
                                 )}
+                                {item.attributes.isPharmacy &&
+                                  ` • Available: ${item.attributes.availableQuantity} units`}
                               </p>
                             </div>
                             <div
@@ -541,6 +588,9 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                           <p className="text-sm text-gray-500">
                             ₦{formatAmount(parseAmount(item.attributes.amount))}{" "}
                             per unit
+                            {item.attributes.isPharmacy &&
+                              item.attributes.availableQuantity &&
+                              ` • Available: ${item.attributes.availableQuantity} units`}
                           </p>
                         </div>
                         <div className="flex items-center space-x-4">
@@ -656,9 +706,26 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                   <div className="border-t pt-3 flex justify-between font-bold">
                     <span>Total</span>
                     <span className="text-green-600">
-                      ₦{formatAmount(totalAmount)}
+                      ₦{formatAmount(rawTotalAmount)}
                     </span>
                   </div>
+
+                  {paymentMethod === "HMO" && hmoDiscount > 0 && (
+                    <>
+                      <div className="flex justify-between text-sm mt-2">
+                        <span>HMO Discount ({hmoDiscount}%)</span>
+                        <span className="text-red-500">
+                          -₦{formatAmount(rawTotalAmount * (hmoDiscount / 100))}
+                        </span>
+                      </div>
+                      <div className="border-t mt-2 pt-3 flex justify-between font-bold">
+                        <span>Final Total</span>
+                        <span className="text-green-600">
+                          ₦{formatAmount(totalAmount)}
+                        </span>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>

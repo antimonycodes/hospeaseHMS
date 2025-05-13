@@ -8,7 +8,7 @@ type AppointmentData = {
   id: number;
   attributes: {
     doctor: string;
-    card_id: string;
+    card_id?: string;
     status: string;
     rescheduled_data: any | null;
     doctor_contact: string | null;
@@ -22,27 +22,33 @@ type AppointmentData = {
     assigned_by: string;
     created_at: string;
     responded_at: string | null;
+    department?: {
+      id: number;
+      name: string;
+    };
   };
 };
 
 type AppointmentAttributes = AppointmentData["attributes"];
 
 type Columns = {
-  key: keyof AppointmentAttributes;
+  key: keyof AppointmentAttributes | "viewMore";
   label: string;
-  render?: (value: any, data: AppointmentAttributes) => JSX.Element; // Use AppointmentAttributes
+  render?: (value: any, data: AppointmentAttributes) => JSX.Element;
 };
 
 type AppointmentTableProps = {
-  data: AppointmentData[];
-  pagination: {
-    total: number;
-    per_page: number;
-    current_page: number;
-    last_page: number;
-    from: number;
-    to: number;
-  } | null;
+  data: {
+    data: AppointmentData[];
+    pagination: {
+      total: number;
+      per_page: number;
+      current_page: number;
+      last_page: number;
+      from: number;
+      to: number;
+    };
+  };
   isLoading: boolean;
   endpoint: string;
 };
@@ -78,12 +84,11 @@ type TabType = (typeof tabs)[number];
 const AppointmentDetails = ({
   data,
   isLoading,
-  pagination,
   endpoint,
 }: AppointmentTableProps) => {
   const { getAllAppointments } = usePatientStore();
   const [activeTab, setActiveTab] = useState<TabType>("All");
-  const [perPage, setPerPage] = useState(pagination?.per_page || 10);
+  const [perPage, setPerPage] = useState(data?.pagination?.per_page || 10);
 
   // const navigate = useNavigate();
 
@@ -100,13 +105,15 @@ const AppointmentDetails = ({
         <span className="font-medium text-[#101828]">{attributes.patient}</span>
       ),
     },
-    {
-      key: "card_id",
-      label: "Patient ID",
-      render: (_, attributes) => (
-        <span className="font-medium text-[#101828]">{attributes.card_id}</span>
-      ),
-    },
+    // {
+    //   key: "card_id",
+    //   label: "Patient ID",
+    //   render: (_, attributes) => (
+    //     <span className="font-medium text-[#101828]">
+    //       {attributes.card_id || "N/A"}
+    //     </span>
+    //   ),
+    // },
     {
       key: "gender",
       label: "Gender",
@@ -137,10 +144,19 @@ const AppointmentDetails = ({
     },
     {
       key: "doctor",
-      label: "Doctor Assigned",
-      render: (_, attributes) => (
-        <span className="text-[#667085]">{attributes.doctor || "N/A"}</span>
-      ),
+      label: "Assigned To",
+      render: (_, attributes) => {
+        // Check if there's a doctor property or department property
+        const doctorName =
+          attributes.doctor ||
+          (attributes.department?.name === "Doctor"
+            ? "Assigned to Doctor Dept"
+            : attributes.department?.name
+            ? `Assigned to ${attributes.department.name} Dept`
+            : "N/A");
+
+        return <span className="text-[#667085]">{doctorName}</span>;
+      },
     },
     {
       key: "status",
@@ -175,8 +191,22 @@ const AppointmentDetails = ({
     getAllAppointments(page.toString(), perPage.toString());
   };
 
-  const getStatusCounts = () => {
-    return data.reduce(
+  const appointmentData = useMemo(() => {
+    return data?.data || [];
+  }, [data]);
+
+  const statusCounts = useMemo(() => {
+    if (!Array.isArray(appointmentData)) {
+      return {
+        All: 0,
+        Pending: 0,
+        Accepted: 0,
+        Declined: 0,
+        Rescheduled: 0,
+      } as Record<TabType, number>;
+    }
+
+    return appointmentData.reduce(
       (acc, item) => {
         const status = formatStatus(item.attributes.status);
         acc[status]++;
@@ -191,21 +221,24 @@ const AppointmentDetails = ({
         Rescheduled: 0,
       } as Record<TabType, number>
     );
-  };
+  }, [appointmentData]);
 
-  const statusCounts = getStatusCounts();
+  const filteredAppointments = useMemo(() => {
+    if (!Array.isArray(appointmentData)) return [];
 
-  const filteredAppointments =
-    activeTab === "All"
-      ? data
-      : data.filter((a) => formatStatus(a.attributes.status) === activeTab);
+    return activeTab === "All"
+      ? appointmentData
+      : appointmentData.filter(
+          (a) => formatStatus(a.attributes.status) === activeTab
+        );
+  }, [appointmentData, activeTab]);
 
   // Map data to attributes for the Table component
   const tableData = filteredAppointments.map((item) => item.attributes);
 
   return (
     <div>
-      {isLoading && !data.length ? (
+      {isLoading && (!appointmentData || appointmentData.length === 0) ? (
         <Loader />
       ) : (
         <div className="w-full bg-white">
@@ -244,7 +277,7 @@ const AppointmentDetails = ({
               data={tableData}
               rowKey="id"
               pagination={true}
-              paginationData={pagination}
+              paginationData={data?.pagination || null}
               loading={isLoading}
               onPageChange={handlePageChange}
             />

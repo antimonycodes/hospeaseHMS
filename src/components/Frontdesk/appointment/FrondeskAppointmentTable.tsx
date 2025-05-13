@@ -56,8 +56,17 @@ const FrondeskAppointmentTable = ({
       />
 
       <AppointmentDetails
-        data={appointments}
-        pagination={pagination}
+        data={{
+          data: appointments,
+          pagination: pagination || {
+            total: 0,
+            per_page: 0,
+            current_page: 0,
+            last_page: 0,
+            from: 0,
+            to: 0,
+          },
+        }}
         isLoading={isLoading}
         endpoint={endpoint}
       />
