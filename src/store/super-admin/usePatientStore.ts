@@ -387,13 +387,14 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
     set({ isLoading: true });
     try {
       const response = await api.put(
-        `/admin/patient/update/${id}`,
+        // `/admin/patient/update/${id}`,
+        `/super-admin/patient/update/${id}`,
         patientData
       );
 
       if (isSuccessfulResponse(response)) {
         console.log(response);
-        const updatedPatient = response.data.data.data;
+        const updatedPatient = response.data.data || response.data.data.data;
         // Update the patient in the state
         set((state) => ({
           ...state,

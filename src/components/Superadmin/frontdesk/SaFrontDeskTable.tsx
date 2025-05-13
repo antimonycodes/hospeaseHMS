@@ -84,7 +84,7 @@ const SaFrontDeskTable = ({ frontdesks, isLoading }: Props) => {
               type="checkbox"
               className="sr-only peer"
               checked={row.is_active}
-              onChange={() => handleToggleStatus(row)} // Corrected here
+              onChange={() => handleToggleStatus(row)}
             />
             <div
               className={`relative w-10 h-5 rounded-full transition-colors ${

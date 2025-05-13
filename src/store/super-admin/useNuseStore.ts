@@ -92,7 +92,26 @@ export interface NurseAttributes {
   is_active: boolean;
   user_id: number;
 }
+export interface FrontdeskAttributes {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  nurse_id: string;
+  hospital: Hospital;
+  shift_status: string;
+  details: string | null;
+  created_at: string;
+  id: number;
+  is_active: boolean;
+  user_id: number;
+}
 
+export interface Frontdesk {
+  type: string;
+  id: number;
+  attributes: FrontdeskAttributes;
+}
 // Interface for Nurse Data
 export interface Nurse {
   type: string;
@@ -138,11 +157,12 @@ export interface NurseStats {
 interface NurseStore {
   isLoading: boolean;
   isDeleting: boolean;
+  isUpdating: boolean;
   isCreating: boolean;
   pagination: Pagination | null;
 
   nurses: Nurse[];
-  frontdesks: any[];
+  frontdesks: Frontdesk[];
   selectedNurse: any | null;
   selectedFrontdesk: any | null;
   selectedPatient: any | null; // Added selectedPatient property
@@ -150,7 +170,11 @@ interface NurseStore {
   getFrontdesk: () => Promise<any>;
   getNurseById: (id: string) => Promise<any>;
   createNurse: (data: CreateNurseData) => Promise<any>;
-  createFrontdesk: (data: any) => Promise<any>;
+  createFrontdesk: (
+    data: any,
+    endpoint?: string,
+    refreshEndpoint?: string
+  ) => Promise<any>;
   getFrontdeskById: (id: string) => Promise<any>;
   updateFrontdek: (id: string, data: any) => Promise<any>;
   getNurseStats: () => Promise<void>;
@@ -165,6 +189,7 @@ export const useNurseStore = create<NurseStore>((set, get) => ({
   isLoading: false,
   isDeleting: false,
   isCreating: false,
+  isUpdating: false,
   pagination: null,
   nurses: [],
   stats: null,
@@ -217,8 +242,11 @@ export const useNurseStore = create<NurseStore>((set, get) => ({
 
       if (isSuccessfulResponse(response)) {
         // toast.success(response.data?.msg);
-        console.log(response.data.data.data);
-        set({ selectedFrontdesk: response.data.data });
+        // console.log("check null", response.data.data.data);
+        set({
+          selectedFrontdesk: response.data.data || response.data.data.data,
+        });
+        console.log("email nullcheck", response.data.data);
         return true;
       }
       return null;
@@ -229,6 +257,7 @@ export const useNurseStore = create<NurseStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
+
   updateFrontdek: async (id, data) => {
     set({ isLoading: true });
     try {
@@ -237,13 +266,13 @@ export const useNurseStore = create<NurseStore>((set, get) => ({
         data
       );
       if (isSuccessfulResponse(response)) {
-        const updatedFrontdesk = response.data.data.data;
+        const updatedFrontdesk = response.data.data || response.data.data.data;
 
         set((state) => ({
           ...state,
           selectedFrontdesk: updatedFrontdesk,
           frontdesks: state.frontdesks.map((frontdesk) =>
-            frontdesk.id === id ? updatedFrontdesk.data : frontdesk
+            frontdesk.id === Number(id) ? updatedFrontdesk.data : frontdesk
           ),
         }));
         toast.success(response.data?.message);
@@ -328,12 +357,20 @@ export const useNurseStore = create<NurseStore>((set, get) => ({
     }
   },
 
-  createFrontdesk: async (data: any) => {
+  createFrontdesk: async (
+    data,
+    refreshEndpoint,
+    endpoint = "/admin/front-desk/create"
+  ) => {
     set({ isLoading: true });
     try {
-      const response = await api.post("/admin/front-desk/create", data);
+      const payload = {
+        ...data,
+        frontdesk_id: data.frontdesk_id ?? null,
+      };
+      const response = await api.post(endpoint, payload);
       if (response.status === 201) {
-        await get().getNurses();
+        await get().getFrontdesk();
         toast.success(response.data.message);
         return true;
       }

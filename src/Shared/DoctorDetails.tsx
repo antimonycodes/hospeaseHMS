@@ -138,7 +138,7 @@ const DoctorDetails = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           <Info
             label="First Name"
             value={selectedDoctor?.attributes?.first_name}
@@ -153,11 +153,13 @@ const DoctorDetails = () => {
             label="Religion"
             value={selectedDoctor?.attributes?.details?.religion}
           />
+
           <Info label="Phone" value={selectedDoctor?.attributes?.phone} />
           <Info
             label="House Address"
             value={selectedDoctor?.attributes?.details?.address}
           />
+          <Info label="Email" value={selectedDoctor?.attributes?.email} />
         </div>
       </div>
 

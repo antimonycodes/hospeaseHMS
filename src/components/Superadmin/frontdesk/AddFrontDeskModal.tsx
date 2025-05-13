@@ -1,35 +1,56 @@
 import { X } from "lucide-react";
-import { CreateNurseData } from "../../../store/super-admin/useNuseStore";
 import Button from "../../../Shared/Button";
+import toast from "react-hot-toast";
 
-interface AddNurseModalProps {
-  formData: any; // Use the same interface as Zustand
+interface AddFrontDeskModalProps {
+  formData: any;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   setShowModal: (show: boolean) => void;
-  createFrontdesk: (data: any) => any;
+  createFrontdesk: (
+    data: any,
+    endpoint?: string,
+    refreshEndpoint?: string
+  ) => Promise<any>;
+  updateFrontdesk?: (id: string, data: any) => Promise<any>;
+  isEditing?: boolean;
 }
 
-const AddFrontDeskModal: React.FC<AddNurseModalProps> = ({
+const AddFrontDeskModal: React.FC<AddFrontDeskModalProps> = ({
   formData,
   handleInputChange,
   setShowModal,
   createFrontdesk,
+  updateFrontdesk,
+  isEditing = false,
 }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(formData);
-    const response = await createFrontdesk(formData);
-    if (response) {
-      setShowModal(false);
+    try {
+      if (isEditing && updateFrontdesk) {
+        const response = await updateFrontdesk(formData.id, formData);
+        if (response) {
+          toast.success("Frontdesk updated successfully");
+          setShowModal(false);
+        }
+      } else {
+        const response = await createFrontdesk(formData);
+        if (response) {
+          toast.success("Frontdesk created successfully");
+          setShowModal(false);
+        }
+      }
+    } catch (error) {
+      toast.error("Failed to save frontdesk");
     }
   };
+
   return (
     <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center z-50 p-6">
       <div className="bg-white rounded-lg custom-shadow overflow-y-auto w-full max-w-2xl h-[90%]">
         <div className="p-4 md:p-12">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-custom-black text-lg font-semibold">
-              Add New Frontdesk
+              {isEditing ? "Edit Frontdesk" : "Add New Frontdesk"}
             </h2>
             <button onClick={() => setShowModal(false)} className="">
               <X className="text-black" />
@@ -37,23 +58,7 @@ const AddFrontDeskModal: React.FC<AddNurseModalProps> = ({
           </div>
 
           <form onSubmit={handleSubmit}>
-            {/* Upload Picture */}
-            {/* <div className="mb-4 flex gap-4">
-              <div className="mb-2 text-center">
-                <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center"></div>
-              </div>
-              <div className="space-y-2">
-                <p className="text-custom-black font-medium">Upload Picture</p>
-                <p className="text-xs md:text-sm text-[#667085] w-full md:max-w-2/3">
-                  Upload image with at least 6000px by 600px in jpg or png
-                  format.
-                </p>
-                <Button variant="primary">Upload</Button>
-              </div>
-            </div> */}
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* First Name */}
               <div>
                 <label
                   htmlFor="first_name"
@@ -72,8 +77,6 @@ const AddFrontDeskModal: React.FC<AddNurseModalProps> = ({
                   required
                 />
               </div>
-
-              {/* Last Name */}
               <div>
                 <label
                   htmlFor="last_name"
@@ -92,8 +95,6 @@ const AddFrontDeskModal: React.FC<AddNurseModalProps> = ({
                   required
                 />
               </div>
-
-              {/* Email */}
               <div>
                 <label
                   htmlFor="email"
@@ -112,8 +113,6 @@ const AddFrontDeskModal: React.FC<AddNurseModalProps> = ({
                   required
                 />
               </div>
-
-              {/* Phone Number */}
               <div>
                 <label
                   htmlFor="phone"
@@ -132,27 +131,6 @@ const AddFrontDeskModal: React.FC<AddNurseModalProps> = ({
                   required
                 />
               </div>
-
-              {/* Date of Birth */}
-              {/* <div>
-                <label
-                  htmlFor="dob"
-                  className="block text-sm font-medium text-custom-black mb-1"
-                >
-                  Date of Birth
-                </label>
-                <input
-                  type="date"
-                  id="dob"
-                  name="dob"
-                  value={formData.dob}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-4 border border-[#D0D5DD] placeholder:text-[#98A2B3] rounded-md"
-                  required
-                />
-              </div> */}
-
-              {/* House Address */}
               <div>
                 <label
                   htmlFor="address"
@@ -171,10 +149,10 @@ const AddFrontDeskModal: React.FC<AddNurseModalProps> = ({
                 />
               </div>
             </div>
-
-            {/* Submit Button */}
             <div className="mt-6">
-              <Button type="submit">Add Frontdesk</Button>
+              <Button type="submit">
+                {isEditing ? "Update Frontdesk" : "Add Frontdesk"}
+              </Button>
             </div>
           </form>
         </div>
