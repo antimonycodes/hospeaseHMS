@@ -5,6 +5,7 @@ import PharmInventory from "../components/Pharmacy/Inventory/PharmInventory";
 import { useNavigate } from "react-router-dom";
 const roleComponents: Record<string, JSX.Element> = {
   admin: <SaPharnacyPage />,
+  "platform-manager": <SaPharnacyPage />,
   pharmacy: <PharmInventory />,
 
   //   doctor:  ,
