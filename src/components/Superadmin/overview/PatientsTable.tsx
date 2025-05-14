@@ -1,5 +1,6 @@
 import { JSX, useEffect, useState } from "react";
 import Table from "../../../Shared/Table";
+import Loader from "../../../Shared/Loader";
 
 type Column<T> = {
   key: keyof T;
@@ -50,6 +51,8 @@ const PatientsTable = ({
       }))
     );
   }, [patients]);
+
+  if (!patients) return <Loader />;
 
   const columns: Column<PatientAttributes>[] = [
     {

@@ -388,12 +388,13 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
     try {
       const response = await api.put(
         // `/admin/patient/update/${id}`,
-        `/super-admin/patient/update/${id}`,
+        `/admin/patient/update/${id}`,
         patientData
       );
 
       if (isSuccessfulResponse(response)) {
         console.log(response);
+        toast.success(response.data.message);
         const updatedPatient = response.data.data || response.data.data.data;
         // Update the patient in the state
         set((state) => ({

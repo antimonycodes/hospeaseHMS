@@ -4,6 +4,7 @@ import FrontdeskInfo from "./FrontdeskInfo";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import AddPatientModals from "./AddPatientModals";
 import SearchBar from "../../ReusablepatientD/SearchBar";
+import Loader from "../../../Shared/Loader";
 
 const FpatientsTable = () => {
   const [openModal, setOpenModal] = useState(false);
@@ -27,6 +28,8 @@ const FpatientsTable = () => {
       getAllPatients("1", "10", baseEndpoint);
     }
   }, [getAllPatients, searchPatients, searchQuery]);
+
+  if (!patients) return <Loader />;
 
   const handleOpenModal = () => {
     setOpenModal(true);

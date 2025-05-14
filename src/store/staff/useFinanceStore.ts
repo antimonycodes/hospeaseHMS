@@ -87,6 +87,8 @@ interface FinanceStore {
   isLoading: boolean;
   expenses: any[];
   payments: any[];
+  paymentSources: any[];
+  doctors: any[];
   isUpdating: boolean;
   selectedPayment: any | null;
   pagination: Pagination | null;
@@ -116,9 +118,14 @@ interface FinanceStore {
   getFinanceStats: (endpoint?: string) => Promise<void>;
   getLabStats: (endpoint?: string) => Promise<void>;
   searchPatients: (query: string) => Promise<any[]>;
+  getPaymentSource: () => Promise<any>;
+  createPaymentSource: (data: any) => Promise<any>;
+  updatePaymentSource: (id: any, data: any) => Promise<any>;
+  deletePaymentSource: (id: any) => Promise<any>;
+  getAllDoctors: () => Promise<any>;
 }
 
-export const useFinanceStore = create<FinanceStore>((set) => ({
+export const useFinanceStore = create<FinanceStore>((set, get) => ({
   isLoading: false,
   isUpdating: false,
   expenses: [],
@@ -126,6 +133,8 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
   stats: null,
   pagination: null,
   selectedPayment: null,
+  paymentSources: [],
+  doctors: [],
 
   getAllExpenses: async (
     page = "1",
@@ -323,6 +332,106 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
       //   error.response?.data?.message || "Failed to fetch laboratory stats"
       // );
       set({ stats: null });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  createPaymentSource: async (data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.post(
+        "/medical-report/payment.source/create",
+        data
+      );
+
+      if (isSuccessfulResponse(response)) {
+        toast.success(response.data?.message);
+        await get().getPaymentSource();
+        return true;
+      }
+      return null;
+    } catch (error) {
+      handleErrorToast(error);
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  getPaymentSource: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(
+        "/medical-report/payment.source/all-records"
+      );
+
+      if (isSuccessfulResponse(response)) {
+        toast.success(response.data?.message);
+        set({ paymentSources: response.data.data.data });
+        console.log(response.data.data);
+        return true;
+      }
+      return null;
+    } catch (error) {
+      handleErrorToast(error);
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  updatePaymentSource: async (id, data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.put(
+        `/medical-report/payment.source/update/${id}`,
+        data
+      );
+
+      if (isSuccessfulResponse(response)) {
+        toast.success(response.data?.message);
+        await get().getPaymentSource();
+
+        return true;
+      }
+      return null;
+    } catch (error) {
+      handleErrorToast(error);
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  deletePaymentSource: async (id) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.delete(
+        `/medical-report/payment.source/delete/${id}`
+      );
+
+      if (isSuccessfulResponse(response)) {
+        toast.success(response.data?.message);
+        return true;
+      }
+      return null;
+    } catch (error) {
+      handleErrorToast(error);
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  getAllDoctors: async () => {
+    set({ isLoading: true });
+    try {
+      const endpoint = "/medical-report/doctor/fetch";
+      const response = await api.get(endpoint);
+      const fetchedDoctors = response.data.data.data; // Extract doctor array
+      set({ doctors: fetchedDoctors });
+      // set({ pagination: response.data.data.pagination });
+
+      // toast.success("Doctors retrieved successfully!");
+    } catch (error: any) {
+      console.error(error.response?.data);
+      // toast.error(error.response.message || "Failed to fetch doctors");
     } finally {
       set({ isLoading: false });
     }

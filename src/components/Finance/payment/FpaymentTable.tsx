@@ -15,6 +15,7 @@ interface PaymentAttributes {
   created_at: string;
   id: number; // Added id
   department: { name: string };
+  payment_source?: string; // Added payment_source
 }
 
 interface PaymentData {
@@ -155,6 +156,17 @@ const FpaymentTable = ({
       key: "payment_type",
       label: "Payment Type",
       render: (_, row) => <PaymentTypeBadge paymentType={row.payment_type} />,
+    },
+    {
+      key: "payment_source",
+      label: "Source",
+      render: (_, row) => {
+        return (
+          <span className="text-[#667085] text-sm">
+            {row.payment_source || "N/A"}
+          </span>
+        );
+      },
     },
     {
       key: "created_at",

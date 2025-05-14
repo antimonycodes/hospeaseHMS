@@ -87,10 +87,6 @@ const PaymentDetails = () => {
           selectedPayment.attributes.amount?.replace(/,/g, "") || "0"
         );
 
-        // Calculate original price before HMO discount
-        // Original price = current total amount / (1 - hmoRate)
-        // Example: If HMO discount is 20%, and current amount is 800,
-        // then original price = 800 / (1 - 0.2) = 800 / 0.8 = 1000
         const calculatedOriginalPrice = totalAmount * hmoRate;
         setOriginalPrice(calculatedOriginalPrice);
       }

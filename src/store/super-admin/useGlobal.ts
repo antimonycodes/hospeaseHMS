@@ -126,8 +126,12 @@ interface Globalstore {
   togglestatus: (data: Togglestatus) => Promise<any>;
   getBranches: (endpoint?: string) => Promise<any>;
   createBranch: (data: CreateBranchData) => Promise<any>;
+  updateBranch: (id: any, data: any) => Promise<any>;
+  deleteBranch: (id: any) => Promise<any>;
   getClinicaldept: (endpoint?: string) => Promise<any>;
   createClinicaldept: (data: CreateClinicaldeptData) => Promise<any>;
+  updateClinicaldept: (id: any, data: any) => Promise<any>;
+  deleteClinicaldept: (id: any) => Promise<any>;
   createStaff: (data: CreateStaff, role: string) => Promise<any>;
   createSubAdmin: (data: CreateSubAdmin) => Promise<any>;
   getSubAdmin: () => Promise<any>;
@@ -178,21 +182,20 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
     try {
       const response = await api.post("/admin/profile/account-status", data);
       if (response.status === 200) {
-        // Return the new status to confirm it was updated on server
         toast.success(response.data.message);
 
         return response.data.data?.attributes.is_active ?? data.is_active;
       }
       console.log(response.data.data?.attributes.is_active);
       toast.success(response.data.message);
-      return null; // Indicate failure
+      return null;
     } catch (error: any) {
       console.error(
         "Error changing status:",
         error.response?.data || error.message
       );
       toast.error(error.response?.data?.message || "Failed to update status");
-      return null; // Indicate failure
+      return null;
     } finally {
       set({ isLoading: false });
     }
@@ -203,7 +206,6 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
     try {
       const response = await api.get(endpoint);
       if (response.status === 200) {
-        // Return the new status to confirm it was updated on server
         // toast.success(response.data.message);
         set({ branches: response.data.data });
         console.log(response.data.data);
@@ -218,7 +220,7 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
         error.response?.data || error.message
       );
       //   toast.error(error.response?.data?.message || "Failed");
-      return null; // Indicate failure
+      return null;
     } finally {
       set({ isLoading: false });
     }
@@ -241,7 +243,53 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
         error.response?.data || error.message
       );
       toast.error(error.response?.data?.message || "Failed");
-      return null; // Indicate failure
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  updateBranch: async (id, data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.put(`admin/branches/update/${id}`, data);
+      if (response.status === 201) {
+        toast.success(response.data.message);
+        await get().getBranches();
+        return true;
+      }
+      console.log(response.data.data?.data);
+      toast.success(response.data.message);
+      return null;
+    } catch (error: any) {
+      console.error(
+        "Error changing status:",
+        error.response?.data || error.message
+      );
+      toast.error(error.response?.data?.message || "Failed");
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  deleteBranch: async (id) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.delete(`admin/branches/delete/${id}`);
+      if (response.status === 200) {
+        toast.success(response.data.message);
+        await get().getBranches();
+        return true;
+      }
+      console.log(response.data.data?.data);
+      toast.success(response.data.message);
+      return null;
+    } catch (error: any) {
+      console.error(
+        "Error changing status:",
+        error.response?.data || error.message
+      );
+      toast.error(error.response?.data?.message || "Failed");
+      return null;
     } finally {
       set({ isLoading: false });
     }
@@ -254,7 +302,6 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
     try {
       const response = await api.get(endpoint);
       if (response.status === 200) {
-        // Return the new status to confirm it was updated on server
         // toast.success(response.data.message);
         set({ clinicaldepts: response.data.data });
         return true;
@@ -268,7 +315,7 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
         error.response?.data || error.message
       );
       //   toast.error(error.response?.data?.message || "Failed");
-      return null; // Indicate failure
+      return null;
     } finally {
       set({ isLoading: false });
     }
@@ -294,7 +341,6 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
         data
       );
       if (response.status === 201) {
-        // Return the new status to confirm it was updated on server
         toast.success(response.data.message);
         await get().getClinicaldept();
         return true;
@@ -308,7 +354,58 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
         error.response?.data || error.message
       );
       toast.error(error.response?.data?.message || "Failed");
-      return null; // Indicate failure
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  deleteClinicaldept: async (id) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.delete(
+        `admin/department/clinical-delete/${id}`
+      );
+      if (response.status === 200) {
+        toast.success(response.data.message);
+        await get().getClinicaldept();
+        return true;
+      }
+      console.log(response.data.data?.data);
+      toast.success(response.data.message);
+      return null;
+    } catch (error: any) {
+      console.error(
+        "Error changing status:",
+        error.response?.data || error.message
+      );
+      toast.error(error.response?.data?.message || "Failed");
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  updateClinicaldept: async (id, data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.put(
+        `/admin/department/clinical-update/${id}`,
+        data
+      );
+      if (response.status === 201) {
+        toast.success(response.data.message);
+        await get().getClinicaldept();
+        return true;
+      }
+      console.log(response.data.data?.data);
+      toast.success(response.data.message);
+      return null;
+    } catch (error: any) {
+      console.error(
+        "Error changing status:",
+        error.response?.data || error.message
+      );
+      toast.error(error.response?.data?.message || "Failed");
+      return null;
     } finally {
       set({ isLoading: false });
     }
@@ -476,7 +573,7 @@ export const useGlobalStore = create<Globalstore>((set, get) => ({
         error.response?.data || error.message
       );
       //   toast.error(error.response?.data?.message || "Failed");
-      return null; // Indicate failure
+      return null;
     } finally {
       set({ isLoading: false });
     }

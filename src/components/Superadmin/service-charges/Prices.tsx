@@ -1,16 +1,18 @@
 import { useState, useEffect, useCallback } from "react";
-// import Button from "../Shared/Button";
-import { XIcon, PlusCircle, Loader2, Edit, Trash2 } from "lucide-react";
-// import { useGlobalStore } from "../store/super-admin/useGlobal";
+import {
+  XIcon,
+  PlusCircle,
+  Loader2,
+  Edit,
+  Trash2,
+  AlertTriangle,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import { useCombinedStore } from "../../../store/super-admin/useCombinedStore";
 import { useGlobalStore } from "../../../store/super-admin/useGlobal";
 import Loader from "../../../Shared/Loader";
 import Button from "../../../Shared/Button";
 import Table from "../../../Shared/Table";
-// import Loader from "../Shared/Loader";
-// import { useCombinedStore } from "../store/super-admin/useCombinedStore";
-// import Table from "../Shared/Table";
 
 interface Item {
   id: number;
@@ -52,6 +54,8 @@ const departmentDisplayNames: Record<string, string> = {
 
 const Prices = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<Item | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editItem, setEditItem] = useState<Item | null>(null);
   const [formData, setFormData] = useState({
@@ -133,13 +137,18 @@ const Prices = () => {
   };
 
   const handleDeleteItem = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this item?")) {
-      const result = await deleteItem(id);
-      if (result) {
-        toast.success("Item deleted successfully");
-        getAllItems();
-      }
+    const result = await deleteItem(id);
+    if (result) {
+      toast.success("Item deleted successfully");
+      getAllItems();
+      setIsDeleteModalOpen(false);
+      setItemToDelete(null);
     }
+  };
+
+  const openDeleteModal = (item: Item) => {
+    setItemToDelete(item);
+    setIsDeleteModalOpen(true);
   };
 
   const openEditModal = (item: Item) => {
@@ -152,12 +161,6 @@ const Prices = () => {
     setIsEditMode(true);
     setIsModalOpen(true);
   };
-
-  // const formatPrice = (price: number) =>
-  //   new Intl.NumberFormat("en-NG", {
-  //     style: "currency",
-  //     currency: "NGN",
-  //   }).format(price);
 
   const columns: Column<Item>[] = [
     {
@@ -197,7 +200,7 @@ const Prices = () => {
             <Edit className="w-5 h-5" />
           </button>
           <button
-            onClick={() => handleDeleteItem(row.id)}
+            onClick={() => openDeleteModal(row)}
             className="text-red-600 hover:text-red-900"
             disabled={isDeleting}
           >
@@ -248,6 +251,7 @@ const Prices = () => {
         onPageChange={handlePageChange}
       />
 
+      {/* Add/Edit Item Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center z-50 p-6">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
@@ -331,6 +335,67 @@ const Prices = () => {
                   </Button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && itemToDelete && (
+        <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center z-50 p-6">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div className="p-6">
+              <div className="flex items-center mb-6 text-red-600">
+                <AlertTriangle className="w-8 h-8 mr-3" />
+                <h2 className="text-xl font-bold">Confirm Deletion</h2>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-gray-700 mb-4">
+                  Are you sure you want to delete{" "}
+                  <span className="font-semibold">
+                    {itemToDelete.attributes.name}
+                  </span>
+                  ?
+                </p>
+                <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
+                  <p className="text-red-700">
+                    <strong>Warning:</strong> Deleting this service charge item
+                    will automatically delete the item in inventory stock and
+                    pharmacy stock.
+                  </p>
+                </div>
+                <p className="text-gray-600 text-sm">
+                  This action cannot be undone.
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  className="min-w-24"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  variant="delete"
+                  onClick={() => handleDeleteItem(itemToDelete.id)}
+                  disabled={isDeleting}
+                  className="min-w-24  hover:bg-red-700 hover:text-white"
+                >
+                  {isDeleting ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Deleting...
+                    </div>
+                  ) : (
+                    "Delete Item"
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         </div>

@@ -40,7 +40,15 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
   endpoint = "frontdesk/save-patient-payment",
   refreshEndpoint = "/finance/all-revenues",
 }) => {
-  const { searchPatients, createPayment, isLoading } = useFinanceStore();
+  const {
+    searchPatients,
+    createPayment,
+    isLoading,
+    getAllDoctors,
+    doctors,
+    getPaymentSource,
+    paymentSources,
+  } = useFinanceStore();
   const { getAllPatientsNoPerPage } = usePatientStore();
   const { getAllItems, items } = useCombinedStore();
   const { getPharmacyStocks, pharmacyStocks } = useReportStore();
@@ -48,6 +56,10 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
   const roles = useGlobalStore((state) => state.roles) as RolesState;
 
   const [query, setQuery] = useState("");
+  const [paymentSource, setPaymentSource] = useState<string | null>(null);
+  const [paymentSourceType, setPaymentSourceType] = useState<
+    "doctor" | "payment_source" | null
+  >(null);
   const [patientOptions, setPatientOptions] = useState<
     {
       id: string;
@@ -102,6 +114,8 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
     getAllItems();
     getAllRoles();
     getPharmacyStocks();
+    getAllDoctors();
+    getPaymentSource();
 
     // Get HMO discount rate from localStorage if available
     const storedHmoDiscount = localStorage.getItem("hmo");
@@ -264,6 +278,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
 
   const handleSubmit = async () => {
     const payload = {
+      payment_source: paymentSource,
       payment_type: paymentType,
       total_amount: totalAmount.toString(),
       part_amount: paymentType === "full" ? null : partAmount,
@@ -671,6 +686,78 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                   ))}
                 </div>
               </div>
+              {/*  */}
+
+              <div>
+                <label className="block text-sm font-medium text-[#101928] mb-2">
+                  Payment Source (Optional)
+                </label>
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPaymentSourceType("doctor");
+                      setPaymentSource(null);
+                    }}
+                    className={`flex items-center justify-center border px-4 py-3 rounded-lg ${
+                      paymentSourceType === "doctor"
+                        ? "bg-primary border-primary text-white"
+                        : "border-[#E4E4E7] text-[#A1A1AA]"
+                    }`}
+                  >
+                    Doctor
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPaymentSourceType("payment_source");
+                      setPaymentSource(null);
+                    }}
+                    className={`flex items-center justify-center border px-4 py-3 rounded-lg ${
+                      paymentSourceType === "payment_source"
+                        ? "bg-primary border-primary text-white"
+                        : "border-[#E4E4E7] text-[#A1A1AA]"
+                    }`}
+                  >
+                    Payment Source
+                  </button>
+                </div>
+
+                {paymentSourceType === "doctor" && (
+                  <select
+                    value={paymentSource || ""}
+                    onChange={(e) => setPaymentSource(e.target.value || null)}
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 outline-none focus:ring-primary focus:border-primary bg-white"
+                  >
+                    <option value="">Select Doctor</option>
+                    {doctors?.map((doctor: any) => (
+                      <option
+                        key={doctor.id}
+                        value={`${doctor.attributes.first_name} ${doctor.attributes.last_name}`}
+                      >
+                        {doctor.attributes.first_name}{" "}
+                        {doctor.attributes.last_name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                {paymentSourceType === "payment_source" && (
+                  <select
+                    value={paymentSource || ""}
+                    onChange={(e) => setPaymentSource(e.target.value || null)}
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 outline-none focus:ring-primary focus:border-primary bg-white"
+                  >
+                    <option value="">Select Payment Source</option>
+                    {paymentSources?.map((source: any) => (
+                      <option key={source.id} value={source.attributes.name}>
+                        {source.attributes.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+              {/*  */}
               {paymentType === "part" && (
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">

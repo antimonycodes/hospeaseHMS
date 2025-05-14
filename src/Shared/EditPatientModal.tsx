@@ -41,8 +41,7 @@ const EditPatientModal = ({
   patientData,
   isLoading,
   onSave,
-}: // onSave,
-EditPatientModalProps) => {
+}: EditPatientModalProps) => {
   const [formData, setFormData] = useState<PatientData | null>(null);
 
   // Update form data when patientData changes or modal opens
@@ -101,7 +100,7 @@ EditPatientModalProps) => {
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent default form submission
     if (formData) {
       onSave(formData);
     }
@@ -122,7 +121,7 @@ EditPatientModalProps) => {
           </button>
         </div>
 
-        <form className="p-4">
+        <form onSubmit={handleSubmit} className="p-4">
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-xs text-gray-500 mb-1">
