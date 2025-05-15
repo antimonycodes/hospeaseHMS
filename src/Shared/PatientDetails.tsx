@@ -136,7 +136,7 @@ const PatientDetails = () => {
   if (!selectedPatient) return <Loader />;
 
   const patient = selectedPatient.attributes;
-
+  console.log("Branch:", patient.branch);
   return (
     <div className="px-2 sm:px-0">
       <div className="bg-white rounded-lg custom-shadow mb-6">
@@ -184,6 +184,7 @@ const PatientDetails = () => {
                 label="CLinical Department"
                 value={patient.clinical_department.name}
               />
+
               <InfoRow label="Branch" value={patient.branch} />
               <InfoRow label="Occupation" value={patient.occupation} />
               <InfoRow label="Religion" value={patient.religion} />
