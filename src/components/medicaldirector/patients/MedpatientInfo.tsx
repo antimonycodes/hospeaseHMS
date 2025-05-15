@@ -64,14 +64,14 @@ const MedpatientInfo = ({
 
   const formattedPatients = patients.map((patient: any) => ({
     name: `${patient.attributes.first_name} ${patient.attributes.last_name}`,
-    // patientId: patient.attributes.card_id, // Convert ID to string if needed
+
     age: patient.attributes.age,
     gender: patient.attributes.gender,
     phone: patient.attributes.phone_number,
     branch: patient.attributes.branch,
     occupation: patient.attributes.occupation,
     viewMore: "View More",
-    card_id: patient.attributes.card_id, // Include card_id property
+    card_id: patient.attributes.card_id,
     id: patient.id,
   }));
   const handleViewMore = (id: string) => {

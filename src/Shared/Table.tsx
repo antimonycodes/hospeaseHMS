@@ -27,6 +27,7 @@ interface TableProps<T> {
   radius?: string;
   onPageChange?: (page: number) => void;
   loading?: boolean;
+  emptyMessage?: string;
 }
 
 const Table = <T extends Record<string, any>>({
@@ -35,6 +36,7 @@ const Table = <T extends Record<string, any>>({
   rowKey,
   pagination = false,
   paginationData,
+  emptyMessage,
   radius = "rounded-b-lg",
   onPageChange,
   loading = false,
