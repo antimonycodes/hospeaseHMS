@@ -1,6 +1,8 @@
 import { X } from "lucide-react";
 import Button from "../../../Shared/Button";
 import toast from "react-hot-toast";
+import { useGlobalStore } from "../../../store/super-admin/useGlobal";
+import { useEffect } from "react";
 
 interface AddFrontDeskModalProps {
   formData: any;
@@ -23,8 +25,24 @@ const AddFrontDeskModal: React.FC<AddFrontDeskModalProps> = ({
   updateFrontdesk,
   isEditing = false,
 }) => {
+  const { updateStaff, isLoading, getAllRoles } = useGlobalStore();
+  const roles = useGlobalStore((state) => state.roles);
+  const department = "front-desk-manager";
+
+  useEffect(() => {
+    getAllRoles();
+  }, [getAllRoles]);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // const { id, role } = roles[department];
+    // console.log(role, "rty");
+
+    // const staffData = {
+    //   ...formData,
+    //   department_id: id,
+    //   role,
+    // };
     try {
       if (isEditing && updateFrontdesk) {
         const response = await updateFrontdesk(formData.id, formData);

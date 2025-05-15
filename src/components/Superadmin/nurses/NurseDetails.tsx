@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useNurseStore } from "../../../store/super-admin/useNuseStore";
 import Button from "../../../Shared/Button";
 import { ArrowLeft, Loader2 } from "lucide-react";
@@ -10,7 +10,10 @@ const NurseDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [showEditModal, setShowEditModal] = useState(false);
+  const location = useLocation();
+  const { userId } = location.state || {};
 
+  console.log(userId);
   const {
     getNurseById,
     selectedNurse,
@@ -143,7 +146,7 @@ const NurseDetails = () => {
           updateNurse={updateNurse}
           // isLoading={isLoading}
           isEditMode={true}
-          selectedNurseId={selectedNurse.id}
+          selectedNurseId={userId}
         />
       )}
     </div>

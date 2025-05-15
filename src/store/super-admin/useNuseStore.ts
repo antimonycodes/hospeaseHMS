@@ -261,10 +261,7 @@ export const useNurseStore = create<NurseStore>((set, get) => ({
   updateFrontdek: async (id, data) => {
     set({ isLoading: true });
     try {
-      const response = await api.put(
-        `/admin/front-desk/update-record/${id}`,
-        data
-      );
+      const response = await api.put(`/admin/front-desk/update/${id}`, data);
       if (isSuccessfulResponse(response)) {
         const updatedFrontdesk = response.data.data || response.data.data.data;
 

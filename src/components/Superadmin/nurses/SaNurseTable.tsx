@@ -41,7 +41,13 @@ const SaNurseTable = ({ nurses, isLoading, pagination, getNurses }: Props) => {
 
   const handleViewMore = (nurse: NurseAttributes) => {
     console.log("View more clicked for:", nurse);
-    navigate(`/dashboard/nurses/${nurse.id}`);
+    // Pass both nurse ID and user ID when navigating
+    navigate(`/dashboard/nurses/${nurse.id}`, {
+      state: {
+        nurseId: nurse.id,
+        userId: nurse.user_id,
+      },
+    });
   };
 
   useEffect(() => {
@@ -52,6 +58,8 @@ const SaNurseTable = ({ nurses, isLoading, pagination, getNurses }: Props) => {
       }))
     );
   }, [nurses]);
+
+  console.log(nurses.indexOf, "dfgh");
 
   const handlePageChange = (page: number) => {
     // Call getAllPatients with the page number, perPage value, and the current baseEndpoint
@@ -101,7 +109,7 @@ const SaNurseTable = ({ nurses, isLoading, pagination, getNurses }: Props) => {
               type="checkbox"
               className="sr-only peer"
               checked={row.is_active}
-              onChange={() => handleToggleStatus(row)} // Corrected here
+              onChange={() => handleToggleStatus(row)}
             />
             <div
               className={`relative w-10 h-5 rounded-full transition-colors ${

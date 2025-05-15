@@ -26,8 +26,13 @@ const SaFrontDeskTable = ({ frontdesks, isLoading }: Props) => {
     []
   );
   const navigate = useNavigate();
-  const { togglestatus } = useGlobalStore();
+  const { togglestatus, staffs, getDeptStaffs } = useGlobalStore();
   //   console.log(frontdesks.id);
+  useEffect(() => {
+    getDeptStaffs("front-desk-manager");
+  }, []);
+
+  console.log(staffs, "dfyu");
 
   useEffect(() => {
     setTransformedNurses(
