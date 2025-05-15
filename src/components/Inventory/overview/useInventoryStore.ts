@@ -125,6 +125,10 @@ interface InventoryStore {
     Catendpoint?: string,
     createEndpoint?: string
   ) => Promise<boolean>;
+  updateCategory: (
+    id: number,
+    data: { name: string }
+  ) => Promise<boolean | null>;
 }
 
 export const useInventoryStore = create<InventoryStore>((set, get) => ({
@@ -377,6 +381,29 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       });
     } catch (error: any) {
       console.log("Error fetching stock activities:", error);
+      set({ isLoading: false });
+    }
+  },
+  updateCategory: async (id, data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.put(`/inventory/category/update/${id}`, data);
+      if (response.status === 201) {
+        toast.success(response.data.message);
+        await get().getAllCategorys("/inventory/category/all-records");
+        return true;
+      }
+      console.log(response.data.data?.data);
+      toast.success(response.data.message);
+      return null;
+    } catch (error: any) {
+      console.error(
+        "Error changing status:",
+        error.response?.data || error.message
+      );
+      toast.error(error.response?.data?.message || "Failed");
+      return null;
+    } finally {
       set({ isLoading: false });
     }
   },

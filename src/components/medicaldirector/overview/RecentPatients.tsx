@@ -112,7 +112,7 @@ const RecentPatients = ({ patients, isLoading }: RecentPatientsProps) => {
   return (
     <div>
       <Table
-        data={formattedPatients.slice(0, 3)}
+        data={formattedPatients.slice(0, 4)}
         columns={columns}
         rowKey="patientId"
         pagination={formattedPatients.length > 10}

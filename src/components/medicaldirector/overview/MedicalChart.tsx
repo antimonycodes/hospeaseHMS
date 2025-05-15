@@ -69,7 +69,7 @@ const MedicalChart = () => {
     <div className="w-full bg-white rounded-lg p-10 font-jakarta">
       <div className="flex items-center justify-between pb-10">
         <h1>Patients visit by Gender</h1>
-        <button>Guess</button>
+        <button>2025</button>
       </div>
       <div className="h-[350px] md:h-[400px]">
         {isLoading ? (

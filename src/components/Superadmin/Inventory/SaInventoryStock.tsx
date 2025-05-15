@@ -1,6 +1,4 @@
 import { JSX, useEffect } from "react";
-
-import { useInventoryStore } from "../../Inventory/overview/useInventoryStore";
 import { Loader } from "lucide-react";
 import Table from "../../../Shared/Table";
 type StockData = {

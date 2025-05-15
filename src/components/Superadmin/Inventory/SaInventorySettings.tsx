@@ -1,14 +1,14 @@
-import { JSX, useEffect } from "react";
+import { JSX, useEffect, useState } from "react";
 
 import { useInventoryStore } from "../../Inventory/overview/useInventoryStore";
-import { Loader } from "lucide-react";
+import { Edit, Loader, Trash2 } from "lucide-react";
 import Table from "../../../Shared/Table";
 type StockData = {
   item_name: string;
   id: number;
 };
 type Columns = {
-  key: keyof StockData;
+  key: keyof StockData | "actions";
   label: string;
   render?: (value: any, stocks: StockData) => JSX.Element;
 };
@@ -37,6 +37,20 @@ const SaInventorySettings = ({
       key: "item_name",
       label: "Item Name",
       render: (_, category) => <span>{category.item_name}</span>,
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      render: (_, row) => (
+        <div className="flex justify-center gap-3">
+          <button className="text-indigo-600 hover:text-indigo-900">
+            <Edit className="w-5 h-5" />
+          </button>
+          <button className="text-red-600 hover:text-red-900">
+            <Trash2 className="w-5 h-5" />
+          </button>
+        </div>
+      ),
     },
   ];
 

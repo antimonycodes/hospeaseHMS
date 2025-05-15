@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import toast from "react-hot-toast";
-import {
-  // CreateStockData,
-  useInventoryStore,
-} from "../overview/useInventoryStore";
+import { useInventoryStore } from "../overview/useInventoryStore";
 import { useCombinedStore } from "../../../store/super-admin/useCombinedStore";
 import Select from "react-select";
 
@@ -44,9 +41,7 @@ const AddStockModal = ({
   useEffect(() => {
     getAllCategorys("/admin/inventory/category/all-records");
     getAllItems();
-  }, [getAllCategorys, fetchEndpoint]);
-
-  console.log(items, "items");
+  }, [getAllCategorys, getAllItems]);
 
   const [stock, setStock] = useState<any>({
     service_item_name: "",
@@ -65,7 +60,7 @@ const AddStockModal = ({
     const { name, value } = e.target;
     setStock((prev: any) => ({
       ...prev,
-      [name]: name === "cost" ? parseFloat(value) || 0 : value,
+      [name]: value,
     }));
   };
 
@@ -73,7 +68,6 @@ const AddStockModal = ({
     const file = e.target.files?.[0] || null;
     setStock((prev: any) => ({ ...prev, image: file }));
   };
-  console.log(categorys, "categoryssss");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,7 +90,6 @@ const AddStockModal = ({
       return;
     }
 
-    // Correct payload without overriding image
     const payload = { ...stock };
 
     const success = await createStock(
@@ -125,8 +118,8 @@ const AddStockModal = ({
       width: "100%",
       padding: "6px 12px",
       border: "1px solid #D0D5DD",
-      borderRadius: "0.375rem", // Tailwind: rounded-md
-      fontSize: "0.875rem", // Tailwind: text-sm
+      borderRadius: "0.375rem",
+      fontSize: "0.875rem",
       boxShadow: "none",
       "&:hover": {
         borderColor: "#D0D5DD",
@@ -138,7 +131,7 @@ const AddStockModal = ({
     }),
     option: (provided: any, state: any) => ({
       ...provided,
-      backgroundColor: state.isFocused ? "#F3F4F6" : "#fff", // hover
+      backgroundColor: state.isFocused ? "#F3F4F6" : "#fff",
       color: "#111827",
       fontSize: "0.875rem",
     }),
@@ -152,6 +145,7 @@ const AddStockModal = ({
       fontSize: "0.875rem",
     }),
   };
+
   return (
     <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center z-50 p-6">
       <div className="bg-white rounded-lg shadow-lg overflow-y-auto p-12 h-[90%] w-full max-w-[980px]">
@@ -199,6 +193,7 @@ const AddStockModal = ({
                       service_charge_id: selectedItem.id,
                       service_item_price:
                         selectedItem.attributes.amount.replace(/,/g, ""),
+                      cost: selectedItem.attributes.amount.replace(/,/g, ""), // Set cost from item amount
                     }));
                   }
                 }}
@@ -244,12 +239,11 @@ const AddStockModal = ({
                 type="text"
                 name="cost"
                 value={stock.cost}
-                onChange={handleChange}
-                disabled={isLoading}
-                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
+                disabled={true} // Disable manual input
+                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm bg-gray-100"
               />
             </div>
-            <div className=" hidden">
+            <div className="hidden">
               <label className="block text-sm font-medium text-custom-black mb-1">
                 Item Price
               </label>
@@ -257,7 +251,6 @@ const AddStockModal = ({
                 type="text"
                 name="service_item_price"
                 value={stock.service_item_price}
-                onChange={handleChange}
                 disabled={true}
                 className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm bg-gray-100"
               />

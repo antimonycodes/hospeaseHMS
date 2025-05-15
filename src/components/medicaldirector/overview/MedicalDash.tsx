@@ -7,9 +7,8 @@ import totalIcon from "../../../assets/totalIcon.png";
 import { useMedicalStore } from "../useMedicalStore";
 import MedicalChart from "./MedicalChart";
 import Loader from "../../../Shared/Loader";
-import MedRecent from "./MedRecent";
-import MedpatientInfo from "../patients/MedpatientInfo";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
+import RecentPatients from "./RecentPatients";
 
 const MedicalDash = () => {
   const { stats, getMedStats, isLoading } = useMedicalStore();
@@ -96,14 +95,8 @@ const MedicalDash = () => {
           </div>
         )}
         <MedicalChart />
-        <MedpatientInfo
-          patients={patients.slice(0, 5)}
-          isLoading={isLoading}
-          // pagination={false}
-          baseEndpoint={baseEndpoint}
-          getAllPatients={getAllPatients}
-        />
-        {/* <MedRecent /> */}
+
+        <RecentPatients patients={patients} />
       </div>
     </div>
   );
