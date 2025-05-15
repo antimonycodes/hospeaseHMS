@@ -8,7 +8,9 @@ const InventoryCatTable = () => {
   const { getAllCategorys, categorys, createCategory, isLoading } =
     useInventoryStore();
   const [openModal, setOpenModal] = useState(false);
-
+  const [isCategoryOpen, setisCategoryOpen] = useState<boolean>(false);
+  const openCategory = () => setisCategoryOpen(true);
+  const closeCategory = () => setisCategoryOpen(false);
   useEffect(() => {
     getAllCategorys("/inventory/category/all-records");
   }, [getAllCategorys]);
@@ -28,10 +30,11 @@ const InventoryCatTable = () => {
         onButtonClick={handleOpenModal}
       />
       <InvenCategory categorys={categorys} isLoading={isLoading} />
-      {openModal && (
+      {isCategoryOpen && (
         <AddCategoryModal
           createEndpoint="/inventory/category/create"
-          onClose={() => setOpenModal(false)}
+          Catendpoint="/inventory/category/all-records"
+          onClose={closeCategory}
           createCategory={createCategory}
         />
       )}
