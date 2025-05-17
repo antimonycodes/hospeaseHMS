@@ -133,6 +133,13 @@ const FrontdeskInfo = ({
       ),
     },
     {
+      key: "branch",
+      label: "Branch",
+      render: (_, patient) => (
+        <span className="text-[#667085]">{patient.branch}</span>
+      ),
+    },
+    {
       key: "occupation",
       label: "Occupation",
       render: (_, patient) => (

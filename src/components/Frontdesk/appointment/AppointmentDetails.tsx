@@ -242,12 +242,12 @@ const AppointmentDetails = ({
         <Loader />
       ) : (
         <div className="w-full bg-white">
-          <div className="flex space-x-2 md:space-x-6">
+          <div className="flex space-x-0.5 md:space-x-6 overflow-x-auto whitespace-nowrap ">
             {tabs.map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`pb-2 px-4 text-xs md:text-sm font-medium ${
+                className={`pb-2 px-0.5 md:px-4 text-xs md:text-sm font-medium ${
                   activeTab === tab
                     ? "text-green-600 border-b-2 border-green-600"
                     : "text-gray-500"

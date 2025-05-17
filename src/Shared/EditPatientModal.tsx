@@ -205,9 +205,7 @@ const EditPatientModal = ({
                   onChange={handleInputChange}
                   className="w-full border border-gray-300 rounded p-4 text-sm appearance-none pr-8"
                 >
-                  <option value="Agodi">Agodi</option>
-                  <option value="Ibadan">Ibadan</option>
-                  <option value="Lagos">Lagos</option>
+                  <option value="Branch 1">{formData.branch}</option>
                 </select>
                 <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                   <svg
