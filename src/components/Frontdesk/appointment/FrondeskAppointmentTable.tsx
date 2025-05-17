@@ -43,6 +43,7 @@ const FrondeskAppointmentTable = ({
     setSearchQuery(query);
   };
 
+  console.log(appointments);
   return (
     <div>
       <Tablehead
@@ -57,7 +58,7 @@ const FrondeskAppointmentTable = ({
 
       <AppointmentDetails
         data={{
-          data: appointments,
+          data: (appointments as unknown as { data: any[] }).data,
           pagination: pagination || {
             total: 0,
             per_page: 0,

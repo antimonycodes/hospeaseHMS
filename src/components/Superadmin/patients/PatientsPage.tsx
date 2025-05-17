@@ -154,8 +154,17 @@ const PatientsPage = ({
           />
         ) : (
           <AppointmentsTable
-            data={appointments}
-            pagination={pagination}
+            data={{
+              data: (appointments as unknown as { data: any[] }).data,
+              pagination: pagination ?? {
+                total: 0,
+                per_page: 10,
+                current_page: 1,
+                last_page: 1,
+                from: 0,
+                to: 0,
+              },
+            }}
             isLoading={isLoading}
             endpoint={endpoint}
           />

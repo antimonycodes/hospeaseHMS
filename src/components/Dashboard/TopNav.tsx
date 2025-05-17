@@ -6,6 +6,9 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useGlobalStore } from "../../store/super-admin/useGlobal";
 
+// Import notification sound
+import notificationSound from "../../assets/bell-notification-337658.mp3"; // You'll need to add this file to your assets
+
 interface TopNavProps {
   setIsMobileMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -13,6 +16,8 @@ interface TopNavProps {
 const TopNav: React.FC<TopNavProps> = ({ setIsMobileMenuOpen }) => {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [prevUnreadCount, setPrevUnreadCount] = useState(0);
 
   const {
     getAllNotifications,
@@ -24,7 +29,23 @@ const TopNav: React.FC<TopNavProps> = ({ setIsMobileMenuOpen }) => {
   useEffect(() => {
     getAllNotifications();
     // getUnreadNotificationCount();
-  }, [getAllNotifications]);
+  }, []);
+
+  // Play sound when new notifications arrive
+  useEffect(() => {
+    // Only play sound if unreadCount has increased
+    if (unreadCount > prevUnreadCount && prevUnreadCount !== 0) {
+      // Play notification sound
+      if (audioRef.current) {
+        audioRef.current.play().catch((error) => {
+          console.error("Failed to play notification sound:", error);
+        });
+      }
+    }
+
+    // Update the previous count
+    setPrevUnreadCount(unreadCount);
+  }, [unreadCount, prevUnreadCount]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -46,6 +67,9 @@ const TopNav: React.FC<TopNavProps> = ({ setIsMobileMenuOpen }) => {
 
   return (
     <div className="w-full z-10">
+      {/* Audio element for notification sound */}
+      <audio ref={audioRef} src={notificationSound} />
+
       <div className="w-full py-2 px-4 flex justify-between items-center border-0 border-[#009952] bg-white z-20 h-[61px] custom-shadow">
         <button
           className="md:hidden mr-2"

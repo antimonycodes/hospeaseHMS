@@ -8,6 +8,7 @@ export type RequestData = {
   id: number;
   type: string;
   attributes: {
+    request_department: any;
     requested_by: {
       id: number;
       first_name: string;
@@ -72,26 +73,29 @@ const InventoryRequest = () => {
       key: "id" as keyof RequestData,
       label: "Requested By",
       render: (_, request) => {
-        const imageSrc = request.attributes.hospital.logo
-          ? request.attributes.hospital.logo
-          : "https://placehold.co/600x400?text=img";
-
-        const requestedBy = request.attributes.requested_by;
-
-        return (
-          <div className="flex items-center gap-2">
-            <img
-              src={imageSrc}
-              className="h-10 w-10 border rounded-full object-cover border-gray-300"
-              alt="Staff"
-            />
-            <h1 className="text-custom-black font-medium">
-              {requestedBy
-                ? `${requestedBy.first_name} ${requestedBy.last_name}`
-                : "N/A"}
-            </h1>
-          </div>
-        );
+        // Handle both staff requests and department requests
+        if (request.attributes.requested_by) {
+          // Staff request format
+          return (
+            <div className="flex items-center gap-2">
+              <h1 className="text-custom-black font-medium">
+                {request.attributes.requested_by.first_name}{" "}
+                {request.attributes.requested_by.last_name}
+              </h1>
+            </div>
+          );
+        } else if (request.attributes.request_department) {
+          // Department request format
+          return (
+            <div className="flex items-center gap-2">
+              <h1 className="text-custom-black font-medium">
+                {request.attributes.request_department}
+              </h1>
+            </div>
+          );
+        } else {
+          return <span className="text-gray-400">Not specified</span>;
+        }
       },
     },
     {

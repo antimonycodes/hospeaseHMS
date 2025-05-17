@@ -1,4 +1,3 @@
-// // AppointmentTable.tsx
 import { useState, JSX, useEffect } from "react";
 import Table from "../../../Shared/Table";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
@@ -7,11 +6,16 @@ import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 type AppointmentData = {
   id: number;
   attributes: {
-    doctor: string;
+    doctor?: string;
+    department?: {
+      id: number;
+      name: string;
+    };
     status: string;
-    card_id: string;
+    card_id?: string;
     rescheduled_data: any | null;
-    doctor_contact: string | null;
+    doctor_contact?: string | null;
+    department_contact?: string | null;
     gender: string;
     patient_contact: string;
     occupation: string;
@@ -28,21 +32,23 @@ type AppointmentData = {
 type AppointmentAttributes = AppointmentData["attributes"];
 
 type Columns = {
-  key: keyof AppointmentAttributes;
+  key: keyof AppointmentAttributes | string;
   label: string;
-  render?: (value: any, data: AppointmentAttributes) => JSX.Element; // Use AppointmentAttributes
+  render?: (value: any, data: AppointmentAttributes) => JSX.Element;
 };
 
 type AppointmentTableProps = {
-  data: AppointmentData[];
-  pagination: {
-    total: number;
-    per_page: number;
-    current_page: number;
-    last_page: number;
-    from: number;
-    to: number;
-  } | null;
+  data: {
+    data: AppointmentData[];
+    pagination: {
+      total: number;
+      per_page: number;
+      current_page: number;
+      last_page: number;
+      from: number;
+      to: number;
+    };
+  };
   isLoading: boolean;
   endpoint: string;
 };
@@ -64,6 +70,7 @@ const formatStatus = (
   };
   return statusMap[status.toLowerCase()] || "Pending";
 };
+
 const statusStyles: Record<string, string> = {
   Pending: "bg-[#FFEBAA] text-[#B58A00]",
   Accepted: "bg-[#CFFFE9] text-[#009952]",
@@ -77,12 +84,11 @@ type TabType = (typeof tabs)[number];
 const AppointmentTable = ({
   data,
   isLoading,
-  pagination,
   endpoint,
 }: AppointmentTableProps) => {
   const { getAllAppointments } = usePatientStore();
   const [activeTab, setActiveTab] = useState<TabType>("All");
-  const [perPage, setPerPage] = useState(pagination?.per_page || 10);
+  const [perPage, setPerPage] = useState(data?.pagination?.per_page || 10);
 
   // useEffect(() => {
   //   getAllAppointments("/admin/appointment/all-records");
@@ -96,14 +102,15 @@ const AppointmentTable = ({
         <span className="font-medium text-[#101828]">{attributes.patient}</span>
       ),
     },
-    {
-      key: "card_id",
-      label: "Patient ID",
-      render: (_, attributes) => (
-        <span className="font-medium text-[#101828]">{attributes.card_id}</span>
-      ),
-    },
-
+    // {
+    //   key: "card_id",
+    //   label: "Patient ID",
+    //   render: (_, attributes) => (
+    //     <span className="font-medium text-[#101828]">
+    //       {attributes.card_id || "N/A"}
+    //     </span>
+    //   ),
+    // },
     {
       key: "gender",
       label: "Gender",
@@ -134,10 +141,15 @@ const AppointmentTable = ({
     },
     {
       key: "doctor",
-      label: "Doctor Assigned",
-      render: (_, attributes) => (
-        <span className="text-[#667085]">{attributes.doctor || "N/A"}</span>
-      ),
+      label: " Assigned To",
+      render: (_, attributes) => {
+        const doctorName =
+          attributes.doctor ||
+          (attributes.department?.name
+            ? `${attributes.department.name} department`
+            : "N/A");
+        return <span className="text-[#667085]">{doctorName}</span>;
+      },
     },
     {
       key: "status",
@@ -154,12 +166,25 @@ const AppointmentTable = ({
       },
     },
   ];
+
   const handlePageChange = (page: number) => {
     getAllAppointments(page.toString(), perPage.toString());
   };
 
   const getStatusCounts = () => {
-    return data.reduce(
+    // Make sure data.data is an array before using reduce
+    const appointmentsData = data?.data || [];
+    if (!Array.isArray(appointmentsData)) {
+      return {
+        All: 0,
+        Pending: 0,
+        Accepted: 0,
+        Declined: 0,
+        Rescheduled: 0,
+      } as Record<TabType, number>;
+    }
+
+    return appointmentsData.reduce(
       (acc, item) => {
         const status = formatStatus(item.attributes.status);
         acc[status]++;
@@ -178,10 +203,14 @@ const AppointmentTable = ({
 
   const statusCounts = getStatusCounts();
 
-  const filteredAppointments =
-    activeTab === "All"
-      ? data
-      : data.filter((a) => formatStatus(a.attributes.status) === activeTab);
+  const appointmentsData = data?.data || [];
+  const filteredAppointments = Array.isArray(appointmentsData)
+    ? activeTab === "All"
+      ? appointmentsData
+      : appointmentsData.filter(
+          (a) => formatStatus(a.attributes.status) === activeTab
+        )
+    : [];
 
   // Map data to attributes for the Table component
   const tableData = filteredAppointments.map((item) => item.attributes);
@@ -212,7 +241,7 @@ const AppointmentTable = ({
           </button>
         ))}
       </div>
-      {tableData.length === 0 ? (
+      {!Array.isArray(tableData) || tableData.length === 0 ? (
         <div className="mt-10 text-center text-gray-500">
           No appointments found
         </div>
@@ -222,7 +251,7 @@ const AppointmentTable = ({
           data={tableData}
           rowKey="id"
           pagination={true}
-          paginationData={pagination}
+          paginationData={data?.pagination || null}
           loading={isLoading}
           onPageChange={handlePageChange}
         />

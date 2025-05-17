@@ -60,7 +60,7 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({
     }
 
     setShowModal(false);
-    navigate(-1);
+    // navigate(-1);
   };
 
   return (
