@@ -132,6 +132,10 @@ const getEndpoints = (role: string) => {
       fetchEndpoint = "/doctor/my-appointments";
       manageEndpoint = "/doctor/manage-appointment";
       break;
+    case "medical-director":
+      fetchEndpoint = "/medical-director/my-appointments";
+      manageEndpoint = "/medical-director/manage-appointment";
+      break;
     default:
       console.warn(`Unknown role: ${role}, using doctor endpoints as fallback`);
       fetchEndpoint = "/doctor/my-appointments";

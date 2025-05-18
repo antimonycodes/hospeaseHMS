@@ -39,7 +39,7 @@ const AddStockModal = ({
   const { getAllItems, items } = useCombinedStore();
 
   useEffect(() => {
-    getAllCategorys("/admin/inventory/category/all-records");
+    getAllCategorys("/inventory/category/all-records");
     getAllItems();
   }, [getAllCategorys, getAllItems]);
 
@@ -95,7 +95,7 @@ const AddStockModal = ({
     const success = await createStock(
       payload,
       endpoint,
-      "/admin/inventory/all-inventory-items"
+      "/inventory/all-inventory-items"
     );
     if (success) {
       setStock({
@@ -193,7 +193,7 @@ const AddStockModal = ({
                       service_charge_id: selectedItem.id,
                       service_item_price:
                         selectedItem.attributes.amount.replace(/,/g, ""),
-                      cost: selectedItem.attributes.amount.replace(/,/g, ""), // Set cost from item amount
+                      // cost: selectedItem.attributes.amount.replace(/,/g, ""), // Set cost from item amount
                     }));
                   }
                 }}
@@ -236,11 +236,12 @@ const AddStockModal = ({
                 Purchase Cost
               </label>
               <input
-                type="text"
+                type="number"
                 name="cost"
                 value={stock.cost}
-                disabled={true} // Disable manual input
-                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm bg-gray-100"
+                onChange={handleChange}
+                // disabled={false} // Disable manual input
+                className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm "
               />
             </div>
             <div className="hidden">

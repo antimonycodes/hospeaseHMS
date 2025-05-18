@@ -89,6 +89,7 @@ const MedicalTimeline: React.FC<MedicalTimelineProps> = ({
         await getAllReport(patientId);
         await getMedicalNote(patientId, "doctor");
         await getMedicalNote(patientId, "consultant");
+        await getMedicalNote(patientId, "medical-director");
       } catch (error) {
         console.error("Error fetching timeline data:", error);
         toast.error("Failed to load medical timeline");
@@ -193,9 +194,9 @@ const MedicalTimeline: React.FC<MedicalTimelineProps> = ({
         {mergedData?.map((day, index) => (
           <div
             key={day.date}
-            className="timeline-day mb-4 border rounded-lg overflow-hidden bg-white"
+            className="timeline-day mb-4 border border-[#667085]  rounded-lg overflow-hidden bg-white"
           >
-            <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
+            <div className="p-4 border-b border-[#667085]  bg-gray-50 flex justify-between items-center">
               <div
                 className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 px-2 py-1 rounded-md"
                 onClick={() => toggleDateExpansion(index)}

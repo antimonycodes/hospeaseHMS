@@ -306,7 +306,7 @@ const MedPatientsDetails = () => {
     if (id) {
       getPatientByIdDoc(id);
       getAllReport(id);
-      getMedicalNote(id, "doctor");
+      getMedicalNote(id, "medical-director");
     }
   }, [id, getPatientByIdDoc, getAllReport, getMedicalNote]);
 
