@@ -16,6 +16,7 @@ import { useStickyNoteStore } from "../../../store/super-admin/useStickyNote";
 import { useReportStore } from "../../../store/super-admin/useReoprt";
 import { useGlobalStore } from "../../../store/super-admin/useGlobal";
 import toast from "react-hot-toast";
+import Button from "../../../Shared/Button";
 
 interface InfoRowItem {
   label: string;
@@ -86,6 +87,7 @@ const FrontdeskPatientDetails = () => {
       quantity: number;
     }[]
   >([]);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const {
     createReport,
@@ -297,6 +299,7 @@ const FrontdeskPatientDetails = () => {
   useEffect(() => {
     if (id) {
       console.log("Fetching patient with ID:", id);
+
       getFdeskPatientById(id).catch((error) => {
         console.error("Error fetching patient:", error);
       });
@@ -317,7 +320,7 @@ const FrontdeskPatientDetails = () => {
   return (
     <div>
       <div className="bg-white rounded-lg shadow-sm p-6 mb-6 relative">
-        <div className="absolute top-0 right-8">
+        {/* <div className="absolute top-0 right-8">
           <div className="absolute top-4 right-6 z-[99999] flex items-center justify-between">
             <button
               onClick={show}
@@ -327,14 +330,26 @@ const FrontdeskPatientDetails = () => {
               <StickyNoteIcon className="w-5 h-5 text-yellow-800" />
             </button>
           </div>
-        </div>
+        </div> */}
         {/* Back button */}
-        <div
-          className="flex items-center text-gray-600 hover:text-primary mb-5"
-          onClick={() => navigate(-1)}
-        >
-          <ChevronLeft size={16} />
-          <span className="ml-1">Patients</span>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 sm:mb-12 gap-4">
+          <div
+            className="flex items-center text-gray-600 hover:text-primary mb-5"
+            onClick={() => navigate(-1)}
+          >
+            <ChevronLeft size={16} />
+            <span className="ml-1">Patients</span>
+          </div>
+          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            <Button
+              variant="edit"
+              rounded="lg"
+              onClick={() => setIsEditModalOpen(true)}
+              className="text-xs sm:text-sm flex-1 sm:flex-none"
+            >
+              Edit Patient
+            </Button>
+          </div>
         </div>
 
         <div className="grid gap-6 relative">
