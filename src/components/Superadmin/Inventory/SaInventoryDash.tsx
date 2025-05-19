@@ -4,6 +4,9 @@ import { useInventoryStore } from "../../Inventory/overview/useInventoryStore";
 import OverviewCard from "../../ReusabledashboardD/Overviewcard";
 import Loader from "../../../Shared/Loader";
 import InventoryChart from "../../Inventory/overview/InventoryChart";
+import InventoryDash from "../../Inventory/overview/InventoryDash";
+import InventoryCard from "../../Inventory/overview/InventoryCard";
+import SaInventoryRecent from "./SaInventoryRecent";
 interface StatsData {
   total_inventories: number;
   total_categories: number;
@@ -88,6 +91,7 @@ const SaInventoryDash = () => {
           </>
         )}
         <InventoryChart />
+        <SaInventoryRecent />
       </div>
     </div>
   );

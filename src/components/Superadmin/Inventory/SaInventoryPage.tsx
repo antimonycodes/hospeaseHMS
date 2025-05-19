@@ -26,6 +26,7 @@ const SaInventoryPage = () => {
     createStock,
     createCategory,
     getAllCategorys,
+
     categorys,
   } = useInventoryStore();
 

@@ -131,6 +131,11 @@ interface InventoryStore {
   ) => Promise<boolean | null>;
   reStockHistory: (id: number) => Promise<any>;
   reStock: (data: any) => Promise<any>;
+  updateSaCategory: (
+    id: number,
+    data: { name: string }
+  ) => Promise<boolean | null>;
+  deleteCategory: (id: number, fetchEndpoint?: string) => Promise<boolean>;
 }
 
 export const useInventoryStore = create<InventoryStore>((set, get) => ({
@@ -442,6 +447,53 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       );
       toast.error(error.response?.data?.message || "Failed");
       return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  updateSaCategory: async (id, data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.put(
+        `/admin/inventory/category/update/${id}`,
+        data
+      );
+      if (response.status === 201) {
+        toast.success(response.data.message);
+        await get().getAllCategorys("/inventory/category/all-records");
+        return true;
+      }
+      console.log(response.data.data?.data);
+      toast.success(response.data.message);
+      return null;
+    } catch (error: any) {
+      console.error(
+        "Error changing status:",
+        error.response?.data || error.message
+      );
+      toast.error(error.response?.data?.message || "Failed");
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  deleteCategory: async (
+    id: number,
+    fetchEndpoint = "/inventory/category/all-records"
+  ) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.delete(`/inventory/category/delete/${id}`);
+      if (response.status === 200 || response.status === 204) {
+        await get().getAllCategorys(fetchEndpoint);
+        toast.success(response.data.message || "Category deleted successfully");
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.error("deleteCategory error:", error.response?.data);
+      toast.error(error.response?.data?.message || "Failed to delete category");
+      return false;
     } finally {
       set({ isLoading: false });
     }
