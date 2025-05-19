@@ -2,12 +2,10 @@ import { useEffect, useState } from "react";
 import { useFinanceStore } from "../../../store/staff/useFinanceStore";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import AddPaymentModal from "../../../Shared/AddPaymentModal";
-// import AddSourceModal from "../../../Shared/AddSourceModal";
 import Tabs from "../../ReusablepatientD/Tabs";
 import FpaymentTable from "./FpaymentTable";
 import AddSourceModal from "./AddSourceModal";
 import FsettingsTable from "./FsettingsTable";
-// import FsettingsTable from "./FsettingsTable";
 
 type FpaymentTableProps = {
   endpoint?: string;
@@ -18,7 +16,6 @@ type FpaymentTableProps = {
 const Fpayment = ({
   endpoint = "/save-patient-payment",
   refreshEndpoint = "/finance/patient-paymet-history",
-  settingsEndpoint = "/finance/payment-sources",
 }: FpaymentTableProps) => {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isSourceModalOpen, setIsSourceModalOpen] = useState(false);
@@ -26,6 +23,7 @@ const Fpayment = ({
   const [activeTab, setActiveTab] = useState<
     "All" | "part" | "full" | "pending"
   >("All");
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   const {
     payments,
@@ -33,32 +31,73 @@ const Fpayment = ({
     getAllPayments,
     getPaymentSource,
     paymentSources,
-    // sources,
-    // getAllSources,
     isLoading,
   } = useFinanceStore();
+
+  // Main endpoint for payment data
   const baseEndpoint = "/medical-report/patient-payment-history";
 
+  // Initial data load
   useEffect(() => {
-    if (mainTab === 0) {
-      console.log("Fetching payments with endpoint:", refreshEndpoint);
-      getAllPayments("1", "10", baseEndpoint);
-    } else {
-      console.log("Fetching payment sources with endpoint:", settingsEndpoint);
-      // getAllSources("1", "10", settingsEndpoint);
+    if (isInitialLoad) {
+      if (mainTab === 0) {
+        // Build base query for the active tab filter
+        let endpoint = baseEndpoint;
+        if (activeTab !== "All") {
+          endpoint = `${baseEndpoint}?payment_type=${activeTab.toLowerCase()}`;
+        }
+
+        getAllPayments("1", "50", endpoint);
+      } else {
+        getPaymentSource();
+      }
+
+      setIsInitialLoad(false);
     }
-  }, [getAllPayments, baseEndpoint, , settingsEndpoint, mainTab]);
+  }, [
+    getAllPayments,
+    getPaymentSource,
+    baseEndpoint,
+    mainTab,
+    activeTab,
+    isInitialLoad,
+  ]);
+
+  // Handle tab changes
+  useEffect(() => {
+    if (!isInitialLoad) {
+      if (mainTab === 0) {
+        // Build base query for the active tab filter
+        let endpoint = baseEndpoint;
+        if (activeTab !== "All") {
+          endpoint = `${baseEndpoint}?payment_type=${activeTab.toLowerCase()}`;
+        }
+
+        getAllPayments("1", "50", endpoint);
+      } else {
+        getPaymentSource();
+      }
+    }
+  }, [
+    mainTab,
+    activeTab,
+    getAllPayments,
+    getPaymentSource,
+    baseEndpoint,
+    isInitialLoad,
+  ]);
 
   const getStatusCounts = () => {
     if (!Array.isArray(payments)) {
       return { All: 0, part: 0, full: 0, pending: 0 };
     }
+
     return payments.reduce(
       (acc, payment) => {
         const type = payment.attributes?.payment_type;
         if (type === "part") acc.part++;
         else if (type === "full") acc.full++;
-        else if (type === "pending") acc.pending++;
+        else acc.pending++;
         acc.All++;
         return acc;
       },
@@ -68,13 +107,9 @@ const Fpayment = ({
 
   const statusCounts = getStatusCounts();
 
-  const filteredPayments = Array.isArray(payments)
-    ? activeTab === "All"
-      ? payments
-      : payments.filter(
-          (payment) => payment.attributes?.payment_type === activeTab
-        )
-    : [];
+  // Use the selected tab's payment list without additional filtering
+  // The filtering is done at API level through the endpoint
+  const filteredPayments = Array.isArray(payments) ? payments : [];
 
   const openPaymentModal = () => setIsPaymentModalOpen(true);
   const closePaymentModal = () => setIsPaymentModalOpen(false);
@@ -90,8 +125,12 @@ const Fpayment = ({
     }
   };
 
+  const handleTabChange = (tab: "All" | "part" | "full" | "pending") => {
+    setActiveTab(tab);
+  };
+
   return (
-    <div className="w-full ">
+    <div className="w-full">
       <div className="flex mb-6 bg-white rounded-lg p-4">
         <button
           className={`px-4 py-2 mr-4 font-medium ${
@@ -135,7 +174,7 @@ const Fpayment = ({
 
           <Tabs<"All" | "full" | "part" | "pending">
             activeTab={activeTab}
-            setActiveTab={setActiveTab}
+            setActiveTab={handleTabChange}
             statusCounts={statusCounts}
             tabs={["All", "full", "part", "pending"]}
           />

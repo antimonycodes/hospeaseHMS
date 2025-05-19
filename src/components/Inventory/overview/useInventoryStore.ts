@@ -129,6 +129,8 @@ interface InventoryStore {
     id: number,
     data: { name: string }
   ) => Promise<boolean | null>;
+  reStockHistory: (id: number) => Promise<any>;
+  reStock: (data: any) => Promise<any>;
 }
 
 export const useInventoryStore = create<InventoryStore>((set, get) => ({
@@ -379,6 +381,43 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
         stockActivities: response.data.data,
         isLoading: false,
       });
+    } catch (error: any) {
+      console.log("Error fetching stock activities:", error);
+      set({ isLoading: false });
+    }
+  },
+  reStock: async (data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.post(
+        "/medical-report/restock-inventory/create",
+        data
+      );
+      console.log("API Response:", response.data);
+      toast.success(response.data.message);
+      // Make sure we're setting the correct data structure
+      // set({
+      //   stockActivities: response.data.data,
+      //   isLoading: false,
+      // });
+    } catch (error: any) {
+      console.log("Error fetching stock activities:", error);
+      set({ isLoading: false });
+    }
+  },
+  reStockHistory: async (id) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(
+        `/medical-report/restock-inventory/all/${id}`
+      );
+      console.log("API Response:", response.data);
+
+      // Make sure we're setting the correct data structure
+      // set({
+      //   stockActivities: response.data.data,
+      //   isLoading: false,
+      // });
     } catch (error: any) {
       console.log("Error fetching stock activities:", error);
       set({ isLoading: false });

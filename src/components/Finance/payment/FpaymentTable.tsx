@@ -3,6 +3,7 @@ import Table from "../../../Shared/Table";
 import Loader from "../../../Shared/Loader";
 import { useFinanceStore } from "../../../store/staff/useFinanceStore";
 import { useNavigate } from "react-router-dom";
+import PaymentTableFilter, { FilterValues } from "./PaymentTableFilters";
 
 interface PaymentAttributes {
   patient: { id: number; first_name: string; last_name: string };
@@ -13,9 +14,9 @@ interface PaymentAttributes {
   is_active?: boolean;
   user_id: string;
   created_at: string;
-  id: number; // Added id
+  id: number;
   department: { name: string };
-  payment_source?: string; // Added payment_source
+  payment_source?: string;
 }
 
 interface PaymentData {
@@ -71,12 +72,6 @@ const PaymentTypeBadge = ({
       </span>
     );
   }
-
-  return (
-    <span className="text-gray-500 text-sm">
-      {paymentType || "N/A"} Payment
-    </span>
-  );
 };
 
 const FpaymentTable = ({
@@ -90,29 +85,139 @@ const FpaymentTable = ({
     PaymentAttributes[]
   >([]);
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(pagination?.current_page || 1);
+  const [perPage, setPerPage] = useState(pagination?.per_page || 10);
+  const [filters, setFilters] = useState<FilterValues>({
+    search: "",
+    department: "",
+    payment_method: "",
+    payment_type: "",
+    payment_source: "",
+    from_date: "",
+    to_date: "",
+  });
+
+  // Add state to track if we're in the middle of a filter operation
+  const [isFiltering, setIsFiltering] = useState(false);
+
+  // Extract unique values for filters
+  const [filterOptions, setFilterOptions] = useState({
+    departments: [] as string[],
+    paymentMethods: [] as string[],
+    paymentTypes: [] as string[],
+    paymentSources: [] as string[],
+  });
+
+  // Update the transformed payments when the raw payments change
+  useEffect(() => {
+    if (Array.isArray(payments)) {
+      setTransformedPayment(
+        payments.map((payment) => ({
+          ...payment.attributes,
+          id: payment.id,
+        }))
+      );
+
+      // Extract unique departments
+      const departments = Array.from(
+        new Set(
+          payments
+            .map((payment) => payment.attributes?.department?.name)
+            .filter(Boolean)
+        )
+      ) as string[];
+
+      // Extract unique payment methods
+      const paymentMethods = Array.from(
+        new Set(
+          payments
+            .map((payment) => payment.attributes?.payment_method)
+            .filter(Boolean)
+        )
+      ) as string[];
+
+      // Extract unique payment types
+      const paymentTypes = Array.from(
+        new Set(
+          payments
+            .map((payment) => payment.attributes?.payment_type)
+            .filter(Boolean)
+        )
+      ) as string[];
+
+      // Extract unique payment sources
+      const paymentSources = Array.from(
+        new Set(
+          payments
+            .map((payment) => payment.attributes?.payment_source)
+            .filter(Boolean)
+        )
+      ) as string[];
+
+      setFilterOptions({
+        departments,
+        paymentMethods,
+        paymentTypes,
+        paymentSources,
+      });
+    }
+  }, [payments]);
 
   const handleViewMore = (payment: PaymentAttributes) => {
-    console.log("View more clicked for:", payment);
     navigate(`/dashboard/finance/payment/${payment.id}`);
   };
 
+  // Fetch payments with all active filters
   useEffect(() => {
-    setTransformedPayment(
-      payments.map((payment) => ({
-        ...payment.attributes,
-        id: payment.id,
-      }))
-    );
-  }, [payments]);
+    // Skip if there's no endpoint or if we're not actively filtering
+    if (!baseEndpoint) {
+      return;
+    }
 
-  useEffect(() => {
-    getAllPayments("1", "10", baseEndpoint);
-  }, [getAllPayments]);
+    // Build query parameters
+    const queryParams = new URLSearchParams();
+    queryParams.append("page", currentPage.toString());
+    queryParams.append("per_page", perPage.toString());
 
-  const [perPage, setPerPage] = useState(pagination?.per_page || 10);
+    // Add filter values to query - only add non-empty values
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) {
+        queryParams.append(key, value);
+      }
+    });
+
+    // Create the endpoint with query parameters
+    const endpoint = `${baseEndpoint}?${queryParams.toString()}`;
+
+    // Fetch data with current filters
+    getAllPayments(currentPage.toString(), perPage.toString(), endpoint);
+
+    // After fetching, reset the filtering flag
+    setIsFiltering(false);
+  }, [
+    currentPage,
+    perPage,
+    filters,
+    getAllPayments,
+    baseEndpoint,
+    isFiltering,
+  ]);
+
+  const handleFilterChange = (newFilters: FilterValues) => {
+    // Reset to page 1 when filters change
+    setCurrentPage(1);
+    setFilters(newFilters);
+    // Set the filtering flag to true to trigger data fetch
+    setIsFiltering(true);
+  };
 
   const handlePageChange = (page: number) => {
-    getAllPayments(page.toString(), perPage.toString(), baseEndpoint);
+    setCurrentPage(page);
+  };
+
+  const handlePerPageChange = (newPerPage: number) => {
+    setPerPage(newPerPage);
+    setCurrentPage(1); // Reset to first page when items per page changes
   };
 
   const columns: Column<PaymentAttributes>[] = [
@@ -195,22 +300,35 @@ const FpaymentTable = ({
     return <Loader />;
   }
 
-  if (!transformedPayments.length) {
-    return (
-      <div className="mt-10 text-center text-gray-500">No payments found</div>
-    );
-  }
-
   return (
-    <Table
-      data={transformedPayments}
-      columns={columns}
-      rowKey="id"
-      pagination={true}
-      paginationData={pagination}
-      loading={isLoading}
-      onPageChange={handlePageChange}
-    />
+    <div>
+      <PaymentTableFilter
+        onFilterChange={handleFilterChange}
+        departments={filterOptions.departments}
+        paymentMethods={filterOptions.paymentMethods}
+        paymentTypes={filterOptions.paymentTypes}
+        paymentSources={filterOptions.paymentSources}
+        isLoading={isLoading}
+      />
+
+      {!transformedPayments.length ? (
+        <div className="mt-10 text-center text-gray-500">
+          {isLoading ? "Loading payments..." : "No payments found"}
+        </div>
+      ) : (
+        <Table
+          data={transformedPayments}
+          columns={columns}
+          rowKey="id"
+          pagination={true}
+          paginationData={pagination}
+          loading={isLoading}
+          // onPageChange={handlePageChange}
+          onPageChange={handlePerPageChange}
+          // onPerPageChange={handlePerPageChange}
+        />
+      )}
+    </div>
   );
 };
 

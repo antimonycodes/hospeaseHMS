@@ -85,6 +85,7 @@ export interface Pagination {
 
 interface FinanceStore {
   isLoading: boolean;
+  isSourceLoading: boolean;
   expenses: any[];
   payments: any[];
   paymentSources: any[];
@@ -128,6 +129,7 @@ interface FinanceStore {
 export const useFinanceStore = create<FinanceStore>((set, get) => ({
   isLoading: false,
   isUpdating: false,
+  isSourceLoading: false,
   expenses: [],
   payments: [],
   stats: null,
@@ -173,26 +175,69 @@ export const useFinanceStore = create<FinanceStore>((set, get) => ({
     }
   },
 
+  // getAllPayments: async (
+  //   page = "1",
+  //   perPage = "50",
+  //   baseEndpoint = "/medical-report/patient-payment-history"
+  // ) => {
+  //   set({ isLoading: true });
+  //   try {
+  //     const endpoint = `${baseEndpoint}?page=${page}&per_page=${perPage}`;
+
+  //     console.log("Fetching Payment from:", endpoint);
+
+  //     const response = await api.get(endpoint);
+  //     set({ pagination: response.data.data.pagination });
+  //     console.log(response.data.data.pagination, "pagination");
+  //     const fetchedPayments = response.data.data.data || [];
+  //     console.log("Fetched Payments:", fetchedPayments);
+  //     set({ payments: fetchedPayments });
+  //   } catch (error: any) {
+  //     console.error("Fetch error:", error.response?.data || error.message);
+  //     // toast.error(error.response?.data?.message || "Failed to fetch payments");
+  //     set({ payments: [] });
+  //   } finally {
+  //     set({ isLoading: false });
+  //   }
+  // },
   getAllPayments: async (
     page = "1",
-    perPage = "10",
+    perPage = "50",
     baseEndpoint = "/medical-report/patient-payment-history"
   ) => {
     set({ isLoading: true });
     try {
-      const endpoint = `${baseEndpoint}?page=${page}&per_page=${perPage}`;
+      // Check if the endpoint already contains query parameters
+      const hasQueryParams = baseEndpoint.includes("?");
+      const separator = hasQueryParams ? "&" : "?";
+
+      // Only append page and per_page if they're not already in the endpoint
+      const pageParamExists = baseEndpoint.includes("page=");
+      const perPageParamExists = baseEndpoint.includes("per_page=");
+
+      let endpoint = baseEndpoint;
+
+      if (!pageParamExists) {
+        endpoint += `${separator}page=${page}`;
+      }
+
+      if (!perPageParamExists) {
+        endpoint += `${endpoint.includes("?") ? "&" : "?"}per_page=${perPage}`;
+      }
 
       console.log("Fetching Payment from:", endpoint);
-
       const response = await api.get(endpoint);
+
       set({ pagination: response.data.data.pagination });
       console.log(response.data.data.pagination, "pagination");
+
       const fetchedPayments = response.data.data.data || [];
       console.log("Fetched Payments:", fetchedPayments);
+
       set({ payments: fetchedPayments });
     } catch (error: any) {
       console.error("Fetch error:", error.response?.data || error.message);
-      // toast.error(error.response?.data?.message || "Failed to fetch payments");
+      toast.error(error.response?.data?.message || "Failed to fetch payments");
       set({ payments: [] });
     } finally {
       set({ isLoading: false });
@@ -357,27 +402,53 @@ export const useFinanceStore = create<FinanceStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
-  getPaymentSource: async () => {
-    set({ isLoading: true });
-    try {
-      const response = await api.get(
-        "/medical-report/payment.source/all-records"
-      );
+  // getPaymentSource: async () => {
+  //   set({ isLoading: true });
+  //   try {
+  //     const response = await api.get(
+  //       "/medical-report/payment.source/all-records"
+  //     );
 
-      if (isSuccessfulResponse(response)) {
-        toast.success(response.data?.message);
-        set({ paymentSources: response.data.data.data });
-        console.log(response.data.data);
-        return true;
+  //     if (isSuccessfulResponse(response)) {
+  //       toast.success(response.data?.message);
+  //       set({ paymentSources: response.data.data.data });
+  //       console.log(response.data.data);
+  //       return true;
+  //     }
+  //     return null;
+  //   } catch (error) {
+  //     handleErrorToast(error);
+  //     return null;
+  //   } finally {
+  //     set({ isLoading: false });
+  //   }
+  // },
+  getPaymentSource: async () =>
+    // page = "1",
+    // perPage = "100",
+    // endpoint = "/medical-report/payment.source/all-records"
+    {
+      set({ isSourceLoading: true });
+      try {
+        // const queryParams = `?page=${page}&per_page=${perPage}`;
+        const response = await api.get(
+          `/medical-report/payment.source/all-records$`
+        );
+
+        set({ paymentSources: response.data.data.data || [] });
+      } catch (error: any) {
+        console.error(
+          "Fetch payment sources error:",
+          error.response?.data || error.message
+        );
+        toast.error(
+          error.response?.data?.message || "Failed to fetch payment sources"
+        );
+        set({ paymentSources: [] });
+      } finally {
+        set({ isSourceLoading: false });
       }
-      return null;
-    } catch (error) {
-      handleErrorToast(error);
-      return null;
-    } finally {
-      set({ isLoading: false });
-    }
-  },
+    },
   updatePaymentSource: async (id, data) => {
     set({ isLoading: true });
     try {
