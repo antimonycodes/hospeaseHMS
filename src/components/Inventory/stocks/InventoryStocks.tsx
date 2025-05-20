@@ -11,7 +11,7 @@ const InventoryStocks = () => {
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
   useEffect(() => {
-    getAllStocks("/inventory/all-inventory-items");
+    getAllStocks();
   }, [getAllStocks]);
 
   return (

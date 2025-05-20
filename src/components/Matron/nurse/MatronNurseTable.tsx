@@ -72,13 +72,7 @@ const MatronNurseTable = ({
         </span>
       ),
     },
-    {
-      key: "nurse_id",
-      label: "Nurse ID",
-      render: (value) => (
-        <span className="text-sm text-[#667085]">{value ?? "N/A"}</span>
-      ),
-    },
+
     {
       key: "phone",
       label: "Phone",

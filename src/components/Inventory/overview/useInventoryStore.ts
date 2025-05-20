@@ -104,9 +104,11 @@ interface InventoryStore {
   stocks: any[];
   requests: any[];
   stockActivities: any[];
+  restockHistoryData: any[];
   // requests: { data: any[]; pagination: Pagination }[];
   getInventoryStats: (endpoint?: string) => Promise<void>;
   getAllStocks: (endpoint?: string) => Promise<void>;
+  getAllStocksSa: (endpoint?: string) => Promise<void>;
   createStock: (
     data: any,
     endpoint?: string,
@@ -146,6 +148,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
   requests: [],
   categorys: [],
   stockActivities: [],
+  restockHistoryData: [],
 
   searchStaff: async (query: string) => {
     try {
@@ -173,7 +176,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       // This includes both the data array and pagination object
       if (response.data && response.data.data) {
         set({ requests: response.data.data });
-        toast.success(response.data.message || "Requests fetched successfully");
+        // toast.success(response.data.message || "Requests fetched successfully");
       } else {
         console.error("Unexpected API response structure:", response.data);
         set({
@@ -282,10 +285,36 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
     }
   },
 
-  getAllStocks: async (endpoint = "/inventory/all-inventory-items") => {
+  getAllStocks: async (
+    page = "1",
+    perPage = "1000",
+    endpoint = "/inventory/all-inventory-items"
+  ) => {
     set({ isLoading: true });
     try {
-      const response = await api.get(endpoint);
+      const response = await api.get(
+        `${endpoint}?page=${page}&per_page=${perPage}`
+      );
+
+      set({ stocks: response.data.data?.data || [] });
+      // toast.success(response.data.message || "Stocks fetched successfully");
+    } catch (error: any) {
+      console.error("getAllStocks error:", error.response?.data);
+      toast.error(error.response?.data?.message || "Failed to fetch stocks");
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  getAllStocksSa: async (
+    page = "1",
+    perPage = "1000",
+    endpoint = "/admin/inventory/all-inventory-items"
+  ) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(
+        `${endpoint}?page=${page}&per_page=${perPage}`
+      );
 
       set({ stocks: response.data.data?.data || [] });
       // toast.success(response.data.message || "Stocks fetched successfully");
@@ -366,7 +395,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
         total_expired_items: 0,
       };
       set({ stats: statsData });
-      toast.success("Inventory stats fetched successfully!");
+      // toast.success("Inventory stats fetched successfully!");
     } catch (error: any) {
       console.error("Stats fetch error:", error.response?.data);
       toast.error(error.response?.data?.message || "Failed to fetch stats");
@@ -399,33 +428,54 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
         data
       );
       console.log("API Response:", response.data);
-      toast.success(response.data.message);
-      // Make sure we're setting the correct data structure
-      // set({
-      //   stockActivities: response.data.data,
-      //   isLoading: false,
-      // });
-    } catch (error: any) {
-      console.log("Error fetching stock activities:", error);
+      toast.success(response.data.message || "Restock successful");
+
+      // get().getAllStocks("/inventory/all-inventory-items");
+
       set({ isLoading: false });
+      return true;
+    } catch (error: any) {
+      console.log("Error restocking inventory:", error);
+      const errorMessage =
+        error?.response?.data?.message || "Failed to restock";
+      toast.error(errorMessage);
+      set({ isLoading: false });
+      return false;
     }
   },
   reStockHistory: async (id) => {
+    console.log("⚠️ Calling reStockHistory for ID:", id);
+
+    // Set loading state once
     set({ isLoading: true });
+
     try {
+      // Make the API call
       const response = await api.get(
         `/medical-report/restock-inventory/all/${id}`
       );
-      console.log("API Response:", response.data);
 
-      // Make sure we're setting the correct data structure
-      // set({
-      //   stockActivities: response.data.data,
-      //   isLoading: false,
-      // });
-    } catch (error: any) {
-      console.log("Error fetching stock activities:", error);
+      console.log("✅ API Response:", response.data);
+
+      // Check if the component is still mounted before updating state
+      if (response.status === 200) {
+        // Update state once with all the data
+        set({
+          restockHistoryData: response.data.data.data,
+          isLoading: false,
+        });
+        return true;
+      }
+
       set({ isLoading: false });
+      return null;
+    } catch (error: any) {
+      console.log("❌ Error fetching restock history:", error);
+      toast.error(error?.response?.data?.message || "Failed to fetch history");
+
+      // Make sure to set loading to false even on error
+      set({ isLoading: false });
+      return false;
     }
   },
   updateCategory: async (id, data) => {

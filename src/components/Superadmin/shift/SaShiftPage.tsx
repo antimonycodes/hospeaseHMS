@@ -5,6 +5,7 @@ import Button from "../../../Shared/Button";
 import toast from "react-hot-toast";
 import { useGlobalStore } from "../../../store/super-admin/useGlobal";
 import editIcon from "../../../assets/edit.svg";
+import { useRole } from "../../../hooks/useRole";
 
 const SaShiftPage = () => {
   const [activeTab, setActiveTab] = useState("shift");
@@ -18,6 +19,7 @@ const SaShiftPage = () => {
     updateShiftType,
     shiftTypes,
   } = useGlobalStore();
+  const role = useRole();
 
   // Form state
   const [shiftForm, setShiftForm] = useState({
@@ -43,9 +45,10 @@ const SaShiftPage = () => {
   };
 
   useEffect(() => {
-    // Fetch shift types on component mount
-    getShiftType();
-  }, [getShiftType]);
+    if (role === "admin") {
+      getShiftType();
+    }
+  }, [role, getShiftType]);
 
   const handleTabChange = (tab: SetStateAction<string>) => {
     setActiveTab(tab);
@@ -153,7 +156,7 @@ const SaShiftPage = () => {
       end_time: "",
     });
   };
-
+  console.log(role);
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
       {/* Tab Navigation */}
@@ -171,19 +174,21 @@ const SaShiftPage = () => {
             }`}
           ></div>
         </h1>
-        <h1
-          className={`relative inline-block flex-none cursor-pointer text-sm md:text-base font-semibold ${
-            activeTab === "settings" ? "text-primary" : "text-[#667185]"
-          }`}
-          onClick={() => handleTabChange("settings")}
-        >
-          Settings
-          <div
-            className={`absolute left-0 -bottom-3 w-full h-[2px] ${
-              activeTab === "settings" ? "bg-primary" : "bg-[#E4E7EC]"
+        {role == "admin" && (
+          <h1
+            className={`relative inline-block flex-none cursor-pointer text-sm md:text-base font-semibold ${
+              activeTab === "settings" ? "text-primary" : "text-[#667185]"
             }`}
-          ></div>
-        </h1>
+            onClick={() => handleTabChange("settings")}
+          >
+            Settings
+            <div
+              className={`absolute left-0 -bottom-3 w-full h-[2px] ${
+                activeTab === "settings" ? "bg-primary" : "bg-[#E4E7EC]"
+              }`}
+            ></div>
+          </h1>
+        )}
       </div>
 
       {/* Tab Content */}

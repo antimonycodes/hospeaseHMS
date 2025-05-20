@@ -64,6 +64,7 @@ import FrontdeskPatientDetails from "./components/Frontdesk/patients/FrontdeskPa
 import TourListener from "./Shared/TourListener";
 import CreateShift from "./components/Matron/shifts/CreateShift";
 import NurseAppointmentDetails from "./components/Nurse/Appointment/NurseAppointmentDetails";
+import RestockHistoryModal from "./components/Inventory/stocks/RestockHistoryModal";
 
 function App() {
   return (
@@ -106,6 +107,10 @@ function App() {
               <Route path="finance/info" element={<Finance />} />
               <Route path="laboratory/info" element={<Laboratory />} />
               <Route path="appointments" element={<Appointments />} />
+              <Route
+                path="stock-history/:id"
+                element={<RestockHistoryModal />}
+              />
               <Route path="nurse" element={<Nurses />} />
               <Route
                 path="appointment/doctor/:id"

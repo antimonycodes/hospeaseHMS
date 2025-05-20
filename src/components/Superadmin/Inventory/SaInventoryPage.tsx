@@ -26,6 +26,7 @@ const SaInventoryPage = () => {
     createStock,
     createCategory,
     getAllCategorys,
+    getAllStocksSa,
 
     categorys,
   } = useInventoryStore();
@@ -94,11 +95,11 @@ const SaInventoryPage = () => {
     }
     return null;
   };
-
+  const baseEndpoint = "/admin/inventory/all-inventory-items";
   useEffect(() => {
-    getAllStocks("/admin/inventory/all-inventory-items");
+    getAllStocksSa();
     getAllCategorys("/admin/inventory/category/all-records");
-  }, [getAllStocks]);
+  }, [getAllStocksSa]);
   // console.log("fetched", stocks);
 
   return (

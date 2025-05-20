@@ -432,7 +432,7 @@ export const useFinanceStore = create<FinanceStore>((set, get) => ({
       try {
         // const queryParams = `?page=${page}&per_page=${perPage}`;
         const response = await api.get(
-          `/medical-report/payment.source/all-records$`
+          `/medical-report/payment.source/all-records`
         );
 
         set({ paymentSources: response.data.data.data || [] });

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useGlobalStore } from "../../../store/super-admin/useGlobal";
 import Loader from "../../../Shared/Loader";
 import Button from "../../../Shared/Button";
+import { useRole } from "../../../hooks/useRole";
 
 // Types
 type ShiftCount = {
@@ -383,12 +384,14 @@ const ShiftManagementCalendar = () => {
           </div>
 
           {/* Create Shift Button */}
-          <Link
-            to="/dashboard/create-shift"
-            className="w-full md:w-auto mt-2 md:mt-0"
-          >
-            <Button className="w-full md:w-auto">Create New Shift</Button>
-          </Link>
+          {role === "admin" && (
+            <Link
+              to="/dashboard/create-shift"
+              className="w-full md:w-auto mt-2 md:mt-0"
+            >
+              <Button className="w-full md:w-auto">Create New Shift</Button>
+            </Link>
+          )}
         </div>
       </div>
 
