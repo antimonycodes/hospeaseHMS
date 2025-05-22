@@ -3,6 +3,7 @@ import Tablehead from "../../ReusablepatientD/Tablehead";
 import Table from "../../../Shared/Table";
 import AddRequestModal from "./AddRequestModal";
 import { useInventoryStore } from "../../../store/staff/useInventoryStore";
+import RequestHistory from "./RequestHistory";
 
 export type RequestData = {
   id: number;
@@ -44,7 +45,10 @@ interface Column<T> {
   render?: (value: any, record: T) => JSX.Element;
 }
 
-const InventoryRequest = () => {
+// Empty Request History Component
+
+// Pharmacy Stock Component (current functionality)
+const PharmacyStock = () => {
   const { getAllRequest, requests, isLoading } =
     useInventoryStore() as unknown as {
       getAllRequest: () => void;
@@ -132,15 +136,6 @@ const InventoryRequest = () => {
         </span>
       ),
     },
-    // {
-    //   key: "id" as keyof RequestData,
-    //   label: "Status",
-    //   render: (_, request) => (
-    //     <span className="text-[#667085] text-sm">
-    //       {request.attributes.status}
-    //     </span>
-    //   ),
-    // },
     {
       key: "id" as keyof RequestData,
       label: "Recorded By",
@@ -165,13 +160,7 @@ const InventoryRequest = () => {
   ] as Column<RequestData>[];
 
   return (
-    <div>
-      <Tablehead
-        typebutton="Add New"
-        tableTitle="Requests"
-        showButton={true}
-        onButtonClick={openModal}
-      />
+    <>
       <div className="w-full bg-white rounded-b-[8px] shadow-table">
         {isLoading ? (
           <p>Loading...</p>
@@ -196,6 +185,58 @@ const InventoryRequest = () => {
           stockEndpoint="/inventory/all-inventory-items"
         />
       )}
+    </>
+  );
+};
+
+// Main Tabbed Component
+const InventoryRequest = () => {
+  const [activeTab, setActiveTab] = useState<"pharmacy" | "history">(
+    "pharmacy"
+  );
+
+  const tabs = [
+    { id: "pharmacy", label: "Pharmacy Stock" },
+    { id: "history", label: "Request History" },
+  ];
+
+  return (
+    <div>
+      {/* Tab Header with Tablehead */}
+      <Tablehead
+        typebutton="Add New"
+        tableTitle="Inventory Management"
+        showButton={activeTab === "pharmacy"}
+        onButtonClick={() => {
+          // This will need to be handled by the PharmacyStock component
+          // You might need to lift the modal state up or use a different approach
+        }}
+      />
+
+      {/* Tab Navigation */}
+      <div className="bg-white border-b">
+        <div className="flex">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as "pharmacy" | "history")}
+              className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === tab.id
+                  ? "border-blue-500 text-blue-600 bg-blue-50"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      <div className="mt-0">
+        {activeTab === "pharmacy" && <PharmacyStock />}
+        {activeTab === "history" && <RequestHistory />}
+      </div>
     </div>
   );
 };

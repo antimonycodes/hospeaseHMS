@@ -105,6 +105,7 @@ interface InventoryStore {
   requests: any[];
   stockActivities: any[];
   restockHistoryData: any[];
+  allPharRequest: any[];
   // requests: { data: any[]; pagination: Pagination }[];
   getInventoryStats: (endpoint?: string) => Promise<void>;
   getAllStocks: (endpoint?: string) => Promise<void>;
@@ -139,6 +140,7 @@ interface InventoryStore {
   ) => Promise<boolean | null>;
   deleteCategory: (id: number, fetchEndpoint?: string) => Promise<boolean>;
   requestToInventory: (data: any) => Promise<any>;
+  allPharmacyRequest: () => Promise<any>;
 }
 
 export const useInventoryStore = create<InventoryStore>((set, get) => ({
@@ -150,6 +152,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
   categorys: [],
   stockActivities: [],
   restockHistoryData: [],
+  allPharRequest: [],
 
   searchStaff: async (query: string) => {
     try {
@@ -558,6 +561,27 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       );
       if (response.status === 201) {
         toast.success(response.data.message || "Request sent successfully");
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.error("requestToInventory error:", error.response?.data);
+      toast.error(error.response?.data?.message || "Failed to send request");
+      return false;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  allPharmacyRequest: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(
+        "/medical-report/restock-inventory/all-dept-restock-request-item"
+      );
+      if (response.status === 200) {
+        toast.success(response.data.message || "Request sent successfully");
+        set({ allPharRequest: response.data.data.data });
+        console.log("allPharmacyRequest", response.data.data.data);
         return true;
       }
       return false;
