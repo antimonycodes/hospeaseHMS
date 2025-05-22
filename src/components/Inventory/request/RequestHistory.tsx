@@ -134,8 +134,14 @@ const RequestHistory = () => {
       key: "id" as keyof PharmacyRequestData,
       label: "Status",
       render: (_, request) => {
-        const status = request.attributes.approval_status;
-        const statusColors = {
+        const status = request.attributes.approval_status as
+          | "pending"
+          | "approved"
+          | "rejected";
+        const statusColors: Record<
+          "pending" | "approved" | "rejected",
+          string
+        > = {
           pending: "bg-yellow-100 text-yellow-800",
           approved: "bg-green-100 text-green-800",
           rejected: "bg-red-100 text-red-800",
