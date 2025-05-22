@@ -141,6 +141,7 @@ interface InventoryStore {
   deleteCategory: (id: number, fetchEndpoint?: string) => Promise<boolean>;
   requestToInventory: (data: any) => Promise<any>;
   allPharmacyRequest: () => Promise<any>;
+  changePharmacyRequestStatus: (id: number, data: any) => Promise<any>;
 }
 
 export const useInventoryStore = create<InventoryStore>((set, get) => ({
@@ -225,7 +226,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
   createRequest: async (
     data,
     endpoint = "/inventory/requests/create",
-    refreshEndpoint = "/inventory/requests/all-records?status=pending"
+    refreshEndpoint = "/inventory/requests/all-records"
   ) => {
     set({ isLoading: true });
     try {
@@ -588,6 +589,28 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
     } catch (error: any) {
       console.error("requestToInventory error:", error.response?.data);
       toast.error(error.response?.data?.message || "Failed to send request");
+      return false;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  changePharmacyRequestStatus: async (id: number, data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.put(
+        `//medical-report/restock-inventory/update-request-restock-status/${id}`,
+        data
+      );
+      if (response.status === 200) {
+        toast.success(response.data.message || "Request status updated");
+        get().allPharmacyRequest();
+        console.log("allPharmacyRequest", response.data.data.data);
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.error("changePharmacyRequestStatus error:", error.response?.data);
+      toast.error(error.response?.data?.message || "Failed to update status");
       return false;
     } finally {
       set({ isLoading: false });
