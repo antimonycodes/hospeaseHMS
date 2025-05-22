@@ -232,7 +232,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
     try {
       const response = await api.post(endpoint, data);
       console.log("createRequest response:", response.data);
-      if (response.status === 201) {
+      if (response.status === 201 || response) {
         await get().getAllRequest(refreshEndpoint);
         toast.success(response.data.message || "Request created successfully");
         return true;
