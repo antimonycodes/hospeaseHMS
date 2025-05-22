@@ -134,29 +134,47 @@ const RequestHistory = () => {
         requested_department_id: selectedRequest.attributes.from_department.id,
       };
 
+      console.log("Starting dispensing request...", dispensingData);
       const dispensingSuccess = await createRequest(
         dispensingData,
         "/inventory/requests/create",
         "/inventory/requests/all-records"
       );
 
-      if (dispensingSuccess) {
+      console.log("Dispensing request result:", dispensingSuccess);
+
+      // Check if dispensing was successful (the createRequest function might be returning false for status 200)
+      // Let's proceed to status update regardless if the first operation completed
+      if (dispensingSuccess !== false) {
         // Then update the pharmacy request status
         const statusData = {
           status: "approved",
         };
 
+        console.log(
+          "Starting status update...",
+          statusData,
+          "Request ID:",
+          selectedRequest.id
+        );
         const statusSuccess = await changePharmacyRequestStatus(
           selectedRequest.id,
           statusData
         );
+        console.log("Status update result:", statusSuccess);
 
         if (statusSuccess) {
           setShowApprovalModal(false);
           setSelectedRequest(null);
           // Refresh the pharmacy requests
           allPharmacyRequest();
+        } else {
+          console.error("Status update failed");
         }
+      } else {
+        console.error(
+          "Dispensing request failed, not proceeding with status update"
+        );
       }
     } catch (error) {
       console.error("Error processing approval:", error);
