@@ -138,6 +138,7 @@ interface InventoryStore {
     data: { name: string }
   ) => Promise<boolean | null>;
   deleteCategory: (id: number, fetchEndpoint?: string) => Promise<boolean>;
+  requestToInventory: (data: any) => Promise<any>;
 }
 
 export const useInventoryStore = create<InventoryStore>((set, get) => ({
@@ -543,6 +544,26 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
     } catch (error: any) {
       console.error("deleteCategory error:", error.response?.data);
       toast.error(error.response?.data?.message || "Failed to delete category");
+      return false;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  requestToInventory: async (data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.post(
+        "/medical-report/restock-inventory/dept-request-restock-item",
+        data
+      );
+      if (response.status === 201) {
+        toast.success(response.data.message || "Request sent successfully");
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.error("requestToInventory error:", error.response?.data);
+      toast.error(error.response?.data?.message || "Failed to send request");
       return false;
     } finally {
       set({ isLoading: false });
