@@ -67,15 +67,7 @@ export type PharmacyRequestData = {
   };
 };
 const RequestHistory = () => {
-  const { allPharmacyRequest, allPharRequest, isLoading } =
-    useInventoryStore() as unknown as {
-      allPharmacyRequest: () => void;
-      allPharRequest: {
-        data: PharmacyRequestData[];
-        pagination: object;
-      } | null;
-      isLoading: boolean;
-    };
+  const { allPharmacyRequest, allPharRequest, isLoading } = useInventoryStore();
 
   useEffect(() => {
     allPharmacyRequest();
@@ -84,8 +76,8 @@ const RequestHistory = () => {
   console.log(allPharRequest, "allPharRequest");
 
   const pharmacyRequestsArray =
-    allPharRequest && allPharRequest.data && Array.isArray(allPharRequest.data)
-      ? allPharRequest.data
+    allPharRequest && allPharRequest && Array.isArray(allPharRequest)
+      ? allPharRequest
       : [];
 
   const requestHistoryColumns = [
