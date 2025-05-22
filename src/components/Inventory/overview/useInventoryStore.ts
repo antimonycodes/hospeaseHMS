@@ -598,10 +598,10 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
     set({ isLoading: true });
     try {
       const response = await api.put(
-        `//medical-report/restock-inventory/update-request-restock-status/${id}`,
+        `/medical-report/restock-inventory/update-request-restock-status/${id}`,
         data
       );
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 204) {
         toast.success(response.data.message || "Request status updated");
         get().allPharmacyRequest();
         console.log("allPharmacyRequest", response.data.data.data);
