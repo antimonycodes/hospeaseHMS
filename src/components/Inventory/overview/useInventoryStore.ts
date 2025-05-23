@@ -373,11 +373,12 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
         }
         return true;
       }
+      toast.error(response.data.message || "Failed to add stock");
+      console.error("Unexpected response status:", response.status);
       return false;
     } catch (error: any) {
       console.error("createStock error:", error);
-      const errorMessage =
-        error?.response?.data?.message || "Failed to add stock";
+      const errorMessage = error?.response?.message || "Failed to add stock";
 
       if (Array.isArray(errorMessage)) {
         errorMessage.forEach((msg) => toast.error(msg));
