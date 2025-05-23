@@ -1,10 +1,11 @@
 // SaInventorySettings.tsx
 import { JSX, useEffect, useState } from "react";
 import { useInventoryStore } from "../../Inventory/overview/useInventoryStore";
-import { Edit, Loader, Loader2, Trash2, XIcon } from "lucide-react";
+import { Edit, Loader2, Trash2, XIcon } from "lucide-react";
 import Table from "../../../Shared/Table";
 import Button from "../../../Shared/Button";
 import toast from "react-hot-toast";
+import Loader from "../../../Shared/Loader";
 
 type StockData = {
   item_name: string;

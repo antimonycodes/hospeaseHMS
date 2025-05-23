@@ -6,10 +6,15 @@ import { BsWhatsapp } from "react-icons/bs";
 import TourOverlay from "../Shared/TourOverlay";
 import { useTourStore } from "../store/super-admin/useTourStore";
 import StickyNote from "../Shared/StickyNote";
+import { StickyNoteIcon } from "lucide-react";
+import { useStickyNoteStore } from "../store/super-admin/useStickyNote";
+import { useRole } from "../hooks/useRole";
 
 const DashboardLayout = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { startTour } = useTourStore();
+  const { show } = useStickyNoteStore();
+  const role = useRole();
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -28,7 +33,22 @@ const DashboardLayout = () => {
         <TopNav setIsMobileMenuOpen={setIsMobileMenuOpen} />
         <div className="p-3 md:p-6 w-full">
           {/* <TourOverlay /> */}
-          <StickyNote />
+          {role === "front-desk-manager" && (
+            <>
+              <StickyNote />
+              <div className="absolute top-12 right-8">
+                <div className="absolute top-4 right-6 z-[99999] flex items-center justify-between">
+                  <button
+                    onClick={show}
+                    className="bg-yellow-200 hover:bg-yellow-300 p-2 rounded-full shadow-md"
+                    title="Open Sticky Note"
+                  >
+                    <StickyNoteIcon className="w-5 h-5 text-yellow-800" />
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
           <Outlet />
           <div className=" fixed bottom-6 left-0 right-0 flex justify-center items-center">
             {/* <button

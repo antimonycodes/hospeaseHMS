@@ -9,13 +9,12 @@ const StickyNote = () => {
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const noteRef = useRef<HTMLDivElement | null>(null);
 
-  // Initialize position from localStorage or default to bottom-right
+  // Initialize position from localStorage
   useEffect(() => {
     const savedPosition = localStorage.getItem("stickyNotePosition");
     if (savedPosition) {
       setPosition(JSON.parse(savedPosition));
     } else {
-      // Default position at bottom-right
       setPosition({
         x: window.innerWidth - 300,
         y: window.innerHeight - 250,
@@ -23,17 +22,32 @@ const StickyNote = () => {
     }
   }, []);
 
-  // Save position to localStorage whenever it changes
+  // Save position changes
   useEffect(() => {
     if (position.x !== 0 && position.y !== 0) {
       localStorage.setItem("stickyNotePosition", JSON.stringify(position));
     }
   }, [position]);
 
-  // Handle mouse down for dragging
-  const handleMouseDown = (e: { clientX: number; clientY: number }) => {
-    if (noteRef.current) {
-      const rect = noteRef.current.getBoundingClientRect();
+  // Common move handler
+  const handleMove = (clientX: number, clientY: number) => {
+    if (!isDragging || !noteRef.current) return;
+
+    const newX = clientX - dragOffset.x;
+    const newY = clientY - dragOffset.y;
+    const maxX = window.innerWidth - noteRef.current.offsetWidth;
+    const maxY = window.innerHeight - noteRef.current.offsetHeight;
+
+    setPosition({
+      x: Math.max(0, Math.min(newX, maxX)),
+      y: Math.max(0, Math.min(newY, maxY)),
+    });
+  };
+
+  // Mouse handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    const rect = noteRef.current?.getBoundingClientRect();
+    if (rect) {
       setDragOffset({
         x: e.clientX - rect.left,
         y: e.clientY - rect.top,
@@ -42,38 +56,42 @@ const StickyNote = () => {
     }
   };
 
-  // Handle mouse move for dragging
+  // Touch handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    const rect = noteRef.current?.getBoundingClientRect();
+    if (rect) {
+      setDragOffset({
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top,
+      });
+      setIsDragging(true);
+    }
+  };
+
+  // Event listeners setup
   useEffect(() => {
-    const handleMouseMove = (e: { clientX: number; clientY: number }) => {
-      if (isDragging) {
-        // Calculate new position based on mouse position and drag offset
-        const newX = e.clientX - dragOffset.x;
-        const newY = e.clientY - dragOffset.y;
-
-        // Constrain to viewport
-        const maxX = window.innerWidth - (noteRef.current?.offsetWidth || 264);
-        const maxY =
-          window.innerHeight - (noteRef.current?.offsetHeight || 200);
-
-        setPosition({
-          x: Math.max(0, Math.min(newX, maxX)),
-          y: Math.max(0, Math.min(newY, maxY)),
-        });
-      }
+    const handleMouseMove = (e: MouseEvent) => handleMove(e.clientX, e.clientY);
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      handleMove(e.touches[0].clientX, e.touches[0].clientY);
     };
 
-    const handleMouseUp = () => {
-      setIsDragging(false);
-    };
+    const handleMouseUp = () => setIsDragging(false);
+    const handleTouchEnd = () => setIsDragging(false);
 
     if (isDragging) {
       window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("touchmove", handleTouchMove, { passive: false });
       window.addEventListener("mouseup", handleMouseUp);
+      window.addEventListener("touchend", handleTouchEnd);
     }
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchend", handleTouchEnd);
     };
   }, [isDragging, dragOffset]);
 
@@ -88,12 +106,14 @@ const StickyNote = () => {
         top: `${position.y}px`,
         width: "264px",
         cursor: isDragging ? "grabbing" : "auto",
+        touchAction: "none",
       }}
     >
       <div className="flex justify-between items-center mb-2">
         <div
           className="flex items-center gap-1 cursor-grab text-gray-700 flex-1"
           onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
         >
           <Move className="w-4 h-4" />
           <span className="text-sm font-semibold">Sticky Note</span>

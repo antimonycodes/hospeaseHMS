@@ -12,7 +12,18 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  // withCredentials: true, //
 });
+
+// const getCsrfToken = () => {
+//   return Cookies.get("XSRF-TOKEN");
+// };
+
+// // Update Axios headers
+// api.interceptors.request.use((config) => {
+//   config.headers["X-XSRF-TOKEN"] = getCsrfToken();
+//   return config;
+// });
 
 // --- Data Payload Interfaces ---
 
@@ -53,6 +64,10 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   login: async (data) => {
     set({ isLoading: true });
     try {
+      // Cookies.remove("XSRF-TOKEN");
+      // Cookies.remove("hospease_session");
+      // localStorage.clear();
+
       const response = await api.post("/auth/login", data);
       if (response.status === 200) {
         // console.log(response.data.data.token, "token");
@@ -69,6 +84,14 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         // Cookies.set("token", token, { expires: 1, secure: true });
         Cookies.set("token", token, { expires: 30, secure: true });
         localStorage.setItem("role", response.data.data.user.attributes.role);
+        localStorage.setItem(
+          "hospitalName",
+          response.data.data.user.attributes.hospital.name
+        );
+        localStorage.setItem(
+          "hospitalLogo",
+          response.data.data.user.attributes.hospital.logo
+        );
         localStorage.setItem(
           "hmo",
           response.data.data.user.attributes.hospital.hmo_percentage

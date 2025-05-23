@@ -596,7 +596,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       const response = await api.put(`${endpoint}/${id}`, data);
       if (response.status === 200) {
         // toast.success(response.data.message);
-        await get().getAllAppointments();
+        // await get().getAllAppointments();
         return true;
       }
       return null;

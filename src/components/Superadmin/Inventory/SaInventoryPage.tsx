@@ -74,14 +74,6 @@ const SaInventoryPage = () => {
     if (activeTab === "Settings") {
       return (
         <div className="flex gap-2">
-          {/* <Button
-            variant="primary"
-            className="flex items-center text-[12px] gap-2 px-2 md:px-4"
-            onClick={openItem}
-          >
-            Add Item
-            <Plus size={20} />
-          </Button> */}
           <Button
             variant="primary"
             className="flex items-center text-[12px] gap-2 px-2 md:px-4"

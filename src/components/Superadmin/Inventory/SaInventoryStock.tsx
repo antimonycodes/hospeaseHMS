@@ -96,6 +96,11 @@ const SaInventoryStock = ({ stocks, isLoading }: SaInventoryStockProps) => {
       label: "Selling Price",
       render: (_, stock) => <span>{stock.selling_price}</span>,
     },
+    // {
+    //   key: "profit",
+    //   label: "Profit",
+    //   render: (_, stock) => <span>{}</span>,
+    // },
     {
       key: "expiry_date",
       label: "Expiry Date",

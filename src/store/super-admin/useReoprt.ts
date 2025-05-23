@@ -192,8 +192,8 @@ export const useReportStore = create<ReportStore>((set) => ({
       }
       return response.data;
     } catch (error) {
-      // const errorMsg = error?.response?.data?.message || "Something went wrong";
-      // toast.error(errorMsg);
+      // const errorMsg = error?.response.message || "Something went wrong";
+      // toast.error(error?.response?.message || "Something went wrong");
       set({ isCreating: false });
       throw error;
     } finally {
@@ -210,7 +210,7 @@ export const useReportStore = create<ReportStore>((set) => ({
       }
       return response.data;
     } catch (error: any) {
-      const errorMsg = error?.response?.data?.message || "Something went wrong";
+      const errorMsg = error?.response?.message || "Something went wrong";
       toast.error(errorMsg);
       // set({ isCreating: false });
       throw error;

@@ -80,7 +80,7 @@ const formatDate = (dateString: string | null): string => {
   // Otherwise, try to parse and format
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
+    return date.toLocaleDateString("en-NG", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -239,11 +239,11 @@ const RequestHistory = () => {
       if (isActive) {
         switch (status) {
           case "pending":
-            return `${baseStyles} bg-amber-100 text-amber-800 border border-amber-200`;
+            return `${baseStyles} bg-[#FEF3CD] text-[#B58A00]  border border-amber-200`;
           case "approved":
-            return `${baseStyles} bg-green-100 text-primary border border-primary`;
+            return `${baseStyles} bg-[#CCFFE7] text-[#009952] border border-primary`;
           case "rejected":
-            return `${baseStyles} bg-red-100 text-red-800 border border-red-200`;
+            return `${baseStyles} bg-[#FBE1E1] text-[#F83E41] border border-red-200`;
         }
       }
 
@@ -277,9 +277,9 @@ const RequestHistory = () => {
         {/* Header with Tabs */}
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">
+            {/* <h2 className="text-lg font-semibold text-gray-900">
               Request History ({pharmacyRequestsArray.length})
-            </h2>
+            </h2> */}
           </div>
 
           {/* Status Tabs */}
@@ -298,13 +298,13 @@ const RequestHistory = () => {
               isActive={activeTab === "approved"}
               onClick={() => setActiveTab("approved")}
             />
-            <TabButton
+            {/* <TabButton
               status="rejected"
               label="Rejected"
               count={statusCounts.rejected}
               isActive={activeTab === "rejected"}
               onClick={() => setActiveTab("rejected")}
-            />
+            /> */}
           </div>
         </div>
 

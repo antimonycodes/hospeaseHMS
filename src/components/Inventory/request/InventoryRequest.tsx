@@ -48,21 +48,17 @@ interface Column<T> {
 // Empty Request History Component
 
 // Pharmacy Stock Component (current functionality)
-const PharmacyStock = () => {
+const PharmacyStock = ({ openModal, closeModal, isModalOpen }: any) => {
   const { getAllRequest, requests, isLoading } =
     useInventoryStore() as unknown as {
       getAllRequest: () => void;
       requests: { data: RequestData[]; pagination: object } | null;
       isLoading: boolean;
     };
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     getAllRequest();
   }, [getAllRequest]);
-
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
 
   const requestsArray =
     requests && requests.data && Array.isArray(requests.data)
@@ -194,7 +190,10 @@ const InventoryRequest = () => {
   const [activeTab, setActiveTab] = useState<"pharmacy" | "history">(
     "pharmacy"
   );
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
   const tabs = [
     { id: "pharmacy", label: "Pharmacy Stock" },
     { id: "history", label: "Request History" },
@@ -208,8 +207,7 @@ const InventoryRequest = () => {
         tableTitle="Inventory Management"
         showButton={activeTab === "pharmacy"}
         onButtonClick={() => {
-          // This will need to be handled by the PharmacyStock component
-          // You might need to lift the modal state up or use a different approach
+          openModal();
         }}
       />
 
@@ -234,7 +232,13 @@ const InventoryRequest = () => {
 
       {/* Tab Content */}
       <div className="mt-0">
-        {activeTab === "pharmacy" && <PharmacyStock />}
+        {activeTab === "pharmacy" && (
+          <PharmacyStock
+            isModalOpen={isModalOpen}
+            closeModal={closeModal}
+            openModal={openModal}
+          />
+        )}
         {activeTab === "history" && <RequestHistory />}
       </div>
     </div>

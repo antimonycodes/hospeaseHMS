@@ -176,8 +176,6 @@ const DoctorsAppointment = () => {
         paginationData={pagination}
         onPageChange={handlePageChange}
       />
-
-      {/* <FrontdeskAppointmentModal isOpen={isModalOpen} onClose={closeModal} /> */}
     </div>
   );
 };

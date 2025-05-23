@@ -53,6 +53,7 @@ const PatientsTable = ({
   }, [patients]);
 
   if (!patients) return <Loader />;
+  if (!simplifiedPatients) return <Loader />;
 
   const columns: Column<PatientAttributes>[] = [
     {
@@ -101,7 +102,7 @@ const PatientsTable = ({
         data={simplifiedPatients} // Use simplifiedPatients here
         columns={columns}
         rowKey="id"
-        pagination={simplifiedPatients.length > 10} // You can adjust this based on your needs
+        pagination={simplifiedPatients?.length > 10} // You can adjust this based on your needs
       />
     </div>
   );

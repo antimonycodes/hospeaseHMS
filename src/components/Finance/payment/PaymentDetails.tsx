@@ -87,7 +87,7 @@ const PaymentDetails = () => {
           selectedPayment.attributes.amount?.replace(/,/g, "") || "0"
         );
 
-        const calculatedOriginalPrice = totalAmount * hmoRate;
+        const calculatedOriginalPrice = (totalAmount / hmoRate) * 100;
         setOriginalPrice(calculatedOriginalPrice);
       }
     }

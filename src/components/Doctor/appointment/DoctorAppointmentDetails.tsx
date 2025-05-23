@@ -1,7 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
+import { useReportStore } from "../../../store/super-admin/useReoprt";
+import { useGlobalStore } from "../../../store/super-admin/useGlobal";
 import Loader from "../../../Shared/Loader";
+import {
+  FileText,
+  StickyNote,
+  Loader2,
+  Check,
+  Plus,
+  Minus,
+} from "lucide-react";
+import toast from "react-hot-toast";
+import MedicalTimeline from "../../../Shared/MedicalTimeline";
 
 // InfoRow reusable component
 type InfoRowItem = {
@@ -26,7 +38,10 @@ const InfoRow: React.FC<{
 // Back Button component
 const BackButton = ({ label }: any) => (
   <div className="flex items-center mb-4">
-    <button className="flex items-center text-gray-600">
+    <Link
+      to="/dashboard/appointments"
+      className="flex items-center text-gray-600"
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         className="h-5 w-5 mr-1"
@@ -40,7 +55,7 @@ const BackButton = ({ label }: any) => (
         />
       </svg>
       {label}
-    </button>
+    </Link>
   </div>
 );
 
@@ -87,7 +102,7 @@ const formatDate = (dateString: string | number | Date) => {
   }
 };
 
-const formatTime = (time: { split: (arg0: string) => [any, any] }) => {
+const formatTime = (time: string) => {
   if (!time) return "-";
   const [hours, minutes] = time.split(":");
   const hour = parseInt(hours, 10);
@@ -117,9 +132,7 @@ const generateTimeOptions = () => {
 
 // Consistent endpoint generation
 const getEndpoints = (role: string) => {
-  // Normalize role to lowercase and trim
   const normalizedRole = (role || "").toLowerCase().trim();
-
   let fetchEndpoint = "";
   let manageEndpoint = "";
 
@@ -153,6 +166,18 @@ const DoctorAppointmentDetails = () => {
     manageAppointment,
     isLoading,
   } = usePatientStore();
+  const {
+    createReport,
+    createNote,
+    getAllReport,
+    getMedicalNote,
+    isCreating,
+    getPharmacyStocks,
+    pharmacyStocks,
+    getLaboratoryItems,
+    labItems,
+  } = useReportStore();
+  const { getAllRoles, roles } = useGlobalStore();
 
   const [actionLoading, setActionLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState("");
@@ -163,31 +188,61 @@ const DoctorAppointmentDetails = () => {
   const [role, setRole] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [activeTab, setActiveTab] = useState<"note" | "report">("note");
+  const [note, setNote] = useState("");
+  const [reportNote, setReportNote] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [itemSearch, setItemSearch] = useState("");
+  const [isSelectOpen, setIsSelectOpen] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<
+    {
+      service_item_name: string;
+      id: any;
+      request_pharmacy_id: any;
+      attributes: { amount?: any; name?: string };
+      quantity: number;
+    }[]
+  >([]);
+  const [labTestSearch, setLabTestSearch] = useState("");
+  const [isLabSelectOpen, setIsLabSelectOpen] = useState(false);
+  const [selectedLabTests, setSelectedLabTests] = useState<
+    { id: number; name: string; amount: string; quantity: number }[]
+  >([]);
 
   const timeOptions = generateTimeOptions();
-
-  // Get endpoints based on role
   const { fetchEndpoint, manageEndpoint } = getEndpoints(role);
 
-  // Load role from localStorage on component mount
+  // Load role and fetch initial data
   useEffect(() => {
     const storedRole = localStorage.getItem("role") || "";
     setRole(storedRole);
-    console.log("Role loaded:", storedRole);
-  }, []);
+    getAllRoles();
+    getPharmacyStocks();
+    getLaboratoryItems();
+  }, [getAllRoles, getPharmacyStocks, getLaboratoryItems]);
 
-  // Fetch appointment data when ID and role are available
+  // Fetch appointment data
   useEffect(() => {
     if (id && role) {
-      console.log(
-        `Fetching appointment ${id} using endpoint: ${fetchEndpoint}`
-      );
       getAppointmentById(id, fetchEndpoint);
     }
   }, [id, role, fetchEndpoint, getAppointmentById]);
 
+  // Fetch reports and notes when appointment is approved
+  // useEffect(() => {
+  //   if (id && selectedAppointment?.attributes?.status === "accepted") {
+  //     const patientId =
+  //       selectedAppointment?.attributes?.patient?.id;
+  //     if (patientId) {
+  //       getAllReport(patientId);
+  //       getMedicalNote(patientId, "doctor");
+  //     }
+  //   }
+  // }, [selectedAppointment, id, getAllReport, getMedicalNote]);
+
   // Show temporary messages
-  const showMessage = (type: string, message: React.SetStateAction<string>) => {
+  const showMessage = (type: string, message: string) => {
     if (type === "error") {
       setErrorMessage(message);
       setTimeout(() => setErrorMessage(""), 5000);
@@ -205,21 +260,15 @@ const DoctorAppointmentDetails = () => {
     }
 
     setActionLoading(true);
-
     try {
-      console.log(
-        `Approving appointment ${id} with endpoint: ${manageEndpoint}`
-      );
-      console.log("Payload:", { status: "accepted" });
-
       const result = await manageAppointment(
         id,
         { status: "accepted" },
         manageEndpoint
       );
-
       if (result) {
         showMessage("success", "Appointment approved successfully");
+        getAppointmentById(id, fetchEndpoint);
       } else {
         showMessage("error", "Failed to approve appointment");
       }
@@ -244,23 +293,17 @@ const DoctorAppointmentDetails = () => {
     }
 
     setActionLoading(true);
-
     try {
-      console.log(
-        `Declining appointment ${id} with endpoint: ${manageEndpoint}`
-      );
-      console.log("Payload:", { status: "rejected", reason });
-
       const result = await manageAppointment(
         id,
         { status: "rejected", reason },
         manageEndpoint
       );
-
       if (result) {
         setReason("");
         setShowDeclineForm(false);
         showMessage("success", "Appointment declined successfully");
+        getAppointmentById(id, fetchEndpoint);
       } else {
         showMessage("error", "Failed to decline appointment");
       }
@@ -290,11 +333,7 @@ const DoctorAppointmentDetails = () => {
     }
 
     setActionLoading(true);
-
     try {
-      console.log(
-        `Rescheduling appointment ${id} with endpoint: ${manageEndpoint}`
-      );
       const payload = {
         status: "reschedule",
         reason: reason || undefined,
@@ -303,16 +342,14 @@ const DoctorAppointmentDetails = () => {
           time: selectedTime,
         },
       };
-      console.log("Payload:", payload);
-
       const result = await manageAppointment(id, payload, manageEndpoint);
-
       if (result) {
         setSelectedDate("");
         setSelectedTime("");
         setReason("");
         setShowRescheduleForm(false);
         showMessage("success", "Appointment rescheduled successfully");
+        getAppointmentById(id, fetchEndpoint);
       } else {
         showMessage("error", "Failed to reschedule appointment");
       }
@@ -324,7 +361,217 @@ const DoctorAppointmentDetails = () => {
     }
   };
 
-  // Toggle form displays - ensure only one is shown at a time
+  // Consultation logic
+  const handleChange = (e: { target: { name: any; value: any } }) => {
+    const { name, value } = e.target;
+    if (name === "itemSearch") {
+      setItemSearch(value);
+    } else if (name === "labTestSearch") {
+      setLabTestSearch(value);
+    }
+  };
+
+  const filteredItems = pharmacyStocks?.filter((stock) =>
+    stock.service_item_name?.toLowerCase().includes(itemSearch.toLowerCase())
+  );
+
+  const filteredLabTests = labItems?.filter((test) =>
+    test.name?.toLowerCase().includes(labTestSearch.toLowerCase())
+  );
+
+  const handleToggleItem = (item: any) => {
+    const exists = selectedItems.find(
+      (i) => i.request_pharmacy_id === item.request_pharmacy_id
+    );
+    if (!exists) {
+      setSelectedItems((prev) => [...prev, { ...item, quantity: 1 }]);
+      toast.success(`Added ${item.service_item_name || "item"} to selection`);
+    } else {
+      setSelectedItems((prev) =>
+        prev.filter((i) => i.request_pharmacy_id !== item.request_pharmacy_id)
+      );
+      toast.success(
+        `Removed ${item.service_item_name || "item"} from selection`
+      );
+    }
+  };
+
+  const handleToggleLabTest = (test: any) => {
+    const exists = selectedLabTests.find((t) => t.id === test.id);
+    if (!exists) {
+      setSelectedLabTests((prev) => [...prev, { ...test, quantity: 1 }]);
+      toast.success(`Added ${test.name || "test"} to selection`);
+    } else {
+      setSelectedLabTests((prev) => prev.filter((t) => t.id !== test.id));
+      toast.success(`Removed ${test.name || "test"} from selection`);
+    }
+  };
+
+  const isItemSelected = (request_pharmacy_id: any) =>
+    selectedItems.some(
+      (item) => item.request_pharmacy_id === request_pharmacy_id
+    );
+
+  const isLabTestSelected = (id: any) =>
+    selectedLabTests.some((test) => test.id === id);
+
+  const handleQuantityChange = (
+    request_pharmacy_id: any,
+    action: "increase" | "decrease"
+  ) => {
+    setSelectedItems((prevItems) =>
+      prevItems.map((item) => {
+        if (item.request_pharmacy_id === request_pharmacy_id) {
+          const stock = pharmacyStocks?.find(
+            (s) => s.request_pharmacy_id === request_pharmacy_id
+          );
+          const maxAvailable = stock?.requested_quantity || 0;
+          if (action === "increase") {
+            return {
+              ...item,
+              quantity:
+                item.quantity < maxAvailable
+                  ? item.quantity + 1
+                  : item.quantity,
+            };
+          } else {
+            return {
+              ...item,
+              quantity: item.quantity > 1 ? item.quantity - 1 : 1,
+            };
+          }
+        }
+        return item;
+      })
+    );
+  };
+
+  const handleQuantityInput = (request_pharmacy_id: any, value: string) => {
+    const numValue = parseInt(value, 10);
+    if (isNaN(numValue)) return;
+
+    setSelectedItems((prevItems) =>
+      prevItems.map((item) => {
+        if (item.request_pharmacy_id === request_pharmacy_id) {
+          const stock = pharmacyStocks?.find(
+            (s) => s.request_pharmacy_id === request_pharmacy_id
+          );
+          const maxAvailable = stock?.quantity || 0;
+          const quantity = Math.min(Math.max(1, numValue), maxAvailable);
+          return { ...item, quantity };
+        }
+        return item;
+      })
+    );
+  };
+
+  const handleReportSubmit = async () => {
+    const patientId = selectedAppointment?.attributes?.patient?.id;
+    if (!patientId) {
+      toast.error("Patient ID is missing");
+      return;
+    }
+
+    if (!selectedDepartment) {
+      toast.error("Please select a department");
+      return;
+    }
+
+    const departmentId = roles[selectedDepartment]?.id;
+    if (!departmentId) {
+      toast.error("Invalid department selected");
+      return;
+    }
+
+    if (!reportNote.trim()) {
+      toast.error("Report note cannot be empty");
+      return;
+    }
+    try {
+      let reportData: {
+        patient_id: string;
+        note: string;
+        department_id: number;
+        parent_id: null;
+        file: File | null;
+        status: string;
+        role: string;
+        pharmacy_stocks?: { id: any; quantity: number }[];
+        laboratory_service_charge?: { id: any; quantity: number }[];
+      } = {
+        patient_id: patientId,
+        note: reportNote,
+        department_id: departmentId,
+        parent_id: null,
+        file,
+        status: "pending",
+        role: selectedDepartment,
+      };
+
+      if (selectedDepartment === "pharmacist" && selectedItems.length > 0) {
+        const pharmacyStocksArray = selectedItems.map((item) => ({
+          id: item.request_pharmacy_id,
+          quantity: item.quantity,
+        }));
+        reportData = { ...reportData, pharmacy_stocks: pharmacyStocksArray };
+      }
+
+      if (selectedDepartment === "laboratory" && selectedLabTests.length > 0) {
+        const laboratoryTestsArray = selectedLabTests.map((test) => ({
+          id: test.id,
+          quantity: test.quantity,
+        }));
+        reportData = {
+          ...reportData,
+          laboratory_service_charge: laboratoryTestsArray,
+        };
+      }
+
+      const response = await createReport(reportData);
+      if (response) {
+        setReportNote("");
+        setFile(null);
+        setSelectedDepartment("");
+        setSelectedItems([]);
+        setSelectedLabTests([]);
+        setItemSearch("");
+        setLabTestSearch("");
+        getAllReport(patientId);
+        // toast.success("Report sent successfully");
+      }
+    } catch (error) {
+      // toast.error("Failed to send report");
+    }
+  };
+
+  const handleNoteSubmit = async () => {
+    const patientId = selectedAppointment?.attributes?.patient?.id;
+    if (!patientId) {
+      toast.error("Patient ID is missing");
+      return;
+    }
+
+    if (!note.trim()) {
+      toast.error("Note cannot be empty");
+      return;
+    }
+
+    try {
+      const response = await createNote({
+        note: note,
+        patient_id: patientId,
+      });
+      if (response) {
+        setNote("");
+        getMedicalNote(patientId, "doctor");
+        toast.success("Note added successfully");
+      }
+    } catch (error) {
+      toast.error("Failed to add note");
+    }
+  };
+
+  // Toggle form displays
   const toggleDeclineForm = () => {
     setShowDeclineForm(!showDeclineForm);
     if (!showDeclineForm) {
@@ -339,40 +586,26 @@ const DoctorAppointmentDetails = () => {
     }
   };
 
-  // Handle loading state and no appointment data
+  // Handle loading state
   if (isLoading || !selectedAppointment) {
     return <Loader />;
   }
 
-  // Get the first appointment from the array if selectedAppointment is an array
   const appointmentData = Array.isArray(selectedAppointment)
     ? selectedAppointment[0]
     : selectedAppointment;
-
-  // Extract the attributes from the selected appointment
   const attributes = appointmentData?.attributes || {};
-
-  // Extract the status from attributes
   const status = attributes?.status || "pending";
-
-  // Extract patient data, adding fallbacks
   const patient = attributes?.patient?.attributes || {};
-
-  // Extract doctor data
   const doctor = attributes?.doctor?.attributes || {};
-
-  // Extract next of kin data with fallback
   const nextOfKin =
     patient?.next_of_kin?.length > 0 ? patient.next_of_kin[0] : {};
-
   const formattedDate = formatDate(attributes?.date);
   const formattedTime = formatTime(attributes?.time);
 
   return (
     <div>
-      <Link to="/dashboard/appointments">
-        <BackButton label="Patients" />
-      </Link>
+      <BackButton label="Patients" />
 
       {/* Messages */}
       {errorMessage && (
@@ -380,7 +613,6 @@ const DoctorAppointmentDetails = () => {
           {errorMessage}
         </div>
       )}
-
       {successMessage && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
           {successMessage}
@@ -402,7 +634,7 @@ const DoctorAppointmentDetails = () => {
             { label: "Gender", value: patient?.gender },
             { label: "Branch", value: patient?.branch },
             { label: "Occupation", value: patient?.occupation },
-            { label: "Religion", value: "Christian" }, // hardcoded
+            { label: "Religion", value: "Christian" },
           ]}
         />
         <InfoRow
@@ -412,8 +644,6 @@ const DoctorAppointmentDetails = () => {
             { label: "House Address", value: patient?.address },
           ]}
         />
-
-        {/* Next of Kin - Only render if nextOfKin is available */}
         {nextOfKin && Object.keys(nextOfKin).length > 0 && (
           <>
             <hr className="my-6 border-gray-200" />
@@ -441,15 +671,14 @@ const DoctorAppointmentDetails = () => {
         )}
       </div>
 
-      {/* Appointment Details - Only show if status is not accepted */}
+      {/* Appointment Details */}
       {status !== "accepted" && (
-        <div className="bg-white rounded-lg shadow-sm p-6 text-[#667085]">
+        <div className="bg-white rounded-lg shadow-sm p-6 text-[#667085] mb-6">
           <h3 className="font-semibold mb-4">Appointment Details</h3>
           <div className="mb-4">
             <p className="mb-1">Date: {String(formattedDate)}</p>
             <p>Time: {formattedTime}</p>
           </div>
-
           <div className="flex flex-wrap gap-3 mb-6">
             <button
               className="bg-primary text-white px-6 py-2 rounded-lg"
@@ -475,8 +704,6 @@ const DoctorAppointmentDetails = () => {
                 : "Reschedule Appointment"}
             </button>
           </div>
-
-          {/* Decline Form */}
           {showDeclineForm && (
             <div className="w-full max-w-sm space-y-4 mb-6">
               <div>
@@ -501,8 +728,6 @@ const DoctorAppointmentDetails = () => {
               </button>
             </div>
           )}
-
-          {/* Reschedule Form */}
           {showRescheduleForm && (
             <div className="w-full max-w-sm space-y-4">
               <div>
@@ -556,8 +781,445 @@ const DoctorAppointmentDetails = () => {
           )}
         </div>
       )}
+
+      {/* Consultation Section */}
+      {status === "accepted" && (
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+          <h3 className="font-semibold mb-4">Consultation</h3>
+          <div className="flex gap-6 mb-4 text-sm font-medium text-[#667185]">
+            <button
+              className={`flex items-center gap-1 px-3 py-1 rounded-md transition ${
+                activeTab === "note"
+                  ? "text-primary bg-[#F0F4FF]"
+                  : "hover:text-primary"
+              }`}
+              onClick={() => setActiveTab("note")}
+            >
+              <StickyNote size={16} />
+              Add Doctor's Note
+            </button>
+            <button
+              className={`flex items-center gap-1 px-3 py-1 rounded-md transition ${
+                activeTab === "report"
+                  ? "text-primary bg-[#F0F4FF]"
+                  : "hover:text-primary"
+              }`}
+              onClick={() => setActiveTab("report")}
+            >
+              <FileText size={16} />
+              Add Doctor's Report
+            </button>
+          </div>
+
+          {activeTab === "note" && (
+            <div className="space-y-4">
+              <textarea
+                rows={5}
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Enter doctor's note..."
+                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+              <button
+                onClick={handleNoteSubmit}
+                disabled={isCreating}
+                className={`bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition flex items-center justify-center
+                  ${isCreating ? "opacity-50 cursor-not-allowed" : ""}`}
+              >
+                {isCreating ? (
+                  <>
+                    Adding
+                    <Loader2 className="size-6 mr-2 animate-spin" />
+                  </>
+                ) : (
+                  <>Add note</>
+                )}
+              </button>
+            </div>
+          )}
+
+          {activeTab === "report" && (
+            <div className="space-y-4">
+              <div className="flex gap-2 mb-4">
+                {roles && Object.keys(roles).length > 0 ? (
+                  <>
+                    {roles["pharmacist"] && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedDepartment("pharmacist")}
+                        className={`px-4 py-2 rounded-lg transition ${
+                          selectedDepartment === "pharmacist"
+                            ? "bg-primary text-white"
+                            : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                        }`}
+                      >
+                        Pharmacy
+                      </button>
+                    )}
+                    {roles["laboratory"] && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedDepartment("laboratory")}
+                        className={`px-4 py-2 rounded-lg transition ${
+                          selectedDepartment === "laboratory"
+                            ? "bg-primary text-white"
+                            : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                        }`}
+                      >
+                        Laboratory
+                      </button>
+                    )}
+                    {roles["nurse"] && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedDepartment("nurse")}
+                        className={`px-4 py-2 rounded-lg transition ${
+                          selectedDepartment === "nurse"
+                            ? "bg-primary text-white"
+                            : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                        }`}
+                      >
+                        Nurse
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <div className="flex items-center text-gray-500">
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Loading departments...
+                  </div>
+                )}
+              </div>
+
+              {selectedDepartment === "pharmacist" && (
+                <div>
+                  <h3 className="text-lg font-medium mb-2">Pharmacy Store</h3>
+                  <h4 className="text-sm text-gray-600 mb-4">
+                    Check and select drugs from pharmacy for the patient here
+                  </h4>
+                  <div className="relative mb-4">
+                    <div
+                      className="border border-[#D0D5DD] rounded-lg p-3 flex items-center justify-between cursor-pointer"
+                      onClick={() => setIsSelectOpen(!isSelectOpen)}
+                    >
+                      <div className="flex-1">
+                        {selectedItems.length === 0 ? (
+                          <span className="text-gray-500">Select items...</span>
+                        ) : (
+                          <span>{selectedItems.length} item(s) selected</span>
+                        )}
+                      </div>
+                      <div
+                        className={`transform transition-transform ${
+                          isSelectOpen ? "rotate-180" : ""
+                        }`}
+                      >
+                        <svg
+                          width="12"
+                          height="8"
+                          viewBox="0 0 12 8"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M1 1L6 6L11 1"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                    {isSelectOpen && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-[#D0D5DD] rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                        <div className="p-2 sticky top-0 bg-white border-b border-[#D0D5DD]">
+                          <input
+                            type="search"
+                            name="itemSearch"
+                            value={itemSearch}
+                            onChange={handleChange}
+                            placeholder="Search items..."
+                            className="w-full border border-[#D0D5DD] p-2 rounded outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                          />
+                        </div>
+                        <ul className="divide-y">
+                          {filteredItems?.length > 0 ? (
+                            filteredItems.map((item) => (
+                              <li
+                                key={item.request_pharmacy_id}
+                                onClick={() => handleToggleItem(item)}
+                                className="px-4 py-3 hover:bg-blue-50 cursor-pointer flex items-center justify-between"
+                              >
+                                <div>
+                                  <p className="font-medium">
+                                    {item.service_item_name}
+                                  </p>
+                                  <p className="text-sm text-gray-500">
+                                    Available: {item.requested_quantity}
+                                  </p>
+                                </div>
+                                <div
+                                  className={`w-5 h-5 rounded border flex items-center justify-center ${
+                                    isItemSelected(item.request_pharmacy_id)
+                                      ? "bg-blue-500 border-blue-500"
+                                      : "border-gray-300"
+                                  }`}
+                                >
+                                  {isItemSelected(item.request_pharmacy_id) && (
+                                    <Check className="h-4 w-4 text-white" />
+                                  )}
+                                </div>
+                              </li>
+                            ))
+                          ) : (
+                            <li className="px-4 py-3 text-gray-500">
+                              No items found
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                  {selectedItems.length > 0 && (
+                    <div className="mt-4 border border-[#D0D5DD] rounded-lg p-4">
+                      <h3 className="font-medium mb-3">Selected Items</h3>
+                      <ul className="divide-y">
+                        {selectedItems.map((item) => {
+                          const stock = pharmacyStocks?.find(
+                            (s) =>
+                              s.request_pharmacy_id === item.request_pharmacy_id
+                          );
+                          const maxQuantity = stock?.requested_quantity || 0;
+                          return (
+                            <li
+                              key={item.request_pharmacy_id}
+                              className="py-3 flex items-center justify-between"
+                            >
+                              <div>
+                                <p className="font-medium">
+                                  {item.service_item_name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {maxQuantity} available
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleQuantityChange(
+                                      item.request_pharmacy_id,
+                                      "decrease"
+                                    )
+                                  }
+                                  className="p-1 rounded-md bg-gray-100 hover:bg-gray-200"
+                                  disabled={item.quantity <= 1}
+                                >
+                                  <Minus className="h-4 w-4" />
+                                </button>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  max={maxQuantity}
+                                  value={item.quantity}
+                                  onChange={(e) =>
+                                    handleQuantityInput(
+                                      item.request_pharmacy_id,
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-12 text-center border border-gray-300 rounded-md p-1"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleQuantityChange(
+                                      item.request_pharmacy_id,
+                                      "increase"
+                                    )
+                                  }
+                                  className="p-1 rounded-md bg-gray-100 hover:bg-gray-200"
+                                  disabled={item.quantity >= maxQuantity}
+                                >
+                                  <Plus className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {selectedDepartment === "laboratory" && (
+                <div>
+                  <h3 className="text-lg font-medium mb-2">Laboratory Tests</h3>
+                  <h4 className="text-sm text-gray-600 mb-4">
+                    Check and select tests from laboratory for the patient here
+                  </h4>
+                  <div className="relative mb-4">
+                    <div
+                      className="border border-[#D0D5DD] rounded-lg p-3 flex items-center justify-between cursor-pointer"
+                      onClick={() => setIsLabSelectOpen(!isLabSelectOpen)}
+                    >
+                      <div className="flex-1">
+                        {selectedLabTests.length === 0 ? (
+                          <span className="text-gray-500">Select tests...</span>
+                        ) : (
+                          <span>
+                            {selectedLabTests.length} test(s) selected
+                          </span>
+                        )}
+                      </div>
+                      <div
+                        className={`transform transition-transform ${
+                          isLabSelectOpen ? "rotate-180" : ""
+                        }`}
+                      >
+                        <svg
+                          width="12"
+                          height="8"
+                          viewBox="0 0 12 8"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M1 1L6 6L11 1"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                    {isLabSelectOpen && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-[#D0D5DD] rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                        <div className="p-2 sticky top-0 bg-white border-b border-[#D0D5DD]">
+                          <input
+                            type="search"
+                            name="labTestSearch"
+                            value={labTestSearch}
+                            onChange={handleChange}
+                            placeholder="Search tests..."
+                            className="w-full border border-[#D0D5DD] p-2 rounded outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                          />
+                        </div>
+                        <ul className="divide-y">
+                          {filteredLabTests?.length > 0 ? (
+                            filteredLabTests.map((test) => (
+                              <li
+                                key={test.id}
+                                onClick={() => handleToggleLabTest(test)}
+                                className="px-4 py-3 hover:bg-blue-50 cursor-pointer flex items-center justify-between"
+                              >
+                                <div>
+                                  <p className="font-medium">{test.name}</p>
+                                </div>
+                                <div
+                                  className={`w-5 h-5 rounded border flex items-center justify-center ${
+                                    isLabTestSelected(test.id)
+                                      ? "bg-blue-500 border-blue-500"
+                                      : "border-gray-300"
+                                  }`}
+                                >
+                                  {isLabTestSelected(test.id) && (
+                                    <Check className="h-4 w-4 text-white" />
+                                  )}
+                                </div>
+                              </li>
+                            ))
+                          ) : (
+                            <li className="px-4 py-3 text-gray-500">
+                              No tests found
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                  {selectedLabTests.length > 0 && (
+                    <div className="mt-4 border border-[#D0D5DD] rounded-lg p-4">
+                      <h3 className="font-medium mb-3">Selected Tests</h3>
+                      <ul className="divide-y">
+                        {selectedLabTests.map((test) => (
+                          <li
+                            key={test.id}
+                            className="py-3 flex items-center justify-between"
+                          >
+                            <div>
+                              <p className="font-medium">{test.name}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="w-12 text-center border border-gray-300 rounded-md p-1">
+                                {test.quantity}
+                              </span>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <textarea
+                rows={5}
+                value={reportNote}
+                onChange={(e) => setReportNote(e.target.value)}
+                placeholder="Enter doctor's report..."
+                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+              <input
+                type="file"
+                accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90"
+              />
+              <button
+                onClick={handleReportSubmit}
+                className={`bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition flex items-center justify-center
+                  ${
+                    isCreating || !selectedDepartment
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
+                  }`}
+                disabled={isCreating || !selectedDepartment}
+              >
+                {isCreating ? (
+                  <>
+                    Adding
+                    <Loader2 className="size-6 mr-2 animate-spin" />
+                  </>
+                ) : (
+                  `Send Report to ${
+                    selectedDepartment
+                      ? departmentLabels[selectedDepartment] || "..."
+                      : "..."
+                  }`
+                )}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {id && (
+        <MedicalTimeline
+          patientId={selectedAppointment?.attributes?.patient?.id}
+          patient={patient}
+          showDownloadCompleteButton={false}
+        />
+      )}
     </div>
   );
+};
+
+const departmentLabels: Record<string, string> = {
+  pharmacist: "Pharmacy",
+  laboratory: "Laboratory",
+  nurse: "Nurse",
 };
 
 export default DoctorAppointmentDetails;
