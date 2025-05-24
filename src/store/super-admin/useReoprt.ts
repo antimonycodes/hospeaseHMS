@@ -10,7 +10,7 @@ const api = axios.create({
 // Attach bearer token
 api.interceptors.request.use(
   (config) => {
-    const token = Cookies.get("token");
+    const token = Cookies.get("hhmstxt");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -66,7 +66,7 @@ export interface ReportStore {
   getMedicalNote: (id: any, type: any) => Promise<any>;
 }
 
-export const useReportStore = create<ReportStore>((set) => ({
+export const useReportStore = create<ReportStore>((set, get) => ({
   isLoading: false,
   isCreating: false,
   isResponding: false,
@@ -325,7 +325,8 @@ export const useReportStore = create<ReportStore>((set) => ({
       );
 
       if (response.status === 201) {
-        toast.success(response.data.message);
+        toast.success(response.data.message || "Report submitted successfully");
+        // await get().getAllReport
         return true;
       }
 

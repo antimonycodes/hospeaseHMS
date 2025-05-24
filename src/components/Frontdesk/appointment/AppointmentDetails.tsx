@@ -97,6 +97,8 @@ const AppointmentDetails = ({
   //   navigate(`/dashboard/appointment/frontdesk/${id}`);
   // };
 
+  console.log(data, "sdf");
+
   const columns: Columns[] = [
     {
       key: "patient",

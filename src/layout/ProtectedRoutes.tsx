@@ -5,7 +5,7 @@ import Cookies from "js-cookie";
 const ProtectedRoutes = () => {
   //   const { isAuthenticated } = useAuthStore();
   //   console.log(isAuthenticated);
-  const token = Cookies.get("token");
+  const token = Cookies.get("hhmstxt");
 
   return token ? <Outlet /> : <Navigate to="/signin" replace />;
 };

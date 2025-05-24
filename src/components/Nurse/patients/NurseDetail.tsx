@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Loader from "../../../Shared/Loader";
 import { useNavigate, useParams } from "react-router-dom";
-import { ChevronLeft, FileText, Loader2 } from "lucide-react";
+import { ChevronLeft, FileText, Loader2, CheckCircle, X } from "lucide-react";
 import { useNurseStore } from "../../../store/super-admin/useNuseStore";
 import { useReportStore } from "../../../store/super-admin/useReoprt";
 import MedicalTimeline from "../../../Shared/MedicalTimeline";
@@ -37,6 +37,11 @@ interface InfoRowItem {
   value: string | number | null;
 }
 
+interface TransferSuccessData {
+  patientName: string;
+  doctorName: string;
+}
+
 const InfoRow: React.FC<{
   items: InfoRowItem[];
   columns?: string;
@@ -56,9 +61,13 @@ const NurseDetail = () => {
   const [file, setFile] = useState<File | null>(null);
   const { id } = useParams<{ id: string }>();
   const { selectedPatient, getPatientById, isLoading } = useNurseStore();
-  const { deptCreateReport, isCreating } = useReportStore();
+  const { deptCreateReport, isCreating, getAllReport } = useReportStore();
   const navigate = useNavigate();
   const [openModal, setOpenModal] = useState(false);
+
+  // Add transfer success state
+  const [transferSuccess, setTransferSuccess] =
+    useState<TransferSuccessData | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -92,11 +101,46 @@ const NurseDetail = () => {
     if (response) {
       setReportNote("");
       setFile(null);
+      // window.location.reload();
+      await getAllReport(id);
     }
     console.log("Report submitted successfully:", response);
   };
+
+  // Handle transfer success from modal
+  const handleTransferSuccess = (successData: TransferSuccessData) => {
+    setTransferSuccess(successData);
+    setOpenModal(false);
+  };
+
+  // Handle closing success message
+  const handleCloseSuccessMessage = () => {
+    setTransferSuccess(null);
+  };
+
   return (
     <div>
+      {/* Transfer Success Message */}
+      {transferSuccess && (
+        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="text-green-600" size={20} />
+            <div className="text-green-800">
+              <p className="font-medium">
+                {transferSuccess.patientName} transferred to{" "}
+                {transferSuccess.doctorName} successfully!
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={handleCloseSuccessMessage}
+            className="text-green-600 hover:text-green-800"
+          >
+            <X size={18} />
+          </button>
+        </div>
+      )}
+
       <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
         {/* Back button */}
         <div
@@ -224,6 +268,7 @@ const NurseDetail = () => {
         <TransferToDoc
           onClose={() => setOpenModal(false)}
           patient={selectedPatient}
+          onTransferSuccess={handleTransferSuccess}
         />
       )}
     </div>

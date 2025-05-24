@@ -10,20 +10,20 @@ interface AddPatientModalProps {
   onClose: () => void;
   createPatient: (
     data: CreatePatientData,
-    endpoint: string,
-    refreshendpoint: string
+    endpoint: string
+    // refreshendpoint: string
   ) => any; // Add endpoint as a parameter
   isLoading: boolean;
   endpoint: string;
-  refreshendpoint: string;
+  // refreshendpoint: string;
 }
 const AddPatientModal = ({
   onClose,
   createPatient,
   isLoading,
   endpoint,
-  refreshendpoint, // Add the endpoint here
-}: AddPatientModalProps) => {
+}: // refreshendpoint, // Add the endpoint here
+AddPatientModalProps) => {
   const [patient, setPatient] = useState<{
     first_name: string;
     last_name: string;
@@ -97,8 +97,8 @@ const AddPatientModal = ({
           : "",
         next_of_kin: [nextOfKin],
       },
-      endpoint,
-      refreshendpoint
+      endpoint
+      // refreshendpoint
     );
 
     if (response) {

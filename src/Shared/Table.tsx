@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import React from "react";
 import Loader from "./Loader";
 
@@ -151,7 +151,7 @@ const Table = <T extends Record<string, any>>({
       </table>
 
       {pagination && paginationData && totalPages > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 bg-white border-t border-[#EAECF0]">
+        <div className=" w-full bg-red-800 flex flex-col sm:flex-row items-center justify-between px-4 py-3 bg-white border-t border-[#EAECF0]">
           {/* Showing entries info */}
           <div className="text-sm text-[#667085] mb-2 sm:mb-0">
             Showing {startItem} to {endItem} of {totalItems} entries
@@ -170,15 +170,7 @@ const Table = <T extends Record<string, any>>({
                 }`}
               type="button"
             >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path
-                  d="M12.5 15L7.5 10L12.5 5"
-                  stroke="#667085"
-                  strokeWidth="1.67"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <ChevronLeft />
               Previous
             </button>
 
@@ -224,15 +216,7 @@ const Table = <T extends Record<string, any>>({
                 }`}
             >
               Next
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path
-                  d="M7.5 5L12.5 10L7.5 15"
-                  stroke="#667085"
-                  strokeWidth="1.67"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <ChevronRight />
             </button>
           </div>
         </div>

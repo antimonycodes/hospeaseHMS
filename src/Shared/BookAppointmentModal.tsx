@@ -140,7 +140,7 @@ const BookAppointmentModal = ({ onClose }: BookAppointmentModalProps) => {
     const success = await bookAppointment(finalAppointmentData);
     if (success) {
       onClose();
-      window.location.reload();
+      // window.location.reload();
     }
   };
 

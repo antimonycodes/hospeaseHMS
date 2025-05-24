@@ -19,7 +19,7 @@ const FrontdeskTable = () => {
 
   // In FrontdeskTable.tsx
   useEffect(() => {
-    getAllPatients("1", "10", "/front-desk/patient/fetch");
+    getAllPatients("1", "20", "/front-desk/patient/fetch");
   }, [getAllPatients]);
   // Transform API data into the correct format
   const formattedPatients: PatientData[] =

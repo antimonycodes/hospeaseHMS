@@ -62,7 +62,7 @@ const FpatientsTable = () => {
           createPatient={createPatient}
           isLoading={isLoading}
           endpoint="/front-desk/patient/create"
-          refreshendpoint={baseEndpoint}
+          // refreshendpoint={baseEndpoint}
         />
       )}
     </div>

@@ -1,16 +1,26 @@
 import { useState, useEffect } from "react";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
-import { Loader2, X } from "lucide-react";
+import { Loader2, X, CheckCircle } from "lucide-react";
 import { useGlobalStore } from "../../../store/super-admin/useGlobal";
+
+interface TransferSuccessData {
+  patientName: string;
+  doctorName: string;
+}
 
 interface TransferToDocProps {
   onClose: () => void;
   patient: any; // Pass the patient directly from NurseDetail
   endpoint?: string;
   refreshEndpoint?: string;
+  onTransferSuccess?: (successData: TransferSuccessData) => void;
 }
 
-const TransferToDoc = ({ onClose, patient }: TransferToDocProps) => {
+const TransferToDoc = ({
+  onClose,
+  patient,
+  onTransferSuccess,
+}: TransferToDocProps) => {
   const { bookAppointment, isLoading } = usePatientStore();
   const { getAllStaffs, allStaffs, getAllRoles, roles } = useGlobalStore();
 
@@ -22,6 +32,10 @@ const TransferToDoc = ({ onClose, patient }: TransferToDocProps) => {
     time: "",
     appointmentType: "staff",
   });
+
+  // Local success state for modal display
+  const [transferSuccess, setTransferSuccess] = useState(false);
+  const [transferredDoctorName, setTransferredDoctorName] = useState("");
 
   const getFilteredDepartments = () => {
     if (!roles || typeof roles !== "object") return [];
@@ -42,6 +56,10 @@ const TransferToDoc = ({ onClose, patient }: TransferToDocProps) => {
   };
 
   useEffect(() => {
+    // Reset states when component mounts
+    setTransferSuccess(false);
+    setTransferredDoctorName("");
+
     // Fetch departments and staff members when component mounts
     getAllRoles();
     getAllStaffs();
@@ -108,10 +126,61 @@ const TransferToDoc = ({ onClose, patient }: TransferToDocProps) => {
 
     console.log("Final Payload:", finalAppointmentData);
 
-    const success = await bookAppointment(finalAppointmentData);
-    if (success) {
-      onClose();
-      window.location.reload();
+    try {
+      const success = await bookAppointment(finalAppointmentData);
+      if (success) {
+        // Set local success state
+        setTransferSuccess(true);
+
+        // Determine doctor name and patient name
+        let doctorName = "";
+        if (
+          appointmentData.appointmentType === "staff" &&
+          appointmentData.user_id
+        ) {
+          const selectedStaff = allStaffs.find(
+            (staff: any) => staff.id === appointmentData.user_id
+          );
+          if (selectedStaff) {
+            doctorName = `Dr. ${selectedStaff.attributes.first_name} ${selectedStaff.attributes.last_name}`;
+          }
+        } else if (
+          appointmentData.appointmentType === "department" &&
+          appointmentData.department_id
+        ) {
+          const selectedDept = getFilteredDepartments().find(
+            (dept) => dept.id === appointmentData.department_id
+          );
+          if (selectedDept) {
+            doctorName = selectedDept.name;
+          }
+        }
+
+        setTransferredDoctorName(doctorName || "Doctor");
+
+        // Prepare success data for parent component
+        const patientAttributes = patient?.attributes || {};
+        const patientName = `${patientAttributes.first_name || ""} ${
+          patientAttributes.last_name || ""
+        }`.trim();
+
+        const successData: TransferSuccessData = {
+          patientName: patientName || "Patient",
+          doctorName: doctorName || "Doctor",
+        };
+
+        // Auto-close modal after showing success for 2 seconds
+        setTimeout(() => {
+          if (onTransferSuccess) {
+            onTransferSuccess(successData);
+          } else {
+            onClose();
+          }
+        }, 2000);
+      }
+    } catch (error) {
+      console.error("Error booking appointment:", error);
+      // Handle error if needed
     }
   };
 
@@ -138,16 +207,51 @@ const TransferToDoc = ({ onClose, patient }: TransferToDocProps) => {
 
   const patientAttributes = patient?.attributes || {};
 
+  const handleClose = () => {
+    if (transferSuccess && onTransferSuccess) {
+      // If transfer was successful, pass data to parent
+      const patientName = `${patientAttributes.first_name || ""} ${
+        patientAttributes.last_name || ""
+      }`.trim();
+      const successData: TransferSuccessData = {
+        patientName: patientName || "Patient",
+        doctorName: transferredDoctorName || "Doctor",
+      };
+      onTransferSuccess(successData);
+    } else {
+      onClose();
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/25 px-6">
       <div className="bg-white w-full max-w-3xl h-[90%] p-6 overflow-y-auto rounded-xl shadow-lg">
         {/* Header */}
         <div className="flex justify-between items-center pb-4">
           <h2 className="text-xl font-semibold">Transfer to Doctor</h2>
-          <button onClick={onClose} className="text-gray-700 hover:text-black">
+          <button
+            onClick={handleClose}
+            className="text-gray-700 hover:text-black"
+          >
             <X size={20} />
           </button>
         </div>
+
+        {/* Success Message (shown in modal briefly) */}
+        {transferSuccess && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
+            <CheckCircle className="text-green-600" size={20} />
+            <div className="text-green-800">
+              <p className="font-medium">
+                {patientAttributes.first_name} {patientAttributes.last_name}{" "}
+                transferred to {transferredDoctorName || "Doctor"} successfully!
+              </p>
+              <p className="text-sm text-green-600 mt-1">
+                Closing modal automatically...
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Patient Info (pre-populated) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
@@ -186,6 +290,7 @@ const TransferToDoc = ({ onClose, patient }: TransferToDocProps) => {
                 name="date"
                 value={appointmentData.date}
                 onChange={handleChange}
+                disabled={transferSuccess}
                 className="w-full border border-gray-300 rounded-lg px-3 py-4"
               />
             </div>
@@ -196,6 +301,7 @@ const TransferToDoc = ({ onClose, patient }: TransferToDocProps) => {
                 name="time"
                 value={appointmentData.time}
                 onChange={handleChange}
+                disabled={transferSuccess}
                 className="w-full border border-gray-300 rounded-lg px-3 py-4"
               />
             </div>
@@ -212,6 +318,7 @@ const TransferToDoc = ({ onClose, patient }: TransferToDocProps) => {
                   value="staff"
                   checked={appointmentData.appointmentType === "staff"}
                   onChange={handleChange}
+                  disabled={transferSuccess}
                   className="mr-2"
                 />
                 <span>Staff Member</span>
@@ -223,6 +330,7 @@ const TransferToDoc = ({ onClose, patient }: TransferToDocProps) => {
                   value="department"
                   checked={appointmentData.appointmentType === "department"}
                   onChange={handleChange}
+                  disabled={transferSuccess}
                   className="mr-2"
                 />
                 <span>Department</span>
@@ -239,6 +347,7 @@ const TransferToDoc = ({ onClose, patient }: TransferToDocProps) => {
               <select
                 name="user_id"
                 onChange={handleChange}
+                disabled={transferSuccess}
                 className="w-full border border-gray-300 rounded-lg px-3 py-4"
                 value={appointmentData.user_id || ""}
               >
@@ -256,6 +365,7 @@ const TransferToDoc = ({ onClose, patient }: TransferToDocProps) => {
               <select
                 name="department_id"
                 onChange={handleChange}
+                disabled={transferSuccess}
                 className="w-full border border-gray-300 rounded-lg px-3 py-4"
                 value={appointmentData.department_id || ""}
               >
@@ -271,25 +381,34 @@ const TransferToDoc = ({ onClose, patient }: TransferToDocProps) => {
 
           {/* Book Button */}
           <div className="mt-6">
-            <button
-              onClick={handleSubmit}
-              disabled={isLoading || !isFormValid()}
-              className={`bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition flex items-center justify-center w-full
-                ${
-                  isLoading || !isFormValid()
-                    ? "opacity-50 cursor-not-allowed"
-                    : ""
-                }`}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="size-6 mr-2 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                "Transfer To Doctor"
-              )}
-            </button>
+            {!transferSuccess ? (
+              <button
+                onClick={handleSubmit}
+                disabled={isLoading || !isFormValid()}
+                className={`bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition flex items-center justify-center w-full
+                  ${
+                    isLoading || !isFormValid()
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
+                  }`}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="size-6 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  "Transfer To Doctor"
+                )}
+              </button>
+            ) : (
+              <button
+                onClick={handleClose}
+                className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition flex items-center justify-center w-full"
+              >
+                Close
+              </button>
+            )}
           </div>
         </div>
       </div>

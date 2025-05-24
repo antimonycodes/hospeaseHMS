@@ -17,7 +17,7 @@ const api = axios.create({
 // Request interceptor to attach the bearer token
 api.interceptors.request.use(
   (config) => {
-    const token = Cookies.get("token");
+    const token = Cookies.get("hhmstxt");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -88,7 +88,7 @@ interface PatientStore {
   patients: any[];
   pagination: Pagination | null;
   selectedPatient: any | null;
-  appointments: any[];
+  appointments: { data: any[]; pagination?: Pagination | null } | null;
   selectedAppointment: any | null;
   labPatients: LabPatient[];
 
@@ -113,8 +113,8 @@ interface PatientStore {
   getPatientByIdDoc: (id: string) => Promise<any>;
   createPatient: (
     data: CreatePatientData,
-    endpoint?: string,
-    refreshendpoint?: string
+    endpoint?: string
+    // refreshendpoint?: string
   ) => Promise<boolean | null>;
   getAllAppointments: (
     page?: string,
@@ -143,7 +143,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   stats: null,
 
   selectedPatient: null,
-  appointments: [],
+  appointments: { data: [], pagination: null },
   pagination: null,
   selectedAppointment: null,
   labPatients: [],
@@ -354,8 +354,8 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   // Create a new Patient
   createPatient: async (
     data,
-    endpoint = "/admin/patient/create",
-    refreshendpoint
+    endpoint = "/admin/patient/create"
+    // refreshendpoint
   ) => {
     set({ isLoading: true });
     try {
@@ -365,24 +365,28 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       };
       const response = await api.post(endpoint, payload);
       if (response.status === 201) {
-        // Refresh the doctors list after creation
-        if (refreshendpoint) {
-          await get().getAllPatients(undefined, undefined, refreshendpoint);
-        } else {
-          await get().getAllPatients();
-        }
+        const newPatient = {
+          id: response.data.data.id,
+          attributes: response.data.data.attributes,
+        };
+
+        set((state) => ({
+          patients: [newPatient, ...state.patients],
+        }));
+
         toast.success(response.data.message);
         return true;
       }
+
       return null;
     } catch (error: any) {
       console.error(error.response?.data);
-      // toast.error(error.response?.data?.message || "Failed to add patient");
       return null;
     } finally {
       set({ isLoading: false });
     }
   },
+
   updatePatient: async (id: string, patientData: any) => {
     set({ isLoading: true });
     try {
@@ -480,7 +484,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
     perPage = "10",
     baseEndpoint = "/medical-report/appointment/all-records"
   ) => {
-    set({ isLoading: true, appointments: [], pagination: null });
+    set({ isLoading: true, appointments: { data: [] }, pagination: null });
     try {
       const endpoint = `${baseEndpoint}?page=${page}&per_page=${perPage}`;
       console.log("Fetching appointments from:", endpoint);
@@ -501,10 +505,12 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
           card_id: appt.attributes.card_id || "N/A",
           patient_contact: appt.attributes.patient_contact || "N/A",
           occupation: appt.attributes.occupation || "N/A",
-          doctor: appt.attributes.doctor || appt.doctor_name || "N/A",
+          doctor: appt.attributes.doctor || appt.doctor_name || null,
+          department: appt.attributes.department || null,
           status: appt.attributes.status || "pending",
           rescheduled_data: appt.attributes.rescheduled_data || null,
           doctor_contact: appt.attributes.doctor_contact || "N/A",
+          department_contact: appt.attributes.department_contact || null,
           date: appt.date || appt.attributes.appointment_date || "",
           time: appt.time || appt.attributes.appointment_time || "",
           reason_if_rejected_or_rescheduled:
@@ -527,39 +533,109 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
         to: rawAppointments.length,
       };
 
+      // FIX: Store the normalized data structure consistently
       set({
-        appointments: response.data.data,
+        appointments: {
+          data: normalizedAppointments,
+          pagination: paginationData,
+        },
         pagination: paginationData,
       });
       console.log("Appointments loaded:", normalizedAppointments);
     } catch (error: any) {
       console.error("Error fetching appointments:", error);
       // toast.error(error.message || "Failed to fetch appointments");
-      set({ appointments: [], pagination: null });
+      set({ appointments: { data: [] }, pagination: null });
     } finally {
       set({ isLoading: false });
     }
   },
+
   bookAppointment: async (
     data: BookAppointmentData,
-    endpoint = "/medical-report/appointment/book",
-    refreshEndpoint = "/medical-report/appointment/all-records"
+    endpoint = "/medical-report/appointment/book"
   ) => {
     set({ isLoading: true });
     try {
       const response = await api.post(endpoint, data);
+
       if (response.status === 201) {
-        console.log(response.data.message);
         toast.success(response.data.message);
-        await get().getAllAppointments(refreshEndpoint);
+
+        // Normalize the new appointment data consistently
+        const appt = response.data.data;
+        const newAppointment = {
+          id: appt.id,
+          attributes: {
+            id: appt.id,
+            patient: appt.attributes?.patient || appt.patient_name || "Unknown",
+            gender: appt.attributes?.gender || "N/A",
+            card_id: appt.attributes?.card_id || "N/A",
+            patient_contact: appt.attributes?.patient_contact || "N/A",
+            occupation: appt.attributes?.occupation || "N/A",
+            doctor: appt.attributes?.doctor || appt.doctor_name || null,
+            department: appt.attributes?.department || null,
+            status: appt.attributes?.status || "pending",
+            rescheduled_data: appt.attributes?.rescheduled_data || null,
+            doctor_contact: appt.attributes?.doctor_contact || "N/A",
+            department_contact: appt.attributes?.department_contact || null,
+            date: appt.date || appt.attributes?.appointment_date || "",
+            time: appt.time || appt.attributes?.appointment_time || "",
+            reason_if_rejected_or_rescheduled:
+              appt.attributes?.reason_if_rejected_or_rescheduled || null,
+            assigned_by: appt.attributes?.assigned_by || "N/A",
+            created_at: appt.attributes?.created_at || "",
+            responded_at: appt.attributes?.responded_at || null,
+          },
+        };
+
+        // FIX: Update state with consistent structure and prevent duplicates
+        set((state) => {
+          const currentAppointments = state.appointments?.data || [];
+
+          // Check if appointment already exists to prevent duplicates
+          const existingIndex = currentAppointments.findIndex(
+            (existing) => existing.id === newAppointment.id
+          );
+
+          let updatedAppointments;
+          if (existingIndex >= 0) {
+            // Replace existing appointment
+            updatedAppointments = [...currentAppointments];
+            updatedAppointments[existingIndex] = newAppointment;
+          } else {
+            // Add new appointment to the beginning
+            updatedAppointments = [newAppointment, ...currentAppointments];
+          }
+
+          return {
+            appointments: {
+              data: updatedAppointments,
+              pagination: state.appointments?.pagination || state.pagination,
+            },
+            // pagination: {
+            //   ...state.pagination,
+            //   total:
+            //     existingIndex >= 0
+            //       ? state.pagination?.total || 0
+            //       : (state.pagination?.total || 0) + 1,
+            //   to:
+            //     existingIndex >= 0
+            //       ? state.pagination?.to || 0
+            //       : (state.pagination?.to || 0) + 1,
+            // },
+          };
+        });
+
         return true;
       }
+
       return false;
     } catch (error: any) {
       console.error(error.response?.data);
-      // toast.error(
-      //   error.response?.data?.message || "Failed to book appointment"
-      // );
+      toast.error(
+        error.response?.data?.message || "Failed to book appointment"
+      );
       return false;
     } finally {
       set({ isLoading: false });

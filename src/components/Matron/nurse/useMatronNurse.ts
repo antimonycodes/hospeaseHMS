@@ -13,7 +13,7 @@ const api = axios.create({
 // Request interceptor to attach the bearer token
 api.interceptors.request.use(
   (config) => {
-    const token = Cookies.get("token");
+    const token = Cookies.get("hhmstxt");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

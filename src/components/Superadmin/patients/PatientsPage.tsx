@@ -177,14 +177,14 @@ const PatientsPage = ({
           createPatient={createPatient}
           isLoading={isLoading}
           endpoint="/admin/patient/create"
-          refreshendpoint="/admin/patient/fetch"
+          // refreshendpoint="/admin/patient/fetch"
         />
       )}
 
       {openModal && modalType === "appointment" && (
         <BookAppointmentModal
-          endpoint={bookEndpoint}
-          refreshEndpoint={refreshEndpoint}
+          // endpoint={bookEndpoint}
+          // refreshEndpoint={refreshEndpoint}
           onClose={() => setOpenModal(false)}
         />
       )}
