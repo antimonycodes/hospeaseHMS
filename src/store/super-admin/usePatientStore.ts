@@ -180,7 +180,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       const response = await api.get("/medical-report/all-patient");
       set({ pagination: response.data.data.pagination });
       console.log(response.data.data.pagination, "pagination");
-      const fetchedPatients = response.data.data.data;
+      const fetchedPatients = response.data.data;
       set({ patients: fetchedPatients });
       console.log(response.data.message);
     } catch (error: any) {

@@ -169,6 +169,12 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       icon: getImageSrc("clinical-defualt.svg"),
       activeIcon: getImageSrc("clinical-active.svg"),
     },
+    {
+      name: "Reset App",
+      path: "/dashboard/reset",
+      icon: getImageSrc("staffs.svg"),
+      activeIcon: getImageSrc("usersWhite.svg"),
+    },
   ],
   "platform-manager": [
     {

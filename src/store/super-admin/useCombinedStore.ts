@@ -73,6 +73,7 @@ interface CombinedStore {
   deleteItem: (id: number) => Promise<any>;
   updateHmoPercentage: (id: any, data: any) => Promise<any>;
   hmoPercentage: () => Promise<any>;
+  resetApp: (data: any) => Promise<any>;
 }
 
 export const useCombinedStore = create<CombinedStore>((set, get) => ({
@@ -207,6 +208,23 @@ export const useCombinedStore = create<CombinedStore>((set, get) => ({
     set({ isDeleting: true });
     try {
       const response = await api.get(`/admin/hmo-settings`);
+
+      if (isSuccessfulResponse(response)) {
+        toast.success(response.data?.message);
+        return true;
+      }
+      return null;
+    } catch (error) {
+      handleErrorToast(error);
+      return null;
+    } finally {
+      set({ isDeleting: false });
+    }
+  },
+  resetApp: async (data) => {
+    set({ isDeleting: true });
+    try {
+      const response = await api.post(`/admin/reset-application`, data);
 
       if (isSuccessfulResponse(response)) {
         toast.success(response.data?.message);

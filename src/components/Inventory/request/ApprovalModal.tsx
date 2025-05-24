@@ -156,10 +156,10 @@ const ApprovalModal = ({ request, onClose, onSuccess }: ApprovalModalProps) => {
             />
           </div>
 
-          <div className="bg-blue-50 p-4 rounded-lg">
+          <div className="bg- p-4 rounded-lg">
             <div className="flex items-start">
               <svg
-                className="w-5 h-5 text-blue-400 mt-0.5 mr-3 flex-shrink-0"
+                className="w-5 h-5 text-primary mt-0.5 mr-3 flex-shrink-0"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -170,8 +170,8 @@ const ApprovalModal = ({ request, onClose, onSuccess }: ApprovalModalProps) => {
                 />
               </svg>
               <div className="text-sm">
-                <p className="font-medium text-blue-800">Approval Process</p>
-                <p className="text-blue-700 mt-1">
+                <p className="font-medium text-primary">Approval Process</p>
+                <p className="text-primary mt-1">
                   This will dispense <strong>{quantity}</strong> unit(s) of{" "}
                   <strong>{request.attributes.item_requested}</strong> to the
                   pharmacy and update the request status to approved.

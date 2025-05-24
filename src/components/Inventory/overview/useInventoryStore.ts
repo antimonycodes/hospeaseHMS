@@ -115,6 +115,7 @@ interface InventoryStore {
     endpoint?: string,
     refreshEndpoint?: string
   ) => Promise<boolean | null>;
+  deleteStock: (id: number, fetchEndpoint?: string) => Promise<boolean>;
   searchStaff: (query: string) => Promise<Staff[]>;
   getAllRequest: (endpoint?: string) => Promise<void>;
   getAllCategorys: (fetchEndpoint: string) => Promise<void>;
@@ -390,6 +391,29 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
+  deleteStock: async (
+    id: number,
+    fetchEndpoint = "/inventory/category/all-records"
+  ) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.delete(
+        `/medical-report/inventory/delete/${id}`
+      );
+      if (response.status === 200 || response.status === 204) {
+        await get().getAllStocks();
+        toast.success(response.data.message || "Category deleted successfully");
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.error("deleteCategory error:", error.response?.data);
+      toast.error(error.response?.data?.message || "Failed to delete category");
+      return false;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 
   getInventoryStats: async (endpoint = "/inventory/stats") => {
     set({ isLoading: true });
@@ -581,7 +605,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
         "/medical-report/restock-inventory/all-dept-restock-request-item"
       );
       if (response.status === 200) {
-        toast.success(response.data.message || "Request sent successfully");
+        // toast.success(response.data.message || "Request sent successfully");
         set({ allPharRequest: response.data.data.data });
         console.log("allPharmacyRequest", response.data.data.data);
         return true;
@@ -603,7 +627,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
         data
       );
       if (response.status === 200) {
-        toast.success(response.data.message || "Request status updated");
+        // toast.success(response.data.message || "Request status updated");
         get().allPharmacyRequest();
         console.log("allPharmacyRequest", response.data.data.data);
         return true;

@@ -212,7 +212,7 @@ const PharmacyStocks = () => {
           onClick={() => handleRequestMore(request)}
           disabled={isLoading}
         >
-          {isLoading ? "Requesting..." : "Request more"}
+          {isLoading ? "Requesting..." : "Request"}
         </button>
       ),
     },

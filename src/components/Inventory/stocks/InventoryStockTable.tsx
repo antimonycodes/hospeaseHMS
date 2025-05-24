@@ -5,6 +5,7 @@ import {
   Package,
   AlertTriangle,
   Clock,
+  Trash,
 } from "lucide-react";
 import Table from "../../../Shared/Table";
 import Loader from "../../../Shared/Loader";
@@ -52,7 +53,8 @@ const InventoryStockTable = ({
   stocks,
   isLoading,
 }: InventoryStockTableProps) => {
-  const { reStock, reStockHistory, restockHistoryData } = useInventoryStore();
+  const { reStock, reStockHistory, restockHistoryData, deleteStock } =
+    useInventoryStore();
   const [restockModalOpen, setRestockModalOpen] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [selectedStock, setSelectedStock] = useState<any>(null);
@@ -184,6 +186,18 @@ const InventoryStockTable = ({
     is_expired: stock.attributes.is_expired,
   }));
 
+  const handleDelete = async (stockId: number) => {
+    const stock = stocks.find((s) => s.id === stockId);
+    if (stock) {
+      setSelectedStock(stock);
+      setHistoryModalOpen(true);
+    }
+    const response = await deleteStock(stockId);
+    if (response) {
+      // Handle successful deletion (e.g., show a success message, refresh the stock list)
+    }
+  };
+
   const handleRestock = (stockId: number) => {
     const stock = stocks.find((s) => s.id === stockId);
     if (stock) {
@@ -266,6 +280,9 @@ const InventoryStockTable = ({
 
         return (
           <div className="flex items-center gap-2">
+            <button onClick={() => handleDelete(stock.id)}>
+              <Trash className="w-3.5 h-3.5" />
+            </button>
             <button
               onClick={() => handleRestock(stock.id)}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors duration-200 shadow-sm hover:shadow-md ${
