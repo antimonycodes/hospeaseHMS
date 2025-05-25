@@ -31,7 +31,7 @@ const DashboardLayout = () => {
       />
       <main className="flex-1 bg-[#efefef] overflow-y-auto">
         <TopNav setIsMobileMenuOpen={setIsMobileMenuOpen} />
-        <div className="p-3 md:p-6 w-full">
+        <div className="p-2 md:p-6 w-full">
           {/* <TourOverlay /> */}
           {role === "front-desk-manager" && (
             <>

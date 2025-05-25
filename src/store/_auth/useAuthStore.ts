@@ -113,7 +113,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
   logout: async () => {
     localStorage.removeItem("role");
-    Cookies.remove("token");
+    Cookies.remove("hhmstxt");
     set({ user: [], role: "", isAuthenticated: false });
   },
   signup: async (data) => {

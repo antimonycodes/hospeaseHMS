@@ -125,7 +125,7 @@ const Signin = () => {
           >
             {isLoading ? (
               <>
-                Logging in
+                {/* Logging in */}
                 <Loader2 className=" size-6 mr-2 animate-spin" />
               </>
             ) : (
