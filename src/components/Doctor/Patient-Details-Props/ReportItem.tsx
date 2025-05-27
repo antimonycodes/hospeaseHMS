@@ -1,4 +1,8 @@
 import { FileText, User } from "lucide-react";
+import {
+  FormattedReportNote,
+  StructuredReportDisplay,
+} from "../../../utils/noteUtils";
 
 export const ReportItem = ({ report }: { report: any }) => {
   const staff = report.attributes.staff_details;
@@ -13,7 +17,7 @@ export const ReportItem = ({ report }: { report: any }) => {
   const hasValidLabItems = report.attributes.laboratory_service_items;
 
   return (
-    <div className="p-4 bg-gray-50 rounded-lg border border-[#667085]  hover:shadow-md transition mb-4">
+    <div className="p-4  rounded-lg border border-[#667085]  hover:shadow-md transition mb-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <StaffAvatar staff={staff} />
@@ -33,7 +37,10 @@ export const ReportItem = ({ report }: { report: any }) => {
       </div>
 
       {report.attributes.note && (
-        <p className="text-sm text-gray-600 mb-2">{report.attributes.note}</p>
+        <p className="text-sm text-gray-600 mb-2">
+          {" "}
+          <FormattedReportNote note={report.attributes.note} />
+        </p>
       )}
 
       {/* Only display pharmacy items section if valid items exist */}

@@ -85,6 +85,7 @@ export interface PatientStats {
 
 interface PatientStore {
   isLoading: boolean;
+  isBooking: boolean;
   patients: any[];
   pagination: Pagination | null;
   selectedPatient: any | null;
@@ -138,9 +139,10 @@ interface PatientStore {
 }
 
 export const usePatientStore = create<PatientStore>((set, get) => ({
-  isLoading: true,
+  isLoading: false,
   patients: [],
   stats: null,
+  isBooking: true,
 
   selectedPatient: null,
   appointments: { data: [], pagination: null },

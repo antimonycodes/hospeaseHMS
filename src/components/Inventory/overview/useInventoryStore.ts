@@ -2,7 +2,6 @@ import { create } from "zustand";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
-import { Cat } from "lucide-react";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_URL,

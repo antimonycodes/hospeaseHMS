@@ -1,4 +1,5 @@
 import { User } from "lucide-react";
+import { StructuredReportDisplay } from "../../../utils/noteUtils";
 
 export const NoteItem = ({ note }: { note: any }) => {
   const staff = note.attributes.staff_details;
@@ -12,7 +13,9 @@ export const NoteItem = ({ note }: { note: any }) => {
           role="Doctor's Note"
         />
       </div>
-      <p className="text-sm text-gray-600">{note.attributes.note}</p>
+      <p className="text-sm text-gray-600">
+        <StructuredReportDisplay note={note.attributes.note} />
+      </p>
     </div>
   );
 };

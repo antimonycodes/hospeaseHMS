@@ -42,6 +42,29 @@ interface TransferSuccessData {
   doctorName: string;
 }
 
+interface VitalsData {
+  weight: string;
+  height: string;
+  bmi: string;
+  systolic: string;
+  diastolic: string;
+  temperature: string;
+  respiratoryRate: string;
+  heartRate: string;
+  urineOutput: string;
+  bloodSugarF: string;
+  bloodSugarR: string;
+  spo2: string;
+  avpu: string;
+  trauma: string;
+  mobility: string;
+  oxygenSupplementation: string;
+  intake: string;
+  output: string;
+  vitalTakenTime: string;
+  comments: string;
+}
+
 const InfoRow: React.FC<{
   items: InfoRowItem[];
   columns?: string;
@@ -69,6 +92,30 @@ const NurseDetail = () => {
   const [transferSuccess, setTransferSuccess] =
     useState<TransferSuccessData | null>(null);
 
+  // Vitals state
+  const [vitals, setVitals] = useState<VitalsData>({
+    weight: "",
+    height: "",
+    bmi: "",
+    systolic: "",
+    diastolic: "",
+    temperature: "",
+    respiratoryRate: "",
+    heartRate: "",
+    urineOutput: "",
+    bloodSugarF: "",
+    bloodSugarR: "",
+    spo2: "",
+    avpu: "",
+    trauma: "",
+    mobility: "",
+    oxygenSupplementation: "",
+    intake: "",
+    output: "",
+    vitalTakenTime: "",
+    comments: "",
+  });
+
   useEffect(() => {
     if (id) {
       console.log("Fetching patient with ID:", id);
@@ -77,6 +124,33 @@ const NurseDetail = () => {
       });
     }
   }, [id, getPatientById]);
+
+  // Format vitals for report
+  const formatVitalsForReport = () => {
+    const vitalsEntries = Object.entries(vitals)
+      .filter(([_, value]) => value.trim() !== "")
+      .map(([key, value]) => {
+        // Convert camelCase to readable labels
+        const label = key
+          .replace(/([A-Z])/g, " $1")
+          .replace(/^./, (str) => str.toUpperCase())
+          .replace(/Bmi/, "BMI")
+          .replace(/Spo2/, "SPO2")
+          .replace(/Avpu/, "AVPU");
+
+        return `${label}: ${value}`;
+      });
+
+    return vitalsEntries.length > 0
+      ? `PATIENT VITALS:\n${vitalsEntries.join("\n")}\n\n`
+      : "";
+  };
+
+  // Update report note whenever vitals change
+  useEffect(() => {
+    const vitalsReport = formatVitalsForReport();
+    setReportNote(vitalsReport);
+  }, [vitals]);
 
   console.log("Selected Patient in Component:", selectedPatient);
 
@@ -91,6 +165,27 @@ const NurseDetail = () => {
   const patient: PatientAttributes = selectedPatient.attributes;
   const nextOfKinList: NextOfKin[] = patient.next_of_kin || [];
 
+  // Handle vitals input change
+  const handleVitalsChange = (field: keyof VitalsData, value: string) => {
+    setVitals((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+
+    // Auto-calculate BMI if both weight and height are provided
+    if (field === "weight" || field === "height") {
+      const updatedVitals = { ...vitals, [field]: value };
+      const weight = parseFloat(updatedVitals.weight);
+      const height = parseFloat(updatedVitals.height);
+
+      if (weight > 0 && height > 0) {
+        const heightInMeters = height / 100; // Convert cm to meters
+        const bmi = (weight / (heightInMeters * heightInMeters)).toFixed(1);
+        setVitals((prev) => ({ ...prev, [field]: value, bmi }));
+      }
+    }
+  };
+
   const handleReportSubmit = async () => {
     const response = await deptCreateReport({
       patient_id: id ?? null,
@@ -101,7 +196,29 @@ const NurseDetail = () => {
     if (response) {
       setReportNote("");
       setFile(null);
-      // window.location.reload();
+      // Reset vitals
+      setVitals({
+        weight: "",
+        height: "",
+        bmi: "",
+        systolic: "",
+        diastolic: "",
+        temperature: "",
+        respiratoryRate: "",
+        heartRate: "",
+        urineOutput: "",
+        bloodSugarF: "",
+        bloodSugarR: "",
+        spo2: "",
+        avpu: "",
+        trauma: "",
+        mobility: "",
+        oxygenSupplementation: "",
+        intake: "",
+        output: "",
+        vitalTakenTime: "",
+        comments: "",
+      });
       await getAllReport(id);
     }
     console.log("Report submitted successfully:", response);
@@ -212,7 +329,268 @@ const NurseDetail = () => {
           </div>
         </div>
       </div>
-      {/*  */}
+
+      {/* Enhanced Vitals Section */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white rounded-lg custom-shadow mb-6 p-4 sm:p-6">
+        <h3 className="col-span-full text-lg font-semibold mb-4">
+          Patient Vitals
+        </h3>
+
+        {/* Basic Measurements */}
+        <div className="flex flex-col gap-1">
+          <label htmlFor="weight">Weight (KG)</label>
+          <input
+            type="number"
+            id="weight"
+            value={vitals.weight}
+            onChange={(e) => handleVitalsChange("weight", e.target.value)}
+            className="border border-[#D0D5DD] rounded-[6px] p-4 outline-none focus:ring-1 focus:ring-primary"
+            placeholder="70"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="height">Height (cm)</label>
+          <input
+            type="number"
+            id="height"
+            value={vitals.height}
+            onChange={(e) => handleVitalsChange("height", e.target.value)}
+            className="border border-[#D0D5DD] rounded-[6px] p-4 outline-none focus:ring-1 focus:ring-primary"
+            placeholder="170"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="bmi">BMI (kg/m²)</label>
+          <input
+            type="text"
+            id="bmi"
+            value={vitals.bmi}
+            readOnly
+            className="border border-[#D0D5DD] rounded-[6px] p-4 outline-none bg-gray-50"
+            placeholder="Auto-calculated"
+          />
+        </div>
+
+        {/* Blood Pressure */}
+        <div className="flex flex-col gap-1">
+          <label htmlFor="systolic">Systolic B.P</label>
+          <input
+            type="number"
+            id="systolic"
+            value={vitals.systolic}
+            onChange={(e) => handleVitalsChange("systolic", e.target.value)}
+            className="border border-[#D0D5DD] rounded-[6px] p-4 outline-none focus:ring-1 focus:ring-primary"
+            placeholder="120"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="diastolic">Diastolic B.P</label>
+          <input
+            type="number"
+            id="diastolic"
+            value={vitals.diastolic}
+            onChange={(e) => handleVitalsChange("diastolic", e.target.value)}
+            className="border border-[#D0D5DD] rounded-[6px] p-4 outline-none focus:ring-1 focus:ring-primary"
+            placeholder="80"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="temperature">Temperature (°C)</label>
+          <input
+            type="number"
+            step="0.1"
+            id="temperature"
+            value={vitals.temperature}
+            onChange={(e) => handleVitalsChange("temperature", e.target.value)}
+            className="border border-[#D0D5DD] rounded-[6px] p-4 outline-none focus:ring-1 focus:ring-primary"
+            placeholder="36.5"
+          />
+        </div>
+
+        {/* Vital Signs */}
+        <div className="flex flex-col gap-1">
+          <label htmlFor="respiratoryRate">Respiratory Rate (/Min)</label>
+          <input
+            type="number"
+            id="respiratoryRate"
+            value={vitals.respiratoryRate}
+            onChange={(e) =>
+              handleVitalsChange("respiratoryRate", e.target.value)
+            }
+            className="border border-[#D0D5DD] rounded-[6px] p-4 outline-none focus:ring-1 focus:ring-primary"
+            placeholder="20"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="heartRate">Heart Rate (BPM)</label>
+          <input
+            type="number"
+            id="heartRate"
+            value={vitals.heartRate}
+            onChange={(e) => handleVitalsChange("heartRate", e.target.value)}
+            className="border border-[#D0D5DD] rounded-[6px] p-4 outline-none focus:ring-1 focus:ring-primary"
+            placeholder="72"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="urineOutput">Urine Output</label>
+          <input
+            type="text"
+            id="urineOutput"
+            value={vitals.urineOutput}
+            onChange={(e) => handleVitalsChange("urineOutput", e.target.value)}
+            className="border border-[#D0D5DD] rounded-[6px] p-4 outline-none focus:ring-1 focus:ring-primary"
+            placeholder="Normal"
+          />
+        </div>
+
+        {/* Blood Sugar */}
+        <div className="flex flex-col gap-1">
+          <label htmlFor="bloodSugarF">Blood Sugar (F)</label>
+          <input
+            type="number"
+            id="bloodSugarF"
+            value={vitals.bloodSugarF}
+            onChange={(e) => handleVitalsChange("bloodSugarF", e.target.value)}
+            className="border border-[#D0D5DD] rounded-[6px] p-4 outline-none focus:ring-1 focus:ring-primary"
+            placeholder="80"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="bloodSugarR">Blood Sugar (R)</label>
+          <input
+            type="number"
+            id="bloodSugarR"
+            value={vitals.bloodSugarR}
+            onChange={(e) => handleVitalsChange("bloodSugarR", e.target.value)}
+            className="border border-[#D0D5DD] rounded-[6px] p-4 outline-none focus:ring-1 focus:ring-primary"
+            placeholder="120"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="spo2">SPO2 (%)</label>
+          <input
+            type="number"
+            id="spo2"
+            value={vitals.spo2}
+            onChange={(e) => handleVitalsChange("spo2", e.target.value)}
+            className="border border-[#D0D5DD] rounded-[6px] p-4 outline-none focus:ring-1 focus:ring-primary"
+            placeholder="98"
+          />
+        </div>
+
+        {/* Assessment Fields */}
+        <div className="flex flex-col gap-1">
+          <label htmlFor="avpu">AVPU</label>
+          <select
+            id="avpu"
+            value={vitals.avpu}
+            onChange={(e) => handleVitalsChange("avpu", e.target.value)}
+            className="border border-[#D0D5DD] rounded-[6px] p-4 outline-none focus:ring-1 focus:ring-primary"
+          >
+            <option value="">Select</option>
+            <option value="Alert">Alert</option>
+            <option value="Voice">Voice</option>
+            <option value="Pain">Pain</option>
+            <option value="Unresponsive">Unresponsive</option>
+          </select>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="trauma">Trauma</label>
+          <select
+            id="trauma"
+            value={vitals.trauma}
+            onChange={(e) => handleVitalsChange("trauma", e.target.value)}
+            className="border border-[#D0D5DD] rounded-[6px] p-4 outline-none focus:ring-1 focus:ring-primary"
+          >
+            <option value="">Select</option>
+            <option value="None">None</option>
+            <option value="Minor">Minor</option>
+            <option value="Major">Major</option>
+          </select>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="mobility">Mobility</label>
+          <select
+            id="mobility"
+            value={vitals.mobility}
+            onChange={(e) => handleVitalsChange("mobility", e.target.value)}
+            className="border border-[#D0D5DD] rounded-[6px] p-4 outline-none focus:ring-1 focus:ring-primary"
+          >
+            <option value="">Select</option>
+            <option value="Independent">Independent</option>
+            <option value="Assisted">Assisted</option>
+            <option value="Bed-bound">Bed-bound</option>
+          </select>
+        </div>
+
+        {/* I/O and Support */}
+        <div className="flex flex-col gap-1">
+          <label htmlFor="oxygenSupplementation">Oxygen Supplementation</label>
+          <select
+            id="oxygenSupplementation"
+            value={vitals.oxygenSupplementation}
+            onChange={(e) =>
+              handleVitalsChange("oxygenSupplementation", e.target.value)
+            }
+            className="border border-[#D0D5DD] rounded-[6px] p-4 outline-none focus:ring-1 focus:ring-primary"
+          >
+            <option value="">Select</option>
+            <option value="None">None</option>
+            <option value="Nasal Cannula">Nasal Cannula</option>
+            <option value="Face Mask">Face Mask</option>
+            <option value="Ventilator">Ventilator</option>
+          </select>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="intake">Intake (ml)</label>
+          <input
+            type="number"
+            id="intake"
+            value={vitals.intake}
+            onChange={(e) => handleVitalsChange("intake", e.target.value)}
+            className="border border-[#D0D5DD] rounded-[6px] p-4 outline-none focus:ring-1 focus:ring-primary"
+            placeholder="1500"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="output">Output (ml)</label>
+          <input
+            type="number"
+            id="output"
+            value={vitals.output}
+            onChange={(e) => handleVitalsChange("output", e.target.value)}
+            className="border border-[#D0D5DD] rounded-[6px] p-4 outline-none focus:ring-1 focus:ring-primary"
+            placeholder="1200"
+          />
+        </div>
+
+        <div className="col-span-full flex flex-col gap-1">
+          <label htmlFor="comments">Comments</label>
+          <textarea
+            id="comments"
+            rows={3}
+            value={vitals.comments}
+            onChange={(e) => handleVitalsChange("comments", e.target.value)}
+            className="border border-[#D0D5DD] rounded-[6px] p-4 outline-none focus:ring-1 focus:ring-primary"
+            placeholder="Additional observations or notes..."
+          />
+        </div>
+      </div>
+
+      {/* nurse report */}
       <div className="bg-white rounded-lg custom-shadow mb-6 p-4 sm:p-6">
         <button
           className={`flex mb-4 text-primary items-center gap-1 px-3 py-1 rounded-md transition
@@ -224,10 +602,11 @@ const NurseDetail = () => {
 
         <div className="space-y-4">
           <textarea
-            rows={5}
+            disabled
+            rows={8}
             value={reportNote}
             onChange={(e) => setReportNote(e.target.value)}
-            placeholder="Enter nurse's report..."
+            placeholder="Vitals will appear here automatically as you fill them above."
             className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-primary"
           />
           <input
