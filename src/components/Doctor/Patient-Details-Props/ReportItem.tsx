@@ -37,10 +37,10 @@ export const ReportItem = ({ report }: { report: any }) => {
       </div>
 
       {report.attributes.note && (
-        <p className="text-sm text-gray-600 mb-2">
+        <div className="text-sm text-gray-600 mb-2">
           {" "}
           <FormattedReportNote note={report.attributes.note} />
-        </p>
+        </div>
       )}
 
       {/* Only display pharmacy items section if valid items exist */}

@@ -281,7 +281,7 @@ const InventoryStockTable = ({
         return (
           <div className="flex items-center gap-2">
             <button onClick={() => handleDelete(stock.id)}>
-              <Trash className="w-3.5 h-3.5" />
+              <Trash className="w-3.5 h-3.5 text-red-600" />
             </button>
             <button
               onClick={() => handleRestock(stock.id)}
