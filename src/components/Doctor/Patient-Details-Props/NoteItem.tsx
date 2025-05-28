@@ -3,15 +3,18 @@ import { StructuredReportDisplay } from "../../../utils/noteUtils";
 
 export const NoteItem = ({ note }: { note: any }) => {
   const staff = note.attributes.staff_details;
+  const doctorname = note.attributes.doctor_name;
 
   return (
     <div className="p-4 bg-white rounded-lg border-l-4 border border-blue-200 border-l-primary hover:shadow-md transition">
-      <div className="flex items-center gap-3 mb-3">
-        <DoctorAvatar staff={staff} />
-        <StaffInfo
-          // name={`${staff?.first_name} ${staff?.last_name}`}
-          role="Doctor's Note"
-        />
+      <h1>History & Evaluation</h1>
+      <div className=" flex justify-between">
+        <div className="flex items-center gap-3 mb-3">
+          <DoctorAvatar staff={staff} />
+          <StaffInfo name={doctorname} role="" />
+        </div>
+        {/*  */}
+        <div>Date</div>
       </div>
       <p className="text-sm text-gray-600">
         <StructuredReportDisplay note={note.attributes.note} />

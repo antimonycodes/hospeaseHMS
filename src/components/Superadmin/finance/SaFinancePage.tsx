@@ -55,7 +55,7 @@ const SaFinancePage = ({
           className="flex items-center text-[12px] gap-2 px-2 md:px-4"
           onClick={openModal}
         >
-          Add Stock
+          Add Payment
           <Plus size={20} />
         </Button>
       );

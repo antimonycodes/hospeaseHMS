@@ -6,6 +6,10 @@ import {
   AlertTriangle,
   Clock,
   Trash,
+  Search,
+  Filter,
+  X,
+  Calendar,
 } from "lucide-react";
 import Table from "../../../Shared/Table";
 import Loader from "../../../Shared/Loader";
@@ -24,6 +28,7 @@ type StockData = {
   expiry_date: string;
   cost: number;
   is_expired?: boolean;
+  created_at: string;
 };
 
 type Columns = {
@@ -31,6 +36,16 @@ type Columns = {
   label: string;
   render?: (value: any, stocks: StockData) => JSX.Element;
 };
+
+interface FilterParams {
+  search: string;
+  category: string;
+  profit_range: string;
+  stock_status: string;
+  expiry_status: string;
+  from_date: string;
+  to_date: string;
+}
 
 interface InventoryStockTableProps {
   isLoading: boolean;
@@ -44,6 +59,7 @@ interface InventoryStockTableProps {
       expiry_date: string;
       cost: number;
       is_expired?: boolean;
+      created_at?: string;
     };
     id: number;
   }[];
@@ -53,11 +69,80 @@ const InventoryStockTable = ({
   stocks,
   isLoading,
 }: InventoryStockTableProps) => {
-  const { reStock, reStockHistory, restockHistoryData, deleteStock } =
-    useInventoryStore();
+  const {
+    reStock,
+    reStockHistory,
+    restockHistoryData,
+    deleteStock,
+    getAllStocks,
+  } = useInventoryStore();
   const [restockModalOpen, setRestockModalOpen] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [selectedStock, setSelectedStock] = useState<any>(null);
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Filter states
+  const [filters, setFilters] = useState<FilterParams>({
+    search: "",
+    category: "",
+    profit_range: "",
+    stock_status: "",
+    expiry_status: "",
+    from_date: "",
+    to_date: "",
+  });
+
+  // Get unique categories from stocks for filter dropdown
+  const categories = Array.from(
+    new Set(stocks?.map((stock) => stock.attributes.category).filter(Boolean))
+  );
+
+  // Debounced search effect
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      handleFilterChange();
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [filters.search]);
+
+  // Handle filter changes
+  const handleFilterChange = () => {
+    const queryParams = new URLSearchParams();
+
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value && value.trim() !== "") {
+        queryParams.append(key, value.trim());
+      }
+    });
+
+    const queryString = queryParams.toString();
+    const endpoint = queryString
+      ? `/inventory/all-inventory-items?${queryString}`
+      : "/inventory/all-inventory-items";
+
+    getAllStocks("1", "1000", endpoint);
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setFilters({
+      search: "",
+      category: "",
+      profit_range: "",
+      stock_status: "",
+      expiry_status: "",
+      from_date: "",
+      to_date: "",
+    });
+    getAllStocks("1", "1000", "/inventory/all-inventory-items");
+  };
+
+  // Apply filters
+  const applyFilters = () => {
+    handleFilterChange();
+    setShowFilters(false);
+  };
 
   // Helper function to format currency - handles comma-separated values
   const formatCurrency = (amount: number | string) => {
@@ -183,6 +268,7 @@ const InventoryStockTable = ({
     service_item_price: stock.attributes.service_item_price,
     selling_price: stock.attributes.service_item_price,
     profit: stock.attributes.profit,
+    created_at: stock.attributes.created_at ?? "",
     is_expired: stock.attributes.is_expired,
   }));
 
@@ -262,6 +348,11 @@ const InventoryStockTable = ({
       ),
     },
     {
+      key: "created_at",
+      label: "Created At",
+      render: (_, stock) => <span>{stock.created_at}</span>,
+    },
+    {
       key: "expiry_date",
       label: "Expiry Status",
       render: (_, stock) =>
@@ -269,7 +360,7 @@ const InventoryStockTable = ({
     },
     {
       key: "actions",
-      label: "Actions",
+      label: "",
       render: (_, stock) => {
         const qty =
           typeof stock.quantity === "string"
@@ -322,6 +413,110 @@ const InventoryStockTable = ({
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      {/* Search and Filter Bar */}
+      <div className="p-4 border-b border-gray-200">
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          {/* Search Input */}
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Search items..."
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors"
+              value={filters.search}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, search: e.target.value }))
+              }
+            />
+          </div>
+
+          {/* Filter Toggle and Clear */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
+                showFilters
+                  ? "bg-primary text-white border-primary"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+              }`}
+            >
+              <Filter className="w-4 h-4" />
+              Filters
+            </button>
+
+            {Object.values(filters).some((value) => value !== "") && (
+              <button
+                onClick={clearFilters}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <X className="w-4 h-4" />
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Advanced Filters */}
+        {showFilters && (
+          <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Date Range */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  From Date
+                </label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="date"
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                    value={filters.from_date}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        from_date: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  To Date
+                </label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="date"
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                    value={filters.to_date}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        to_date: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Apply Filters Button */}
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={applyFilters}
+                className="inline-flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+              >
+                <Filter className="w-4 h-4" />
+                Apply Filters
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Table */}
       <div className="overflow-x-auto">
         <Table
           data={formattedStocks}
@@ -331,6 +526,7 @@ const InventoryStockTable = ({
         />
       </div>
 
+      {/* Modals */}
       {restockModalOpen && selectedStock && (
         <RestockModal
           onClose={() => setRestockModalOpen(false)}

@@ -18,11 +18,11 @@ interface Patient {
     | "Accepted"
     | "Declined"
     | "Rescheduled"
-    | "Completed"
+    // | "Completed"
     | undefined;
 }
 
-const tabs = ["Pending", "Accepted", "Rescheduled", "Completed"] as const;
+const tabs = ["Pending", "Accepted", "Rescheduled"] as const;
 type TabType = (typeof tabs)[number];
 
 const getStatusCounts = (patients: Patient[]) => {
@@ -38,7 +38,6 @@ const getStatusCounts = (patients: Patient[]) => {
       Accepted: 0,
       Rescheduled: 0,
       Declined: 0,
-      Completed: 0,
     }
   );
 };
@@ -66,9 +65,7 @@ const NurseAppointment = () => {
       case "reschedule":
         status = "Rescheduled";
         break;
-      case "completed":
-        status = "Completed";
-        break;
+
       case "rejected":
         status = "Declined";
         break;
