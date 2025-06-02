@@ -66,6 +66,9 @@ import CreateShift from "./components/Matron/shifts/CreateShift";
 import NurseAppointmentDetails from "./components/Nurse/Appointment/NurseAppointmentDetails";
 import RestockHistoryModal from "./components/Inventory/stocks/RestockHistoryModal";
 import ResetApp from "./components/Superadmin/reset/ResetApp";
+import AdmissionOverview from "./components/Admission/AdmissionOverview";
+import AdmissionPage from "./components/Admission/AdmissionPage";
+import AdmissionDetails from "./components/Admission/AdmissionDetails";
 
 function App() {
   return (
@@ -196,6 +199,8 @@ function App() {
               <Route path="notifications" element={<NotificationPage />} />
               <Route path="service-charges" element={<ServiceCharges />} />
               <Route path="reset" element={<ResetApp />} />
+              <Route path="admission" element={<AdmissionPage />} />
+              <Route path="admission-details" element={<AdmissionDetails />} />
             </Route>
           </Route>
         </Routes>

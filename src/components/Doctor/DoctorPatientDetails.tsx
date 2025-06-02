@@ -25,6 +25,161 @@ import { useGlobalStore } from "../../store/super-admin/useGlobal";
 import Loader from "../../Shared/Loader";
 import MedicalTimeline from "../../Shared/MedicalTimeline";
 
+const COMMON_COMPLAINTS = [
+  "Headache",
+  "Fever",
+  "Cough",
+  "Sore throat",
+  "Nausea",
+  "Vomiting",
+  "Diarrhea",
+  "Constipation",
+  "Abdominal pain",
+  "Chest pain",
+  "Back pain",
+  "Joint pain",
+  "Fatigue",
+  "Dizziness",
+  "Shortness of breath",
+  "Palpitations",
+  "Rash",
+  "Itching",
+  "Swelling",
+  "Weight loss",
+  "Weight gain",
+  "Loss of appetite",
+  "Difficulty sleeping",
+  "Anxiety",
+  "Depression",
+  "Memory problems",
+  "Confusion",
+  "Blurred vision",
+  "Hearing loss",
+  "Earache",
+  "Runny nose",
+  "Sneezing",
+  "Muscle weakness",
+  "Numbness",
+  "Tingling",
+  "Difficulty swallowing",
+  "Frequent urination",
+  "Painful urination",
+  "Blood in urine",
+  "Irregular periods",
+  "Excessive bleeding",
+  "Hot flashes",
+  "Night sweats",
+  "Chills",
+];
+
+// Laboratory investigation parameters
+const LAB_PARAMETERS = [
+  {
+    name: "Hematology",
+    parameters: [
+      "Full Blood Count (FBC)",
+      "Complete Blood Count (CBC)",
+      "Hemoglobin (Hb)",
+      "Hematocrit (HCT)",
+      "White Blood Cell Count (WBC)",
+      "Platelet Count",
+      "ESR (Erythrocyte Sedimentation Rate)",
+      "Bleeding Time",
+      "Clotting Time",
+      "Prothrombin Time (PT)",
+      "Partial Thromboplastin Time (PTT)",
+    ],
+  },
+  {
+    name: "Biochemistry",
+    parameters: [
+      "Fasting Blood Sugar (FBS)",
+      "Random Blood Sugar (RBS)",
+      "HbA1c (Glycated Hemoglobin)",
+      "Lipid Profile",
+      "Total Cholesterol",
+      "HDL Cholesterol",
+      "LDL Cholesterol",
+      "Triglycerides",
+      "Liver Function Tests (LFTs)",
+      "Kidney Function Tests (KFTs)",
+      "Urea",
+      "Creatinine",
+      "Electrolytes (Na, K, Cl)",
+      "Total Protein",
+      "Albumin",
+      "Bilirubin (Total & Direct)",
+    ],
+  },
+  {
+    name: "Immunology",
+    parameters: [
+      "HIV Screening",
+      "Hepatitis B Surface Antigen (HBsAg)",
+      "Hepatitis C Antibody",
+      "Thyroid Function Tests (TFTs)",
+      "TSH (Thyroid Stimulating Hormone)",
+      "Free T3",
+      "Free T4",
+      "C-Reactive Protein (CRP)",
+      "Rheumatoid Factor (RF)",
+      "Anti-Nuclear Antibody (ANA)",
+    ],
+  },
+  {
+    name: "Microbiology",
+    parameters: [
+      "Urine Culture & Sensitivity",
+      "Blood Culture",
+      "Stool Culture",
+      "Sputum Culture",
+      "Wound Swab Culture",
+      "Gram Stain",
+      "AFB (Acid Fast Bacilli)",
+      "Malaria Parasite (MP)",
+      "Widal Test",
+      "VDRL (Syphilis Test)",
+    ],
+  },
+  {
+    name: "Radiology",
+    parameters: [
+      "Chest X-Ray",
+      "Abdominal X-Ray",
+      "Pelvic X-Ray",
+      "Ultrasound Abdomen",
+      "Ultrasound Pelvis",
+      "CT Scan Head",
+      "CT Scan Chest",
+      "CT Scan Abdomen",
+      "MRI Brain",
+      "Echocardiogram",
+      "ECG (Electrocardiogram)",
+    ],
+  },
+  {
+    name: "Others",
+    parameters: [
+      "Urinalysis",
+      "Stool Analysis",
+      "Pregnancy Test",
+      "Pap Smear",
+      "Biopsy",
+      "Endoscopy",
+      "Colonoscopy",
+      "Spirometry",
+      "Audiometry",
+    ],
+  },
+  // { name: "Malaria Test", parameters: ["RDT", "Microscopy"] },
+  // { name: "HIV Test", parameters: ["Rapid Test", "ELISA", "Western Blot"] },
+  // {
+  //   name: "Hepatitis B",
+  //   parameters: ["HBsAg", "Anti-HBs", "HBeAg", "Anti-HBe", "Anti-HBc"],
+  // },
+  // { name: "Hepatitis C", parameters: ["Anti-HCV", "HCV RNA"] },
+];
+
 const DoctorPatientDetails = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("note");
@@ -32,6 +187,9 @@ const DoctorPatientDetails = () => {
   const [reportNote, setReportNote] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedComplaints, setSelectedComplaints] = useState<string[]>([]);
+  const [selectedParameters, setSelectedParameters] = useState<string[]>([]);
+
   const [mergedData, setMergedData] = useState<
     Array<{
       date: string;
@@ -215,6 +373,20 @@ const DoctorPatientDetails = () => {
   };
 
   useEffect(() => {
+    // Filter out any existing investigation section to avoid duplication
+    const existingReport = reportNote.split("\n\nInvestigation:")[0].trim();
+
+    // Only add investigation section if there are selected parameters
+    const investigationSection =
+      selectedParameters.length > 0
+        ? `\n\nInvestigation:\n${selectedParameters.join("\n")}`
+        : "";
+
+    // Combine the existing report with the updated investigation section
+    setReportNote(existingReport + investigationSection);
+  }, [selectedParameters]);
+
+  useEffect(() => {
     if (allReports.length > 0 || allNotes.length > 0) {
       const processData = () => {
         const groupedReports = groupByDate(allReports);
@@ -268,10 +440,14 @@ const DoctorPatientDetails = () => {
     if (!departmentId) {
       return;
     }
+    if (!reportNote.trim()) {
+      toast.error("Report note cannot be empty");
+      return;
+    }
 
     try {
-      let reportData: {
-        patient_id: string;
+      type ReportData = {
+        patient_id: any;
         note: string;
         department_id: number;
         parent_id: null;
@@ -279,10 +455,12 @@ const DoctorPatientDetails = () => {
         status: string;
         role: string;
         pharmacy_stocks?: { id: any; quantity: number }[];
-        laboratory_service_charge?: { id: any; quantity: number }[];
-      } = {
-        patient_id: id ?? "",
-        note: reportNote,
+        laboratory_service_charge?: { id: number; quantity: number }[];
+      };
+
+      let reportData: ReportData = {
+        patient_id: id,
+        note: reportNote, // Use the updated note with investigation
         department_id: departmentId,
         parent_id: null,
         file,
@@ -295,10 +473,7 @@ const DoctorPatientDetails = () => {
           id: item.request_pharmacy_id,
           quantity: item.quantity,
         }));
-        reportData = {
-          ...reportData,
-          pharmacy_stocks: pharmacyStocksArray,
-        };
+        reportData = { ...reportData, pharmacy_stocks: pharmacyStocksArray };
       }
 
       if (selectedDepartment === "laboratory" && selectedLabTests.length > 0) {
@@ -313,17 +488,16 @@ const DoctorPatientDetails = () => {
       }
 
       const response = await createReport(reportData);
-
       if (response) {
         setReportNote("");
         setFile(null);
         setSelectedDepartment("");
         setSelectedItems([]);
         setSelectedLabTests([]);
+        setSelectedParameters([]); // Reset selected parameters
         setItemSearch("");
         setLabTestSearch("");
         getAllReport(id);
-        toast.success("Report sent successfully");
       }
     } catch (error) {
       // Error handling is done in the toast already
@@ -455,6 +629,38 @@ const DoctorPatientDetails = () => {
 
         {activeTab === "note" && (
           <div className="space-y-4">
+            {/* Complaint selection */}
+            <div>
+              <h4 className="text-sm font-medium mb-2">Common Complaints</h4>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {COMMON_COMPLAINTS.map((complaint) => (
+                  <button
+                    key={complaint}
+                    type="button"
+                    onClick={() => {
+                      if (selectedComplaints.includes(complaint)) {
+                        setSelectedComplaints(
+                          selectedComplaints.filter((c) => c !== complaint)
+                        );
+                      } else {
+                        setSelectedComplaints([
+                          ...selectedComplaints,
+                          complaint,
+                        ]);
+                      }
+                    }}
+                    className={`px-3 py-1 text-sm rounded-full border ${
+                      selectedComplaints.includes(complaint)
+                        ? "bg-primary text-white border-primary"
+                        : "bg-white border-gray-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    {complaint}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <textarea
               rows={5}
               value={note}
@@ -462,21 +668,44 @@ const DoctorPatientDetails = () => {
               placeholder="Enter doctor's note..."
               className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-primary"
             />
-            <button
-              onClick={handleNoteSubmit}
-              disabled={!!isCreating}
-              className={`bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition flex items-center justify-center
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  const complaintsText = selectedComplaints.join(", ");
+                  setNote((prev) =>
+                    prev
+                      ? `${prev}\nComplaints: ${complaintsText}`
+                      : `Complaints: ${complaintsText}`
+                  );
+                  setSelectedComplaints([]);
+                }}
+                disabled={selectedComplaints.length === 0}
+                className={`bg-gray-100 px-4 py-2 rounded-lg ${
+                  selectedComplaints.length === 0
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-gray-200"
+                }`}
+              >
+                Add Complaints to Note
+              </button>
+
+              <button
+                onClick={handleNoteSubmit}
+                disabled={isCreating}
+                className={`bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition flex items-center justify-center
                  ${isCreating ? "opacity-50 cursor-not-allowed" : ""}`}
-            >
-              {isCreating ? (
-                <>
-                  Adding
-                  <Loader2 className="size-6 mr-2 animate-spin" />
-                </>
-              ) : (
-                <>Add note</>
-              )}
-            </button>
+              >
+                {isCreating ? (
+                  <>
+                    Adding
+                    <Loader2 className="size-6 mr-2 animate-spin" />
+                  </>
+                ) : (
+                  <>Add note</>
+                )}
+              </button>
+            </div>
           </div>
         )}
         {activeTab === "report" && (
@@ -699,118 +928,172 @@ const DoctorPatientDetails = () => {
 
             {activeTab === "report" && selectedDepartment === "laboratory" && (
               <div>
-                <h1 className="text-lg font-medium mb-2">Laboratory Tests</h1>
-                <h2 className="text-sm text-gray-600 mb-4">
-                  Check and select tests from laboratory for the patient here
-                </h2>
+                <h3 className="text-lg font-medium mb-2">
+                  Laboratory Requests
+                </h3>
 
-                <div className="relative mb-4">
-                  <div
-                    className="border border-[#D0D5DD] rounded-lg p-3 flex items-center justify-between cursor-pointer"
-                    onClick={() => setIsLabSelectOpen(!isLabSelectOpen)}
-                  >
-                    <div className="flex-1">
-                      {selectedLabTests.length === 0 ? (
-                        <span className="text-gray-500">Select tests...</span>
-                      ) : (
-                        <span>{selectedLabTests.length} test(s) selected</span>
-                      )}
-                    </div>
+                {/* Laboratory Test Selection (Existing Functionality) */}
+                <div className="mb-6">
+                  <h4 className="text-sm font-medium mb-2">
+                    Select Laboratory Tests
+                  </h4>
+                  <div className="relative mb-4">
                     <div
-                      className={`transform transition-transform ${
-                        isLabSelectOpen ? "rotate-180" : ""
-                      }`}
+                      className="border border-[#D0D5DD] rounded-lg p-3 flex items-center justify-between cursor-pointer"
+                      onClick={() => setIsLabSelectOpen(!isLabSelectOpen)}
                     >
-                      <svg
-                        width="12"
-                        height="8"
-                        viewBox="0 0 12 8"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M1 1L6 6L11 1"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                  {isLabSelectOpen && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-[#D0D5DD] rounded-lg shadow-lg max-h-64 overflow-y-auto">
-                      <div className="p-2 sticky top-0 bg-white border-b border-[#D0D5DD]">
-                        <input
-                          type="search"
-                          name="labTestSearch"
-                          value={labTestSearch}
-                          onChange={handleChange}
-                          placeholder="Search tests..."
-                          className="w-full border border-[#D0D5DD] p-2 rounded outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-                        />
-                      </div>
-                      <ul className="divide-y">
-                        {filteredLabTests?.length > 0 ? (
-                          filteredLabTests.map((test) => (
-                            <li
-                              key={test.id}
-                              onClick={() => handleToggleLabTest(test)}
-                              className="px-4 py-3 hover:bg-blue-50 cursor-pointer flex items-center justify-between"
-                            >
-                              <div>
-                                <p className="font-medium">{test.name}</p>
-                                {/* <p className="text-sm text-gray-500">
-                                  Amount: {test.amount}
-                                </p> */}
-                              </div>
-                              <div
-                                className={`w-5 h-5 rounded border flex items-center justify-center ${
-                                  isLabTestSelected(test.id)
-                                    ? "bg-blue-500 border-blue-500"
-                                    : "border-gray-300"
-                                }`}
-                              >
-                                {isLabTestSelected(test.id) && (
-                                  <Check className="h-4 w-4 text-white" />
-                                )}
-                              </div>
-                            </li>
-                          ))
+                      <div className="flex-1">
+                        {selectedLabTests.length === 0 ? (
+                          <span className="text-gray-500">Select tests...</span>
                         ) : (
-                          <li className="px-4 py-3 text-gray-500">
-                            No tests found
-                          </li>
+                          <span>
+                            {selectedLabTests.length} test(s) selected
+                          </span>
                         )}
+                      </div>
+                      <div
+                        className={`transform transition-transform ${
+                          isLabSelectOpen ? "rotate-180" : ""
+                        }`}
+                      >
+                        <svg
+                          width="12"
+                          height="8"
+                          viewBox="0 0 12 8"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M1 1L6 6L11 1"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                    {isLabSelectOpen && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-[#D0D5DD] rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                        <div className="p-2 sticky top-0 bg-white border-b border-[#D0D5DD]">
+                          <input
+                            type="search"
+                            name="labTestSearch"
+                            value={labTestSearch}
+                            onChange={handleChange}
+                            placeholder="Search tests..."
+                            className="w-full border border-[#D0D5DD] p-2 rounded outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                          />
+                        </div>
+                        <ul className="divide-y">
+                          {filteredLabTests?.length > 0 ? (
+                            filteredLabTests.map((test) => (
+                              <li
+                                key={test.id}
+                                onClick={() => handleToggleLabTest(test)}
+                                className="px-4 py-3 hover:bg-blue-50 cursor-pointer flex items-center justify-between"
+                              >
+                                <div>
+                                  <p className="font-medium">{test.name}</p>
+                                </div>
+                                <div
+                                  className={`w-5 h-5 rounded border flex items-center justify-center ${
+                                    isLabTestSelected(test.id)
+                                      ? "bg-blue-500 border-blue-500"
+                                      : "border-gray-300"
+                                  }`}
+                                >
+                                  {isLabTestSelected(test.id) && (
+                                    <Check className="h-4 w-4 text-white" />
+                                  )}
+                                </div>
+                              </li>
+                            ))
+                          ) : (
+                            <li className="px-4 py-3 text-gray-500">
+                              No tests found
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+
+                  {selectedLabTests.length > 0 && (
+                    <div className="mt-4 border border-[#D0D5DD] rounded-lg p-4 mb-6">
+                      <h3 className="font-medium mb-3">Selected Tests</h3>
+                      <ul className="divide-y">
+                        {selectedLabTests.map((test) => (
+                          <li
+                            key={test.id}
+                            className="py-3 flex items-center justify-between"
+                          >
+                            <div>
+                              <p className="font-medium">{test.name}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="w-12 text-center border border-gray-300 rounded-md p-1">
+                                {test.quantity}
+                              </span>
+                            </div>
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   )}
                 </div>
 
-                {selectedLabTests.length > 0 && (
-                  <div className="mt-4 border border-[#D0D5DD] rounded-lg p-4">
-                    <h3 className="font-medium mb-3">Selected Tests</h3>
-                    <ul className="divide-y">
-                      {selectedLabTests.map((test) => (
-                        <li
-                          key={test.id}
-                          className="py-3 flex items-center justify-between"
-                        >
-                          <div>
-                            <p className="font-medium">{test.name}</p>
-                            {/* <p className="text-xs text-gray-500">
-                              Amount: {test.amount}
-                            </p> */}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="w-12 text-center border border-gray-300 rounded-md p-1">
-                              {test.quantity}
-                            </span>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
+                {/* Investigation Parameters */}
+                <div className="mb-6">
+                  <h4 className="text-sm font-medium mb-2">
+                    Investigation Parameters
+                  </h4>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Add specific parameters to investigate for each test
+                  </p>
+
+                  <div className="space-y-4">
+                    {LAB_PARAMETERS.map((test) => (
+                      <div key={test.name} className="border rounded-lg p-3">
+                        <div className="font-medium mb-2">{test.name}</div>
+                        <div className="flex flex-wrap gap-2">
+                          {test.parameters.map((param) => {
+                            const paramKey = `${test.name}: ${param}`;
+                            const isSelected =
+                              selectedParameters.includes(paramKey);
+
+                            return (
+                              <button
+                                key={param}
+                                type="button"
+                                onClick={() => {
+                                  if (isSelected) {
+                                    setSelectedParameters((prev) =>
+                                      prev.filter((p) => p !== paramKey)
+                                    );
+                                  } else {
+                                    setSelectedParameters((prev) => [
+                                      ...prev,
+                                      paramKey,
+                                    ]);
+                                  }
+                                }}
+                                className={`px-3 py-1 text-sm rounded-full border transition ${
+                                  isSelected
+                                    ? "bg-primary text-white border-primary"
+                                    : "border-gray-300 hover:bg-gray-50"
+                                }`}
+                              >
+                                {param}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                )}
+                </div>
+
+                {/* Rest of your existing code... */}
               </div>
             )}
 

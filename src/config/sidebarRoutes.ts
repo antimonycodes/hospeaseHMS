@@ -24,6 +24,12 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       activeIcon: getImageSrc("patientsWhite.svg"),
     },
     {
+      name: "Admission",
+      path: "/dashboard/admission",
+      icon: getImageSrc("patientsicon.svg"),
+      activeIcon: getImageSrc("Adm-white.svg"),
+    },
+    {
       name: "Front Desk",
       path: "/dashboard/front-desk",
       icon: getImageSrc("front-desk.svg"),
@@ -190,6 +196,12 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       activeIcon: getImageSrc("patientsWhite.svg"),
     },
     {
+      name: "Admission",
+      path: "/dashboard/admission",
+      icon: getImageSrc("patientsicon.svg"),
+      activeIcon: getImageSrc("Adm-white.svg"),
+    },
+    {
       name: "Front Desk",
       path: "/dashboard/front-desk",
       icon: getImageSrc("front-desk.svg"),
@@ -350,6 +362,12 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       activeIcon: getImageSrc("patienticonsLight.svg"),
     },
     {
+      name: "Admission",
+      path: "/dashboard/admission",
+      icon: getImageSrc("patientsicon.svg"),
+      activeIcon: getImageSrc("Adm-white.svg"),
+    },
+    {
       name: "Appointments",
       path: "/dashboard/appointments",
       icon: getImageSrc("appointmentsdark.svg"),
@@ -380,6 +398,12 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       path: "/dashboard/patients",
       icon: getImageSrc("patientsicon.svg"),
       activeIcon: getImageSrc("patienticonsLight.svg"),
+    },
+    {
+      name: "Admission",
+      path: "/dashboard/admission",
+      icon: getImageSrc("patientsicon.svg"),
+      activeIcon: getImageSrc("Adm-white.svg"),
     },
     {
       name: "Appointments",
@@ -424,6 +448,12 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       path: "/dashboard/patients",
       icon: getImageSrc("patientsicon.svg"),
       activeIcon: getImageSrc("patienticonsLight.svg"),
+    },
+    {
+      name: "Admission",
+      path: "/dashboard/admission",
+      icon: getImageSrc("patientsicon.svg"),
+      activeIcon: getImageSrc("Adm-white.svg"),
     },
     {
       name: "payments",
@@ -488,6 +518,12 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       path: "/dashboard/patients",
       icon: getImageSrc("patientsicon.svg"),
       activeIcon: getImageSrc("patienticonsLight.svg"),
+    },
+    {
+      name: "Admission",
+      path: "/dashboard/admission",
+      icon: getImageSrc("patientsicon.svg"),
+      activeIcon: getImageSrc("Adm-white.svg"),
     },
     {
       name: "Stocks",
@@ -572,6 +608,12 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       activeIcon: getImageSrc("patienticonsLight.svg"),
     },
     {
+      name: "Admission",
+      path: "/dashboard/admission",
+      icon: getImageSrc("patientsicon.svg"),
+      activeIcon: getImageSrc("Adm-white.svg"),
+    },
+    {
       name: "Appointments",
       path: "/dashboard/appointments",
       icon: getImageSrc("appointmentsdark.svg"),
@@ -611,6 +653,12 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       activeIcon: getImageSrc("patienticonsLight.svg"),
     },
     {
+      name: "Admission",
+      path: "/dashboard/admission",
+      icon: getImageSrc("patientsicon.svg"),
+      activeIcon: getImageSrc("Adm-white.svg"),
+    },
+    {
       name: "Shifts",
       path: "/dashboard/shifts",
       icon: getImageSrc("pharmacyicon.svg"),
@@ -629,6 +677,12 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       path: "/dashboard/patients",
       icon: getImageSrc("patientsicon.svg"),
       activeIcon: getImageSrc("patienticonsLight.svg"),
+    },
+    {
+      name: "Admission",
+      path: "/dashboard/admission",
+      icon: getImageSrc("patientsicon.svg"),
+      activeIcon: getImageSrc("Adm-white.svg"),
     },
 
     {
@@ -652,6 +706,12 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       path: "/dashboard/patients",
       icon: getImageSrc("patientsicon.svg"),
       activeIcon: getImageSrc("patienticonsLight.svg"),
+    },
+    {
+      name: "Admission",
+      path: "/dashboard/admission",
+      icon: getImageSrc("patientsicon.svg"),
+      activeIcon: getImageSrc("Adm-white.svg"),
     },
     {
       name: "Appointments",

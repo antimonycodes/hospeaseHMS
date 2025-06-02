@@ -648,14 +648,6 @@ const DoctorAppointmentDetails = () => {
     }
 
     try {
-      // // Add investigation heading and parameters to report note
-      // let finalReportNote = reportNote;
-      // if (selectedParameters.length > 0) {
-      //   const investigationSection =
-      //     "\n\nInvestigation:\n" + selectedParameters.join("\n");
-      //   finalReportNote = reportNote + investigationSection;
-      // }
-
       type ReportData = {
         patient_id: any;
         note: string;
