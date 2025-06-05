@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Search, Filter, User, Bed, AlertTriangle, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useAdmissionStore } from "../../store/super-admin/useAdmissionStore";
 
 interface NextOfKin {
   [key: string]: any;
@@ -57,9 +56,38 @@ interface AdmissionAttributes {
 interface AdmissionRecord {
   type: string;
   id: number;
-  attributes: AdmissionAttributes;
-  patient: Patient;
+  attributes: AdmissionAttributes & {
+    patient: Patient;
+    recovery_history: any[];
+    fluid_balance: any[];
+    medication_history: any[];
+    tpr_history: any[];
+    vital_signs_history: any[];
+  };
 }
+
+// API Response structure
+interface ApiResponse {
+  status: boolean;
+  message: string;
+  data: {
+    data: AdmissionRecord[];
+    pagination: {
+      total: number;
+      per_page: number;
+      current_page: number;
+    };
+  };
+  status_code: number;
+}
+
+// Assuming you have a store or API service
+// Replace this with your actual store/API call
+declare const useAdmissionStore: () => {
+  admissionList: AdmissionRecord[];
+  isLoading: boolean;
+  allAdmission: () => Promise<void>;
+};
 
 const AdmissionOverview: React.FC = () => {
   const { admissionList, isLoading, allAdmission } = useAdmissionStore();
@@ -69,6 +97,7 @@ const AdmissionOverview: React.FC = () => {
   );
 
   useEffect(() => {
+    // Fetch admission data on component mount
     allAdmission();
   }, [allAdmission]);
 
@@ -79,8 +108,9 @@ const AdmissionOverview: React.FC = () => {
     } else {
       const filtered = admissionList.filter((admission) => {
         const patientName =
-          `${admission.patient.attributes.first_name} ${admission.patient.attributes.last_name}`.toLowerCase();
-        const patientId = admission.patient.attributes.card_id.toLowerCase();
+          `${admission.attributes.patient.attributes.first_name} ${admission.attributes.patient.attributes.last_name}`.toLowerCase();
+        const patientId =
+          admission.attributes.patient.attributes.card_id.toLowerCase();
         const diagnosis = admission.attributes.diagnosis.toLowerCase();
         const ward =
           admission.attributes.clinical_department.name.toLowerCase();
@@ -102,7 +132,7 @@ const AdmissionOverview: React.FC = () => {
     admission.attributes.status.toLowerCase().includes("critical")
   ).length;
   const occupiedBeds = admissionList.filter(
-    (admission) => admission.patient.attributes.is_admitted
+    (admission) => admission.attributes.patient.attributes.is_admitted
   ).length;
 
   // Calculate average stay (this would need more data from backend for accurate calculation)
@@ -282,16 +312,18 @@ const AdmissionOverview: React.FC = () => {
                     <tr key={admission.id} className="hover:bg-gray-50">
                       <td className="py-4 px-6 text-sm text-gray-900 font-medium">
                         {`${capitalizeFirst(
-                          admission.patient.attributes.first_name
+                          admission.attributes.patient.attributes.first_name
                         )} ${capitalizeFirst(
-                          admission.patient.attributes.last_name
+                          admission.attributes.patient.attributes.last_name
                         )}`}
                       </td>
                       <td className="py-4 px-6 text-sm text-gray-600">
-                        {admission.patient.attributes.card_id}
+                        {admission.attributes.patient.attributes.card_id}
                       </td>
                       <td className="py-4 px-6 text-sm text-gray-600">
-                        {capitalizeFirst(admission.patient.attributes.gender)}
+                        {capitalizeFirst(
+                          admission.attributes.patient.attributes.gender
+                        )}
                       </td>
                       <td className="py-4 px-6 text-sm text-gray-600">
                         {admission.attributes.bed_number}
