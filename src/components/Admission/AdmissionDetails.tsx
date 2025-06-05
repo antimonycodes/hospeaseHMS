@@ -473,7 +473,7 @@ const AdmissionDetails: React.FC = () => {
             </div>
           </div>
         )}
-        {activeTab === "Fluid Balance" && <FluidBalance />}
+        <FluidBalance admissionId={currentAdmission.id} />
         {activeTab === "Medications" && <MedicationSheet />}
         {activeTab === "TPR" && <TPRSheet />}
         {activeTab === "Vital Signs" && <VitalSigns />}
