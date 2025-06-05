@@ -24,6 +24,7 @@ import toast from "react-hot-toast";
 import { useGlobalStore } from "../../store/super-admin/useGlobal";
 import Loader from "../../Shared/Loader";
 import MedicalTimeline from "../../Shared/MedicalTimeline";
+import AdmitPatientModal from "../../Shared/AdmitPatientModal";
 
 const COMMON_COMPLAINTS = [
   "Headache",
@@ -218,6 +219,7 @@ const DoctorPatientDetails = () => {
   const { getAllRoles, roles } = useGlobalStore();
   const [itemSearch, setItemSearch] = useState("");
   const [isSelectOpen, setIsSelectOpen] = useState(false);
+  const [isAdmitModalOpen, setIsAdmitModalOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<
     {
       service_item_name: string;
@@ -362,16 +364,6 @@ const DoctorPatientDetails = () => {
     );
   };
 
-  const groupByDate = (data: any[]) => {
-    return data.reduce((acc: { [key: string]: any[] }, item) => {
-      const rawDate = new Date(item.attributes?.created_at);
-      const date = rawDate.toLocaleDateString("en-CA");
-      if (!acc[date]) acc[date] = [];
-      acc[date].push(item);
-      return acc;
-    }, {});
-  };
-
   useEffect(() => {
     // Filter out any existing investigation section to avoid duplication
     const existingReport = reportNote.split("\n\nInvestigation:")[0].trim();
@@ -385,35 +377,6 @@ const DoctorPatientDetails = () => {
     // Combine the existing report with the updated investigation section
     setReportNote(existingReport + investigationSection);
   }, [selectedParameters]);
-
-  useEffect(() => {
-    if (allReports.length > 0 || allNotes.length > 0) {
-      const processData = () => {
-        const groupedReports = groupByDate(allReports);
-        const groupedNotes = groupByDate(allNotes);
-
-        const allDates = Array.from(
-          new Set([
-            ...Object.keys(groupedReports),
-            ...Object.keys(groupedNotes),
-          ])
-        );
-
-        return allDates
-          .map((date) => ({
-            date,
-            reports: groupedReports[date] || [],
-            notes: groupedNotes[date] || [],
-            isExpanded: true,
-          }))
-          .sort(
-            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-          );
-      };
-
-      setMergedData(processData());
-    }
-  }, [allReports, allNotes]);
 
   useEffect(() => {
     getAllRoles();
@@ -539,14 +502,20 @@ const DoctorPatientDetails = () => {
     <div className="px-2 sm:px-0">
       <div className="bg-white rounded-lg custom-shadow mb-6">
         <div className="p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 sm:mb-12 gap-4">
-            <Link
-              to="/dashboard/patients"
-              className="flex items-center text-gray-600 hover:text-primary"
-            >
-              <ChevronLeft size={16} />
-              <span className="ml-1">Patients</span>
-            </Link>
+          <div className=" flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 sm:mb-12 gap-4">
+              <Link
+                to="/dashboard/patients"
+                className="flex items-center text-gray-600 hover:text-primary"
+              >
+                <ChevronLeft size={16} />
+                <span className="ml-1">Patients</span>
+              </Link>
+            </div>
+            {/*  */}
+            <Button onClick={() => setIsAdmitModalOpen((prev) => !prev)}>
+              Admit Patient
+            </Button>
           </div>
 
           <div className="grid gap-6">
@@ -1156,6 +1125,13 @@ const DoctorPatientDetails = () => {
           throw new Error("Function not implemented.");
         }}
       />
+
+      {isAdmitModalOpen && (
+        <AdmitPatientModal
+          setIsAdmitModalOpen={setIsAdmitModalOpen}
+          patientId={id ? Number(id) : 0}
+        />
+      )}
     </div>
   );
 };

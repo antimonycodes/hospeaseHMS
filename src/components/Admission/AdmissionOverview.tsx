@@ -11,6 +11,7 @@ interface Patient {
   ward: string;
   diagnosis: string;
   status: "Critically Ill" | "Recovering";
+  totalDays: string;
 }
 
 const AdmissionOverview: React.FC = () => {
@@ -24,6 +25,7 @@ const AdmissionOverview: React.FC = () => {
       ward: "Male ward",
       diagnosis: "Typhoid",
       status: "Critically Ill",
+      totalDays: "45",
     },
     {
       id: "2",
@@ -34,6 +36,7 @@ const AdmissionOverview: React.FC = () => {
       ward: "Female ward",
       diagnosis: "Kidney Disease",
       status: "Recovering",
+      totalDays: "85",
     },
     {
       id: "3",
@@ -44,6 +47,7 @@ const AdmissionOverview: React.FC = () => {
       ward: "Children ward",
       diagnosis: "Delivery",
       status: "Recovering",
+      totalDays: "08",
     },
     {
       id: "4",
@@ -54,6 +58,7 @@ const AdmissionOverview: React.FC = () => {
       ward: "Emergency ward",
       diagnosis: "Ulcer",
       status: "Critically Ill",
+      totalDays: "15",
     },
     {
       id: "5",
@@ -64,6 +69,7 @@ const AdmissionOverview: React.FC = () => {
       ward: "OPD",
       diagnosis: "Surgery",
       status: "Critically Ill",
+      totalDays: "45",
     },
     {
       id: "6",
@@ -74,6 +80,7 @@ const AdmissionOverview: React.FC = () => {
       ward: "Male ward",
       diagnosis: "Migraine",
       status: "Recovering",
+      totalDays: "45",
     },
     {
       id: "7",
@@ -84,6 +91,7 @@ const AdmissionOverview: React.FC = () => {
       ward: "General ward",
       diagnosis: "Fever",
       status: "Recovering",
+      totalDays: "45",
     },
     {
       id: "8",
@@ -94,6 +102,7 @@ const AdmissionOverview: React.FC = () => {
       ward: "Surgery room",
       diagnosis: "Fever",
       status: "Recovering",
+      totalDays: "45",
     },
     {
       id: "9",
@@ -104,6 +113,7 @@ const AdmissionOverview: React.FC = () => {
       ward: "Children ward",
       diagnosis: "Delivery",
       status: "Critically Ill",
+      totalDays: "45",
     },
     {
       id: "10",
@@ -114,6 +124,7 @@ const AdmissionOverview: React.FC = () => {
       ward: "Female ward",
       diagnosis: "Lassa Fever",
       status: "Critically Ill",
+      totalDays: "45",
     },
   ];
 
@@ -244,6 +255,9 @@ const AdmissionOverview: React.FC = () => {
                     Status
                   </th>
                   <th className="text-left py-3 px-6 font-medium text-gray-700 text-sm">
+                    Total stay (DAYS)
+                  </th>
+                  <th className="text-left py-3 px-6 font-medium text-gray-700 text-sm">
                     Action
                   </th>
                 </tr>
@@ -271,6 +285,9 @@ const AdmissionOverview: React.FC = () => {
                     </td>
                     <td className="py-4 px-6">
                       <StatusBadge status={patient.status} />
+                    </td>
+                    <td className="py-4 px-6 text-sm text-gray-600">
+                      {patient.totalDays} days
                     </td>
                     <td className="py-4 px-6">
                       <Link to="/dashboard/admission-details">
