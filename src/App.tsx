@@ -200,7 +200,10 @@ function App() {
               <Route path="service-charges" element={<ServiceCharges />} />
               <Route path="reset" element={<ResetApp />} />
               <Route path="admission" element={<AdmissionPage />} />
-              <Route path="admission-details" element={<AdmissionDetails />} />
+              <Route
+                path="admission-details/:id"
+                element={<AdmissionDetails />}
+              />
             </Route>
           </Route>
         </Routes>

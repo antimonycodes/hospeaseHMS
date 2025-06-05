@@ -1,15 +1,26 @@
-import React, { useState } from "react";
-import { ArrowLeft, Edit2, X } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { ArrowLeft, Edit2, X, Loader2 } from "lucide-react";
 import FluidBalance from "./FluidBalance";
 import MedicationSheet from "./MedicationSheet";
 import TPRSheet from "./TPRSheet";
 import VitalSigns from "./VitalSigns";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { useAdmissionStore } from "../../store/super-admin/useAdmissionStore";
 
 const AdmissionDetails: React.FC = () => {
   const [showStatusModal, setShowStatusModal] = useState(false);
-  const [currentStatus, setCurrentStatus] = useState("Critically Ill");
   const [activeTab, setActiveTab] = useState("Clinical History");
+
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+
+  const {
+    isLoading,
+    currentAdmission,
+    getAdmissionById,
+    updateAdmissionStatus,
+    clearCurrentAdmission,
+  } = useAdmissionStore();
 
   const tabs = [
     "Clinical History",
@@ -21,7 +32,7 @@ const AdmissionDetails: React.FC = () => {
 
   const statusOptions = [
     {
-      name: "Critically Ill",
+      name: "Critically ill",
       color: "text-red-600",
       bgColor: "bg-red-50",
       borderColor: "border-red-200",
@@ -58,13 +69,30 @@ const AdmissionDetails: React.FC = () => {
     },
   ];
 
-  const handleStatusUpdate = (newStatus: string) => {
-    setCurrentStatus(newStatus);
-    setShowStatusModal(false);
+  useEffect(() => {
+    if (id) {
+      getAdmissionById(parseInt(id));
+    }
+
+    return () => {
+      clearCurrentAdmission();
+    };
+  }, [id, getAdmissionById, clearCurrentAdmission]);
+
+  const handleStatusUpdate = async (newStatus: string) => {
+    if (id) {
+      const success = await updateAdmissionStatus(parseInt(id), newStatus);
+      if (success) {
+        setShowStatusModal(false);
+      }
+    }
   };
 
   const getCurrentStatusColor = () => {
-    const status = statusOptions.find((s) => s.name === currentStatus);
+    if (!currentAdmission) return "text-red-600";
+    const status = statusOptions.find(
+      (s) => s.name === currentAdmission.attributes.status
+    );
     return status ? status.color : "text-red-600";
   };
 
@@ -72,27 +100,70 @@ const AdmissionDetails: React.FC = () => {
     children: React.ReactNode;
     variant?: "primary" | "secondary";
     onClick?: () => void;
-  }> = ({ children, variant = "primary", onClick }) => {
+    disabled?: boolean;
+  }> = ({ children, variant = "primary", onClick, disabled = false }) => {
     const baseClasses =
-      "px-4 py-2 rounded-lg font-medium text-sm transition-colors";
+      "px-4 py-2 rounded-lg font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
     const variantClasses =
       variant === "primary"
-        ? "bg-primary text-white hover:bg-green-700"
-        : "bg-gray-100 text-gray-700 hover:bg-gray-200";
+        ? "bg-primary text-white hover:bg-green-700 disabled:hover:bg-primary"
+        : "bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:hover:bg-gray-100";
 
     return (
-      <button className={`${baseClasses} ${variantClasses}`} onClick={onClick}>
+      <button
+        className={`${baseClasses} ${variantClasses}`}
+        onClick={onClick}
+        disabled={disabled}
+      >
         {children}
       </button>
     );
   };
 
-  const navigate = useNavigate();
+  if (isLoading && !currentAdmission) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center gap-2">
+          <Loader2 className="animate-spin" size={20} />
+          <span>Loading admission details...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentAdmission) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Admission Not Found
+          </h2>
+          <p className="text-gray-600 mb-4">
+            The admission record you're looking for doesn't exist.
+          </p>
+          <Button onClick={() => navigate(-1)}>Go Back</Button>
+        </div>
+      </div>
+    );
+  }
+
+  const {
+    patient,
+    clinical_department,
+    bed_number,
+    diagnosis,
+    status,
+    recommended_by,
+    recorded_by,
+    created_at,
+  } = currentAdmission.attributes;
+  const nextOfKin = patient.attributes.next_of_kin[0] || {};
+
   return (
     <div className="min-h-screen">
       <div className="bg-white border border-[#EAECF0] custom-shadow rounded-lg p-6 space-y-12">
         {/* Patient Information Card */}
-        <div className=" ">
+        <div className="">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <button
@@ -101,32 +172,43 @@ const AdmissionDetails: React.FC = () => {
             >
               <ArrowLeft size={24} className="text-gray-600" />
             </button>
-            <Button>Discharge Patient</Button>
+            <Button disabled={status === "Discharged"}>
+              Discharge Patient
+            </Button>
           </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
             <div>
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 First Name
               </label>
-              <p className="text-gray-900 font-medium">Philip</p>
+              <p className="text-gray-900 font-medium">
+                {patient.attributes.first_name}
+              </p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 Last Name
               </label>
-              <p className="text-gray-900 font-medium">Ikiriko</p>
+              <p className="text-gray-900 font-medium">
+                {patient.attributes.last_name}
+              </p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 Patient ID
               </label>
-              <p className="text-gray-900 font-medium">0010602</p>
+              <p className="text-gray-900 font-medium">
+                {patient.attributes.card_id}
+              </p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 Age
               </label>
-              <p className="text-gray-900 font-medium">32</p>
+              <p className="text-gray-900 font-medium">
+                {patient.attributes.age || "N/A"}
+              </p>
             </div>
           </div>
 
@@ -135,25 +217,33 @@ const AdmissionDetails: React.FC = () => {
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 Gender
               </label>
-              <p className="text-gray-900 font-medium">Male</p>
+              <p className="text-gray-900 font-medium capitalize">
+                {patient.attributes.gender}
+              </p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 Branch
               </label>
-              <p className="text-gray-900 font-medium">Agodi</p>
+              <p className="text-gray-900 font-medium">
+                {patient.attributes.branch}
+              </p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 Occupation
               </label>
-              <p className="text-gray-900 font-medium">Banker</p>
+              <p className="text-gray-900 font-medium">
+                {patient.attributes.occupation}
+              </p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 Religion
               </label>
-              <p className="text-gray-900 font-medium">Christian</p>
+              <p className="text-gray-900 font-medium">
+                {patient.attributes.religion}
+              </p>
             </div>
           </div>
 
@@ -162,21 +252,23 @@ const AdmissionDetails: React.FC = () => {
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 Phone
               </label>
-              <p className="text-gray-900 font-medium">+23465666954</p>
+              <p className="text-gray-900 font-medium">
+                {patient.attributes.phone_number}
+              </p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 House Address
               </label>
               <p className="text-gray-900 font-medium">
-                5, John Ayanfe Close, Agodi, Ibadan Oyo State
+                {patient.attributes.address}
               </p>
             </div>
           </div>
         </div>
 
         {/* Next of Kin */}
-        <div className="bg-white ">
+        <div className="bg-white">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Next of Kin
           </h3>
@@ -186,25 +278,33 @@ const AdmissionDetails: React.FC = () => {
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 First Name
               </label>
-              <p className="text-gray-900 font-medium">Philip</p>
+              <p className="text-gray-900 font-medium">
+                {nextOfKin.name || "N/A"}
+              </p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 Last Name
               </label>
-              <p className="text-gray-900 font-medium">Juliet</p>
+              <p className="text-gray-900 font-medium">
+                {nextOfKin.last_name || "N/A"}
+              </p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 Gender
               </label>
-              <p className="text-gray-900 font-medium">Male</p>
+              <p className="text-gray-900 font-medium capitalize">
+                {nextOfKin.gender || "N/A"}
+              </p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 Occupation
               </label>
-              <p className="text-gray-900 font-medium">Banker</p>
+              <p className="text-gray-900 font-medium">
+                {nextOfKin.occupation || "N/A"}
+              </p>
             </div>
           </div>
 
@@ -213,19 +313,25 @@ const AdmissionDetails: React.FC = () => {
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 Religion
               </label>
-              <p className="text-gray-900 font-medium">Christian</p>
+              <p className="text-gray-900 font-medium">
+                {nextOfKin.religion || "N/A"}
+              </p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 Phone
               </label>
-              <p className="text-gray-900 font-medium">+23465666954</p>
+              <p className="text-gray-900 font-medium">
+                {nextOfKin.phone || "N/A"}
+              </p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 Relationship with Patient
               </label>
-              <p className="text-gray-900 font-medium">Sister</p>
+              <p className="text-gray-900 font-medium capitalize">
+                {nextOfKin.relationship || "N/A"}
+              </p>
             </div>
           </div>
 
@@ -234,16 +340,15 @@ const AdmissionDetails: React.FC = () => {
               House Address
             </label>
             <p className="text-gray-900 font-medium">
-              5, John Ayanfe Close, Agodi, Ibadan Oyo State
+              {nextOfKin.address || "N/A"}
             </p>
           </div>
         </div>
 
         {/* Admission Details */}
-        <div className=" ">
+        <div className="">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Admission</h3>
-            {/* <Button variant="secondary">Admission History</Button> */}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
@@ -251,25 +356,56 @@ const AdmissionDetails: React.FC = () => {
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 Department
               </label>
-              <p className="text-gray-900 font-medium">Clinical Department</p>
+              <p className="text-gray-900 font-medium">
+                {clinical_department.name}
+              </p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 Diagnosis
               </label>
-              <p className="text-gray-900 font-medium">Fever</p>
+              <p className="text-gray-900 font-medium">{diagnosis}</p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 Ward
               </label>
-              <p className="text-gray-900 font-medium">05</p>
+              <p className="text-gray-900 font-medium">
+                {bed_number.split("-")[0]}
+              </p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 Bed
               </label>
-              <p className="text-gray-900 font-medium">01</p>
+              <p className="text-gray-900 font-medium">
+                {bed_number.split("-")[1]}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <div>
+              <label className="text-sm font-medium text-gray-500 mb-1 block">
+                Recommended By
+              </label>
+              <p className="text-gray-900 font-medium">
+                Dr. {recommended_by.first_name} {recommended_by.last_name}
+              </p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-500 mb-1 block">
+                Recorded By
+              </label>
+              <p className="text-gray-900 font-medium">
+                {recorded_by.first_name} {recorded_by.last_name}
+              </p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-500 mb-1 block">
+                Admission Date
+              </label>
+              <p className="text-gray-900 font-medium">{created_at}</p>
             </div>
           </div>
 
@@ -280,19 +416,17 @@ const AdmissionDetails: React.FC = () => {
               </label>
               <div className="flex items-center gap-2">
                 <span className={`font-medium ${getCurrentStatusColor()}`}>
-                  {currentStatus}
+                  {status}
                 </span>
                 <button
                   onClick={() => setShowStatusModal(true)}
                   className="p-1 hover:bg-gray-100 rounded transition-colors"
+                  disabled={status === "Discharged"}
                 >
                   <Edit2 size={16} className="text-gray-400" />
                 </button>
               </div>
             </div>
-            {/* <div className="ml-auto">
-              <Button variant="secondary">Discharge Patient</Button>
-            </div> */}
           </div>
         </div>
 
@@ -312,8 +446,33 @@ const AdmissionDetails: React.FC = () => {
             </button>
           ))}
         </div>
-        {/* clinical History */}
-        {activeTab === "Clinical History" && <h1>Clinical History</h1>}
+
+        {/* Tab Content */}
+        {activeTab === "Clinical History" && (
+          <div className="bg-gray-50 p-6 rounded-lg">
+            <h2 className="text-lg font-semibold mb-4">Clinical History</h2>
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-medium text-gray-700 mb-2">
+                  Primary Diagnosis
+                </h4>
+                <p className="text-gray-900">{diagnosis}</p>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-700 mb-2">Department</h4>
+                <p className="text-gray-900">{clinical_department.name}</p>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-700 mb-2">
+                  Current Status
+                </h4>
+                <p className={`font-medium ${getCurrentStatusColor()}`}>
+                  {status}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
         {activeTab === "Fluid Balance" && <FluidBalance />}
         {activeTab === "Medications" && <MedicationSheet />}
         {activeTab === "TPR" && <TPRSheet />}
@@ -322,7 +481,7 @@ const AdmissionDetails: React.FC = () => {
 
       {/* Status Modal */}
       {showStatusModal && (
-        <div className="fixed inset-0 bg-[#1E1E1E40]  flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
@@ -337,24 +496,25 @@ const AdmissionDetails: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              {statusOptions.map((status) => (
+              {statusOptions.map((statusOption) => (
                 <button
-                  key={status.name}
-                  onClick={() => handleStatusUpdate(status.name)}
-                  className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                    currentStatus === status.name
-                      ? `${status.borderColor} ${status.bgColor} ${status.color} border-2`
-                      : `border-gray-200 hover:${status.bgColor} hover:${status.borderColor} text-gray-700 hover:${status.color}`
+                  key={statusOption.name}
+                  onClick={() => handleStatusUpdate(statusOption.name)}
+                  disabled={isLoading}
+                  className={`w-full text-left p-3 rounded-lg border transition-colors disabled:opacity-50 ${
+                    status === statusOption.name
+                      ? `${statusOption.borderColor} ${statusOption.bgColor} ${statusOption.color} border-2`
+                      : `border-gray-200 hover:${statusOption.bgColor} hover:${statusOption.borderColor} text-gray-700 hover:${statusOption.color}`
                   }`}
                 >
                   <span
                     className={
-                      currentStatus === status.name
-                        ? status.color
-                        : `hover:${status.color}`
+                      status === statusOption.name
+                        ? statusOption.color
+                        : `hover:${statusOption.color}`
                     }
                   >
-                    {status.name}
+                    {statusOption.name}
                   </span>
                 </button>
               ))}
@@ -364,6 +524,7 @@ const AdmissionDetails: React.FC = () => {
               <Button
                 variant="secondary"
                 onClick={() => setShowStatusModal(false)}
+                disabled={isLoading}
               >
                 Cancel
               </Button>
