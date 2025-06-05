@@ -6,6 +6,7 @@ import TPRSheet from "./TPRSheet";
 import VitalSigns from "./VitalSigns";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAdmissionStore } from "../../store/super-admin/useAdmissionStore";
+import Loader from "../../Shared/Loader";
 
 const AdmissionDetails: React.FC = () => {
   const [showStatusModal, setShowStatusModal] = useState(false);
@@ -19,7 +20,8 @@ const AdmissionDetails: React.FC = () => {
     currentAdmission,
     getAdmissionById,
     updateAdmissionStatus,
-    clearCurrentAdmission,
+    dischargePatient,
+    updateRecoveryStatus,
   } = useAdmissionStore();
 
   const tabs = [
@@ -61,27 +63,34 @@ const AdmissionDetails: React.FC = () => {
       bgColor: "bg-blue-50",
       borderColor: "border-blue-200",
     },
-    {
-      name: "Discharged",
-      color: "text-gray-600",
-      bgColor: "bg-gray-50",
-      borderColor: "border-gray-200",
-    },
   ];
 
   useEffect(() => {
     if (id) {
       getAdmissionById(parseInt(id));
     }
-
-    return () => {
-      clearCurrentAdmission();
-    };
-  }, [id, getAdmissionById, clearCurrentAdmission]);
+  }, [id, getAdmissionById]);
 
   const handleStatusUpdate = async (newStatus: string) => {
+    const data = {
+      admission_id: id,
+      status: newStatus,
+    };
     if (id) {
-      const success = await updateAdmissionStatus(parseInt(id), newStatus);
+      const success = await updateRecoveryStatus(data);
+      if (success) {
+        setShowStatusModal(false);
+      }
+    }
+  };
+
+  const handleDischarge = async () => {
+    const data = {
+      admission_id: id,
+      status: "discharged",
+    };
+    if (id) {
+      const success = await dischargePatient(data);
       if (success) {
         setShowStatusModal(false);
       }
@@ -121,30 +130,11 @@ const AdmissionDetails: React.FC = () => {
   };
 
   if (isLoading && !currentAdmission) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex items-center gap-2">
-          <Loader2 className="animate-spin" size={20} />
-          <span>Loading admission details...</span>
-        </div>
-      </div>
-    );
+    return <Loader />;
   }
 
   if (!currentAdmission) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            Admission Not Found
-          </h2>
-          <p className="text-gray-600 mb-4">
-            The admission record you're looking for doesn't exist.
-          </p>
-          <Button onClick={() => navigate(-1)}>Go Back</Button>
-        </div>
-      </div>
-    );
+    return;
   }
 
   const {
@@ -172,7 +162,10 @@ const AdmissionDetails: React.FC = () => {
             >
               <ArrowLeft size={24} className="text-gray-600" />
             </button>
-            <Button disabled={status === "Discharged"}>
+            <Button
+              disabled={status === "Discharged"}
+              onClick={handleDischarge}
+            >
               Discharge Patient
             </Button>
           </div>
@@ -473,10 +466,16 @@ const AdmissionDetails: React.FC = () => {
             </div>
           </div>
         )}
-        <FluidBalance admissionId={currentAdmission.id} />
-        {activeTab === "Medications" && <MedicationSheet />}
-        {activeTab === "TPR" && <TPRSheet />}
-        {activeTab === "Vital Signs" && <VitalSigns />}
+        {activeTab === "Fluid Balance" && (
+          <FluidBalance admissionId={currentAdmission.id} />
+        )}
+        {activeTab === "Medications" && (
+          <MedicationSheet admissionId={currentAdmission.id} />
+        )}
+        {activeTab === "TPR" && <TPRSheet admissionId={currentAdmission.id} />}
+        {activeTab === "Vital Signs" && (
+          <VitalSigns admissionId={currentAdmission.id} />
+        )}
       </div>
 
       {/* Status Modal */}

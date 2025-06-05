@@ -42,38 +42,30 @@ export const formatFluidValue = (value: string) => {
  * @returns {Object} - Transformed entry for component
  */
 export const transformApiEntryToComponent = (
-  apiEntry: {
-    created_at: string | number | Date;
-    id: any;
-    type: any;
-    iv_input: any;
-    oral_input: any;
-    urine_input: any;
-    vomits_input: any;
-    other_input: any;
-    comment: any;
-    updated_at: any;
-  },
+  entry: any,
   recordedBy: { first_name: string; last_name: string } | null = null
-) => {
-  const createdDate = new Date(apiEntry.created_at);
-
+): FluidEntry => {
   return {
-    id: apiEntry.id,
-    type: apiEntry.type,
-    date: createdDate.toISOString().split("T")[0],
-    time: createdDate.toTimeString().slice(0, 5),
-    ivInput: parseFluidValue(apiEntry.iv_input),
-    oralInput: parseFluidValue(apiEntry.oral_input),
-    urineOutput: parseFluidValue(apiEntry.urine_input),
-    vomitusOutput: parseFluidValue(apiEntry.vomits_input),
-    others: apiEntry.other_input || "",
-    comments: apiEntry.comment || "",
+    id: entry.id,
+    type: entry.attributes.type,
+    date: new Date(entry.attributes.created_at).toISOString().split("T")[0],
+    time: new Date(entry.attributes.created_at).toLocaleTimeString("en-NG", {
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+
+    ivInput: parseFluidValue(entry.attributes.iv_input),
+    oralInput: parseFluidValue(entry.attributes.oral_input),
+    urineOutput: parseFluidValue(entry.attributes.urine_input),
+    vomitusOutput: parseFluidValue(entry.attributes.vomits_input),
+    others: entry.attributes.other_input || "",
+    comments: entry.attributes.comment || "",
     recordedBy: recordedBy
       ? `${recordedBy.first_name} ${recordedBy.last_name}`
       : "Unknown",
-    created_at: apiEntry.created_at,
-    updated_at: apiEntry.updated_at,
+    created_at: entry.attributes.created_at,
+    updated_at: entry.attributes.updated_at || "",
   };
 };
 
@@ -161,16 +153,12 @@ export const calculateFluidStats = (entries: FluidEntry[]) => {
 export const validateFluidBalanceForm = (formData: {
   [x: string]: number | string;
   type: string;
-  recordedBy: string;
+  // recordedBy: string;
 }) => {
   const errors = [];
 
   if (!formData.type?.trim()) {
     errors.push("Type is required");
-  }
-
-  if (!formData.recordedBy?.trim()) {
-    errors.push("Recorded By is required");
   }
 
   // Validate numeric fields

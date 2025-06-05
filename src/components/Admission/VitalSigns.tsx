@@ -1,84 +1,59 @@
 import { Edit2, Plus, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAdmissionStore } from "../../store/super-admin/useAdmissionStore";
 
 type VitalSignsEntry = {
-  id: number;
-  date: string;
-  time: string;
-  temperature: number; // in °C
-  pulse: number; // bpm
-  respiration: number; // breaths per minute
-  systolicBP: number; // mmHg
-  diastolicBP: number; // mmHg
-  oxygenSat: number; // %
-  painScore: number; // 0-10
+  time: any;
+  date: any;
+  id: any;
+
+  temperature: any; // in °C
+  pulse: any; // bpm
+  respiration: any; // breaths per minute
+  systolicBP: any; // mmHg
+  diastolicBP: any; // mmHg
+  oxygenSat: any; // %
+  painScore: any; // 0-10
   recordedBy: string;
 };
 
-const VitalSigns = () => {
+const VitalSigns = ({ admissionId }: any) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingEntry, setEditingEntry] = useState<VitalSignsEntry | null>(
-    null
-  );
+  const [editingEntry, setEditingEntry] = useState<any | null>(null);
+  const { isLoading, createVitals, extractVitals, vitalsEntries } =
+    useAdmissionStore();
 
-  const [entries, setEntries] = useState<VitalSignsEntry[]>([
-    {
-      id: 1,
-      date: "2025-06-01",
-      time: "08:00",
-      temperature: 36.8,
-      pulse: 72,
-      respiration: 16,
-      systolicBP: 120,
-      diastolicBP: 80,
-      oxygenSat: 98,
-      painScore: 0,
-      recordedBy: "Nurse Titi",
-    },
-    {
-      id: 2,
-      date: "2025-06-01",
-      time: "12:00",
-      temperature: 37.1,
-      pulse: 68,
-      respiration: 18,
-      systolicBP: 118,
-      diastolicBP: 76,
-      oxygenSat: 97,
-      painScore: 1,
-      recordedBy: "Nurse Adeola",
-    },
-    {
-      id: 3,
-      date: "2025-06-01",
-      time: "16:00",
-      temperature: 37.3,
-      pulse: 75,
-      respiration: 17,
-      systolicBP: 122,
-      diastolicBP: 82,
-      oxygenSat: 96,
-      painScore: 2,
-      recordedBy: "Nurse Titi",
-    },
-    {
-      id: 4,
-      date: "2025-06-02",
-      time: "08:00",
-      temperature: 36.9,
-      pulse: 70,
-      respiration: 16,
-      systolicBP: 119,
-      diastolicBP: 78,
-      oxygenSat: 99,
-      painScore: 0,
-      recordedBy: "Nurse Adeola",
-    },
-  ]);
+  console.log(vitalsEntries, "vits");
+  useEffect(() => {
+    const vitasData = vitalsEntries.length > 0 ? vitalsEntries : [];
+
+    // Transform API data to component format
+    const transformedEntries = vitasData.map((vital, index) => ({
+      id: vital.id,
+      date: new Date(vital.attributes.created_at).toISOString().split("T")[0],
+      time: new Date(vital.attributes.created_at).toLocaleTimeString("en-NG", {
+        hour12: false,
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      temperature: vital.attributes.temperature,
+      pulse: vital.attributes.pulse,
+      respiration: vital.attributes.respiration_rate,
+      systolicBP: vital.attributes.systolic_bp,
+      diastolicBP: vital.attributes.diastolic_bp,
+      comment: vital.attributes.comment,
+      oxygenSat: vital.attributes.oxygen_saturation,
+      painScore: vital.attributes.pain_score,
+      // comment: vital.attributes.comment,
+
+      recordedBy: `${vital.attributes.recorded_by.first_name} ${vital.attributes.recorded_by.last_name}`,
+    }));
+
+    setEntries(transformedEntries);
+  }, [vitalsEntries]);
+  const [entries, setEntries] = useState<VitalSignsEntry[]>([]);
 
   const [formData, setFormData] = useState({
-    date: "",
-    time: "",
     temperature: "",
     pulse: "",
     respiration: "",
@@ -86,13 +61,10 @@ const VitalSigns = () => {
     diastolicBP: "",
     oxygenSat: "",
     painScore: "",
-    recordedBy: "",
   });
 
   const resetForm = () => {
     setFormData({
-      date: "",
-      time: "",
       temperature: "",
       pulse: "",
       respiration: "",
@@ -100,16 +72,13 @@ const VitalSigns = () => {
       diastolicBP: "",
       oxygenSat: "",
       painScore: "",
-      recordedBy: "",
     });
   };
 
-  const openModal = (entry: VitalSignsEntry | null = null) => {
+  const openModal = (entry: any | null = null) => {
     if (entry) {
       setEditingEntry(entry);
       setFormData({
-        date: entry.date,
-        time: entry.time,
         temperature: entry.temperature.toString(),
         pulse: entry.pulse.toString(),
         respiration: entry.respiration.toString(),
@@ -117,7 +86,6 @@ const VitalSigns = () => {
         diastolicBP: entry.diastolicBP.toString(),
         oxygenSat: entry.oxygenSat.toString(),
         painScore: entry.painScore.toString(),
-        recordedBy: entry.recordedBy,
       });
     } else {
       setEditingEntry(null);
@@ -132,29 +100,59 @@ const VitalSigns = () => {
     resetForm();
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const newEntry = {
-      id: editingEntry ? editingEntry.id : entries.length + 1,
-      date: formData.date,
-      time: formData.time,
-      temperature: parseFloat(formData.temperature) || 0,
-      pulse: parseInt(formData.pulse) || 0,
-      respiration: parseInt(formData.respiration) || 0,
-      systolicBP: parseInt(formData.systolicBP) || 0,
-      diastolicBP: parseInt(formData.diastolicBP) || 0,
-      oxygenSat: parseInt(formData.oxygenSat) || 0,
-      painScore: parseInt(formData.painScore) || 0,
-      recordedBy: formData.recordedBy,
+      admission_id: admissionId,
+      temperature: formData.temperature,
+      pulse: formData.pulse,
+      respiration_rate: formData.respiration,
+      systolic_bp: formData.systolicBP,
+      diastolic_bp: formData.diastolicBP,
+      oxygen_saturation: formData.oxygenSat,
+      pain_score: formData.painScore,
     };
+
+    const success = await createVitals(newEntry);
 
     if (editingEntry) {
       setEntries(
-        entries.map((entry) =>
-          entry.id === editingEntry.id ? newEntry : entry
+        entries.map((entry: any) =>
+          entry.id === editingEntry.id
+            ? {
+                ...entry,
+                temperature: Number(formData.temperature),
+                pulse: Number(formData.pulse),
+                respiration: Number(formData.respiration),
+                systolicBP: Number(formData.systolicBP),
+                diastolicBP: Number(formData.diastolicBP),
+                oxygenSat: Number(formData.oxygenSat),
+                painScore: Number(formData.painScore),
+              }
+            : entry
         )
       );
     } else {
-      setEntries([...entries, newEntry]);
+      const now = new Date();
+      setEntries([
+        ...entries,
+        {
+          id: Math.random().toString(36).substr(2, 9), // Temporary ID
+          date: now.toISOString().split("T")[0],
+          time: now.toLocaleTimeString("en-NG", {
+            hour12: false,
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          temperature: Number(formData.temperature),
+          pulse: Number(formData.pulse),
+          respiration: Number(formData.respiration),
+          systolicBP: Number(formData.systolicBP),
+          diastolicBP: Number(formData.diastolicBP),
+          oxygenSat: Number(formData.oxygenSat),
+          painScore: Number(formData.painScore),
+          recordedBy: "You", // Or get from user context if available
+        },
+      ]);
     }
 
     closeModal();
@@ -176,13 +174,18 @@ const VitalSigns = () => {
 
   // Average calculations
   const avgTemperature =
-    entries.reduce((sum, entry) => sum + entry.temperature, 0) / entries.length;
+    entries.reduce((sum, entry) => sum + Number(entry.temperature || 0), 0) /
+    (entries.length || 1);
+
   const avgPulse =
-    entries.reduce((sum, entry) => sum + entry.pulse, 0) / entries.length;
+    entries.reduce((sum, entry) => sum + Number(entry.pulse || 0), 0) /
+    (entries.length || 1);
   const avgRespiration =
-    entries.reduce((sum, entry) => sum + entry.respiration, 0) / entries.length;
+    entries.reduce((sum, entry) => sum + Number(entry.respiration || 0), 0) /
+    entries.length;
   const avgOxygenSat =
-    entries.reduce((sum, entry) => sum + entry.oxygenSat, 0) / entries.length;
+    entries.reduce((sum, entry) => sum + Number(entry.oxygenSat || 0), 0) /
+    entries.length;
 
   // Last recorded vital signs
   const lastEntry = entries.length > 0 ? entries[entries.length - 1] : null;
@@ -299,7 +302,7 @@ const VitalSigns = () => {
                         : "text-gray-900"
                     }`}
                   >
-                    {entry.temperature.toFixed(1)}
+                    {entry.temperature}
                   </td>
                   <td
                     className={`px-4 py-3 text-sm font-medium ${
@@ -345,7 +348,7 @@ const VitalSigns = () => {
                   <td className="px-4 py-3 text-sm text-gray-900">
                     {entry.recordedBy}
                   </td>
-                  <td className="px-4 py-3">
+                  {/* <td className="px-4 py-3">
                     <button
                       onClick={() => openModal(entry)}
                       className="text-primary p-1 rounded hover:bg-blue-50 transition-colors"
@@ -353,7 +356,7 @@ const VitalSigns = () => {
                     >
                       <Edit2 size={16} />
                     </button>
-                  </td>
+                  </td> */}
                 </tr>
               ))}
             </tbody>
@@ -379,34 +382,6 @@ const VitalSigns = () => {
 
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Date */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Date *
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.date}
-                    onChange={(e) => handleInputChange("date", e.target.value)}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                {/* Time */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Time *
-                  </label>
-                  <input
-                    type="time"
-                    value={formData.time}
-                    onChange={(e) => handleInputChange("time", e.target.value)}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
                 {/* Temperature */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -535,23 +510,6 @@ const VitalSigns = () => {
                     }
                     required
                     placeholder="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                {/* Recorded By */}
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Recorded By *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.recordedBy}
-                    onChange={(e) =>
-                      handleInputChange("recordedBy", e.target.value)
-                    }
-                    required
-                    placeholder="e.g., Nurse Smith"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>

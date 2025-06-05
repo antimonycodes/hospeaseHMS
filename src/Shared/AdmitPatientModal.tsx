@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useGlobalStore } from "../store/super-admin/useGlobal";
 import { useAdmissionStore } from "../store/super-admin/useAdmissionStore";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 interface AdmitPatientModalProps {
   setIsAdmitModalOpen: (open: boolean) => void;
@@ -23,6 +24,7 @@ const AdmitPatientModal: React.FC<AdmitPatientModalProps> = ({
   const [status, setStatus] = useState("");
 
   const doctorId = Number(localStorage.getItem("uid"));
+  const navigate = useNavigate();
 
   useEffect(() => {
     getClinicaldept();
@@ -46,6 +48,7 @@ const AdmitPatientModal: React.FC<AdmitPatientModalProps> = ({
 
     if (success) {
       setIsAdmitModalOpen(false);
+      navigate("/dashboard/admission");
     }
   };
 

@@ -7,9 +7,10 @@ import {
   Activity,
   Gauge,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAdmissionStore } from "../../store/super-admin/useAdmissionStore";
 
-const TPRSheet = () => {
+const TPRSheet = ({ admissionId }: any) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   type TPREntry = {
     id: number;
@@ -24,64 +25,51 @@ const TPRSheet = () => {
   };
 
   const [editingEntry, setEditingEntry] = useState<TPREntry | null>(null);
+  const { isLoading, createTPR, extractTPRHistory, tprEntries } =
+    useAdmissionStore();
 
-  const [entries, setEntries] = useState<TPREntry[]>([
-    {
-      id: 1,
-      date: "2024-06-01",
-      time: "08:00",
-      temperature: "98.6",
-      pulse: "72",
-      respiration: "18",
-      bloodPressure: "120/80",
-      comment: "Normal vitals, patient stable",
-      recordedBy: "Nurse Titi",
-    },
-    {
-      id: 2,
-      date: "2024-06-01",
-      time: "14:00",
-      temperature: "99.2",
-      pulse: "78",
-      respiration: "20",
-      bloodPressure: "125/82",
-      comment: "Slight temperature elevation",
-      recordedBy: "Adeola Becker",
-    },
-    {
-      id: 3,
-      date: "2024-06-01",
-      time: "20:00",
-      temperature: "98.4",
-      pulse: "68",
-      respiration: "16",
-      bloodPressure: "118/76",
-      comment: "Temperature normalized",
-      recordedBy: "Adeola Becker",
-    },
-  ]);
+  console.log(tprEntries, "tttppprrr");
+  useEffect(() => {
+    const tprData = tprEntries.length > 0 ? tprEntries : [];
+
+    // Transform API data to component format
+    const transformedEntries = tprData.map((tpr, index) => ({
+      id: tpr.id,
+      date: new Date(tpr.attributes.created_at).toISOString().split("T")[0],
+      time: new Date(tpr.attributes.created_at).toLocaleTimeString("en-NG", {
+        hour12: false,
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      temperature: tpr.attributes.temperature,
+      pulse: tpr.attributes.pulse,
+      respiration: tpr.attributes.respiration,
+      bloodPressure: tpr.attributes.blood_pressure,
+      comment: tpr.attributes.comment,
+
+      recordedBy: `${tpr.attributes.recorded_by.first_name} ${tpr.attributes.recorded_by.last_name}`,
+    }));
+
+    setEntries(transformedEntries);
+  }, [tprEntries]);
+
+  const [entries, setEntries] = useState<any[]>([]);
 
   const [formData, setFormData] = useState<any>({
-    date: "",
-    time: "",
     temperature: "",
     pulse: "",
     respiration: "",
     bloodPressure: "",
     comment: "",
-    recordedBy: "",
   });
 
   const resetForm = () => {
     setFormData({
-      date: "",
-      time: "",
       temperature: "",
       pulse: "",
       respiration: "",
       bloodPressure: "",
       comment: "",
-      recordedBy: "",
     });
   };
 
@@ -89,14 +77,11 @@ const TPRSheet = () => {
     if (entry) {
       setEditingEntry(entry);
       setFormData({
-        date: entry.date,
-        time: entry.time,
         temperature: entry.temperature,
         pulse: entry.pulse,
         respiration: entry.respiration,
         bloodPressure: entry.bloodPressure,
         comment: entry.comment,
-        recordedBy: entry.recordedBy,
       });
     } else {
       setEditingEntry(null);
@@ -111,24 +96,17 @@ const TPRSheet = () => {
     resetForm();
   };
 
-  const handleSubmit = () => {
-    // Validate required fields
-    if (!formData.date || !formData.time || !formData.recordedBy) {
-      alert("Please fill in all required fields");
-      return;
-    }
-
+  const handleSubmit = async () => {
     const newEntry = {
-      id: editingEntry ? editingEntry.id : entries.length + 1,
-      date: formData.date,
-      time: formData.time,
+      admission_id: admissionId,
       temperature: formData.temperature,
       pulse: formData.pulse,
       respiration: formData.respiration,
-      bloodPressure: formData.bloodPressure,
+      blood_pressure: formData.bloodPressure,
       comment: formData.comment,
-      recordedBy: formData.recordedBy,
     };
+
+    const success = await createTPR(newEntry);
 
     if (editingEntry) {
       setEntries(
@@ -276,9 +254,7 @@ const TPRSheet = () => {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Recorded By
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Action
-                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -328,7 +304,7 @@ const TPRSheet = () => {
                       {entry.recordedBy}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
+                  {/* <td className="px-4 py-3">
                     <button
                       onClick={() => openModal(entry)}
                       className="text-primary p-1 rounded hover:bg-blue-50 transition-colors"
@@ -336,7 +312,7 @@ const TPRSheet = () => {
                     >
                       <Edit2 size={16} />
                     </button>
-                  </td>
+                  </td> */}
                 </tr>
               ))}
             </tbody>
@@ -346,7 +322,7 @@ const TPRSheet = () => {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-xl font-bold text-gray-900">
@@ -362,34 +338,6 @@ const TPRSheet = () => {
 
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Date */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Date *
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.date}
-                    onChange={(e) => handleInputChange("date", e.target.value)}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                {/* Time */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Time *
-                  </label>
-                  <input
-                    type="time"
-                    value={formData.time}
-                    onChange={(e) => handleInputChange("time", e.target.value)}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
                 {/* Temperature */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -461,23 +409,6 @@ const TPRSheet = () => {
                       handleInputChange("bloodPressure", e.target.value)
                     }
                     placeholder="120/80"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                {/* Recorded By */}
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Recorded By *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.recordedBy}
-                    onChange={(e) =>
-                      handleInputChange("recordedBy", e.target.value)
-                    }
-                    required
-                    placeholder="e.g., Nurse Smith"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>

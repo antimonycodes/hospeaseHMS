@@ -19,7 +19,6 @@ const FluidBalance = ({ admissionId }: any) => {
     fluidBalanceEntries,
     createFluidBalance,
     updateFluidBalance,
-    getFluidBalanceEntries,
     currentAdmission,
   } = useAdmissionStore();
 
@@ -35,7 +34,7 @@ const FluidBalance = ({ admissionId }: any) => {
     vomitusOutput: "",
     others: "",
     comments: "",
-    recordedBy: "",
+    // recordedBy: "",
   });
 
   const typeOptions = [
@@ -48,13 +47,6 @@ const FluidBalance = ({ admissionId }: any) => {
     "Other",
   ];
 
-  // Load fluid balance entries on component mount
-  useEffect(() => {
-    if (admissionId) {
-      loadFluidBalanceEntries();
-    }
-  }, [admissionId]);
-
   // Update local entries when store entries change
   useEffect(() => {
     const mappedEntries = fluidBalanceEntries.map((entry) => {
@@ -64,18 +56,12 @@ const FluidBalance = ({ admissionId }: any) => {
       );
       return {
         ...mapped,
-        created_at: mapped.created_at ? String(mapped.created_at) : "",
-        updated_at: mapped.updated_at ? String(mapped.updated_at) : "",
+        created_at: mapped.created_at ? mapped.created_at : "",
+        updated_at: mapped.updated_at ? mapped.updated_at : "",
       };
     });
     setEntries(mappedEntries);
   }, [fluidBalanceEntries, currentAdmission]);
-
-  const loadFluidBalanceEntries = async () => {
-    if (admissionId) {
-      await getFluidBalanceEntries(admissionId);
-    }
-  };
 
   const resetForm = () => {
     setFormData({
@@ -88,7 +74,7 @@ const FluidBalance = ({ admissionId }: any) => {
       vomitusOutput: "",
       others: "",
       comments: "",
-      recordedBy: "",
+      // recordedBy: "",
     });
   };
 
@@ -105,7 +91,6 @@ const FluidBalance = ({ admissionId }: any) => {
         vomitusOutput: entry.vomitusOutput.toString(),
         others: entry.others,
         comments: entry.comments,
-        recordedBy: entry.recordedBy,
       });
     } else {
       setEditingEntry(null);
@@ -140,7 +125,7 @@ const FluidBalance = ({ admissionId }: any) => {
     if (editingEntry) {
       // Update existing entry
       const updateData = transformComponentToApiData(formData, admissionId);
-      delete updateData.admission_id; // Remove admission_id for updates
+      // delete updateData.admission_id; // Remove admission_id for updates
       success = await updateFluidBalance(editingEntry.id, updateData);
     } else {
       // Create new entry
@@ -151,7 +136,7 @@ const FluidBalance = ({ admissionId }: any) => {
     if (success) {
       closeModal();
       // Refresh entries
-      await loadFluidBalanceEntries();
+      // await loadFluidBalanceEntries();
     }
   };
 
@@ -295,8 +280,8 @@ const FluidBalance = ({ admissionId }: any) => {
                         {entry.type}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {entry.date} {entry.time}
+                    <td className="px-4 py-3 w-full text-sm text-gray-900">
+                      {entry.created_at}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-900">
                       {entry.ivInput}ml
@@ -373,49 +358,6 @@ const FluidBalance = ({ admissionId }: any) => {
                       </option>
                     ))}
                   </select>
-                </div>
-
-                {/* Recorded By */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Recorded By *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.recordedBy}
-                    onChange={(e) =>
-                      handleInputChange("recordedBy", e.target.value)
-                    }
-                    required
-                    placeholder="e.g., Nurse Smith"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                {/* Date */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Date
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.date}
-                    onChange={(e) => handleInputChange("date", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                {/* Time */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Time
-                  </label>
-                  <input
-                    type="time"
-                    value={formData.time}
-                    onChange={(e) => handleInputChange("time", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
                 </div>
 
                 {/* IV Input */}

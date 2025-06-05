@@ -513,9 +513,15 @@ const DoctorPatientDetails = () => {
               </Link>
             </div>
             {/*  */}
-            <Button onClick={() => setIsAdmitModalOpen((prev) => !prev)}>
-              Admit Patient
-            </Button>
+            {patient.is_admitted !== true ? (
+              <Button onClick={() => setIsAdmitModalOpen((prev) => !prev)}>
+                Admit Patient
+              </Button>
+            ) : (
+              <h1 className=" bg-primary p-2 rounded-full text-white">
+                Admitted
+              </h1>
+            )}
           </div>
 
           <div className="grid gap-6">

@@ -1,71 +1,64 @@
 import { Edit2, Plus, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAdmissionStore } from "../../store/super-admin/useAdmissionStore";
+import { useDoctorStore } from "../../store/super-admin/useDoctorStore";
+import { useFinanceStore } from "../../store/staff/useFinanceStore";
 
-const MedicationSheet = () => {
+const MedicationSheet = ({ admissionId }: any) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<any | null>(null);
+  // const { isLoading, createMedication } = useAdmissionStore();
+  const { getAllDoctors, doctors } = useFinanceStore();
+  const baseEndpoint = "/medical-reports/all-doctors";
 
-  const [entries, setEntries] = useState<any>([
-    {
-      id: 1,
-      date: "2020-07-21",
-      time: "18:00",
-      name: "Metformin",
-      dosage: "10mg",
-      route: "Oral",
-      prescribedBy: " Doctor James",
-      recordedBy: "Nurse Titi",
-    },
-    {
-      id: 2,
-      date: "2020-07-21",
-      time: "18:00",
-      name: "Insulin Glargine",
-      dosage: "10mg",
-      route: "Oral",
-      prescribedBy: " Doctor James",
-      recordedBy: "Adeola Becker",
-    },
-    {
-      id: 3,
-      date: "2020-07-21",
-      time: "18:00",
-      name: "Lisinopril",
-      dosage: "10mg",
-      route: "IV",
-      prescribedBy: " Doctor James",
-      recordedBy: "Adeola Becker",
-    },
-    {
-      id: 4,
-      date: "2020-07-21",
-      time: "18:00",
-      name: "Lisinopril",
-      dosage: "10mg",
-      route: "IV",
-      prescribedBy: " Doctor James",
-      recordedBy: "Adeola Becker",
-    },
-    {
-      id: 5,
-      date: "2025-06-02",
-      time: "18:00",
-      name: "Lisinopril",
-      dosage: "10mg",
-      route: "IV",
-      prescribedBy: " Doctor James",
-      recordedBy: "Adeola Becker",
-    },
-  ]);
+  useEffect(() => {
+    getAllDoctors();
+  }, [getAllDoctors]);
+
+  const {
+    isLoading,
+    createMedication,
+    medicationEntries,
+    extractMedicationHistory,
+  } = useAdmissionStore();
+
+  useEffect(() => {
+    const medicationData =
+      medicationEntries.length > 0 ? medicationEntries : [];
+
+    // Transform API data to component format
+    const transformedEntries = medicationData.map((medication, index) => ({
+      id: medication.id,
+      date: new Date(medication.attributes.created_at)
+        .toISOString()
+        .split("T")[0],
+      time: new Date(medication.attributes.created_at).toLocaleTimeString(
+        "en-NG",
+        {
+          hour12: false,
+          hour: "2-digit",
+          minute: "2-digit",
+        }
+      ),
+      name: medication.attributes.drug_name,
+      dosage: medication.attributes.dosage,
+      route: medication.attributes.route,
+      prescribedBy: `${medication.attributes.recorded_by.first_name} ${medication.attributes.recorded_by.last_name}`,
+      recordedBy: `${medication.attributes.recorded_by.first_name} ${medication.attributes.recorded_by.last_name}`,
+    }));
+
+    setEntries(transformedEntries);
+  }, [medicationEntries]);
+
+  console.log(medicationEntries, "medd");
+
+  const [entries, setEntries] = useState<any[]>([]);
 
   const [formData, setFormData] = useState({
-    date: "",
-    time: "",
     name: "",
     dosage: "",
     route: "",
-    prescribedBy: " Doctor James",
-    recordedBy: "",
+    prescribedBy: "",
   });
 
   const typeOptions = [
@@ -81,28 +74,24 @@ const MedicationSheet = () => {
     "Ophthalmic",
     "Otic",
   ];
+
   const resetForm = () => {
     setFormData({
-      date: "",
-      time: "",
       name: "",
       dosage: "",
       route: "",
-      prescribedBy: " Doctor James",
-      recordedBy: "",
+      prescribedBy: "",
     });
   };
+
   const openModal = (entry: any | null = null) => {
     if (entry) {
       setEditingEntry(entry);
       setFormData({
-        date: entry.date,
-        time: entry.time,
         name: entry.name.toString(),
         dosage: entry.dosage.toString(),
         route: entry.route,
         prescribedBy: entry.prescribedBy,
-        recordedBy: entry.recordedBy,
       });
     } else {
       setEditingEntry(null);
@@ -116,6 +105,7 @@ const MedicationSheet = () => {
     setEditingEntry(null);
     resetForm();
   };
+
   const handleInputChange = (field: any, value: any) => {
     setFormData((prev) => ({
       ...prev,
@@ -123,20 +113,75 @@ const MedicationSheet = () => {
     }));
   };
 
+  const handleSubmit = async () => {
+    try {
+      // Validate required fields
+      if (
+        !formData.name ||
+        !formData.dosage ||
+        !formData.route ||
+        !formData.prescribedBy
+      ) {
+        alert("Please fill in all required fields");
+        return;
+      }
+
+      const medicationData = {
+        admission_id: admissionId,
+        drug_name: formData.name,
+        dosage: formData.dosage,
+        route: formData.route,
+        prescribed_by: formData.prescribedBy, // This should be the user_id
+      };
+
+      const success = await createMedication(medicationData);
+
+      if (success) {
+        // Add to local state for immediate UI update
+        const newEntry = {
+          id: Date.now(), // Temporary ID
+          ...formData,
+          prescribedBy: getDoctorName(formData.prescribedBy), // Display name for UI
+        };
+
+        if (editingEntry) {
+          setEntries(
+            entries.map((entry: any) =>
+              entry.id === editingEntry.id
+                ? { ...newEntry, id: editingEntry.id }
+                : entry
+            )
+          );
+        } else {
+          setEntries([...entries, newEntry]);
+        }
+
+        closeModal();
+      }
+    } catch (error) {
+      console.error("Error creating medication:", error);
+    }
+  };
+
+  // Helper function to get doctor's display name
+  const getDoctorName = (userId: string) => {
+    const doctor = doctors.find(
+      (doc: any) => doc.attributes.user_id.toString() === userId
+    );
+    return doctor
+      ? `${doctor.attributes.first_name} ${doctor.attributes.last_name}`
+      : "Unknown Doctor";
+  };
+
   // Stats calculations
   const totalMedications = entries.length;
-
-  // Unique medications count
   const uniqueMedications = new Set(entries.map((entry: any) => entry.name))
     .size;
-
-  // Today's medications (using current date)
   const today = new Date().toISOString().split("T")[0];
   const todaysMedications = entries.filter(
     (entry: any) => entry.date === today
   ).length;
 
-  // Most prescribed drug
   const medicationStats = entries.reduce((acc: any, entry: any) => {
     acc[entry.name] = (acc[entry.name] || 0) + 1;
     return acc;
@@ -148,7 +193,6 @@ const MedicationSheet = () => {
         )
       : "None";
 
-  // Most active prescriber
   const prescriberStats = entries.reduce((acc: any, entry: any) => {
     acc[entry.prescribedBy] = (acc[entry.prescribedBy] || 0) + 1;
     return acc;
@@ -218,7 +262,6 @@ const MedicationSheet = () => {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   S/N
                 </th>
-
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Date & Time
                 </th>
@@ -234,11 +277,10 @@ const MedicationSheet = () => {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Prescribed By
                 </th>
-
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Recorded By
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                {/* <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th> */}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -247,8 +289,7 @@ const MedicationSheet = () => {
                   <td className="px-4 py-3 text-sm text-gray-900">
                     {index + 1}
                   </td>
-
-                  <td className="px-4 py-3 text-sm text-gray-900">
+                  <td className="px-4 text-nowrap py-3 text-sm text-gray-900">
                     {entry.date} {entry.time}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900">
@@ -266,7 +307,7 @@ const MedicationSheet = () => {
                   <td className="px-4 py-3 text-sm text-gray-900">
                     {entry.recordedBy}
                   </td>
-                  <td className="px-4 py-3">
+                  {/* <td className="px-4 py-3">
                     <button
                       onClick={() => openModal(entry)}
                       className="text-primary p-1 rounded hover:bg-blue-50 transition-colors"
@@ -274,13 +315,14 @@ const MedicationSheet = () => {
                     >
                       <Edit2 size={16} />
                     </button>
-                  </td>
+                  </td> */}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
+
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center p-4 z-50">
@@ -299,53 +341,76 @@ const MedicationSheet = () => {
 
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Name*/}
+                {/* Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Name
+                    Medication Name <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={formData.name}
-                    onChange={(e) =>
-                      handleInputChange("ivInput", e.target.value)
-                    }
-                    placeholder="Drug name"
+                    onChange={(e) => handleInputChange("name", e.target.value)}
+                    placeholder="Enter medication name"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
                   />
                 </div>
 
-                {/*Dosag */}
+                {/* Dosage */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Dosage
+                    Dosage <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={formData.dosage}
                     onChange={(e) =>
-                      handleInputChange("oralInput", e.target.value)
+                      handleInputChange("dosage", e.target.value)
                     }
-                    placeholder=""
+                    placeholder="e.g., 10mg, 2 tablets"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
                   />
                 </div>
 
-                {/*Route */}
+                {/* Route */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Route
+                    Route <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={formData.route}
-                    onChange={(e) => handleInputChange("type", e.target.value)}
+                    onChange={(e) => handleInputChange("route", e.target.value)}
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="">Select type</option>
+                    <option value="">Select route</option>
                     {typeOptions.map((option) => (
                       <option key={option} value={option}>
                         {option}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Prescribed By */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Prescribed By <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={formData.prescribedBy}
+                    onChange={(e) =>
+                      handleInputChange("prescribedBy", e.target.value)
+                    }
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Select doctor</option>
+                    {doctors.map((doctor: any) => (
+                      <option key={doctor.id} value={doctor.attributes.user_id}>
+                        {doctor.attributes.first_name}{" "}
+                        {doctor.attributes.last_name}
                       </option>
                     ))}
                   </select>
@@ -356,10 +421,24 @@ const MedicationSheet = () => {
               <div className="flex items-center justify-end gap-3 pt-4">
                 <button
                   type="button"
-                  //   onClick={handleSubmit}
-                  className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md  transition-colors"
+                  onClick={closeModal}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
                 >
-                  {editingEntry ? "Update Entry" : "Add Entry"}
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={isLoading}
+                  className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading
+                    ? editingEntry
+                      ? "Updating..."
+                      : "Adding..."
+                    : editingEntry
+                    ? "Update Entry"
+                    : "Add Entry"}
                 </button>
               </div>
             </div>

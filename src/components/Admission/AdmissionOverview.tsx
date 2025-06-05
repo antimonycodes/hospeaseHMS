@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Search, Filter, User, Bed, AlertTriangle, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAdmissionStore } from "../../store/super-admin/useAdmissionStore";
+import Loader from "../../Shared/Loader";
 
 interface NextOfKin {
   [key: string]: any;
@@ -175,11 +176,7 @@ const AdmissionOverview: React.FC = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <Loader />;
   }
 
   return (
