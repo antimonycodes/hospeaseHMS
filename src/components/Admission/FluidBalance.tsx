@@ -64,8 +64,8 @@ const FluidBalance = ({ admissionId }: any) => {
       );
       return {
         ...mapped,
-        created_at: mapped.created_at ? String(mapped.created_at) : undefined,
-        updated_at: mapped.updated_at ? String(mapped.updated_at) : undefined,
+        created_at: mapped.created_at ? String(mapped.created_at) : "",
+        updated_at: mapped.updated_at ? String(mapped.updated_at) : "",
       };
     });
     setEntries(mappedEntries);
