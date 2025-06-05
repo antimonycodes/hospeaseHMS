@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Search, Filter, User, Bed, AlertTriangle, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAdmissionStore } from "../../store/super-admin/useAdmissionStore";
 
 interface NextOfKin {
   [key: string]: any;
@@ -80,14 +81,6 @@ interface ApiResponse {
   };
   status_code: number;
 }
-
-// Assuming you have a store or API service
-// Replace this with your actual store/API call
-declare const useAdmissionStore: () => {
-  admissionList: AdmissionRecord[];
-  isLoading: boolean;
-  allAdmission: () => Promise<void>;
-};
 
 const AdmissionOverview: React.FC = () => {
   const { admissionList, isLoading, allAdmission } = useAdmissionStore();
