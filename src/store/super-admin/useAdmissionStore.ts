@@ -258,6 +258,7 @@ export const useAdmissionStore = create<AdmissionStore>((set, get) => ({
       );
       if (isSuccessfulResponse(response)) {
         toast.success(response.data?.message);
+        // get().getAdmissionById();
         return true;
       }
       return null;

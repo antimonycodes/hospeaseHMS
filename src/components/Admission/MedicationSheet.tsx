@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useAdmissionStore } from "../../store/super-admin/useAdmissionStore";
 import { useDoctorStore } from "../../store/super-admin/useDoctorStore";
 import { useFinanceStore } from "../../store/staff/useFinanceStore";
+import { useRole } from "../../hooks/useRole";
 
 const MedicationSheet = ({ admissionId }: any) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -204,17 +205,23 @@ const MedicationSheet = ({ admissionId }: any) => {
         )
       : "None";
 
+  const role = useRole();
+
   return (
     <div className=" space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">MEDICATION SHEET</h1>
-        <button
-          onClick={() => openModal()}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-md "
-        >
-          <Plus size={16} />
-          Add Entry
-        </button>
+        <h1 className="text-md md:text-2xl font-bold text-gray-900">
+          MEDICATION SHEET
+        </h1>
+        {(role === "nurse" || role === "admin") && (
+          <button
+            onClick={() => openModal()}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-md "
+          >
+            <Plus size={16} />
+            Add Entry
+          </button>
+        )}
       </div>
 
       {/*  Summary Cards  */}

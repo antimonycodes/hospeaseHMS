@@ -7,6 +7,8 @@ import VitalSigns from "./VitalSigns";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAdmissionStore } from "../../store/super-admin/useAdmissionStore";
 import Loader from "../../Shared/Loader";
+import { useRole } from "../../hooks/useRole";
+import MedicalTimeline from "../../Shared/MedicalTimeline";
 
 const AdmissionDetails: React.FC = () => {
   const [showStatusModal, setShowStatusModal] = useState(false);
@@ -80,6 +82,7 @@ const AdmissionDetails: React.FC = () => {
       const success = await updateRecoveryStatus(data);
       if (success) {
         setShowStatusModal(false);
+        getAdmissionById(parseInt(id));
       }
     }
   };
@@ -149,6 +152,11 @@ const AdmissionDetails: React.FC = () => {
   } = currentAdmission.attributes;
   const nextOfKin = patient.attributes.next_of_kin[0] || {};
 
+  const selectedP = patient.attributes;
+  console.log(selectedP, "ert");
+
+  const role = useRole();
+
   return (
     <div className="min-h-screen">
       <div className="bg-white border border-[#EAECF0] custom-shadow rounded-lg p-6 space-y-12">
@@ -162,12 +170,14 @@ const AdmissionDetails: React.FC = () => {
             >
               <ArrowLeft size={24} className="text-gray-600" />
             </button>
-            <Button
-              disabled={status === "Discharged"}
-              onClick={handleDischarge}
-            >
-              Discharge Patient
-            </Button>
+            {(role === "nurse" || role === "doctor" || role === "admin") && (
+              <Button
+                disabled={status === "discharged"}
+                onClick={handleDischarge}
+              >
+                Discharge Patient
+              </Button>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
@@ -203,9 +213,8 @@ const AdmissionDetails: React.FC = () => {
                 {patient.attributes.age || "N/A"}
               </p>
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6"> */}
             <div>
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 Gender
@@ -238,9 +247,8 @@ const AdmissionDetails: React.FC = () => {
                 {patient.attributes.religion}
               </p>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* </div> */}
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> */}
             <div>
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 Phone
@@ -257,8 +265,10 @@ const AdmissionDetails: React.FC = () => {
                 {patient.attributes.address}
               </p>
             </div>
+            {/* </div> */}
           </div>
         </div>
+        <hr className="text-[#979797]" />
 
         {/* Next of Kin */}
         <div className="bg-white">
@@ -299,9 +309,7 @@ const AdmissionDetails: React.FC = () => {
                 {nextOfKin.occupation || "N/A"}
               </p>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6"> */}
             <div>
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 Religion
@@ -326,17 +334,19 @@ const AdmissionDetails: React.FC = () => {
                 {nextOfKin.relationship || "N/A"}
               </p>
             </div>
-          </div>
-
-          <div className="mt-6">
-            <label className="text-sm font-medium text-gray-500 mb-1 block">
-              House Address
-            </label>
-            <p className="text-gray-900 font-medium">
-              {nextOfKin.address || "N/A"}
-            </p>
+            {/* </div> */}
+            <div className="mt-6">
+              <label className="text-sm font-medium text-gray-500 mb-1 block">
+                House Address
+              </label>
+              <p className="text-gray-900 font-medium">
+                {nextOfKin.address || "N/A"}
+              </p>
+            </div>
           </div>
         </div>
+
+        <hr className="text-[#979797]" />
 
         {/* Admission Details */}
         <div className="">
@@ -375,31 +385,29 @@ const AdmissionDetails: React.FC = () => {
                 {bed_number.split("-")[1]}
               </p>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6"> */}
             <div>
               <label className="text-sm font-medium text-gray-500 mb-1 block">
-                Recommended By
+                Admitted By
               </label>
               <p className="text-gray-900 font-medium">
                 Dr. {recommended_by.first_name} {recommended_by.last_name}
               </p>
             </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500 mb-1 block">
-                Recorded By
-              </label>
-              <p className="text-gray-900 font-medium">
-                {recorded_by.first_name} {recorded_by.last_name}
-              </p>
-            </div>
+
             <div>
               <label className="text-sm font-medium text-gray-500 mb-1 block">
                 Admission Date
               </label>
               <p className="text-gray-900 font-medium">{created_at}</p>
             </div>
+            <div>
+              <h4 className="font-medium text-gray-700 mb-2">
+                Primary Diagnosis
+              </h4>
+              <p className="text-gray-900">{diagnosis}</p>
+            </div>
+            {/* </div> */}
           </div>
 
           <div className="flex items-center gap-4">
@@ -411,25 +419,30 @@ const AdmissionDetails: React.FC = () => {
                 <span className={`font-medium ${getCurrentStatusColor()}`}>
                   {status}
                 </span>
-                <button
-                  onClick={() => setShowStatusModal(true)}
-                  className="p-1 hover:bg-gray-100 rounded transition-colors"
-                  disabled={status === "Discharged"}
-                >
-                  <Edit2 size={16} className="text-gray-400" />
-                </button>
+                {(role === "nurse" ||
+                  role === "doctor" ||
+                  role === "admin") && (
+                  <button
+                    onClick={() => setShowStatusModal(true)}
+                    className="p-1 hover:bg-gray-100 rounded transition-colors"
+                    disabled={status === "Discharged"}
+                  >
+                    <Edit2 size={16} className="text-gray-400" />
+                  </button>
+                )}
               </div>
             </div>
           </div>
+          {/*  */}
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-200 mb-6">
+        <div className="flex flex-wrap gap-2 border-b border-gray-200 mb-6">
           {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              className={` py-2 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === tab
                   ? "border-primary text-primary"
                   : "border-transparent text-gray-500 hover:text-gray-700"
@@ -442,28 +455,14 @@ const AdmissionDetails: React.FC = () => {
 
         {/* Tab Content */}
         {activeTab === "Clinical History" && (
-          <div className="bg-gray-50 p-6 rounded-lg">
-            <h2 className="text-lg font-semibold mb-4">Clinical History</h2>
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-medium text-gray-700 mb-2">
-                  Primary Diagnosis
-                </h4>
-                <p className="text-gray-900">{diagnosis}</p>
-              </div>
-              <div>
-                <h4 className="font-medium text-gray-700 mb-2">Department</h4>
-                <p className="text-gray-900">{clinical_department.name}</p>
-              </div>
-              <div>
-                <h4 className="font-medium text-gray-700 mb-2">
-                  Current Status
-                </h4>
-                <p className={`font-medium ${getCurrentStatusColor()}`}>
-                  {status}
-                </p>
-              </div>
-            </div>
+          <div>
+            {patient?.id && (
+              <MedicalTimeline
+                patientId={patient.id.toString()}
+                patient={selectedP}
+                showDownloadCompleteButton={false}
+              />
+            )}
           </div>
         )}
         {activeTab === "Fluid Balance" && (

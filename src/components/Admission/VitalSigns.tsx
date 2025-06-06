@@ -1,6 +1,7 @@
 import { Edit2, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAdmissionStore } from "../../store/super-admin/useAdmissionStore";
+import { useRole } from "../../hooks/useRole";
 
 type VitalSignsEntry = {
   time: any;
@@ -193,19 +194,23 @@ const VitalSigns = ({ admissionId }: any) => {
     ? `${lastEntry.systolicBP}/${lastEntry.diastolicBP}`
     : "N/A";
 
+  const role = useRole();
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-md lg:text-2xl font-bold text-gray-900">
           VITAL SIGNS MONITORING
         </h1>
-        <button
-          onClick={() => openModal()}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-md"
-        >
-          <Plus size={16} />
-          Add Entry
-        </button>
+        {(role === "nurse" || role === "admin") && (
+          <button
+            onClick={() => openModal()}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-md"
+          >
+            <Plus size={16} />
+            Add Entry
+          </button>
+        )}
       </div>
 
       {/* Stats Cards */}

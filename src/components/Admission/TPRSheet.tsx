@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAdmissionStore } from "../../store/super-admin/useAdmissionStore";
+import { useRole } from "../../hooks/useRole";
 
 const TPRSheet = ({ admissionId }: any) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -148,20 +149,26 @@ const TPRSheet = ({ admissionId }: any) => {
     }
   };
 
+  const role = useRole();
+
   return (
     <div className="space-y-6 ">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Activity className="text-blue-600" size={28} />
-          <h1 className="text-2xl font-bold text-gray-900">TPR SHEET</h1>
+          <h1 className="text-md lg:text-2xl font-bold text-gray-900">
+            TPR SHEET
+          </h1>
         </div>
-        <button
-          onClick={() => openModal()}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-md transition-colors"
-        >
-          <Plus size={16} />
-          Add Entry
-        </button>
+        {(role === "nurse" || role == "admin") && (
+          <button
+            onClick={() => openModal()}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-md transition-colors"
+          >
+            <Plus size={16} />
+            Add Entry
+          </button>
+        )}
       </div>
 
       {/* Summary Cards */}
@@ -300,7 +307,7 @@ const TPRSheet = ({ admissionId }: any) => {
                     </div>
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    <span className="inline-flex items-center  text-xs font-medium">
                       {entry.recordedBy}
                     </span>
                   </td>

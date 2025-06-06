@@ -9,6 +9,7 @@ import {
   calculateFluidStats,
   FluidEntry,
 } from "../../utils/fluidBalanceUtils";
+import { useRole } from "../../hooks/useRole";
 
 const FluidBalance = ({ admissionId }: any) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -150,18 +151,25 @@ const FluidBalance = ({ admissionId }: any) => {
   // Stats calculations using utility function
   const stats = calculateFluidStats(entries);
 
+  const role = useRole();
+  console.log(role);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">FLUID CHART</h1>
-        <button
-          onClick={() => openModal()}
-          disabled={isLoading}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-md disabled:opacity-50"
-        >
-          <Plus size={16} />
-          {isLoading ? "Loading..." : "Add Entry"}
-        </button>
+        <h1 className="text-md lg:text-2xl font-bold text-gray-900">
+          FLUID CHART
+        </h1>
+        {(role === "nurse" || role === "admin") && (
+          <button
+            onClick={() => openModal()}
+            disabled={isLoading}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-md disabled:opacity-50"
+          >
+            <Plus size={16} />
+            {isLoading ? "Loading..." : "Add Entry"}
+          </button>
+        )}
       </div>
 
       {/* Stats Card */}

@@ -184,9 +184,9 @@ const AdmissionOverview: React.FC = () => {
       <div className="">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          {/* <h1 className="text-2xl font-bold text-gray-900 mb-2">
             Good Morning! Doctor Abiola
-          </h1>
+          </h1> */}
         </div>
 
         {/* Stats Grid */}
@@ -227,7 +227,7 @@ const AdmissionOverview: React.FC = () => {
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900">
                 Patients on Admission{" "}
-                <span className="text-blue-600 text-sm ml-2">
+                <span className="text-primary text-sm ml-2">
                   {totalPatients}
                 </span>
               </h2>
@@ -334,7 +334,7 @@ const AdmissionOverview: React.FC = () => {
                         <Link
                           to={`/dashboard/admission-details/${admission.id}`}
                         >
-                          <button className="text-blue-600 text-sm font-medium hover:text-blue-800">
+                          <button className="text-primary text-sm font-medium ">
                             View More
                           </button>
                         </Link>
