@@ -55,7 +55,8 @@ const PaymentStatusBadge = ({ status }: { status: string }) => {
 const PaymentDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { selectedPayment, getPaymentById, updatePayment } = useFinanceStore();
+  const { selectedPayment, getPaymentById, updatePayment, refundPayment } =
+    useFinanceStore();
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -73,6 +74,13 @@ const PaymentDetails = () => {
         });
     }
   }, [id, getPaymentById]);
+
+  const handleRefund = async (id: any) => {
+    const success = await refundPayment(selectedPayment.id);
+    if (success) {
+      getPaymentById(selectedPayment.id);
+    }
+  };
 
   useEffect(() => {
     // Calculate original price for HMO payment method
@@ -254,6 +262,7 @@ const PaymentDetails = () => {
 
         <div className="flex space-x-2 mt-8">
           {/* Only show payment buttons if not fully paid */}
+
           {attributes.payment_type !== "full" && (
             <>
               <button
@@ -270,6 +279,13 @@ const PaymentDetails = () => {
               </button>
             </>
           )}
+          <button
+            className="rounded-sm text-white border bg-red-800 py-2 px-3"
+            // onClick={() => handlePaymentAction("part")}
+            onClick={handleRefund}
+          >
+            Refund
+          </button>
         </div>
 
         {/* Order Summary */}

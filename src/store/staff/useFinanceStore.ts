@@ -85,6 +85,7 @@ export interface Pagination {
 
 interface FinanceStore {
   isLoading: boolean;
+  isBillLoading: boolean;
   isSourceLoading: boolean;
   expenses: any[];
   payments: any[];
@@ -124,12 +125,15 @@ interface FinanceStore {
   updatePaymentSource: (id: any, data: any) => Promise<any>;
   deletePaymentSource: (id: any) => Promise<any>;
   getAllDoctors: () => Promise<any>;
+  createDoctorBill: (data: any) => Promise<any>;
+  refundPayment: (id: any) => Promise<any>;
 }
 
 export const useFinanceStore = create<FinanceStore>((set, get) => ({
   isLoading: false,
   isUpdating: false,
   isSourceLoading: false,
+  isBillLoading: false,
   expenses: [],
   payments: [],
   stats: null,
@@ -490,6 +494,27 @@ export const useFinanceStore = create<FinanceStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
+  createDoctorBill: async (data) => {
+    set({ isBillLoading: true });
+    try {
+      const response = await api.post(
+        "/medical-report/doctor-bill/create",
+        data
+      );
+      if (isSuccessfulResponse(response)) {
+        // toast.success(response.data?.message);
+        console.log(response.data.data);
+        // Return the actual data instead of just true
+        return response.data.data; // This returns the bill data
+      }
+      return null;
+    } catch (error) {
+      handleErrorToast(error);
+      return null;
+    } finally {
+      set({ isBillLoading: false });
+    }
+  },
   getAllDoctors: async () => {
     set({ isLoading: true });
     try {
@@ -500,6 +525,23 @@ export const useFinanceStore = create<FinanceStore>((set, get) => ({
       // set({ pagination: response.data.data.pagination });
 
       // toast.success("Doctors retrieved successfully!");
+    } catch (error: any) {
+      console.error(error.response?.data);
+      // toast.error(error.response.message || "Failed to fetch doctors");
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  refundPayment: async (id) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.put(`medical-report/refund-patient/${id}`);
+      if (isSuccessfulResponse(response)) {
+        toast.success(response.data?.message);
+        get().getAllPayments();
+        return true;
+      }
+      return null;
     } catch (error: any) {
       console.error(error.response?.data);
       // toast.error(error.response.message || "Failed to fetch doctors");

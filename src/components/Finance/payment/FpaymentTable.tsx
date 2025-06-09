@@ -65,10 +65,16 @@ const PaymentTypeBadge = ({
         Part Payment
       </span>
     );
-  } else {
+  } else if (type === "pending") {
     return (
       <span className="px-2 py-1 bg-[#FBE1E1] text-[#F83E41] rounded-full text-xs font-medium">
         Pending
+      </span>
+    );
+  } else {
+    return (
+      <span className="px-2 py-1 bg-red-500 text-white rounded-full text-xs font-medium">
+        refunded
       </span>
     );
   }

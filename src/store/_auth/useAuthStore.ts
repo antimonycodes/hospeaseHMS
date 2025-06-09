@@ -79,6 +79,12 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         });
         const token = response.data.data.token;
         sessionStorage.setItem("userId", response.data.data.user.id);
+        sessionStorage.setItem(
+          "user-info",
+          JSON.stringify(response.data.data.user)
+        );
+
+        console.log(response.data.data.user);
         console.log(response.data.data.user.id, "idd");
         console.log(response.data.data.user.id, "idd");
         // Cookies.set("token", token, { expires: 1, secure: true });

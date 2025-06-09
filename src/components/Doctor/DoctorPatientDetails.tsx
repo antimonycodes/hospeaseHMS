@@ -14,6 +14,7 @@ import {
   Check,
   Plus,
   Minus,
+  Banknote,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { usePatientStore } from "../../store/super-admin/usePatientStore";
@@ -25,6 +26,9 @@ import { useGlobalStore } from "../../store/super-admin/useGlobal";
 import Loader from "../../Shared/Loader";
 import MedicalTimeline from "../../Shared/MedicalTimeline";
 import AdmitPatientModal from "../../Shared/AdmitPatientModal";
+import Input from "../../Shared/Input";
+import { useFinanceStore } from "../../store/staff/useFinanceStore";
+import DoctorBillForm from "./DoctorBillForm";
 
 const COMMON_COMPLAINTS = [
   "Headache",
@@ -494,6 +498,8 @@ const DoctorPatientDetails = () => {
     setMergedData(updatedData);
   };
 
+  const { createDoctorBill, isBillLoading } = useFinanceStore();
+
   if (!selectedPatient) return <Loader />;
 
   const patient = selectedPatient.attributes;
@@ -577,7 +583,7 @@ const DoctorPatientDetails = () => {
       </div>
 
       <div className="bg-white rounded-lg custom-shadow mb-6 p-4 sm:p-6">
-        <div className="flex gap-6 mb-4 text-sm font-medium text-[#667185]">
+        <div className="flex flex-wrap gap-6 mb-4 text-sm font-medium text-[#667185]">
           <button
             className={`flex items-center gap-1 px-3 py-1 rounded-md transition ${
               activeTab === "note"
@@ -599,6 +605,19 @@ const DoctorPatientDetails = () => {
           >
             <FileText size={16} />
             Add Doctor's Report
+          </button>
+          <button
+            className={`flex items-center gap-1 px-3 py-1 rounded-md transition ${
+              activeTab === "bill"
+                ? "text-primary bg-[#F0F4FF]"
+                : "hover:text-primary"
+            }`}
+            onClick={() => setActiveTab("bill")}
+          >
+            {/* <Bill /> */}
+            <Banknote size={16} />
+            {/* <BanknoteArrowDown /> */}
+            Add Doctor's Bill
           </button>
         </div>
 
@@ -1111,6 +1130,22 @@ const DoctorPatientDetails = () => {
               )}
             </button>
           </div>
+        )}
+        {activeTab == "bill" && (
+          // <div>
+          //   <div className="space-y-4 mb-4">
+          //     <label htmlFor="">Description</label>
+          //     <Input name="description" value="" onChange="" />
+          //   </div>
+          //   <div className="space-y-4 mb-4">
+          //     <label htmlFor="">Amount</label>
+          //     <Input name="amount" value="" onChange="" />
+          //   </div>
+          //   <div className=" flex justify-end">
+          //     <Button>Add Doctor's Bill</Button>
+          //   </div>{" "}
+          // </div>
+          <DoctorBillForm patient={patient} />
         )}
       </div>
 
