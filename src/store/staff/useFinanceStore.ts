@@ -504,8 +504,7 @@ export const useFinanceStore = create<FinanceStore>((set, get) => ({
       if (isSuccessfulResponse(response)) {
         // toast.success(response.data?.message);
         console.log(response.data.data);
-        // Return the actual data instead of just true
-        return response.data.data; // This returns the bill data
+        return response.data.data;
       }
       return null;
     } catch (error) {

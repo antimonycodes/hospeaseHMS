@@ -16,6 +16,7 @@ const AdmissionDetails: React.FC = () => {
 
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const role = useRole();
 
   const {
     isLoading,
@@ -154,8 +155,6 @@ const AdmissionDetails: React.FC = () => {
 
   const selectedP = patient.attributes;
   console.log(selectedP, "ert");
-
-  const role = useRole();
 
   return (
     <div className="min-h-screen">

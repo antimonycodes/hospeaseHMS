@@ -12,9 +12,13 @@ import {
   Plus,
   Minus,
   ChevronLeft,
+  Banknote,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import MedicalTimeline from "../../../Shared/MedicalTimeline";
+import DoctorBillForm from "../DoctorBillForm";
+import Button from "../../../Shared/Button";
+import AdmitPatientModal from "../../../Shared/AdmitPatientModal";
 
 const COMMON_COMPLAINTS = [
   "Headache",
@@ -61,114 +65,6 @@ const COMMON_COMPLAINTS = [
   "Hot flashes",
   "Night sweats",
   "Chills",
-];
-
-// Laboratory investigation parameters
-const LAB_PARAMETERS = [
-  {
-    name: "Hematology",
-    parameters: [
-      "Full Blood Count (FBC)",
-      "Complete Blood Count (CBC)",
-      "Hemoglobin (Hb)",
-      "Hematocrit (HCT)",
-      "White Blood Cell Count (WBC)",
-      "Platelet Count",
-      "ESR (Erythrocyte Sedimentation Rate)",
-      "Bleeding Time",
-      "Clotting Time",
-      "Prothrombin Time (PT)",
-      "Partial Thromboplastin Time (PTT)",
-    ],
-  },
-  {
-    name: "Biochemistry",
-    parameters: [
-      "Fasting Blood Sugar (FBS)",
-      "Random Blood Sugar (RBS)",
-      "HbA1c (Glycated Hemoglobin)",
-      "Lipid Profile",
-      "Total Cholesterol",
-      "HDL Cholesterol",
-      "LDL Cholesterol",
-      "Triglycerides",
-      "Liver Function Tests (LFTs)",
-      "Kidney Function Tests (KFTs)",
-      "Urea",
-      "Creatinine",
-      "Electrolytes (Na, K, Cl)",
-      "Total Protein",
-      "Albumin",
-      "Bilirubin (Total & Direct)",
-    ],
-  },
-  {
-    name: "Immunology",
-    parameters: [
-      "HIV Screening",
-      "Hepatitis B Surface Antigen (HBsAg)",
-      "Hepatitis C Antibody",
-      "Thyroid Function Tests (TFTs)",
-      "TSH (Thyroid Stimulating Hormone)",
-      "Free T3",
-      "Free T4",
-      "C-Reactive Protein (CRP)",
-      "Rheumatoid Factor (RF)",
-      "Anti-Nuclear Antibody (ANA)",
-    ],
-  },
-  {
-    name: "Microbiology",
-    parameters: [
-      "Urine Culture & Sensitivity",
-      "Blood Culture",
-      "Stool Culture",
-      "Sputum Culture",
-      "Wound Swab Culture",
-      "Gram Stain",
-      "AFB (Acid Fast Bacilli)",
-      "Malaria Parasite (MP)",
-      "Widal Test",
-      "VDRL (Syphilis Test)",
-    ],
-  },
-  {
-    name: "Radiology",
-    parameters: [
-      "Chest X-Ray",
-      "Abdominal X-Ray",
-      "Pelvic X-Ray",
-      "Ultrasound Abdomen",
-      "Ultrasound Pelvis",
-      "CT Scan Head",
-      "CT Scan Chest",
-      "CT Scan Abdomen",
-      "MRI Brain",
-      "Echocardiogram",
-      "ECG (Electrocardiogram)",
-    ],
-  },
-  {
-    name: "Others",
-    parameters: [
-      "Urinalysis",
-      "Stool Analysis",
-      "Pregnancy Test",
-      "Pap Smear",
-      "Biopsy",
-      "Endoscopy",
-      "Colonoscopy",
-      "Spirometry",
-      "Audiometry",
-    ],
-  },
-  // { name: "Malaria Test", parameters: ["RDT", "Microscopy"] },
-  // { name: "HIV Test", parameters: ["Rapid Test", "ELISA", "Western Blot"] },
-  // {
-  //   name: "Hepatitis B",
-  //   parameters: ["HBsAg", "Anti-HBs", "HBeAg", "Anti-HBe", "Anti-HBc"],
-  // },
-  // { name: "Hepatitis C", parameters: ["Anti-HCV", "HCV RNA"] },
 ];
 
 // InfoRow reusable component
@@ -333,13 +229,17 @@ const DoctorAppointmentDetails = () => {
   const [role, setRole] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [activeTab, setActiveTab] = useState<"note" | "report">("note");
+  const [activeTab, setActiveTab] = useState<"note" | "report" | "bill">(
+    "note"
+  );
   const [note, setNote] = useState("");
   const [reportNote, setReportNote] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [itemSearch, setItemSearch] = useState("");
   const [isSelectOpen, setIsSelectOpen] = useState(false);
+  const [isAdmitModalOpen, setIsAdmitModalOpen] = useState(false);
+
   const [selectedParameters, setSelectedParameters] = useState<string[]>([]);
   const [selectedItems, setSelectedItems] = useState<
     {
@@ -767,8 +667,6 @@ const DoctorAppointmentDetails = () => {
 
   return (
     <div>
-      <BackButton label="Patients" />
-
       {/* Messages */}
       {errorMessage && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -780,7 +678,17 @@ const DoctorAppointmentDetails = () => {
           {successMessage}
         </div>
       )}
+      <div className=" flex items-center justify-between mb-4">
+        <BackButton label="Patients" />
 
+        {patient.is_admitted !== true ? (
+          <Button onClick={() => setIsAdmitModalOpen((prev) => !prev)}>
+            Admit Patient
+          </Button>
+        ) : (
+          <h1 className=" bg-primary p-2 rounded-full text-white">Admitted</h1>
+        )}
+      </div>
       {/* Patient Info */}
       <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
         <InfoRow
@@ -970,6 +878,19 @@ const DoctorAppointmentDetails = () => {
             >
               <FileText size={16} />
               Add Doctor's Report
+            </button>
+            <button
+              className={`flex items-center gap-1 px-3 py-1 rounded-md transition ${
+                activeTab === "bill"
+                  ? "text-primary bg-[#F0F4FF]"
+                  : "hover:text-primary"
+              }`}
+              onClick={() => setActiveTab("bill")}
+            >
+              {/* <Bill /> */}
+              <Banknote size={16} />
+              {/* <BanknoteArrowDown /> */}
+              Add Doctor's Bill
             </button>
           </div>
           {activeTab === "note" && (
@@ -1387,57 +1308,6 @@ const DoctorAppointmentDetails = () => {
                     )}
                   </div>
 
-                  {/* Investigation Parameters */}
-                  <div className="mb-6">
-                    <h4 className="text-sm font-medium mb-2">
-                      Investigation Parameters
-                    </h4>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Add specific parameters to investigate for each test
-                    </p>
-
-                    <div className="space-y-4">
-                      {LAB_PARAMETERS.map((test) => (
-                        <div key={test.name} className="border rounded-lg p-3">
-                          <div className="font-medium mb-2">{test.name}</div>
-                          <div className="flex flex-wrap gap-2">
-                            {test.parameters.map((param) => {
-                              const paramKey = `${test.name}: ${param}`;
-                              const isSelected =
-                                selectedParameters.includes(paramKey);
-
-                              return (
-                                <button
-                                  key={param}
-                                  type="button"
-                                  onClick={() => {
-                                    if (isSelected) {
-                                      setSelectedParameters((prev) =>
-                                        prev.filter((p) => p !== paramKey)
-                                      );
-                                    } else {
-                                      setSelectedParameters((prev) => [
-                                        ...prev,
-                                        paramKey,
-                                      ]);
-                                    }
-                                  }}
-                                  className={`px-3 py-1 text-sm rounded-full border transition ${
-                                    isSelected
-                                      ? "bg-primary text-white border-primary"
-                                      : "border-gray-300 hover:bg-gray-50"
-                                  }`}
-                                >
-                                  {param}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
                   {/* Rest of your existing code... */}
                 </div>
               )}
@@ -1480,6 +1350,12 @@ const DoctorAppointmentDetails = () => {
               </button>
             </div>
           )}
+          {activeTab == "bill" && (
+            <DoctorBillForm
+              patient={patient}
+              patientId={selectedAppointment?.attributes?.patient?.id}
+            />
+          )}
         </div>
       )}
 
@@ -1488,6 +1364,13 @@ const DoctorAppointmentDetails = () => {
           patientId={selectedAppointment?.attributes?.patient?.id}
           patient={patient}
           showDownloadCompleteButton={false}
+        />
+      )}
+
+      {isAdmitModalOpen && (
+        <AdmitPatientModal
+          setIsAdmitModalOpen={setIsAdmitModalOpen}
+          patientId={selectedAppointment?.attributes?.patient?.id}
         />
       )}
     </div>

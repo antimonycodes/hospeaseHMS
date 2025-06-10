@@ -35,9 +35,15 @@ interface CreatedBill {
 
 interface DoctorBillFormProps {
   patient?: Patient;
+  selectedPatient?: Patient;
+  patientId?: any;
 }
 
-const DoctorBillForm: React.FC<DoctorBillFormProps> = ({ patient }) => {
+const DoctorBillForm: React.FC<DoctorBillFormProps> = ({
+  patient,
+  selectedPatient,
+  patientId,
+}) => {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [user, setUser] = useState<User | null>(null);
@@ -47,6 +53,13 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({ patient }) => {
     message: string;
   } | null>(null);
   const { id } = useParams<{ id: string }>();
+  console.log(selectedPatient, "wefvhg");
+  const selectedPatientId = selectedPatient?.id;
+  console.log(selectedPatientId);
+  console.log(patientId);
+
+  const patientIdToBeUsed = selectedPatientId || patientId;
+  // const patientId = patient?.id || (idFromParams ? Number(idFromParams) : null);
 
   const { createDoctorBill, isBillLoading, createPayment } = useFinanceStore();
 
@@ -77,7 +90,7 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({ patient }) => {
       return;
     }
 
-    if (!id) {
+    if (!patientIdToBeUsed) {
       setStatusMessage({
         type: "error",
         message: "Patient information not available",
@@ -167,12 +180,12 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({ patient }) => {
       payment_type: "pending",
       total_amount: billAmount.toString(),
       part_amount: null,
-      payment_method: "cash", // You may need to make this dynamic
-      patient_id: Number(id),
+      payment_method: "cash",
+      patient_id: Number(patientIdToBeUsed),
       department_id: Number(departmentId),
       payments: [
         {
-          patient_id: Number(id),
+          patient_id: Number(patientIdToBeUsed),
           amount: billAmount,
           service_charge_id: null,
           request_pharmacy_id: null,
@@ -264,7 +277,7 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({ patient }) => {
           onChange={(e) => setDescription(e.target.value)}
           className="w-full border border-gray-300 rounded px-3 py-2"
           required
-          disabled={isButtonDisabled} // Disable input during processing
+          disabled={isButtonDisabled}
         />
       </div>
 

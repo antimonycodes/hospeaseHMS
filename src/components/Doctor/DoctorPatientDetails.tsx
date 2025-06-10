@@ -77,114 +77,6 @@ const COMMON_COMPLAINTS = [
   "Chills",
 ];
 
-// Laboratory investigation parameters
-const LAB_PARAMETERS = [
-  {
-    name: "Hematology",
-    parameters: [
-      "Full Blood Count (FBC)",
-      "Complete Blood Count (CBC)",
-      "Hemoglobin (Hb)",
-      "Hematocrit (HCT)",
-      "White Blood Cell Count (WBC)",
-      "Platelet Count",
-      "ESR (Erythrocyte Sedimentation Rate)",
-      "Bleeding Time",
-      "Clotting Time",
-      "Prothrombin Time (PT)",
-      "Partial Thromboplastin Time (PTT)",
-    ],
-  },
-  {
-    name: "Biochemistry",
-    parameters: [
-      "Fasting Blood Sugar (FBS)",
-      "Random Blood Sugar (RBS)",
-      "HbA1c (Glycated Hemoglobin)",
-      "Lipid Profile",
-      "Total Cholesterol",
-      "HDL Cholesterol",
-      "LDL Cholesterol",
-      "Triglycerides",
-      "Liver Function Tests (LFTs)",
-      "Kidney Function Tests (KFTs)",
-      "Urea",
-      "Creatinine",
-      "Electrolytes (Na, K, Cl)",
-      "Total Protein",
-      "Albumin",
-      "Bilirubin (Total & Direct)",
-    ],
-  },
-  {
-    name: "Immunology",
-    parameters: [
-      "HIV Screening",
-      "Hepatitis B Surface Antigen (HBsAg)",
-      "Hepatitis C Antibody",
-      "Thyroid Function Tests (TFTs)",
-      "TSH (Thyroid Stimulating Hormone)",
-      "Free T3",
-      "Free T4",
-      "C-Reactive Protein (CRP)",
-      "Rheumatoid Factor (RF)",
-      "Anti-Nuclear Antibody (ANA)",
-    ],
-  },
-  {
-    name: "Microbiology",
-    parameters: [
-      "Urine Culture & Sensitivity",
-      "Blood Culture",
-      "Stool Culture",
-      "Sputum Culture",
-      "Wound Swab Culture",
-      "Gram Stain",
-      "AFB (Acid Fast Bacilli)",
-      "Malaria Parasite (MP)",
-      "Widal Test",
-      "VDRL (Syphilis Test)",
-    ],
-  },
-  {
-    name: "Radiology",
-    parameters: [
-      "Chest X-Ray",
-      "Abdominal X-Ray",
-      "Pelvic X-Ray",
-      "Ultrasound Abdomen",
-      "Ultrasound Pelvis",
-      "CT Scan Head",
-      "CT Scan Chest",
-      "CT Scan Abdomen",
-      "MRI Brain",
-      "Echocardiogram",
-      "ECG (Electrocardiogram)",
-    ],
-  },
-  {
-    name: "Others",
-    parameters: [
-      "Urinalysis",
-      "Stool Analysis",
-      "Pregnancy Test",
-      "Pap Smear",
-      "Biopsy",
-      "Endoscopy",
-      "Colonoscopy",
-      "Spirometry",
-      "Audiometry",
-    ],
-  },
-  // { name: "Malaria Test", parameters: ["RDT", "Microscopy"] },
-  // { name: "HIV Test", parameters: ["Rapid Test", "ELISA", "Western Blot"] },
-  // {
-  //   name: "Hepatitis B",
-  //   parameters: ["HBsAg", "Anti-HBs", "HBeAg", "Anti-HBe", "Anti-HBc"],
-  // },
-  // { name: "Hepatitis C", parameters: ["Anti-HCV", "HCV RNA"] },
-];
-
 const DoctorPatientDetails = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("note");
@@ -397,6 +289,8 @@ const DoctorPatientDetails = () => {
     }
   }, [id, getPatientByIdDoc, getAllReport, getMedicalNote]);
 
+  console.log(selectedPatient, "Select");
+
   const handleReportSubmit = async () => {
     if (!selectedDepartment) {
       toast.error("Please select a department");
@@ -498,11 +392,11 @@ const DoctorPatientDetails = () => {
     setMergedData(updatedData);
   };
 
-  const { createDoctorBill, isBillLoading } = useFinanceStore();
+  const patient = selectedPatient.attributes;
+  const selectedPatientId = selectedPatient.id;
+  console.log(patient);
 
   if (!selectedPatient) return <Loader />;
-
-  const patient = selectedPatient.attributes;
 
   return (
     <div className="px-2 sm:px-0">
@@ -1036,57 +930,6 @@ const DoctorPatientDetails = () => {
                   )}
                 </div>
 
-                {/* Investigation Parameters */}
-                <div className="mb-6">
-                  <h4 className="text-sm font-medium mb-2">
-                    Investigation Parameters
-                  </h4>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Add specific parameters to investigate for each test
-                  </p>
-
-                  <div className="space-y-4">
-                    {LAB_PARAMETERS.map((test) => (
-                      <div key={test.name} className="border rounded-lg p-3">
-                        <div className="font-medium mb-2">{test.name}</div>
-                        <div className="flex flex-wrap gap-2">
-                          {test.parameters.map((param) => {
-                            const paramKey = `${test.name}: ${param}`;
-                            const isSelected =
-                              selectedParameters.includes(paramKey);
-
-                            return (
-                              <button
-                                key={param}
-                                type="button"
-                                onClick={() => {
-                                  if (isSelected) {
-                                    setSelectedParameters((prev) =>
-                                      prev.filter((p) => p !== paramKey)
-                                    );
-                                  } else {
-                                    setSelectedParameters((prev) => [
-                                      ...prev,
-                                      paramKey,
-                                    ]);
-                                  }
-                                }}
-                                className={`px-3 py-1 text-sm rounded-full border transition ${
-                                  isSelected
-                                    ? "bg-primary text-white border-primary"
-                                    : "border-gray-300 hover:bg-gray-50"
-                                }`}
-                              >
-                                {param}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Rest of your existing code... */}
               </div>
             )}
@@ -1145,7 +988,7 @@ const DoctorPatientDetails = () => {
           //     <Button>Add Doctor's Bill</Button>
           //   </div>{" "}
           // </div>
-          <DoctorBillForm patient={patient} />
+          <DoctorBillForm patient={patient} selectedPatient={selectedPatient} />
         )}
       </div>
 

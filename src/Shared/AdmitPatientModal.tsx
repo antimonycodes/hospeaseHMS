@@ -33,7 +33,7 @@ const AdmitPatientModal: React.FC<AdmitPatientModalProps> = ({
   const handleCreateAdmission = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!department || !diagnosis || !ward || !bed || !status) {
+    if (!department || !diagnosis || !status) {
       return toast.error("Please fill all fields.");
     }
 
@@ -105,7 +105,7 @@ const AdmitPatientModal: React.FC<AdmitPatientModalProps> = ({
             {/* Ward */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Ward
+                Ward (optional)
               </label>
               <select
                 value={ward}
@@ -121,7 +121,7 @@ const AdmitPatientModal: React.FC<AdmitPatientModalProps> = ({
             {/* Bed */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Bed
+                Bed (optional)
               </label>
               <select
                 value={bed}
