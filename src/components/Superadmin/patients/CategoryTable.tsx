@@ -4,7 +4,8 @@ import Button from "../../../Shared/Button";
 import { Edit, Loader2, PlusCircle, Trash2 } from "lucide-react";
 // import DeleteCategoryModal from "./deleteCategoryModal";
 import AddCategoryModal from "./AddCategoryModal";
-import DeleteCategoryModal from "./deleteCategoryModal";
+import DeleteCategoryModal from "./DeleteCategoryModal";
+// import DeleteCategoryModal from "./DeleteCategoryModal";
 // import DeleteCategoryModal from "./DeleteCategoryModal";
 
 interface Category {
