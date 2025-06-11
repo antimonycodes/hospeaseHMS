@@ -60,6 +60,7 @@ interface CombinedStore {
   isLoading: boolean;
   isDeleting: boolean;
   items: any[];
+  categories: any[];
   pagination: Pagination | null;
 
   createItem: (data: CreateItem) => Promise<any>;
@@ -74,6 +75,10 @@ interface CombinedStore {
   updateHmoPercentage: (id: any, data: any) => Promise<any>;
   hmoPercentage: () => Promise<any>;
   resetApp: (data: any) => Promise<any>;
+  createPatientCategory: (data: any) => Promise<any>;
+  getAllCategory: () => Promise<any>;
+  updatePatientsCategory: (id: any, name: any) => Promise<any>;
+  deletePatientsCategory: (id: any) => Promise<any>;
 }
 
 export const useCombinedStore = create<CombinedStore>((set, get) => ({
@@ -81,6 +86,7 @@ export const useCombinedStore = create<CombinedStore>((set, get) => ({
   isDeleting: false,
   items: [],
   pagination: null,
+  categories: [],
 
   createItem: async (data) => {
     set({ isLoading: true });
@@ -227,6 +233,105 @@ export const useCombinedStore = create<CombinedStore>((set, get) => ({
       const response = await api.post(`/admin/reset-application`, data);
 
       if (isSuccessfulResponse(response)) {
+        toast.success(response.data?.message);
+        return true;
+      }
+      return null;
+    } catch (error) {
+      handleErrorToast(error);
+      return null;
+    } finally {
+      set({ isDeleting: false });
+    }
+  },
+  createPatientCategory: async (data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.post(
+        "/medical-report/patient-category/create",
+        data
+      );
+
+      if (isSuccessfulResponse(response)) {
+        toast.success(response.data?.message);
+        get().getAllCategory();
+        return true;
+      }
+      return null;
+    } catch (error) {
+      handleErrorToast(error);
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  getAllCategory: async (
+    page = "1",
+    perPage = "1000",
+    baseEndpoint = "medical-report/patient-category/all-records"
+  ) => {
+    set({ isLoading: true });
+    try {
+      const endpoint = `${baseEndpoint}?page=${page}&per_page=${perPage}`;
+      const response = await api.get(endpoint);
+
+      if (isSuccessfulResponse(response)) {
+        // toast.success(response.data?.msg);
+        set({ categories: response.data.data });
+        console.log(response.data.data);
+
+        set({ pagination: response.data.data.pagination });
+
+        return true;
+      }
+      return null;
+    } catch (error) {
+      //   handleErrorToast(error, "Failed.");
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  updatePatientsCategory: async (
+    id,
+    name
+
+    // endpoint = `/medical-report/service-charge/update/${id}`
+  ) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.put(
+        `/medical-report/patient-category/update/${id}`,
+        {
+          name: name.trim(),
+        }
+      );
+
+      if (isSuccessfulResponse(response)) {
+        // toast.success(response.data?.msg);
+        // set({ items: response.data.data.data });
+        get().getAllCategory();
+        console.log(response);
+        return true;
+      }
+      return null;
+    } catch (error) {
+      //   handleErrorToast(error, "Failed.");
+      console.log(error);
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  deletePatientsCategory: async (id) => {
+    set({ isDeleting: true });
+    try {
+      const response = await api.delete(
+        `/medical-report/patient-category/delete/${id}`
+      );
+
+      if (isSuccessfulResponse(response)) {
+        get().getAllCategory();
         toast.success(response.data?.message);
         return true;
       }

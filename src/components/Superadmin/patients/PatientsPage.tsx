@@ -7,6 +7,8 @@ import AddPatientModal from "../../../Shared/AddPatientModal";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
 import SearchBar from "../../ReusablepatientD/SearchBar";
+import CategoryTable from "./CategoryTable";
+import AddCategoryModal from "./AddCategoryModal";
 
 type PatientsPage = {
   endpoint?: string;
@@ -21,15 +23,21 @@ const PatientsPage = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState(0);
   const [openModal, setOpenModal] = useState(false);
-  const [modalType, setModalType] = useState<"patient" | "appointment">(
-    "patient"
-  );
+  const [modalType, setModalType] = useState<
+    "patient" | "appointment" | "category"
+  >("patient");
   const { appointments, pagination, isLoading, getAllAppointments } =
     usePatientStore();
 
   const [perPage, setPerPage] = useState(10);
   const handleOpenModal = () => {
-    setModalType(activeTab === 0 ? "patient" : "appointment");
+    if (activeTab === 0) {
+      setModalType("patient");
+    } else if (activeTab === 1) {
+      setModalType("appointment");
+    } else if (activeTab === 2) {
+      setModalType("category");
+    }
     setOpenModal(true);
   };
   const {
@@ -67,9 +75,11 @@ const PatientsPage = ({
         {/* Search and Button */}
 
         <div className=" w-full flex-1 flex flex-col md:flex-row items-center gap-2">
-          <div className="flex items-center space-x-4 min-w-[70%]  ">
-            <SearchBar onSearch={handleSearch} />
-          </div>
+          {activeTab !== 2 && (
+            <div className="flex items-center space-x-4 min-w-[70%]  ">
+              <SearchBar onSearch={handleSearch} />
+            </div>
+          )}
           {/* <div className="relative w-full flex-1">
             <input
               type="text"
@@ -81,7 +91,7 @@ const PatientsPage = ({
 
           <div
             className={`w-full md:w-auto ${
-              activeTab === 1 ? "hidden" : "block"
+              activeTab === 0 ? "block" : "hidden"
             }`}
           >
             <Button
@@ -97,7 +107,7 @@ const PatientsPage = ({
 
           <div
             className={`w-full md:w-auto ${
-              activeTab === 0 ? "hidden" : "block"
+              activeTab === 1 ? "block" : "hidden"
             }`}
           >
             <Button
@@ -110,6 +120,22 @@ const PatientsPage = ({
               <Plus size={16} />
             </Button>
           </div>
+          {/*  */}
+          {/* <div
+            className={`w-full md:w-auto ${
+              activeTab === 2 ? "block" : "hidden"
+            }`}
+          >
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleOpenModal}
+              className="flex items-center gap-2 px-4"
+            >
+              Add Category
+              <Plus size={16} />
+            </Button>
+          </div> */}
         </div>
 
         {/* Tabs */}
@@ -140,19 +166,34 @@ const PatientsPage = ({
               }`}
             ></div>
           </h1>
+          <h1
+            className={`relative inline-block flex-none cursor-pointer text-sm md:text-base font-semibold ${
+              activeTab === 2 ? "text-primary" : "text-[#667185]"
+            }`}
+            onClick={() => setActiveTab(2)}
+          >
+            Category
+            <div
+              className={`absolute left-0 -bottom-3 w-full h-[1px] ${
+                activeTab === 2 ? "bg-primary" : "bg-[#E4E7EC]"
+              }`}
+            ></div>
+          </h1>
         </div>
       </div>
 
       {/* Table */}
       <div className=" mt-4">
-        {activeTab === 0 ? (
+        {activeTab === 0 && (
           <InformationTable
             patients={patients}
             pagination={pagination}
             isLoading={isLoading}
             // perPage={perPage}
           />
-        ) : (
+        )}
+
+        {activeTab === 1 && (
           <AppointmentsTable
             data={{
               data: (appointments as unknown as { data: any[] }).data,
@@ -170,6 +211,7 @@ const PatientsPage = ({
           />
         )}
       </div>
+      {activeTab === 2 && <CategoryTable />}
 
       {openModal && (
         <AddPatientModal
@@ -187,6 +229,13 @@ const PatientsPage = ({
           // refreshEndpoint={refreshEndpoint}
           onClose={() => setOpenModal(false)}
         />
+      )}
+
+      {openModal && modalType === "category" && (
+        <AddCategoryModal
+          // endpoint={bookEndpoint}
+          // refreshEndpoint={refreshEndpoint}
+          onClose={() => setOpenModal(false)} isOpen={false} isEditMode={false}        />
       )}
     </div>
   );

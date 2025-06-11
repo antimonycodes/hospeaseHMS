@@ -5,25 +5,21 @@ import { CreatePatientData } from "../store/super-admin/usePatientStore";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useGlobalStore } from "../store/super-admin/useGlobal";
+import { useCombinedStore } from "../store/super-admin/useCombinedStore";
 
 interface AddPatientModalProps {
   onClose: () => void;
-  createPatient: (
-    data: CreatePatientData,
-    endpoint: string
-    // refreshendpoint: string
-  ) => any; // Add endpoint as a parameter
+  createPatient: (data: CreatePatientData, endpoint: string) => any;
   isLoading: boolean;
   endpoint: string;
-  // refreshendpoint: string;
 }
+
 const AddPatientModal = ({
   onClose,
   createPatient,
   isLoading,
   endpoint,
-}: // refreshendpoint, // Add the endpoint here
-AddPatientModalProps) => {
+}: AddPatientModalProps) => {
   const [patient, setPatient] = useState<{
     first_name: string;
     last_name: string;
@@ -37,6 +33,7 @@ AddPatientModalProps) => {
     patient_type: string;
     dob: Date | null;
     clinical_patient_type: any;
+    patient_category_id: string;
   }>({
     first_name: "",
     last_name: "",
@@ -50,6 +47,7 @@ AddPatientModalProps) => {
     patient_type: "",
     dob: null,
     clinical_patient_type: "",
+    patient_category_id: "",
   });
 
   const [nextOfKin, setNextOfKin] = useState({
@@ -65,11 +63,21 @@ AddPatientModalProps) => {
 
   const { branches, getBranches, clinicaldepts, getClinicaldept } =
     useGlobalStore();
+  const { getAllCategory, categories } = useCombinedStore();
+
+  useEffect(() => {
+    getAllCategory();
+  }, [getAllCategory]);
 
   useEffect(() => {
     getBranches();
     getClinicaldept();
   }, []);
+
+  // Debug logs with better formatting
+  console.log("Categories:", categories);
+  console.log("Branches:", branches);
+  console.log("Current patient state:", patient);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -77,6 +85,7 @@ AddPatientModalProps) => {
   ) => {
     const { name, value } = e.target;
     if (field === "patient") {
+      console.log(`Setting ${name} to ${value}`);
       setPatient((prev) => ({ ...prev, [name]: value }));
     } else {
       setNextOfKin((prev) => ({ ...prev, [name]: value }));
@@ -84,27 +93,46 @@ AddPatientModalProps) => {
   };
 
   const handleSubmit = async () => {
-    const response = await createPatient(
-      {
-        ...patient,
-        dob: patient.dob
-          ? `${patient.dob.getFullYear()}-${String(
-              patient.dob.getMonth() + 1
-            ).padStart(2, "0")}-${String(patient.dob.getDate()).padStart(
-              2,
-              "0"
-            )}`
-          : "",
-        next_of_kin: [nextOfKin],
-      },
-      endpoint
-      // refreshendpoint
-    );
+    // Validate required fields
+    if (!patient.branch_id || !patient.patient_category_id) {
+      alert("Please select both Branch and Category");
+      return;
+    }
 
-    if (response) {
-      onClose();
+    // Debug: Log the patient data before submission
+    console.log("Patient data before submission:", patient);
+    console.log("Branch ID:", patient.branch_id);
+    console.log("Category ID:", patient.patient_category_id);
+
+    // Prepare the payload with proper data types
+    const payload = {
+      ...patient,
+      // Keep IDs as strings to match CreatePatientData type
+      branch_id: patient.branch_id,
+      patient_category_id: patient.patient_category_id,
+      clinical_patient_type: patient.clinical_patient_type
+        ? patient.clinical_patient_type
+        : "",
+      dob: patient.dob
+        ? `${patient.dob.getFullYear()}-${String(
+            patient.dob.getMonth() + 1
+          ).padStart(2, "0")}-${String(patient.dob.getDate()).padStart(2, "0")}`
+        : "",
+      next_of_kin: [nextOfKin],
+    };
+
+    console.log("Final payload being sent:", payload);
+
+    try {
+      const response = await createPatient(payload, endpoint);
+      if (response) {
+        onClose();
+      }
+    } catch (error) {
+      console.error("Error creating patient:", error);
     }
   };
+
   const handleDateChange = (date: any) => {
     setPatient((prev) => ({ ...prev, dob: date }));
   };
@@ -166,8 +194,8 @@ AddPatientModalProps) => {
             showMonthDropdown
             showYearDropdown
             dropdownMode="select"
-            yearDropdownItemNumber={100} // How many years to show in the dropdown
-            scrollableYearDropdown // Makes the year dropdown scrollable
+            yearDropdownItemNumber={100}
+            scrollableYearDropdown
           />
 
           {/* Gender Select */}
@@ -185,18 +213,19 @@ AddPatientModalProps) => {
             <option value="other">Other</option>
           </select>
 
-          {/* Branch Select */}
+          {/* Branch Select - FIXED: Use actual branch IDs */}
           <select
             name="branch_id"
             value={patient.branch_id}
             onChange={(e) => handleChange(e, "patient")}
             className="border p-2 rounded text-gray-400 outline-none focus:border-primary focus:ring-1 focus:ring-primary "
+            required
           >
             <option value="" disabled>
               Select Branch
             </option>
             {branches?.map((branch) => (
-              <option key={branch.id} value={branch.id}>
+              <option key={branch.id} value={branch.id.toString()}>
                 {branch.attributes.name}
               </option>
             ))}
@@ -214,6 +243,7 @@ AddPatientModalProps) => {
             value={patient.occupation}
             onChange={(e) => handleChange(e, "patient")}
           />
+
           {/* Clinical Department Select */}
           <select
             name="clinical_patient_type"
@@ -225,11 +255,30 @@ AddPatientModalProps) => {
               Select Clinical Department
             </option>
             {clinicaldepts?.map((dept) => (
-              <option key={dept.id} value={dept.id}>
+              <option key={dept.id} value={dept.id.toString()}>
                 {dept.attributes.name}
               </option>
             ))}
           </select>
+
+          {/* Category Select - FIXED: Use actual category IDs */}
+          <select
+            name="patient_category_id"
+            value={patient.patient_category_id}
+            onChange={(e) => handleChange(e, "patient")}
+            className="border p-2 rounded text-gray-400 outline-none focus:border-primary focus:ring-1 focus:ring-primary "
+            required
+          >
+            <option value="" disabled>
+              Select Category
+            </option>
+            {categories?.map((category) => (
+              <option key={category.id} value={category.id.toString()}>
+                {category.attributes.name}
+              </option>
+            ))}
+          </select>
+
           <Input
             name="religion"
             placeholder="Religion"
@@ -303,12 +352,25 @@ AddPatientModalProps) => {
           </div>
         </div>
 
+        {/* Display current selection for debugging */}
+        {/* <div className="mb-4 p-3 bg-gray-100 rounded text-sm">
+          <p>
+            <strong>Debug Info:</strong>
+          </p>
+          <p>Selected Branch ID: {patient.branch_id}</p>
+          <p>Selected Category ID: {patient.patient_category_id}</p>
+          <p>Available Branch IDs: {branches?.map((b) => b.id).join(", ")}</p>
+          <p>
+            Available Category IDs: {categories?.map((c) => c.id).join(", ")}
+          </p>
+        </div> */}
+
         <button
           onClick={handleSubmit}
           disabled={!!isLoading}
           className={`bg-primary w-fit text-white px-4 py-2 rounded mt-4
             ${isLoading ? "opacity-50 cursor-not-allowed" : ""}
-            `}
+          `}
         >
           {isLoading ? "Adding Patient..." : "Add Patient"}
         </button>

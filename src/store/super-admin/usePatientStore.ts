@@ -37,6 +37,7 @@ export interface NextOfKin {
 }
 
 export interface CreatePatientData {
+  patient_category_id: any;
   branch_id: string | null;
   first_name: string;
   last_name: string;
@@ -354,35 +355,38 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   },
 
   // Create a new Patient
-  createPatient: async (
-    data,
-    endpoint = "/admin/patient/create"
-    // refreshendpoint
-  ) => {
+  createPatient: async (data, endpoint = "/admin/patient/create") => {
     set({ isLoading: true });
     try {
+      // Debug: Log what we're receiving
+      console.log("Data received in createPatient:", data);
+      console.log("Branch ID received:", data.branch_id);
+      console.log("Category ID received:", data.patient_category_id);
+
       const payload = {
         ...data,
         branch_id: data.branch_id ?? null,
+        patient_category_id: data.patient_category_id ?? null,
       };
+
+      // Debug: Log the final payload
+      console.log("Final payload being sent:", payload);
+
       const response = await api.post(endpoint, payload);
       if (response.status === 201) {
         const newPatient = {
           id: response.data.data.id,
           attributes: response.data.data.attributes,
         };
-
         set((state) => ({
           patients: [newPatient, ...state.patients],
         }));
-
         toast.success(response.data.message);
         return true;
       }
-
       return null;
     } catch (error: any) {
-      console.error(error.response?.data);
+      console.error("Error in createPatient:", error.response?.data);
       return null;
     } finally {
       set({ isLoading: false });

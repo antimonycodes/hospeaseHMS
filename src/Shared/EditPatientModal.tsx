@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 interface NextOfKin {
   name: string;
@@ -10,20 +12,25 @@ interface NextOfKin {
   address: string;
   religion?: string;
   relationship: string;
+  clinical_patient_type?: string;
 }
 
 interface PatientData {
   first_name: string;
   last_name: string;
   card_id: string;
-  gender: string;
-  branch: string;
+  branch_id: string;
   phone_number: string;
   occupation: string;
   religion: string;
   address: string;
-  age?: number;
+  gender: string;
   patient_type: string;
+  dob: any;
+  clinical_patient_type: any;
+  patient_category_id: string;
+  age?: number;
+  branch?: string; // Keep for backward compatibility
   next_of_kin: NextOfKin[];
 }
 
@@ -33,6 +40,10 @@ interface EditPatientModalProps {
   patientData: PatientData | null;
   isLoading: boolean;
   onSave: (data: PatientData) => void;
+  // Add these props to match AddPatientModal functionality
+  branches?: Array<{ id: number; attributes: { name: string } }>;
+  categories?: Array<{ id: number; attributes: { name: string } }>;
+  clinicaldepts?: Array<{ id: number; attributes: { name: string } }>;
 }
 
 const EditPatientModal = ({
@@ -41,6 +52,9 @@ const EditPatientModal = ({
   patientData,
   isLoading,
   onSave,
+  branches = [],
+  categories = [],
+  clinicaldepts = [],
 }: EditPatientModalProps) => {
   const [formData, setFormData] = useState<PatientData | null>(null);
 
@@ -49,6 +63,12 @@ const EditPatientModal = ({
     if (patientData && isOpen) {
       setFormData({
         ...patientData,
+        // Ensure all required fields have default values
+        branch_id: patientData.branch_id || "",
+        patient_category_id: patientData.patient_category_id || "",
+        patient_type: patientData.patient_type || "",
+        clinical_patient_type: patientData.clinical_patient_type || "",
+        dob: patientData.dob || null,
         next_of_kin:
           patientData.next_of_kin?.length > 0
             ? [...patientData.next_of_kin]
@@ -62,6 +82,7 @@ const EditPatientModal = ({
                   address: "",
                   relationship: "",
                   religion: "",
+                  clinical_patient_type: "",
                 },
               ],
       });
@@ -76,6 +97,15 @@ const EditPatientModal = ({
       setFormData({
         ...formData,
         [name]: value,
+      });
+    }
+  };
+
+  const handleDateChange = (date: Date | null) => {
+    if (formData) {
+      setFormData({
+        ...formData,
+        dob: date,
       });
     }
   };
@@ -100,17 +130,41 @@ const EditPatientModal = ({
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent default form submission
-    if (formData) {
-      onSave(formData);
+    e.preventDefault();
+
+    if (!formData) return;
+
+    // Validate required fields
+    if (!formData.branch_id || !formData.patient_category_id) {
+      alert("Please select both Branch and Category");
+      return;
     }
+
+    // Prepare the payload similar to AddPatientModal
+    const payload: PatientData = {
+      ...formData,
+      // Keep IDs as strings to match PatientData type
+      branch_id: formData.branch_id,
+      patient_category_id: formData.patient_category_id,
+      clinical_patient_type: formData.clinical_patient_type,
+      dob: formData.dob
+        ? `${formData.dob.getFullYear()}-${String(
+            formData.dob.getMonth() + 1
+          ).padStart(2, "0")}-${String(formData.dob.getDate()).padStart(
+            2,
+            "0"
+          )}`
+        : "",
+    };
+
+    onSave(payload);
   };
 
   if (!isOpen || !formData) return null;
 
   return (
     <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
         <div className="p-4 flex items-center justify-between">
           <h2 className="text-lg font-medium">Edit Patient</h2>
           <button
@@ -152,78 +206,94 @@ const EditPatientModal = ({
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-xs text-gray-500 mb-1">
-                Patient ID
+                Card ID
               </label>
               <input
                 type="text"
                 name="card_id"
                 value={formData.card_id}
+                onChange={handleInputChange}
                 className="w-full border border-gray-300 rounded p-4 text-sm bg-gray-100"
                 readOnly
               />
             </div>
             <div>
+              <label className="block text-xs text-gray-500 mb-1">
+                Patient Type
+              </label>
+              <select
+                name="patient_type"
+                value={formData.patient_type}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded p-4 text-sm appearance-none pr-8"
+              >
+                <option value="" disabled>
+                  Select Patient Type
+                </option>
+                <option value="Insurance">Insurance</option>
+                <option value="Organised Private Scheme">
+                  Organised Private Scheme
+                </option>
+                <option value="Regular Private">Regular Private</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">
+                Date of Birth
+              </label>
+              <DatePicker
+                selected={formData.dob}
+                onChange={handleDateChange}
+                placeholderText="Date of birth"
+                className="w-full border border-gray-300 rounded p-4 text-sm"
+                dateFormat="yyyy-MM-dd"
+                showMonthDropdown
+                showYearDropdown
+                dropdownMode="select"
+                yearDropdownItemNumber={100}
+                scrollableYearDropdown
+              />
+            </div>
+            <div>
               <label className="block text-xs text-gray-500 mb-1">Gender</label>
-              <div className="relative">
-                <select
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded p-4 text-sm appearance-none pr-8"
-                >
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                  <svg
-                    className="w-4 h-4 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 9l-7 7-7-7"
-                    ></path>
-                  </svg>
-                </div>
-              </div>
+              <select
+                name="gender"
+                value={formData.gender}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded p-4 text-sm appearance-none pr-8"
+              >
+                <option value="" disabled>
+                  Select Gender
+                </option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-xs text-gray-500 mb-1">Branch</label>
-              <div className="relative">
-                <select
-                  name="branch"
-                  value={formData.branch}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded p-4 text-sm appearance-none pr-8"
-                >
-                  <option value="Branch 1">{formData.branch}</option>
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                  <svg
-                    className="w-4 h-4 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 9l-7 7-7-7"
-                    ></path>
-                  </svg>
-                </div>
-              </div>
+              <select
+                name="branch_id"
+                value={formData.branch_id}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded p-4 text-sm appearance-none pr-8"
+                required
+              >
+                <option value="" disabled>
+                  Select Branch
+                </option>
+                {branches?.map((branch) => (
+                  <option key={branch.id} value={branch.id.toString()}>
+                    {branch.attributes.name} (ID: {branch.id})
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-xs text-gray-500 mb-1">
@@ -251,6 +321,50 @@ const EditPatientModal = ({
                 onChange={handleInputChange}
                 className="w-full border border-gray-300 rounded p-4 text-sm"
               />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">
+                Clinical Department
+              </label>
+              <select
+                name="clinical_patient_type"
+                value={formData.clinical_patient_type}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded p-4 text-sm appearance-none pr-8"
+              >
+                <option value="" disabled>
+                  Select Clinical Department
+                </option>
+                {clinicaldepts?.map((dept) => (
+                  <option key={dept.id} value={dept.id.toString()}>
+                    {dept.attributes.name} (ID: {dept.id})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">
+                Category
+              </label>
+              <select
+                name="patient_category_id"
+                value={formData.patient_category_id}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded p-4 text-sm appearance-none pr-8"
+                required
+              >
+                <option value="" disabled>
+                  Select Category
+                </option>
+                {categories?.map((category) => (
+                  <option key={category.id} value={category.id.toString()}>
+                    {category.attributes.name} (ID: {category.id})
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-xs text-gray-500 mb-1">
@@ -317,34 +431,16 @@ const EditPatientModal = ({
                   <label className="block text-xs text-gray-500 mb-1">
                     Gender
                   </label>
-                  <div className="relative">
-                    <select
-                      name="gender"
-                      value={formData.next_of_kin[0].gender}
-                      onChange={(e) => handleKinChange(e, 0)}
-                      className="w-full border border-gray-300 rounded p-4 text-sm appearance-none pr-8"
-                    >
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                      <svg
-                        className="w-4 h-4 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M19 9l-7 7-7-7"
-                        ></path>
-                      </svg>
-                    </div>
-                  </div>
+                  <select
+                    name="gender"
+                    value={formData.next_of_kin[0].gender}
+                    onChange={(e) => handleKinChange(e, 0)}
+                    className="w-full border border-gray-300 rounded p-4 text-sm appearance-none pr-8"
+                  >
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </select>
                 </div>
                 <div>
                   <label className="block text-xs text-gray-500 mb-1">
@@ -416,13 +512,24 @@ const EditPatientModal = ({
             </div>
           )}
 
+          {/* Debug info section (optional - remove in production) */}
+          <div className="mb-4 p-3 bg-gray-100 rounded text-sm">
+            <p>
+              <strong>Debug Info:</strong>
+            </p>
+            <p>Selected Branch ID: {formData.branch_id}</p>
+            <p>Selected Category ID: {formData.patient_category_id}</p>
+            <p>Patient Type: {formData.patient_type}</p>
+            <p>Clinical Dept: {formData.clinical_patient_type}</p>
+          </div>
+
           <div className="mt-6">
             <button
               type="submit"
               disabled={isLoading}
               className={`bg-primary text-white py-2 px-4 rounded text-sm ${
                 isLoading ? "opacity-50 cursor-not-allowed" : ""
-              } `}
+              }`}
             >
               {isLoading ? "Saving..." : "Save Changes"}
             </button>

@@ -176,15 +176,15 @@ const PatientDetails = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
               <InfoRow label="First Name" value={patient.first_name} />
               <InfoRow label="Last Name" value={patient.last_name} />
-              <InfoRow label="Patient ID" value={patient.card_id} />
+              <InfoRow label="Card ID" value={patient.card_id} />
               <InfoRow label="Age" value={patient.age?.toString()} />
               <InfoRow label="Gender" value={patient.gender} />
               <InfoRow label="Patient type" value={patient.patient_type} />
               <InfoRow
                 label="CLinical Department"
                 value={patient.clinical_department.name}
-              />
-
+              />{" "}
+              <InfoRow label="Category" value={patient.patient_category.name} />
               <InfoRow label="Branch" value={patient.branch} />
               <InfoRow label="Occupation" value={patient.occupation} />
               <InfoRow label="Religion" value={patient.religion} />

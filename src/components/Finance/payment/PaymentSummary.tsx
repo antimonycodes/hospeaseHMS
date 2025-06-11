@@ -39,7 +39,7 @@ const PaymentSummary: React.FC<{
   return (
     showSummary && (
       <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center backdrop-blur-sm">
-        <div className="bg-white w-full max-w-md p-6 rounded-lg shadow-xl">
+        <div className="bg-white w-full max-w-md p-6 h-[80vh] overflow-y-auto rounded-lg shadow-xl">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-bold">Confirm Payment</h3>
             <button
