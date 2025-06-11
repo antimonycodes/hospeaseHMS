@@ -37,7 +37,7 @@ export interface NextOfKin {
 }
 
 export interface CreatePatientData {
-  patient_category_id: any;
+  patient_category_id?: any;
   branch_id: string | null;
   first_name: string;
   last_name: string;

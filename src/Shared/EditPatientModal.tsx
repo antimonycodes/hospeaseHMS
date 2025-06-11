@@ -513,7 +513,7 @@ const EditPatientModal = ({
           )}
 
           {/* Debug info section (optional - remove in production) */}
-          <div className="mb-4 p-3 bg-gray-100 rounded text-sm">
+          {/* <div className="mb-4 p-3 bg-gray-100 rounded text-sm">
             <p>
               <strong>Debug Info:</strong>
             </p>
@@ -521,7 +521,7 @@ const EditPatientModal = ({
             <p>Selected Category ID: {formData.patient_category_id}</p>
             <p>Patient Type: {formData.patient_type}</p>
             <p>Clinical Dept: {formData.clinical_patient_type}</p>
-          </div>
+          </div> */}
 
           <div className="mt-6">
             <button
