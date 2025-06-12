@@ -235,7 +235,10 @@ const PatientsPage = ({
         <AddCategoryModal
           // endpoint={bookEndpoint}
           // refreshEndpoint={refreshEndpoint}
-          onClose={() => setOpenModal(false)} isOpen={false} isEditMode={false}        />
+          onClose={() => setOpenModal(false)}
+          isOpen={false}
+          isEditMode={false}
+        />
       )}
     </div>
   );

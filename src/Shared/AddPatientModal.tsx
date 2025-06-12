@@ -74,11 +74,6 @@ const AddPatientModal = ({
     getClinicaldept();
   }, []);
 
-  // Debug logs with better formatting
-  console.log("Categories:", categories);
-  console.log("Branches:", branches);
-  console.log("Current patient state:", patient);
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
     field: string

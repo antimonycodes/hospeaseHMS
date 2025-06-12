@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useCombinedStore } from "../store/super-admin/useCombinedStore";
+import { useGlobalStore } from "../store/super-admin/useGlobal";
 
 interface NextOfKin {
   name: string;
@@ -30,7 +32,9 @@ interface PatientData {
   clinical_patient_type: any;
   patient_category_id: string;
   age?: number;
-  branch?: string; // Keep for backward compatibility
+  branch?: string;
+  clinical_department?: { id: number; name: string };
+  patient_category?: { id: number; name: string } | null;
   next_of_kin: NextOfKin[];
 }
 
@@ -40,7 +44,6 @@ interface EditPatientModalProps {
   patientData: PatientData | null;
   isLoading: boolean;
   onSave: (data: PatientData) => void;
-  // Add these props to match AddPatientModal functionality
   branches?: Array<{ id: number; attributes: { name: string } }>;
   categories?: Array<{ id: number; attributes: { name: string } }>;
   clinicaldepts?: Array<{ id: number; attributes: { name: string } }>;
@@ -52,23 +55,65 @@ const EditPatientModal = ({
   patientData,
   isLoading,
   onSave,
-  branches = [],
-  categories = [],
-  clinicaldepts = [],
 }: EditPatientModalProps) => {
   const [formData, setFormData] = useState<PatientData | null>(null);
+  const { branches, getBranches, clinicaldepts, getClinicaldept } =
+    useGlobalStore();
+  const { getAllCategory, categories } = useCombinedStore();
+
+  useEffect(() => {
+    getAllCategory();
+    getBranches();
+    getClinicaldept();
+  }, [getAllCategory, getBranches, getClinicaldept]);
+
+  // Convert date string to Date object
+  const parseDate = (dateString: string | Date | null) => {
+    if (!dateString) return null;
+    if (dateString instanceof Date) return dateString;
+
+    try {
+      const date = new Date(dateString);
+      return isNaN(date.getTime()) ? null : date;
+    } catch {
+      return null;
+    }
+  };
+
+  // Find branch ID by name
+  const findBranchIdByName = (branchName: string) => {
+    const branch = branches?.find((b) => b.attributes.name === branchName);
+    return branch ? branch.id.toString() : "";
+  };
 
   // Update form data when patientData changes or modal opens
   useEffect(() => {
     if (patientData && isOpen) {
+      console.log("Setting form data with patient:", patientData);
+
       setFormData({
         ...patientData,
-        // Ensure all required fields have default values
-        branch_id: patientData.branch_id || "",
-        patient_category_id: patientData.patient_category_id || "",
-        patient_type: patientData.patient_type || "",
-        clinical_patient_type: patientData.clinical_patient_type || "",
-        dob: patientData.dob || null,
+        // Handle branch - use branch_id if available, otherwise find by branch name
+        branch_id:
+          patientData.branch_id ||
+          (patientData.branch ? findBranchIdByName(patientData.branch) : ""),
+
+        // Handle clinical department - use clinical_patient_type if available, otherwise use clinical_department.id
+        clinical_patient_type:
+          patientData.clinical_patient_type ||
+          patientData.clinical_department?.id?.toString() ||
+          "",
+
+        // Handle patient category - use patient_category_id if available, otherwise use patient_category.id
+        patient_category_id:
+          patientData.patient_category_id ||
+          patientData.patient_category?.id?.toString() ||
+          "",
+
+        // Parse date of birth
+        dob: parseDate(patientData.dob),
+
+        // Ensure next_of_kin has proper structure
         next_of_kin:
           patientData.next_of_kin?.length > 0
             ? [...patientData.next_of_kin]
@@ -76,7 +121,7 @@ const EditPatientModal = ({
                 {
                   name: "",
                   last_name: "",
-                  gender: "Female",
+                  gender: "female",
                   phone: "",
                   occupation: "",
                   address: "",
@@ -87,7 +132,12 @@ const EditPatientModal = ({
               ],
       });
     }
-  }, [patientData, isOpen]);
+  }, [patientData, isOpen, branches]);
+
+  console.log("Current formData:", formData);
+  console.log("Available branches:", branches);
+  console.log("Available categories:", categories);
+  console.log("Available clinical depts:", clinicaldepts);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -140,10 +190,9 @@ const EditPatientModal = ({
       return;
     }
 
-    // Prepare the payload similar to AddPatientModal
+    // Prepare the payload
     const payload: PatientData = {
       ...formData,
-      // Keep IDs as strings to match PatientData type
       branch_id: formData.branch_id,
       patient_category_id: formData.patient_category_id,
       clinical_patient_type: formData.clinical_patient_type,
@@ -214,7 +263,7 @@ const EditPatientModal = ({
                 value={formData.card_id}
                 onChange={handleInputChange}
                 className="w-full border border-gray-300 rounded p-4 text-sm bg-gray-100"
-                readOnly
+                // readOnly
               />
             </div>
             <div>
@@ -231,6 +280,7 @@ const EditPatientModal = ({
                   Select Patient Type
                 </option>
                 <option value="Insurance">Insurance</option>
+                <option value="HMO">HMO</option>
                 <option value="Organised Private Scheme">
                   Organised Private Scheme
                 </option>
@@ -255,6 +305,7 @@ const EditPatientModal = ({
                 dropdownMode="select"
                 yearDropdownItemNumber={100}
                 scrollableYearDropdown
+                maxDate={new Date()}
               />
             </div>
             <div>
@@ -511,17 +562,6 @@ const EditPatientModal = ({
               </div>
             </div>
           )}
-
-          {/* Debug info section (optional - remove in production) */}
-          {/* <div className="mb-4 p-3 bg-gray-100 rounded text-sm">
-            <p>
-              <strong>Debug Info:</strong>
-            </p>
-            <p>Selected Branch ID: {formData.branch_id}</p>
-            <p>Selected Category ID: {formData.patient_category_id}</p>
-            <p>Patient Type: {formData.patient_type}</p>
-            <p>Clinical Dept: {formData.clinical_patient_type}</p>
-          </div> */}
 
           <div className="mt-6">
             <button

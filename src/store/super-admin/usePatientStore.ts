@@ -106,6 +106,12 @@ interface PatientStore {
     perPage?: string,
     endpoint?: string
   ) => Promise<void>;
+  filterPatients: (
+    filters: any,
+    page?: string,
+    perPage?: string,
+    endpoint?: string
+  ) => Promise<void>;
   getAllPatientsNoPerPage: () => Promise<void>;
   getPatientById: (id: string) => Promise<void>;
   updatePatient: (id: string, patientData: any) => Promise<any>;
@@ -158,8 +164,23 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   ) => {
     set({ isLoading: true });
     try {
-      // Construct the full endpoint with query parameters
-      const endpoint = `${baseEndpoint}?page=${page}&per_page=${perPage}`;
+      // Check if the endpoint already contains query parameters
+      const hasQueryParams = baseEndpoint.includes("?");
+      const separator = hasQueryParams ? "&" : "?";
+
+      // Only append page and per_page if they're not already in the endpoint
+      const pageParamExists = baseEndpoint.includes("page=");
+      const perPageParamExists = baseEndpoint.includes("per_page=");
+
+      let endpoint = baseEndpoint;
+
+      if (!pageParamExists) {
+        endpoint += `${separator}page=${page}`;
+      }
+
+      if (!perPageParamExists) {
+        endpoint += `${endpoint.includes("?") ? "&" : "?"}per_page=${perPage}`;
+      }
 
       console.log("Fetching patients from:", endpoint);
 
@@ -170,8 +191,62 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       set({ patients: fetchedPatients });
       console.log(response.data.message);
     } catch (error: any) {
+      console.error("Fetch error:", error.response?.data || error.message);
+      toast.error(error.response?.data?.message || "Failed to fetch patients");
+      set({ patients: [] });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  filterPatients: async (
+    filters: any,
+    page = "1",
+    perPage = "10",
+    baseEndpoint = "/admin/patient/fetch"
+  ) => {
+    set({ isLoading: true });
+    try {
+      // Build query parameters from filters
+      const queryParams = new URLSearchParams({
+        page,
+        per_page: perPage,
+      });
+
+      // Add filter parameters
+      if (filters.gender) {
+        queryParams.append("gender", filters.gender);
+      }
+
+      if (filters.branch) {
+        queryParams.append("branch", filters.branch);
+      }
+
+      if (filters.occupation) {
+        queryParams.append("occupation", filters.occupation);
+      }
+
+      if (filters.ageRange?.min) {
+        queryParams.append("min_age", filters.ageRange.min.toString());
+      }
+
+      if (filters.ageRange?.max) {
+        queryParams.append("max_age", filters.ageRange.max.toString());
+      }
+
+      const endpoint = `${baseEndpoint}?${queryParams.toString()}`;
+
+      console.log("Filtering patients from:", endpoint);
+
+      const response = await api.get(endpoint);
+      set({ pagination: response.data.data.pagination });
+      console.log(response.data.data.pagination, "pagination");
+      const fetchedPatients = response.data.data.data || response.data.data;
+      set({ patients: fetchedPatients });
+      console.log(response.data.message);
+    } catch (error: any) {
       console.error(error.response?.data);
-      // toast.error(error.response?.data?.message || "Failed to fetch patients");
+      // toast.error(error.response?.data?.message || "Failed to filter patients");
     } finally {
       set({ isLoading: false });
     }

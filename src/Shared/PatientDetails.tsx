@@ -184,7 +184,10 @@ const PatientDetails = () => {
                 label="CLinical Department"
                 value={patient.clinical_department.name}
               />{" "}
-              <InfoRow label="Category" value={patient.patient_category.name} />
+              <InfoRow
+                label="Category"
+                value={patient?.patient_category?.name}
+              />
               <InfoRow label="Branch" value={patient.branch} />
               <InfoRow label="Occupation" value={patient.occupation} />
               <InfoRow label="Religion" value={patient.religion} />
