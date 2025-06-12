@@ -82,7 +82,7 @@ const InformationTable = ({
   const filterOptions = useMemo(() => {
     if (!Array.isArray(patients)) {
       return {
-        branches: [] as string[],
+        branches: [] as any[],
         genders: [] as string[],
         occupations: [] as string[],
         categories: [] as { id: number; name: string }[],

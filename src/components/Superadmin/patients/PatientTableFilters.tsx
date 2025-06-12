@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 interface FilterProps {
   onFilterChange: (filters: FilterValues) => void;
   patientCategories: { id: number; name: string }[];
-  branches: string[];
+  branches: { id: number; name: string }[];
   genders: string[];
   occupations: string[];
   isLoading?: boolean;
@@ -183,7 +183,7 @@ const PatientTableFilters = ({
                 ))}
               </select>
             </div>
-            <div>
+            {/* <div>
               <label className="block mb-1 text-sm font-medium text-gray-700">
                 Branch
               </label>
@@ -192,14 +192,14 @@ const PatientTableFilters = ({
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
               >
                 <option value="">All Branches</option>
-                {branches.map((branch, index) => (
-                  <option key={index} value={branch}>
-                    {branch}
+                {branches.map((branch) => (
+                  <option key={branch.id} value={branch.id}>
+                    {branch.name}
                   </option>
                 ))}
               </select>
-            </div>
-            <div>
+            </div> */}
+            {/* <div>
               <label className="block mb-1 text-sm font-medium text-gray-700">
                 Gender
               </label>
@@ -214,8 +214,8 @@ const PatientTableFilters = ({
                   </option>
                 ))}
               </select>
-            </div>
-            <div>
+            </div> */}
+            {/* <div>
               <label className="block mb-1 text-sm font-medium text-gray-700">
                 Occupation
               </label>
@@ -230,8 +230,8 @@ const PatientTableFilters = ({
                   </option>
                 ))}
               </select>
-            </div>
-            <div>
+            </div> */}
+            {/* <div>
               <label className="block mb-1 text-sm font-medium text-gray-700">
                 Age From
               </label>
@@ -252,7 +252,7 @@ const PatientTableFilters = ({
                 placeholder="Max age"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
               />
-            </div>
+            </div> */}
           </div>
 
           <div className="flex justify-end mt-4">

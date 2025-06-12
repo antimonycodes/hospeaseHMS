@@ -9,6 +9,7 @@ import { useAdmissionStore } from "../../store/super-admin/useAdmissionStore";
 import Loader from "../../Shared/Loader";
 import { useRole } from "../../hooks/useRole";
 import MedicalTimeline from "../../Shared/MedicalTimeline";
+import DoctorReportSystem from "./DoctorReportSystem";
 
 const AdmissionDetails: React.FC = () => {
   const [showStatusModal, setShowStatusModal] = useState(false);
@@ -456,11 +457,17 @@ const AdmissionDetails: React.FC = () => {
         {activeTab === "Clinical History" && (
           <div>
             {patient?.id && (
-              <MedicalTimeline
-                patientId={patient.id.toString()}
-                patient={selectedP}
-                showDownloadCompleteButton={false}
-              />
+              <>
+                {role === "admin" ||
+                  (role === "doctor" && (
+                    <DoctorReportSystem patientId={patient.id.toString()} />
+                  ))}
+                <MedicalTimeline
+                  patientId={patient.id.toString()}
+                  patient={selectedP}
+                  showDownloadCompleteButton={false}
+                />
+              </>
             )}
           </div>
         )}

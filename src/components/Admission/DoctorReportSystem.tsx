@@ -1,35 +1,20 @@
-import { Link, useParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import DoctorBillForm from "../Doctor/DoctorBillForm";
 import {
-  ChevronLeft,
-  ChevronDown,
-  ChevronUp,
-  User,
-  FileText,
-  StickyNote,
-  Download,
-  Printer,
-  Calendar,
-  Clock,
-  Loader2,
-  Check,
-  Plus,
-  Minus,
   Banknote,
+  Check,
+  FileText,
+  Loader2,
+  Minus,
+  Plus,
+  StickyNote,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { usePatientStore } from "../../store/super-admin/usePatientStore";
-import Button from "../../Shared/Button";
-import EditPatientModal from "../../Shared/EditPatientModal";
-import { useReportStore } from "../../store/super-admin/useReoprt";
-import toast from "react-hot-toast";
-import { useGlobalStore } from "../../store/super-admin/useGlobal";
 import Loader from "../../Shared/Loader";
-import MedicalTimeline from "../../Shared/MedicalTimeline";
-import AdmitPatientModal from "../../Shared/AdmitPatientModal";
-import Input from "../../Shared/Input";
-import { useFinanceStore } from "../../store/staff/useFinanceStore";
-import DoctorBillForm from "./DoctorBillForm";
-
+import toast from "react-hot-toast";
+import { useParams } from "react-router-dom";
+import { usePatientStore } from "../../store/super-admin/usePatientStore";
+import { useReportStore } from "../../store/super-admin/useReoprt";
+import { useGlobalStore } from "../../store/super-admin/useGlobal";
 const COMMON_COMPLAINTS = [
   "Headache",
   "Fever",
@@ -76,9 +61,11 @@ const COMMON_COMPLAINTS = [
   "Night sweats",
   "Chills",
 ];
+interface DoctorReportSystemProps {
+  patientId: string;
+}
 
-const DoctorPatientDetails = () => {
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+const DoctorReportSystem = ({ patientId }: DoctorReportSystemProps) => {
   const [activeTab, setActiveTab] = useState("note");
   const [note, setNote] = useState("");
   const [reportNote, setReportNote] = useState("");
@@ -96,7 +83,7 @@ const DoctorPatientDetails = () => {
     }>
   >([]);
 
-  const { id } = useParams();
+  const id = patientId;
   const { selectedPatient, getPatientByIdDoc } = usePatientStore();
   const {
     createReport,
@@ -289,8 +276,6 @@ const DoctorPatientDetails = () => {
     }
   }, [id, getPatientByIdDoc, getAllReport, getMedicalNote]);
 
-  console.log(selectedPatient, "Select");
-
   const handleReportSubmit = async () => {
     if (!selectedDepartment) {
       toast.error("Please select a department");
@@ -392,90 +377,13 @@ const DoctorPatientDetails = () => {
     setMergedData(updatedData);
   };
 
-  const patient = selectedPatient.attributes;
-  const selectedPatientId = selectedPatient.id;
+  const patient = selectedPatient?.attributes;
+  const selectedPatientId = selectedPatient?.id;
   console.log(patient);
 
   if (!selectedPatient) return <Loader />;
-
   return (
-    <div className="px-2 sm:px-0">
-      <div className="bg-white rounded-lg custom-shadow mb-6">
-        <div className="p-4 sm:p-6">
-          <div className=" flex items-center justify-between">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 sm:mb-12 gap-4">
-              <Link
-                to="/dashboard/patients"
-                className="flex items-center text-gray-600 hover:text-primary"
-              >
-                <ChevronLeft size={16} />
-                <span className="ml-1">Patients</span>
-              </Link>
-            </div>
-            {/*  */}
-            {patient.is_admitted !== true ? (
-              <Button onClick={() => setIsAdmitModalOpen((prev) => !prev)}>
-                Admit Patient
-              </Button>
-            ) : (
-              <h1 className=" bg-primary p-2 rounded-full text-white">
-                Admitted
-              </h1>
-            )}
-          </div>
-
-          <div className="grid gap-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
-              <InfoRow label="First Name" value={patient.first_name} />
-              <InfoRow label="Last Name" value={patient.last_name} />
-              <InfoRow label="Patient ID" value={patient.card_id} />
-              <InfoRow label="Age" value={patient.age?.toString()} />
-              <InfoRow label="Gender" value={patient.gender} />
-              <InfoRow label="Patient type" value={patient.patient_type} />
-              <InfoRow
-                label="CLinical Department"
-                value={patient.clinical_department?.name}
-              />
-              <InfoRow label="Branch" value={patient.branch} />
-              <InfoRow label="Occupation" value={patient.occupation} />
-              <InfoRow label="Religion" value={patient.religion} />
-              <InfoRow label="Phone" value={patient.phone_number} />
-              <InfoRow
-                className="sm:col-span-2 md:col-span-3 lg:col-span-4"
-                label="Address"
-                value={patient.address}
-              />
-            </div>
-            <hr className="text-[#979797]" />
-            <div className="">
-              <div className="">
-                <h3 className="text-sm font-medium text-gray-800 mb-4">
-                  Next of Kin
-                </h3>
-                {patient.next_of_kin?.map((kin: any, index: any) => (
-                  <div
-                    key={index}
-                    className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4"
-                  >
-                    <InfoRow label="First Name" value={kin.name} />
-                    <InfoRow label="Last Name" value={kin.last_name} />
-                    <InfoRow label="Gender" value={kin.gender} />
-                    <InfoRow label="Occupation" value={kin.occupation} />
-                    <InfoRow label="Phone" value={kin.phone} />
-                    <InfoRow label="Relationship" value={kin.relationship} />
-                    <InfoRow
-                      className="sm:col-span-2 md:col-span-3 lg:col-span-4"
-                      label="Address"
-                      value={kin.address}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <div>
       <div className="bg-white rounded-lg custom-shadow mb-6 p-4 sm:p-6">
         <div className="flex flex-wrap gap-6 mb-4 text-sm font-medium text-[#667185]">
           <button
@@ -991,44 +899,11 @@ const DoctorPatientDetails = () => {
           <DoctorBillForm patient={patient} selectedPatient={selectedPatient} />
         )}
       </div>
-
-      {id && (
-        <MedicalTimeline
-          patientId={id}
-          patient={patient}
-          showDownloadCompleteButton={false}
-        />
-      )}
-
-      <EditPatientModal
-        isLoading={false}
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        patientData={patient}
-        onSave={function (data: any): void {
-          throw new Error("Function not implemented.");
-        }}
-      />
-
-      {isAdmitModalOpen && (
-        <AdmitPatientModal
-          setIsAdmitModalOpen={setIsAdmitModalOpen}
-          patientId={id ? Number(id) : 0}
-        />
-      )}
     </div>
   );
 };
 
-const InfoRow = ({ label, value, className = "" }: any) => (
-  <div className={className}>
-    <p className="text-xs text-gray-500">{label}</p>
-    <p className="text-sm font-medium">{value || "N/A"}</p>
-  </div>
-);
-
-export default DoctorPatientDetails;
-
+export default DoctorReportSystem;
 const departmentLabels: Record<string, string> = {
   pharmacist: "Pharmacy",
   laboratory: "Laboratory",
