@@ -289,8 +289,6 @@ const DoctorPatientDetails = () => {
     }
   }, [id, getPatientByIdDoc, getAllReport, getMedicalNote]);
 
-  console.log(selectedPatient, "Select");
-
   const handleReportSubmit = async () => {
     if (!selectedDepartment) {
       toast.error("Please select a department");
@@ -392,8 +390,8 @@ const DoctorPatientDetails = () => {
     setMergedData(updatedData);
   };
 
-  const patient = selectedPatient.attributes;
-  const selectedPatientId = selectedPatient.id;
+  const patient = selectedPatient?.attributes;
+  const selectedPatientId = selectedPatient?.id;
   console.log(patient);
 
   if (!selectedPatient) return <Loader />;
@@ -1000,7 +998,7 @@ const DoctorPatientDetails = () => {
         />
       )}
 
-      <EditPatientModal
+      {/* <EditPatientModal
         isLoading={false}
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
@@ -1008,7 +1006,7 @@ const DoctorPatientDetails = () => {
         onSave={function (data: any): void {
           throw new Error("Function not implemented.");
         }}
-      />
+      /> */}
 
       {isAdmitModalOpen && (
         <AdmitPatientModal
