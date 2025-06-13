@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import InformationTable from "./InformationTable";
 import AppointmentsTable from "./AppointmentsTable";
 import Button from "../../../Shared/Button";
-import { Plus, Search } from "lucide-react";
+import { Plus } from "lucide-react";
 import AddPatientModal from "../../../Shared/AddPatientModal";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import BookAppointmentModal from "../../../Shared/BookAppointmentModal";
@@ -10,16 +10,17 @@ import SearchBar from "../../ReusablepatientD/SearchBar";
 import CategoryTable from "./CategoryTable";
 import AddCategoryModal from "./AddCategoryModal";
 
-type PatientsPage = {
+type PatientsPageProps = {
   endpoint?: string;
   bookEndpoint?: string;
   refreshEndpoint?: string;
 };
+
 const PatientsPage = ({
   endpoint = "/medical-report/appointment/all-records",
   bookEndpoint = "/medical-report/appointment/book",
   refreshEndpoint = "/admin/appointment/all-records",
-}) => {
+}: PatientsPageProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState(0);
   const [openModal, setOpenModal] = useState(false);
@@ -28,8 +29,43 @@ const PatientsPage = ({
   >("patient");
   const { appointments, pagination, isLoading, getAllAppointments } =
     usePatientStore();
+  const { getAllPatients, searchPatients, patients, createPatient } =
+    usePatientStore();
+  const [isFilterSearchActive, setIsFilterSearchActive] = useState(false);
 
-  const [perPage, setPerPage] = useState(10);
+  useEffect(() => {
+    const fetchData = async () => {
+      if (activeTab === 0 && !isFilterSearchActive) {
+        if (searchQuery) {
+          console.log("Searching patients with query:", searchQuery);
+          await searchPatients(searchQuery);
+        } else {
+          console.log("Fetching all patients");
+          await getAllPatients("1", "10", "/admin/patient/fetch");
+        }
+      }
+    };
+
+    const debounceTimer = setTimeout(() => {
+      fetchData();
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [
+    searchQuery,
+    activeTab,
+    isFilterSearchActive,
+    searchPatients,
+    getAllPatients,
+  ]);
+
+  useEffect(() => {
+    if (activeTab === 1) {
+      console.log("Fetching appointments");
+      getAllAppointments("1", "10", endpoint);
+    }
+  }, [activeTab, getAllAppointments, endpoint]);
+
   const handleOpenModal = () => {
     if (activeTab === 0) {
       setModalType("patient");
@@ -40,55 +76,28 @@ const PatientsPage = ({
     }
     setOpenModal(true);
   };
-  const {
-    getAllPatients,
-    searchPatients,
-    patients,
-    createPatient,
-    getPatientById,
-    selectedPatient,
-  } = usePatientStore();
-
-  // useEffect(() => {
-  //   getAllPatients();
-  // }, [getAllPatients]);
-  useEffect(() => {
-    if (searchQuery) {
-      searchPatients(searchQuery).then((fetchedPatients) => {
-        usePatientStore.setState({ patients: fetchedPatients });
-      });
-    } else {
-      getAllPatients();
-    }
-  }, [getAllPatients, searchPatients, searchQuery]);
-
-  useEffect(() => {
-    getAllAppointments("1", "10", endpoint);
-  }, [getAllAppointments, endpoint]);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   };
-  return (
-    <div className=" bg-white custom-shadow p-4">
-      <div className=" flex flex-col xl:flex-row-reverse gap-4 xl:gap-24">
-        {/* Search and Button */}
 
-        <div className=" w-full flex-1 flex flex-col md:flex-row items-center gap-2">
+  const handleFilterSearchChange = (isActive: boolean) => {
+    console.log("Filter search active:", isActive);
+    setIsFilterSearchActive(isActive);
+    if (isActive) {
+      setSearchQuery("");
+    }
+  };
+
+  return (
+    <div className="bg-white custom-shadow p-4">
+      <div className="flex flex-col xl:flex-row-reverse gap-4 xl:gap-24">
+        <div className="w-full flex-1 flex flex-col md:flex-row items-center gap-2">
           {activeTab !== 2 && (
-            <div className="flex items-center space-x-4 min-w-[70%]  ">
+            <div className="flex items-center space-x-4 min-w-[70%]">
               <SearchBar onSearch={handleSearch} />
             </div>
           )}
-          {/* <div className="relative w-full flex-1">
-            <input
-              type="text"
-              placeholder="Type to search"
-              className="w-full border border-gray-200 py-2 pl-10 pr-4 rounded-lg"
-            />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1AA] size-4" />
-          </div> */}
-
           <div
             className={`w-full md:w-auto ${
               activeTab === 0 ? "block" : "hidden"
@@ -104,7 +113,6 @@ const PatientsPage = ({
               <Plus size={16} />
             </Button>
           </div>
-
           <div
             className={`w-full md:w-auto ${
               activeTab === 1 ? "block" : "hidden"
@@ -120,8 +128,7 @@ const PatientsPage = ({
               <Plus size={16} />
             </Button>
           </div>
-          {/*  */}
-          {/* <div
+          <div
             className={`w-full md:w-auto ${
               activeTab === 2 ? "block" : "hidden"
             }`}
@@ -135,10 +142,8 @@ const PatientsPage = ({
               Add Category
               <Plus size={16} />
             </Button>
-          </div> */}
+          </div>
         </div>
-
-        {/* Tabs */}
         <div className="flex items-center text-xs gap-3">
           <h1
             className={`relative inline-block flex-none cursor-pointer text-sm md:text-base font-semibold ${
@@ -181,22 +186,20 @@ const PatientsPage = ({
           </h1>
         </div>
       </div>
-
-      {/* Table */}
-      <div className=" mt-4">
+      <div className="mt-4">
         {activeTab === 0 && (
           <InformationTable
             patients={patients}
             pagination={pagination}
             isLoading={isLoading}
-            // perPage={perPage}
+            baseEndpoint="/admin/patient/fetch"
+            onFilterSearchChange={handleFilterSearchChange}
           />
         )}
-
         {activeTab === 1 && (
           <AppointmentsTable
             data={{
-              data: (appointments as unknown as { data: any[] }).data,
+              data: Array.isArray(appointments) ? appointments : [],
               pagination: pagination ?? {
                 total: 0,
                 per_page: 10,
@@ -210,33 +213,23 @@ const PatientsPage = ({
             endpoint={endpoint}
           />
         )}
+        {activeTab === 2 && <CategoryTable />}
       </div>
-      {activeTab === 2 && <CategoryTable />}
-
-      {openModal && (
+      {openModal && modalType === "patient" && (
         <AddPatientModal
           onClose={() => setOpenModal(false)}
           createPatient={createPatient}
           isLoading={isLoading}
           endpoint="/admin/patient/create"
-          // refreshendpoint="/admin/patient/fetch"
         />
       )}
-
       {openModal && modalType === "appointment" && (
-        <BookAppointmentModal
-          // endpoint={bookEndpoint}
-          // refreshEndpoint={refreshEndpoint}
-          onClose={() => setOpenModal(false)}
-        />
+        <BookAppointmentModal onClose={() => setOpenModal(false)} />
       )}
-
       {openModal && modalType === "category" && (
         <AddCategoryModal
-          // endpoint={bookEndpoint}
-          // refreshEndpoint={refreshEndpoint}
           onClose={() => setOpenModal(false)}
-          isOpen={false}
+          isOpen={openModal}
           isEditMode={false}
         />
       )}

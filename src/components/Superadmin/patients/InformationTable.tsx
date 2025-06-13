@@ -5,6 +5,11 @@ import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import Loader from "../../../Shared/Loader";
 import PatientTableFilters, { FilterValues } from "./PatientTableFilters";
 
+// Utility for deep equality comparison
+function areEqual(obj1: any, obj2: any): boolean {
+  return JSON.stringify(obj1) === JSON.stringify(obj2);
+}
+
 type InformationData = {
   name: string;
   patientId: string;
@@ -52,17 +57,30 @@ type InformationTableProps = {
   isLoading: boolean;
   baseEndpoint?: string;
   patientCategories?: { id: number; name: string }[];
+  onFilterSearchChange?: (isActive: boolean) => void;
 };
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
+}
 
 const InformationTable = ({
   patients,
-  isLoading,
   pagination,
+  isLoading,
   baseEndpoint = "/admin/patient/fetch",
   patientCategories = [],
+  onFilterSearchChange,
 }: InformationTableProps) => {
   const navigate = useNavigate();
-  const { getAllPatients } = usePatientStore();
+  const { filterPatients } = usePatientStore();
   const [currentPage, setCurrentPage] = useState(pagination?.current_page || 1);
   const [perPage, setPerPage] = useState(pagination?.per_page || 10);
   const [filters, setFilters] = useState<FilterValues>({
@@ -74,36 +92,64 @@ const InformationTable = ({
     age_from: "",
     age_to: "",
   });
+  const [prevFilters, setPrevFilters] = useState<FilterValues>(filters);
 
-  // Add state to track if we're in the middle of a filter operation
-  const [isFiltering, setIsFiltering] = useState(false);
+  const debouncedFilters = useDebounce(filters, 300);
 
-  // Extract unique values for filters using useMemo
+  // Notify parent when filter search changes
+  useEffect(() => {
+    onFilterSearchChange?.(!!debouncedFilters.search);
+  }, [debouncedFilters.search, onFilterSearchChange]);
+
+  // Reset currentPage when pagination prop changes
+  useEffect(() => {
+    if (pagination?.current_page && pagination.current_page !== currentPage) {
+      setCurrentPage(pagination.current_page);
+    }
+  }, [pagination?.current_page]);
+
+  // Fetch patients with debounced filters
+  useEffect(() => {
+    if (!baseEndpoint || isLoading) return;
+    if (areEqual(debouncedFilters, prevFilters)) return;
+    console.log("Fetching with filters:", debouncedFilters);
+    filterPatients(
+      debouncedFilters,
+      currentPage.toString(),
+      perPage.toString(),
+      baseEndpoint
+    );
+    setPrevFilters(debouncedFilters);
+  }, [
+    currentPage,
+    perPage,
+    debouncedFilters,
+    baseEndpoint,
+    filterPatients,
+    isLoading,
+    prevFilters,
+  ]);
+
+  // Extract unique values for filters
   const filterOptions = useMemo(() => {
     if (!Array.isArray(patients)) {
       return {
-        branches: [] as any[],
+        branches: [] as string[],
         genders: [] as string[],
         occupations: [] as string[],
         categories: [] as { id: number; name: string }[],
       };
     }
-
-    // Extract unique branches
     const branches = Array.from(
       new Set(
         patients.map((patient) => patient.attributes?.branch).filter(Boolean)
       )
     ) as string[];
-
-    // Extract unique genders
     const genders = Array.from(
       new Set(
         patients.map((patient) => patient.attributes?.gender).filter(Boolean)
       )
     ) as string[];
-
-    // Extract unique occupations
     const occupations = Array.from(
       new Set(
         patients
@@ -111,28 +157,21 @@ const InformationTable = ({
           .filter(Boolean)
       )
     ) as string[];
-
-    // Extract unique patient categories from the patients data
     const categoriesFromPatients = patients
       .map((patient) => patient.attributes?.patient_category)
       .filter(
         (category): category is { id: number; name: string } =>
           category !== null && category !== undefined
       );
-
-    // Remove duplicates based on id
     const uniqueCategories = categoriesFromPatients.filter(
       (category, index, self) =>
         index === self.findIndex((c) => c.id === category.id)
     );
-
-    // Combine with patientCategories prop (if any) and remove duplicates
     const allCategories = [...patientCategories, ...uniqueCategories];
     const finalCategories = allCategories.filter(
       (category, index, self) =>
         index === self.findIndex((c) => c.id === category.id)
     );
-
     return {
       branches,
       genders,
@@ -157,52 +196,14 @@ const InformationTable = ({
     [patients]
   );
 
-  // Fetch patients with all active filters
-  useEffect(() => {
-    // Skip if there's no endpoint
-    if (!baseEndpoint) {
-      return;
-    }
-
-    // Skip if already loading to prevent multiple simultaneous requests
-    if (isLoading && patients.length === 0) {
-      return;
-    }
-
-    // Build query parameters
-    const queryParams = new URLSearchParams();
-    queryParams.append("page", currentPage.toString());
-    queryParams.append("per_page", perPage.toString());
-
-    // Add filter values to query - only add non-empty values
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) {
-        queryParams.append(key, value);
-      }
-    });
-
-    // Create the endpoint with query parameters
-    const endpoint = `${baseEndpoint}?${queryParams.toString()}`;
-
-    // Fetch data with current filters
-    getAllPatients(currentPage.toString(), perPage.toString(), endpoint);
-
-    // After fetching, reset the filtering flag
-    if (isFiltering) {
-      setIsFiltering(false);
-    }
-  }, [currentPage, perPage, filters, baseEndpoint, isFiltering]);
-
   const handleViewMore = (id: string) => {
     navigate(`/dashboard/patients/${id}`);
   };
 
   const handleFilterChange = (newFilters: FilterValues) => {
-    // Reset to page 1 when filters change
+    console.log("Filter change:", newFilters);
     setCurrentPage(1);
     setFilters(newFilters);
-    // Set the filtering flag to true to trigger data fetch
-    setIsFiltering(true);
   };
 
   const handlePageChange = (page: number) => {
@@ -211,7 +212,7 @@ const InformationTable = ({
 
   const handlePerPageChange = (newPerPage: number) => {
     setPerPage(newPerPage);
-    setCurrentPage(1); // Reset to first page when items per page changes
+    setCurrentPage(1);
   };
 
   if (isLoading && !patients.length) return <Loader />;
@@ -271,12 +272,14 @@ const InformationTable = ({
       <PatientTableFilters
         onFilterChange={handleFilterChange}
         patientCategories={filterOptions.categories}
-        branches={filterOptions.branches}
+        branches={filterOptions.branches.map((branch, idx) => ({
+          id: idx,
+          name: branch,
+        }))}
         genders={filterOptions.genders}
         occupations={filterOptions.occupations}
         isLoading={isLoading}
       />
-
       {!formattedPatients.length ? (
         <div className="mt-10 text-center text-gray-500">
           {isLoading ? "Loading patients..." : "No patients found"}
@@ -290,7 +293,6 @@ const InformationTable = ({
           paginationData={pagination}
           loading={isLoading}
           onPageChange={handlePageChange}
-          // onPageChange={handlePerPageChange}
         />
       )}
     </div>

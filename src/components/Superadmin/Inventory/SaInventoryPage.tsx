@@ -15,7 +15,7 @@ import AddCategoryModal from "../../../Shared/AddCategoryModal";
 
 const SaInventoryPage = () => {
   const [activeTab, setActiveTab] = useState<
-    "Overview" | "Stock" | "Requests" | "Settings"
+    "Overview" | "Stock" | "Disburse" | "Settings"
   >("Overview");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -59,7 +59,7 @@ const SaInventoryPage = () => {
         </Button>
       );
     }
-    if (activeTab === "Requests") {
+    if (activeTab === "Disburse") {
       return (
         <Button
           variant="primary"
@@ -97,10 +97,10 @@ const SaInventoryPage = () => {
   return (
     <div>
       <div className=" flex flex-col gap-4 md:flex-row w-full bg-white pt-10 pb-3 pr-2 md:pr-4 rounded-xl custom-shadow  ">
-        <Tabs<"Overview" | "Stock" | "Requests" | "Settings">
+        <Tabs<"Overview" | "Stock" | "Disburse" | "Settings">
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          tabs={["Overview", "Stock", "Requests", "Settings"]}
+          tabs={["Overview", "Stock", "Disburse", "Settings"]}
         />
 
         <div className="flex justify-end w-full md:max-w-2xl">
@@ -112,7 +112,7 @@ const SaInventoryPage = () => {
         {activeTab === "Stock" && (
           <SaInventoryStock stocks={stocks} isLoading={isLoading} />
         )}
-        {activeTab === "Requests" && <SaInventoryRequest />}
+        {activeTab === "Disburse" && <SaInventoryRequest />}
         {activeTab === "Settings" && (
           <SaInventorySettings categorys={categorys} isLoading={isLoading} />
         )}

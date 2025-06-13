@@ -341,7 +341,7 @@ const EditPatientModal = ({
                 </option>
                 {branches?.map((branch) => (
                   <option key={branch.id} value={branch.id.toString()}>
-                    {branch.attributes.name} (ID: {branch.id})
+                    {branch.attributes.name}
                   </option>
                 ))}
               </select>
@@ -388,7 +388,7 @@ const EditPatientModal = ({
                 </option>
                 {clinicaldepts?.map((dept) => (
                   <option key={dept.id} value={dept.id.toString()}>
-                    {dept.attributes.name} (ID: {dept.id})
+                    {dept.attributes.name}
                   </option>
                 ))}
               </select>
@@ -412,7 +412,7 @@ const EditPatientModal = ({
                 </option>
                 {categories?.map((category) => (
                   <option key={category.id} value={category.id.toString()}>
-                    {category.attributes.name} (ID: {category.id})
+                    {category.attributes.name}
                   </option>
                 ))}
               </select>

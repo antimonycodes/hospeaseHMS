@@ -45,7 +45,7 @@ type FpaymentTableProps = {
   baseEndpoint?: string;
 };
 
-// Badge component for payment type
+// Enhanced Badge component for payment type with refund status support
 const PaymentTypeBadge = ({
   paymentType,
 }: {
@@ -53,31 +53,58 @@ const PaymentTypeBadge = ({
 }) => {
   const type = paymentType?.toLowerCase() || "";
 
-  if (type === "full") {
-    return (
-      <span className="px-2 py-1 bg-[#CCFFE7] text-[#009952] rounded-full text-xs font-medium">
-        Full Payment
-      </span>
-    );
-  } else if (type === "part") {
-    return (
-      <span className="px-2 py-1 bg-[#FEF3CD] text-[#B58A00] rounded-full text-xs font-medium">
-        Part Payment
-      </span>
-    );
-  } else if (type === "pending") {
-    return (
-      <span className="px-2 py-1 bg-[#FBE1E1] text-[#F83E41] rounded-full text-xs font-medium">
-        Pending
-      </span>
-    );
-  } else {
-    return (
-      <span className="px-2 py-1 bg-red-500 text-white rounded-full text-xs font-medium">
-        refunded
-      </span>
-    );
-  }
+  // Define badge styles based on payment/refund type
+  const getBadgeStyle = () => {
+    switch (type) {
+      case "full":
+        return {
+          bg: "bg-[#CCFFE7]",
+          text: "text-[#009952]",
+          label: "Full Payment",
+        };
+      case "part":
+      case "partial":
+        return {
+          bg: "bg-[#FEF3CD]",
+          text: "text-[#B58A00]",
+          label: "Part Payment",
+        };
+      case "pending":
+        return {
+          bg: "bg-[#FBE1E1]",
+          text: "text-[#F83E41]",
+          label: "Pending",
+        };
+      case "refunded":
+        return {
+          bg: "bg-[#E1F5FE]",
+          text: "text-[#0288D1]",
+          label: "Refunded",
+        };
+      case "partially_refunded":
+        return {
+          bg: "bg-[#FFF3E0]",
+          text: "text-[#EF6C00]",
+          label: "Partially Refunded",
+        };
+      default:
+        return {
+          bg: "bg-gray-100",
+          text: "text-gray-800",
+          label: type.charAt(0).toUpperCase() + type.slice(1),
+        };
+    }
+  };
+
+  const { bg, text, label } = getBadgeStyle();
+
+  return (
+    <span
+      className={`px-2 py-1 ${bg} ${text} rounded-full text-xs font-medium`}
+    >
+      {label}
+    </span>
+  );
 };
 
 const FpaymentTable = ({
@@ -103,10 +130,7 @@ const FpaymentTable = ({
     to_date: "",
   });
 
-  // Add state to track if we're in the middle of a filter operation
   const [isFiltering, setIsFiltering] = useState(false);
-
-  // Extract unique values for filters
   const [filterOptions, setFilterOptions] = useState({
     departments: [] as string[],
     paymentMethods: [] as string[],
@@ -129,36 +153,36 @@ const FpaymentTable = ({
         new Set(
           payments
             .map((payment) => payment.attributes?.department?.name)
-            .filter(Boolean)
+            .filter((name): name is string => name !== undefined)
         )
-      ) as string[];
+      );
 
       // Extract unique payment methods
       const paymentMethods = Array.from(
         new Set(
           payments
             .map((payment) => payment.attributes?.payment_method)
-            .filter(Boolean)
+            .filter((method): method is string => method !== undefined)
         )
-      ) as string[];
+      );
 
       // Extract unique payment types
       const paymentTypes = Array.from(
         new Set(
           payments
             .map((payment) => payment.attributes?.payment_type)
-            .filter(Boolean)
+            .filter((type): type is string => type !== undefined)
         )
-      ) as string[];
+      );
 
       // Extract unique payment sources
       const paymentSources = Array.from(
         new Set(
           payments
             .map((payment) => payment.attributes?.payment_source)
-            .filter(Boolean)
+            .filter((source): source is string => source !== undefined)
         )
-      ) as string[];
+      );
 
       setFilterOptions({
         departments,
@@ -168,37 +192,26 @@ const FpaymentTable = ({
       });
     }
   }, [payments]);
-
   const handleViewMore = (payment: PaymentAttributes) => {
     navigate(`/dashboard/finance/payment/${payment.id}`);
   };
 
   // Fetch payments with all active filters
   useEffect(() => {
-    // Skip if there's no endpoint or if we're not actively filtering
-    if (!baseEndpoint) {
-      return;
-    }
+    if (!baseEndpoint) return;
 
-    // Build query parameters
     const queryParams = new URLSearchParams();
     queryParams.append("page", currentPage.toString());
     queryParams.append("per_page", perPage.toString());
 
-    // Add filter values to query - only add non-empty values
     Object.entries(filters).forEach(([key, value]) => {
       if (value) {
         queryParams.append(key, value);
       }
     });
 
-    // Create the endpoint with query parameters
     const endpoint = `${baseEndpoint}?${queryParams.toString()}`;
-
-    // Fetch data with current filters
     getAllPayments(currentPage.toString(), perPage.toString(), endpoint);
-
-    // After fetching, reset the filtering flag
     setIsFiltering(false);
   }, [
     currentPage,
@@ -210,21 +223,14 @@ const FpaymentTable = ({
   ]);
 
   const handleFilterChange = (newFilters: FilterValues) => {
-    // Reset to page 1 when filters change
     setCurrentPage(1);
     setFilters(newFilters);
-    // Set the filtering flag to true to trigger data fetch
     setIsFiltering(true);
   };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
-
-  // const handlePerPageChange = (newPerPage: number) => {
-  //   setPerPage(newPerPage);
-  //   setCurrentPage(1); // Reset to first page when items per page changes
-  // };
 
   const columns: Column<PaymentAttributes>[] = [
     {
@@ -329,9 +335,7 @@ const FpaymentTable = ({
           pagination={true}
           paginationData={pagination}
           loading={isLoading}
-          // onPageChange={handlePageChange}
           onPageChange={handlePageChange}
-          // onPerPageChange={handlePerPageChange}
         />
       )}
     </div>

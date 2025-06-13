@@ -164,31 +164,31 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   ) => {
     set({ isLoading: true });
     try {
-      // Check if the endpoint already contains query parameters
       const hasQueryParams = baseEndpoint.includes("?");
       const separator = hasQueryParams ? "&" : "?";
-
-      // Only append page and per_page if they're not already in the endpoint
       const pageParamExists = baseEndpoint.includes("page=");
       const perPageParamExists = baseEndpoint.includes("per_page=");
-
       let endpoint = baseEndpoint;
-
       if (!pageParamExists) {
         endpoint += `${separator}page=${page}`;
       }
-
       if (!perPageParamExists) {
         endpoint += `${endpoint.includes("?") ? "&" : "?"}per_page=${perPage}`;
       }
-
       console.log("Fetching patients from:", endpoint);
-
       const response = await api.get(endpoint);
-      set({ pagination: response.data.data.pagination });
+      set((state) => {
+        const newPatients = response.data.data.data || response.data.data;
+        // Prevent redundant updates
+        if (JSON.stringify(state.patients) === JSON.stringify(newPatients)) {
+          return state;
+        }
+        return {
+          pagination: response.data.data.pagination,
+          patients: newPatients,
+        };
+      });
       console.log(response.data.data.pagination, "pagination");
-      const fetchedPatients = response.data.data.data || response.data.data;
-      set({ patients: fetchedPatients });
       console.log(response.data.message);
     } catch (error: any) {
       console.error("Fetch error:", error.response?.data || error.message);
@@ -207,51 +207,43 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   ) => {
     set({ isLoading: true });
     try {
-      // Build query parameters from filters
       const queryParams = new URLSearchParams({
         page,
         per_page: perPage,
       });
-
-      // Add filter parameters
-      if (filters.gender) {
-        queryParams.append("gender", filters.gender);
-      }
-
-      if (filters.branch) {
-        queryParams.append("branch", filters.branch);
-      }
-
-      if (filters.occupation) {
+      if (filters.search) queryParams.append("search", filters.search);
+      if (filters.gender) queryParams.append("gender", filters.gender);
+      if (filters.branch) queryParams.append("branch", filters.branch);
+      if (filters.occupation)
         queryParams.append("occupation", filters.occupation);
-      }
-
-      if (filters.ageRange?.min) {
-        queryParams.append("min_age", filters.ageRange.min.toString());
-      }
-
-      if (filters.ageRange?.max) {
-        queryParams.append("max_age", filters.ageRange.max.toString());
-      }
-
+      if (filters.patient_category_id)
+        queryParams.append("patient_category_id", filters.patient_category_id);
+      if (filters.age_from) queryParams.append("min_age", filters.age_from);
+      if (filters.age_to) queryParams.append("max_age", filters.age_to);
       const endpoint = `${baseEndpoint}?${queryParams.toString()}`;
-
       console.log("Filtering patients from:", endpoint);
-
       const response = await api.get(endpoint);
-      set({ pagination: response.data.data.pagination });
+      set((state) => {
+        const newPatients = response.data.data.data || response.data.data;
+        // Prevent redundant updates
+        if (JSON.stringify(state.patients) === JSON.stringify(newPatients)) {
+          return state;
+        }
+        return {
+          pagination: response.data.data.pagination,
+          patients: newPatients,
+        };
+      });
       console.log(response.data.data.pagination, "pagination");
-      const fetchedPatients = response.data.data.data || response.data.data;
-      set({ patients: fetchedPatients });
       console.log(response.data.message);
     } catch (error: any) {
-      console.error(error.response?.data);
-      // toast.error(error.response?.data?.message || "Failed to filter patients");
+      console.error("Filter error:", error.response?.data || error.message);
+      toast.error(error.response?.data?.message || "Failed to filter patients");
+      set({ patients: [] });
     } finally {
       set({ isLoading: false });
     }
   },
-
   getAllPatientsNoPerPage: async () => {
     set({ isLoading: true });
     try {
