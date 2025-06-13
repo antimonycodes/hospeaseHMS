@@ -32,6 +32,10 @@ const PaymentStatusBadge = ({ status }: { status: string }) => {
         return "bg-[#FEF3CD] text-[#B58A00]";
       case "pending":
         return "bg-[#FBE1E1] text-[#F83E41]";
+      case "refunded":
+        return "bg-[#E1F5FE] text-[#0288D1]";
+      case "partially_refunded":
+        return "bg-[#FFF3E0] text-[#EF6C00]";
       default:
         return "bg-[#FBE1E1] text-[#F83E41]";
     }
@@ -47,6 +51,10 @@ const PaymentStatusBadge = ({ status }: { status: string }) => {
         ? "Partially Paid"
         : status === "pending"
         ? "Pending Payment"
+        : status === "refunded"
+        ? "Refunded"
+        : status === "partially_refunded"
+        ? "Partially Refunded"
         : status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
   );
@@ -63,6 +71,9 @@ const PaymentDetails = () => {
   const [paymentType, setPaymentType] = useState("");
   const [amountToPay, setAmountToPay] = useState("0");
   const [originalPrice, setOriginalPrice] = useState<number | null>(null);
+  const [showRefundModal, setShowRefundModal] = useState(false);
+  const [refundType, setRefundType] = useState<"full" | "partial">("full");
+  const [refundAmount, setRefundAmount] = useState("");
 
   useEffect(() => {
     if (id) {
@@ -75,10 +86,23 @@ const PaymentDetails = () => {
     }
   }, [id, getPaymentById]);
 
-  const handleRefund = async (id: any) => {
-    const success = await refundPayment(selectedPayment.id);
-    if (success) {
-      getPaymentById(selectedPayment.id);
+  const handleRefund = async () => {
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        type: refundType,
+        amount: refundType === "full" ? null : parseFloat(refundAmount),
+      };
+
+      const success = await refundPayment(selectedPayment.id, payload);
+      if (success) {
+        await getPaymentById(selectedPayment.id);
+        setShowRefundModal(false);
+      }
+    } catch (error) {
+      console.error("Refund failed:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -281,8 +305,7 @@ const PaymentDetails = () => {
           )}
           <button
             className="rounded-sm text-white border bg-red-800 py-2 px-3"
-            // onClick={() => handlePaymentAction("part")}
-            onClick={handleRefund}
+            onClick={() => setShowRefundModal(true)}
           >
             Refund
           </button>
@@ -340,6 +363,71 @@ const PaymentDetails = () => {
           </div>
         </div>
       </div>
+      {showRefundModal && (
+        <div className="fixed inset-0 bg-[#1E1E1E40] bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-medium mb-4">Process Refund</h3>
+
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                Refund Type
+              </label>
+              <select
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                value={refundType}
+                onChange={(e) => {
+                  setRefundType(e.target.value as "full" | "partial");
+                  if (e.target.value === "full") {
+                    setRefundAmount("");
+                  }
+                }}
+              >
+                <option value="full">Full Refund</option>
+                <option value="partial">Partial Refund</option>
+              </select>
+            </div>
+
+            {refundType === "partial" && (
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Refund Amount (₦)
+                </label>
+                <input
+                  type="number"
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  value={refundAmount}
+                  onChange={(e) => setRefundAmount(e.target.value)}
+                  min="0"
+                  max={totalAmount}
+                />
+              </div>
+            )}
+
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => {
+                  setShowRefundModal(false);
+                  setRefundType("full");
+                  setRefundAmount("");
+                }}
+                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
+                disabled={isSubmitting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRefund}
+                className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                disabled={
+                  isSubmitting || (refundType === "partial" && !refundAmount)
+                }
+              >
+                {isSubmitting ? "Processing..." : "Process Refund"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Payment Modal */}
       {showPaymentModal && (

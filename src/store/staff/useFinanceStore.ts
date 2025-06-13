@@ -126,7 +126,7 @@ interface FinanceStore {
   deletePaymentSource: (id: any) => Promise<any>;
   getAllDoctors: () => Promise<any>;
   createDoctorBill: (data: any) => Promise<any>;
-  refundPayment: (id: any) => Promise<any>;
+  refundPayment: (id: any, data: any) => Promise<any>;
 }
 
 export const useFinanceStore = create<FinanceStore>((set, get) => ({
@@ -531,10 +531,13 @@ export const useFinanceStore = create<FinanceStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
-  refundPayment: async (id) => {
+  refundPayment: async (id, data) => {
     set({ isLoading: true });
     try {
-      const response = await api.put(`medical-report/refund-patient/${id}`);
+      const response = await api.put(
+        `medical-report/refund-patient/${id}`,
+        data
+      );
       if (isSuccessfulResponse(response)) {
         toast.success(response.data?.message);
         get().getAllPayments();
