@@ -221,10 +221,10 @@ const FpaymentTable = ({
     setCurrentPage(page);
   };
 
-  const handlePerPageChange = (newPerPage: number) => {
-    setPerPage(newPerPage);
-    setCurrentPage(1); // Reset to first page when items per page changes
-  };
+  // const handlePerPageChange = (newPerPage: number) => {
+  //   setPerPage(newPerPage);
+  //   setCurrentPage(1); // Reset to first page when items per page changes
+  // };
 
   const columns: Column<PaymentAttributes>[] = [
     {
@@ -330,7 +330,7 @@ const FpaymentTable = ({
           paginationData={pagination}
           loading={isLoading}
           // onPageChange={handlePageChange}
-          onPageChange={handlePerPageChange}
+          onPageChange={handlePageChange}
           // onPerPageChange={handlePerPageChange}
         />
       )}
