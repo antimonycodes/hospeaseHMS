@@ -92,34 +92,76 @@ const InformationTable = ({
     age_from: "",
     age_to: "",
   });
-  const [prevFilters, setPrevFilters] = useState<FilterValues>(filters);
+  const [prevState, setPrevState] = useState<{
+    filters: FilterValues;
+    currentPage: number;
+    perPage: number;
+  }>({
+    filters,
+    currentPage,
+    perPage,
+  });
+  const [isFetching, setIsFetching] = useState(false);
 
   const debouncedFilters = useDebounce(filters, 300);
 
   // Notify parent when filter search changes
   useEffect(() => {
-    onFilterSearchChange?.(!!debouncedFilters.search);
+    const isSearchActive = !!debouncedFilters.search;
+    console.log("Filter search active (InformationTable):", isSearchActive);
+    onFilterSearchChange?.(isSearchActive);
   }, [debouncedFilters.search, onFilterSearchChange]);
 
-  // Reset currentPage when pagination prop changes
+  // Sync currentPage with pagination prop
   useEffect(() => {
     if (pagination?.current_page && pagination.current_page !== currentPage) {
       setCurrentPage(pagination.current_page);
     }
   }, [pagination?.current_page]);
 
-  // Fetch patients with debounced filters
+  // Sync perPage with pagination prop
   useEffect(() => {
-    if (!baseEndpoint || isLoading) return;
-    if (areEqual(debouncedFilters, prevFilters)) return;
-    console.log("Fetching with filters:", debouncedFilters);
+    if (pagination?.per_page && pagination.per_page !== perPage) {
+      setPerPage(pagination.per_page);
+    }
+  }, [pagination?.per_page]);
+
+  // Fetch patients with debounced filters, page, or perPage changes
+  useEffect(() => {
+    if (!baseEndpoint || isLoading || isFetching) return;
+    if (
+      areEqual(debouncedFilters, prevState.filters) &&
+      currentPage === prevState.currentPage &&
+      perPage === prevState.perPage
+    ) {
+      console.log("Skipping fetch: no changes in filters, page, or perPage");
+      return;
+    }
+
+    console.log(
+      "Fetching with filters:",
+      debouncedFilters,
+      "page:",
+      currentPage,
+      "perPage:",
+      perPage
+    );
+    setIsFetching(true);
     filterPatients(
       debouncedFilters,
       currentPage.toString(),
       perPage.toString(),
       baseEndpoint
-    );
-    setPrevFilters(debouncedFilters);
+    )
+      .then(() => {
+        setPrevState({ filters: debouncedFilters, currentPage, perPage });
+      })
+      .catch(() => {
+        console.error("Fetch failed");
+      })
+      .finally(() => {
+        setIsFetching(false);
+      });
   }, [
     currentPage,
     perPage,
@@ -127,7 +169,7 @@ const InformationTable = ({
     baseEndpoint,
     filterPatients,
     isLoading,
-    prevFilters,
+    prevState,
   ]);
 
   // Extract unique values for filters
@@ -208,11 +250,13 @@ const InformationTable = ({
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    console.log("Page changed to:", page);
   };
 
   const handlePerPageChange = (newPerPage: number) => {
     setPerPage(newPerPage);
     setCurrentPage(1);
+    console.log("Per page changed to:", newPerPage);
   };
 
   if (isLoading && !patients.length) return <Loader />;
@@ -293,6 +337,7 @@ const InformationTable = ({
           paginationData={pagination}
           loading={isLoading}
           onPageChange={handlePageChange}
+          // onPerPageChange={handlePerPageChange}
         />
       )}
     </div>

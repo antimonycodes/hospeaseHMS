@@ -15,6 +15,9 @@ const PaymentSummary: React.FC<{
   isLoading: boolean;
   handleSubmit: () => void;
   hmoDiscount: number;
+  firstName: string;
+  lastName: string;
+  cardId: string;
 }> = ({
   showSummary,
   setShowSummary,
@@ -28,6 +31,9 @@ const PaymentSummary: React.FC<{
   isLoading,
   handleSubmit,
   hmoDiscount,
+  firstName,
+  lastName,
+  cardId,
 }) => {
   const formatAmount = (amount: number): string => {
     return amount.toLocaleString("en-NG", {
@@ -52,11 +58,11 @@ const PaymentSummary: React.FC<{
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
             <p className="text-gray-500 mb-3">Patient</p>
             <p className="font-medium">
-              {selectedPatient?.attributes.first_name}{" "}
-              {selectedPatient?.attributes.last_name}
+              {selectedPatient?.attributes.first_name || firstName}{" "}
+              {selectedPatient?.attributes.last_name || lastName}
             </p>
             <p className="text-sm text-gray-500">
-              Card ID: {selectedPatient?.attributes.card_id}
+              Card ID: {selectedPatient?.attributes.card_id || cardId}
             </p>
           </div>
           <ul className="mb-4 divide-y">

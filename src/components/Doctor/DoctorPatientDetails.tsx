@@ -15,6 +15,8 @@ import {
   Plus,
   Minus,
   Banknote,
+  X,
+  Trash2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { usePatientStore } from "../../store/super-admin/usePatientStore";
@@ -30,51 +32,125 @@ import Input from "../../Shared/Input";
 import { useFinanceStore } from "../../store/staff/useFinanceStore";
 import DoctorBillForm from "./DoctorBillForm";
 
-const COMMON_COMPLAINTS = [
-  "Headache",
-  "Fever",
-  "Cough",
-  "Sore throat",
-  "Nausea",
-  "Vomiting",
-  "Diarrhea",
-  "Constipation",
-  "Abdominal pain",
-  "Chest pain",
-  "Back pain",
-  "Joint pain",
-  "Fatigue",
-  "Dizziness",
-  "Shortness of breath",
-  "Palpitations",
-  "Rash",
-  "Itching",
-  "Swelling",
-  "Weight loss",
-  "Weight gain",
-  "Loss of appetite",
-  "Difficulty sleeping",
-  "Anxiety",
-  "Depression",
-  "Memory problems",
-  "Confusion",
-  "Blurred vision",
-  "Hearing loss",
-  "Earache",
-  "Runny nose",
-  "Sneezing",
-  "Muscle weakness",
-  "Numbness",
-  "Tingling",
-  "Difficulty swallowing",
-  "Frequent urination",
-  "Painful urination",
-  "Blood in urine",
-  "Irregular periods",
-  "Excessive bleeding",
-  "Hot flashes",
-  "Night sweats",
-  "Chills",
+const CLINICAL_COMPLAINTS_GROUPED = [
+  {
+    category: "General Symptoms",
+    complaints: [
+      "Fever",
+      "Chills",
+      "Fatigue",
+      "Night sweats",
+      "Weight loss",
+      "Weight gain",
+      "Loss of appetite",
+    ],
+  },
+  {
+    category: "Pain & Discomfort",
+    complaints: [
+      "Headache",
+      "Chest pain",
+      "Abdominal pain",
+      "Back pain",
+      "Joint pain",
+      "Muscle pain",
+      "Earache",
+      "Sore throat",
+    ],
+  },
+  {
+    category: "Respiratory",
+    complaints: [
+      "Cough",
+      "Shortness of breath",
+      "Wheezing",
+      "Chest tightness",
+      "Sputum production",
+      "Snoring",
+    ],
+  },
+  {
+    category: "Cardiovascular",
+    complaints: [
+      "Palpitations",
+      "Leg swelling",
+      "Dizziness",
+      "Syncope (fainting)",
+      "Exercise intolerance",
+    ],
+  },
+  {
+    category: "Gastrointestinal",
+    complaints: [
+      "Nausea",
+      "Vomiting",
+      "Diarrhea",
+      "Constipation",
+      "Heartburn",
+      "Difficulty swallowing",
+      "Blood in stool",
+    ],
+  },
+  {
+    category: "Neurological",
+    complaints: [
+      "Memory problems",
+      "Confusion",
+      "Seizures",
+      "Weakness",
+      "Numbness",
+      "Tingling",
+      "Vision changes",
+      "Speech difficulties",
+    ],
+  },
+  {
+    category: "Skin & Appearance",
+    complaints: [
+      "Rash",
+      "Itching",
+      "Skin lesions",
+      "Hair loss",
+      "Nail changes",
+      "Excessive sweating",
+      "Swelling",
+    ],
+  },
+  {
+    category: "Urinary",
+    complaints: [
+      "Frequent urination",
+      "Painful urination",
+      "Blood in urine",
+      "Difficulty urinating",
+      "Incontinence",
+      "Kidney pain",
+    ],
+  },
+  {
+    category: "Reproductive",
+    complaints: [
+      "Irregular periods",
+      "Heavy menstrual bleeding",
+      "Pelvic pain",
+      "Vaginal discharge",
+      "Hot flashes",
+      "Breast pain",
+      "Erectile dysfunction",
+      "Testicular pain",
+    ],
+  },
+  {
+    category: "Psychological",
+    complaints: [
+      "Anxiety",
+      "Depression",
+      "Sleep disturbances",
+      "Mood changes",
+      "Difficulty concentrating",
+      "Panic attacks",
+    ],
+  },
 ];
 
 const DoctorPatientDetails = () => {
@@ -86,6 +162,13 @@ const DoctorPatientDetails = () => {
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [selectedComplaints, setSelectedComplaints] = useState<string[]>([]);
   const [selectedParameters, setSelectedParameters] = useState<string[]>([]);
+  // State for complaint durations
+  const [complaintDurations, setComplaintDurations] = useState<{
+    [key: string]: { value: number; unit: string };
+  }>({});
+
+  // State for lab modal
+  const [isLabModalOpen, setIsLabModalOpen] = useState(false);
 
   const [mergedData, setMergedData] = useState<
     Array<{
@@ -118,6 +201,8 @@ const DoctorPatientDetails = () => {
   const [isAdmitModalOpen, setIsAdmitModalOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<
     {
+      requested_quantity: string | number | undefined;
+      service_item_price: string;
       service_item_name: string;
       id: any;
       request_pharmacy_id: any;
@@ -142,6 +227,103 @@ const DoctorPatientDetails = () => {
       quantity: number;
     }[]
   >([]);
+
+  // State for prescription modal
+  const [isPrescriptionModalOpen, setIsPrescriptionModalOpen] = useState(false);
+  const [prescriptionItems, setPrescriptionItems] = useState<{
+    [key: string]: { dosage: string; quantity: number };
+  }>({});
+
+  // Calculate total cost
+  const totalCost = selectedItems.reduce((total, item) => {
+    const price = parseFloat(item.service_item_price) || 0;
+    return total + price * item.quantity;
+  }, 0);
+
+  const handleAddComplaintWithDuration = (complaint: string) => {
+    setSelectedComplaints((prev) => {
+      if (prev.includes(complaint)) {
+        const updated = prev.filter((c) => c !== complaint);
+        const { [complaint]: _, ...restDurations } = complaintDurations;
+        setComplaintDurations(restDurations);
+        return updated;
+      } else {
+        setComplaintDurations((prevDurations) => ({
+          ...prevDurations,
+          [complaint]: { value: 1, unit: "days" },
+        }));
+        return [...prev, complaint];
+      }
+    });
+  };
+
+  // Handle duration change
+  const handleDurationChange = (
+    complaint: string,
+    field: string,
+    value: any
+  ) => {
+    setComplaintDurations((prev) => ({
+      ...prev,
+      [complaint]: {
+        ...prev[complaint],
+        [field]: value,
+      },
+    }));
+  };
+
+  // Option 1: Each complaint on its own line (Recommended)
+  const addComplaintsToNote = () => {
+    const complaintsText = selectedComplaints
+      .map((complaint) => {
+        const duration = complaintDurations[complaint];
+        return duration
+          ? `${complaint}: ${duration.value} ${duration.unit}`
+          : `${complaint}: Not specified`;
+      })
+      .join("\n");
+
+    const formattedComplaints = `PATIENT COMPLAINTS:\n${complaintsText}`;
+
+    setNote((prev) =>
+      prev ? `${prev}\n\n${formattedComplaints}` : formattedComplaints
+    );
+    setSelectedComplaints([]);
+    setComplaintDurations({});
+  };
+
+  // Handle prescription change
+  const handlePrescriptionChange = (id: string, field: string, value: any) => {
+    setPrescriptionItems((prev) => ({
+      ...prev,
+      [id]: {
+        ...(prev[id] || { dosage: "", quantity: 1 }),
+        [field]: value,
+      },
+    }));
+  };
+
+  // Add prescription to report
+  const addPrescriptionToReport = () => {
+    let prescriptionText = "";
+
+    selectedItems.forEach((item) => {
+      const dosage =
+        prescriptionItems[item.request_pharmacy_id]?.dosage ||
+        "No dosage specified";
+      prescriptionText += `- ${item.service_item_name}: ${dosage} (Qty: ${item.quantity})\n`;
+    });
+
+    if (prescriptionText) {
+      // Remove existing prescription section if any
+      let updatedNote = reportNote.replace(/\n\nPrescription:[\s\S]*?$/, "");
+
+      // Add new prescription section
+      setReportNote(`${updatedNote}\n\nPrescription:\n${prescriptionText}`);
+    }
+
+    setIsPrescriptionModalOpen(false);
+  };
 
   const handleChange = (e: { target: { name: any; value: any } }) => {
     const { name, value } = e.target;
@@ -386,14 +568,8 @@ const DoctorPatientDetails = () => {
     }
   };
 
-  const toggleDateExpansion = (index: number) => {
-    const updatedData = [...mergedData];
-    updatedData[index].isExpanded = !updatedData[index].isExpanded;
-    setMergedData(updatedData);
-  };
-
-  const patient = selectedPatient.attributes;
-  const selectedPatientId = selectedPatient.id;
+  const patient = selectedPatient?.attributes;
+  const selectedPatientId = selectedPatient?.id;
   console.log(patient);
 
   if (!selectedPatient) return <Loader />;
@@ -517,37 +693,133 @@ const DoctorPatientDetails = () => {
 
         {activeTab === "note" && (
           <div className="space-y-4">
-            {/* Complaint selection */}
             <div>
               <h4 className="text-sm font-medium mb-2">Common Complaints</h4>
-              <div className="flex flex-wrap gap-2 mb-4">
-                {COMMON_COMPLAINTS.map((complaint) => (
-                  <button
-                    key={complaint}
-                    type="button"
-                    onClick={() => {
-                      if (selectedComplaints.includes(complaint)) {
-                        setSelectedComplaints(
-                          selectedComplaints.filter((c) => c !== complaint)
-                        );
-                      } else {
-                        setSelectedComplaints([
-                          ...selectedComplaints,
-                          complaint,
-                        ]);
-                      }
-                    }}
-                    className={`px-3 py-1 text-sm rounded-full border ${
-                      selectedComplaints.includes(complaint)
-                        ? "bg-primary text-white border-primary"
-                        : "bg-white border-gray-300 hover:bg-gray-50"
-                    }`}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                {CLINICAL_COMPLAINTS_GROUPED.map((group) => (
+                  <div
+                    key={group.category}
+                    className="bg-gray-50 p-3 rounded-lg"
                   >
-                    {complaint}
-                  </button>
+                    <h5 className="font-medium text-gray-700 mb-2">
+                      {group.category}
+                    </h5>
+                    <div className="flex flex-wrap gap-2">
+                      {group.complaints.map((complaint) => {
+                        const isSelected =
+                          selectedComplaints.includes(complaint);
+                        const duration = complaintDurations[complaint];
+
+                        return (
+                          <div
+                            key={complaint}
+                            className={`flex flex-col gap-1 ${
+                              isSelected ? "bg-blue-50 p-1 rounded" : ""
+                            }`}
+                          >
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleAddComplaintWithDuration(complaint)
+                              }
+                              className={`px-3 py-1 text-sm rounded-full border transition ${
+                                isSelected
+                                  ? "bg-primary text-white border-primary"
+                                  : "bg-white border-gray-300 hover:bg-gray-50"
+                              }`}
+                            >
+                              {complaint}
+                            </button>
+
+                            {isSelected && (
+                              <div className="flex gap-1">
+                                <input
+                                  type="number"
+                                  min="1"
+                                  value={duration?.value || 1}
+                                  onChange={(e) =>
+                                    handleDurationChange(
+                                      complaint,
+                                      "value",
+                                      parseInt(e.target.value) || 1
+                                    )
+                                  }
+                                  className="w-12 border border-gray-300 rounded px-1 py-1 text-sm"
+                                />
+                                <select
+                                  value={duration?.unit || "days"}
+                                  onChange={(e) =>
+                                    handleDurationChange(
+                                      complaint,
+                                      "unit",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="border border-gray-300 rounded px-1 py-1 text-sm"
+                                >
+                                  <option value="hours">Hours</option>
+                                  <option value="days">Days</option>
+                                  <option value="weeks">Weeks</option>
+                                  <option value="months">Months</option>
+                                  <option value="years">Years</option>
+                                </select>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
+
+            {/* {selectedComplaints.length > 0 && (
+              <div className="bg-blue-50 p-4 rounded-lg mb-4">
+                <h4 className="font-medium text-gray-700 mb-3">
+                  Selected Complaints
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {selectedComplaints.map((complaint) => (
+                    <div key={complaint} className="flex items-center gap-2">
+                      <span className="font-medium">{complaint}</span>
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="number"
+                          min="1"
+                          value={complaintDurations[complaint]?.value || 1}
+                          onChange={(e) =>
+                            handleDurationChange(
+                              complaint,
+                              "value",
+                              parseInt(e.target.value) || 1
+                            )
+                          }
+                          className="w-12 border border-gray-300 rounded px-2 py-1 text-sm"
+                        />
+                        <select
+                          value={complaintDurations[complaint]?.unit || "days"}
+                          onChange={(e) =>
+                            handleDurationChange(
+                              complaint,
+                              "unit",
+                              e.target.value
+                            )
+                          }
+                          className="border border-gray-300 rounded px-2 py-1 text-sm"
+                        >
+                          <option value="hours">Hours</option>
+                          <option value="days">Days</option>
+                          <option value="weeks">Weeks</option>
+                          <option value="months">Months</option>
+                          <option value="years">Years</option>
+                        </select>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )} */}
 
             <textarea
               rows={5}
@@ -559,15 +831,7 @@ const DoctorPatientDetails = () => {
 
             <div className="flex gap-3">
               <button
-                onClick={() => {
-                  const complaintsText = selectedComplaints.join(", ");
-                  setNote((prev) =>
-                    prev
-                      ? `${prev}\nComplaints: ${complaintsText}`
-                      : `Complaints: ${complaintsText}`
-                  );
-                  setSelectedComplaints([]);
-                }}
+                onClick={addComplaintsToNote}
                 disabled={selectedComplaints.length === 0}
                 className={`bg-gray-100 px-4 py-2 rounded-lg ${
                   selectedComplaints.length === 0
@@ -649,171 +913,6 @@ const DoctorPatientDetails = () => {
               )}
             </div>
 
-            {activeTab === "report" && selectedDepartment === "pharmacist" && (
-              <div>
-                <h1 className="text-lg font-medium mb-2">Pharmacy Store</h1>
-                <h2 className="text-sm text-gray-600 mb-4">
-                  Check and select drugs from pharmacy for the patient here
-                </h2>
-
-                <div className="relative mb-4">
-                  <div
-                    className="border border-[#D0D5DD] rounded-lg p-3 flex items-center justify-between cursor-pointer"
-                    onClick={() => setIsSelectOpen(!isSelectOpen)}
-                  >
-                    <div className="flex-1">
-                      {selectedItems.length === 0 ? (
-                        <span className="text-gray-500">Select items...</span>
-                      ) : (
-                        <span>{selectedItems.length} item(s) selected</span>
-                      )}
-                    </div>
-                    <div
-                      className={`transform transition-transform ${
-                        isSelectOpen ? "rotate-180" : ""
-                      }`}
-                    >
-                      <svg
-                        width="12"
-                        height="8"
-                        viewBox="0 0 12 8"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M1 1L6 6L11 1"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                  {isSelectOpen && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-[#D0D5DD] rounded-lg shadow-lg max-h-64 overflow-y-auto">
-                      <div className="p-2 sticky top-0 bg-white border-b border-[#D0D5DD]">
-                        <input
-                          type="search"
-                          name="itemSearch"
-                          value={itemSearch}
-                          onChange={handleChange}
-                          placeholder="Search items..."
-                          className="w-full border border-[#D0D5DD] p-2 rounded outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-                        />
-                      </div>
-                      <ul className="divide-y">
-                        {filteredItems?.length > 0 ? (
-                          filteredItems.map((item) => (
-                            <li
-                              key={item.request_pharmacy_id}
-                              onClick={() => handleToggleItem(item)}
-                              className="px-4 py-3 hover:bg-blue-50 cursor-pointer flex items-center justify-between"
-                            >
-                              <div>
-                                <p className="font-medium">
-                                  {item.service_item_name}
-                                </p>
-                                <p className="text-sm text-gray-500">
-                                  Available: {item.requested_quantity}
-                                </p>
-                              </div>
-                              <div
-                                className={`w-5 h-5 rounded border flex items-center justify-center ${
-                                  isItemSelected(item.request_pharmacy_id)
-                                    ? "bg-blue-500 border-blue-500"
-                                    : "border-gray-300"
-                                }`}
-                              >
-                                {isItemSelected(item.request_pharmacy_id) && (
-                                  <Check className="h-4 w-4 text-white" />
-                                )}
-                              </div>
-                            </li>
-                          ))
-                        ) : (
-                          <li className="px-4 py-3 text-gray-500">
-                            No items found
-                          </li>
-                        )}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-
-                {selectedItems.length > 0 && (
-                  <div className="mt-4 border border-[#D0D5DD] rounded-lg p-4">
-                    <h3 className="font-medium mb-3">Selected Items</h3>
-                    <ul className="divide-y">
-                      {selectedItems.map((item) => {
-                        const stock = pharmacyStocks?.find(
-                          (s) =>
-                            s.request_pharmacy_id === item.request_pharmacy_id
-                        );
-                        const maxQuantity = stock?.requested_quantity || 0;
-
-                        return (
-                          <li
-                            key={item.request_pharmacy_id}
-                            className="py-3 flex items-center justify-between"
-                          >
-                            <div>
-                              <p className="font-medium">
-                                {item.service_item_name}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {maxQuantity} available
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleQuantityChange(
-                                    item.request_pharmacy_id,
-                                    "decrease"
-                                  )
-                                }
-                                className="p-1 rounded-md bg-gray-100 hover:bg-gray-200"
-                                disabled={item.quantity <= 1}
-                              >
-                                <Minus className="h-4 w-4" />
-                              </button>
-                              <input
-                                type="number"
-                                min="1"
-                                max={maxQuantity}
-                                value={item.quantity}
-                                onChange={(e) =>
-                                  handleQuantityInput(
-                                    item.request_pharmacy_id,
-                                    e.target.value
-                                  )
-                                }
-                                className="w-12 text-center border border-gray-300 rounded-md p-1"
-                              />
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleQuantityChange(
-                                    item.request_pharmacy_id,
-                                    "increase"
-                                  )
-                                }
-                                className="p-1 rounded-md bg-gray-100 hover:bg-gray-200"
-                                disabled={item.quantity >= maxQuantity}
-                              >
-                                <Plus className="h-4 w-4" />
-                              </button>
-                            </div>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            )}
-
             {activeTab === "report" && selectedDepartment === "laboratory" && (
               <div>
                 <h3 className="text-lg font-medium mb-2">
@@ -822,106 +921,50 @@ const DoctorPatientDetails = () => {
 
                 {/* Laboratory Test Selection (Existing Functionality) */}
                 <div className="mb-6">
-                  <h4 className="text-sm font-medium mb-2">
-                    Select Laboratory Tests
-                  </h4>
-                  <div className="relative mb-4">
-                    <div
-                      className="border border-[#D0D5DD] rounded-lg p-3 flex items-center justify-between cursor-pointer"
-                      onClick={() => setIsLabSelectOpen(!isLabSelectOpen)}
-                    >
-                      <div className="flex-1">
-                        {selectedLabTests.length === 0 ? (
-                          <span className="text-gray-500">Select tests...</span>
-                        ) : (
-                          <span>
-                            {selectedLabTests.length} test(s) selected
-                          </span>
-                        )}
-                      </div>
-                      <div
-                        className={`transform transition-transform ${
-                          isLabSelectOpen ? "rotate-180" : ""
-                        }`}
-                      >
-                        <svg
-                          width="12"
-                          height="8"
-                          viewBox="0 0 12 8"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M1 1L6 6L11 1"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                          />
-                        </svg>
-                      </div>
+                  <div className="flex justify-between items-center mb-4">
+                    <div>
+                      <h2 className="text-sm text-gray-600">
+                        Request laboratory tests for this patient
+                      </h2>
                     </div>
-                    {isLabSelectOpen && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-[#D0D5DD] rounded-lg shadow-lg max-h-64 overflow-y-auto">
-                        <div className="p-2 sticky top-0 bg-white border-b border-[#D0D5DD]">
-                          <input
-                            type="search"
-                            name="labTestSearch"
-                            value={labTestSearch}
-                            onChange={handleChange}
-                            placeholder="Search tests..."
-                            className="w-full border border-[#D0D5DD] p-2 rounded outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-                          />
-                        </div>
-                        <ul className="divide-y">
-                          {filteredLabTests?.length > 0 ? (
-                            filteredLabTests.map((test) => (
-                              <li
-                                key={test.id}
-                                onClick={() => handleToggleLabTest(test)}
-                                className="px-4 py-3 hover:bg-blue-50 cursor-pointer flex items-center justify-between"
-                              >
-                                <div>
-                                  <p className="font-medium">{test.name}</p>
-                                </div>
-                                <div
-                                  className={`w-5 h-5 rounded border flex items-center justify-center ${
-                                    isLabTestSelected(test.id)
-                                      ? "bg-blue-500 border-blue-500"
-                                      : "border-gray-300"
-                                  }`}
-                                >
-                                  {isLabTestSelected(test.id) && (
-                                    <Check className="h-4 w-4 text-white" />
-                                  )}
-                                </div>
-                              </li>
-                            ))
-                          ) : (
-                            <li className="px-4 py-3 text-gray-500">
-                              No tests found
-                            </li>
-                          )}
-                        </ul>
-                      </div>
-                    )}
+                    <Button onClick={() => setIsLabModalOpen(true)}>
+                      {selectedLabTests.length > 0
+                        ? "Edit Lab Tests"
+                        : "Add Lab Tests"}
+                    </Button>
                   </div>
 
                   {selectedLabTests.length > 0 && (
-                    <div className="mt-4 border border-[#D0D5DD] rounded-lg p-4 mb-6">
-                      <h3 className="font-medium mb-3">Selected Tests</h3>
+                    <div className="border border-gray-200 rounded-lg p-4 mb-4">
+                      <div className="flex justify-between items-center mb-3">
+                        <h3 className="font-medium">Selected Tests</h3>
+                        <span className="font-bold text-primary">
+                          Total: ₦
+                          {selectedLabTests
+                            .reduce(
+                              (total, test) =>
+                                total + parseFloat(test.amount) * test.quantity,
+                              0
+                            )
+                            .toFixed(2)}
+                        </span>
+                      </div>
                       <ul className="divide-y">
                         {selectedLabTests.map((test) => (
-                          <li
-                            key={test.id}
-                            className="py-3 flex items-center justify-between"
-                          >
-                            <div>
-                              <p className="font-medium">{test.name}</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="w-12 text-center border border-gray-300 rounded-md p-1">
-                                {test.quantity}
-                              </span>
+                          <li key={test.id} className="py-3">
+                            <div className="flex justify-between">
+                              <div>
+                                <p className="font-medium">{test.name}</p>
+                                <p className="text-sm text-gray-600">
+                                  Quantity: {test.quantity}
+                                </p>
+                              </div>
+                              <p className="font-medium text-primary">
+                                ₦
+                                {(
+                                  parseFloat(test.amount) * test.quantity
+                                ).toFixed(2)}
+                              </p>
                             </div>
                           </li>
                         ))}
@@ -931,6 +974,464 @@ const DoctorPatientDetails = () => {
                 </div>
 
                 {/* Rest of your existing code... */}
+              </div>
+            )}
+
+            {activeTab === "report" && selectedDepartment === "pharmacist" && (
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <h1 className="text-lg font-medium">
+                      Pharmacy Prescription
+                    </h1>
+                    <h2 className="text-sm text-gray-600">
+                      Create prescriptions for pharmacy items
+                    </h2>
+                  </div>
+                  <Button onClick={() => setIsPrescriptionModalOpen(true)}>
+                    {selectedItems.length > 0
+                      ? "Edit Prescription"
+                      : "Add Prescription"}
+                  </Button>
+                </div>
+
+                {selectedItems.length > 0 && (
+                  <div className="border border-gray-200 rounded-lg p-4 mb-4">
+                    <div className="flex justify-between items-center mb-3">
+                      <h3 className="font-medium">Prescription Items</h3>
+                      <span className="font-bold text-primary">
+                        Total: ₦{totalCost.toFixed(2)}
+                      </span>
+                    </div>
+                    <ul className="divide-y">
+                      {selectedItems.map((item) => (
+                        <li key={item.request_pharmacy_id} className="py-3">
+                          <div className="flex justify-between">
+                            <div>
+                              <p className="font-medium">
+                                {item.service_item_name}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {prescriptionItems[item.request_pharmacy_id]
+                                  ?.dosage || "No dosage specified"}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm">
+                                ₦{item.service_item_price} × {item.quantity}
+                              </span>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Prescription Modal */}
+            {isPrescriptionModalOpen && (
+              <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+                  <div className="p-4 border-b">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-lg font-bold">Create Prescription</h3>
+                      <button
+                        onClick={() => setIsPrescriptionModalOpen(false)}
+                        className="text-gray-500 hover:text-gray-700"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="p-4 flex-1 overflow-auto">
+                    <div className="mb-4">
+                      <input
+                        type="search"
+                        placeholder="Search pharmacy items..."
+                        value={itemSearch}
+                        onChange={(e) => setItemSearch(e.target.value)}
+                        className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="font-medium mb-2">Available Items</h4>
+                        <div className="border border-gray-200 rounded-lg overflow-hidden">
+                          <ul className="divide-y max-h-[300px] overflow-y-auto">
+                            {filteredItems?.map((item) => (
+                              <li
+                                key={item.request_pharmacy_id}
+                                className={`p-3 cursor-pointer hover:bg-blue-50 ${
+                                  isItemSelected(item.request_pharmacy_id)
+                                    ? "bg-blue-100"
+                                    : ""
+                                }`}
+                                onClick={() => handleToggleItem(item)}
+                              >
+                                <div className="flex justify-between">
+                                  <div>
+                                    <p className="font-medium">
+                                      {item.service_item_name}
+                                    </p>
+                                    <p className="text-sm text-gray-600">
+                                      Available: {item.requested_quantity}
+                                    </p>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <span className="font-medium text-primary mr-2">
+                                      ₦{item.service_item_price}
+                                    </span>
+                                    <div
+                                      className={`w-5 h-5 rounded border flex items-center justify-center ${
+                                        isItemSelected(item.request_pharmacy_id)
+                                          ? "bg-primary border-primary"
+                                          : "border-gray-300"
+                                      }`}
+                                    >
+                                      {isItemSelected(
+                                        item.request_pharmacy_id
+                                      ) && (
+                                        <Check className="h-4 w-4 text-white" />
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-medium mb-2">
+                          Prescription Details
+                        </h4>
+                        <div className="border border-gray-200 rounded-lg p-3 overflow-y-auto h-[400px]">
+                          {selectedItems.length === 0 ? (
+                            <p className="text-gray-500 text-center py-4">
+                              Select items to add to prescription
+                            </p>
+                          ) : (
+                            <ul className="space-y-3">
+                              {selectedItems.map((item) => (
+                                <li
+                                  key={item.request_pharmacy_id}
+                                  className="border border-gray-200 rounded p-3"
+                                >
+                                  <div className="flex justify-between items-start">
+                                    <div>
+                                      <p className="font-medium">
+                                        {item.service_item_name}
+                                      </p>
+                                      <p className="text-sm text-gray-600">
+                                        ₦{item.service_item_price} ×{" "}
+                                        {item.quantity}
+                                      </p>
+                                    </div>
+                                    <button
+                                      onClick={() => handleToggleItem(item)}
+                                      className="text-red-500 hover:text-red-700"
+                                    >
+                                      <Trash2 size={16} />
+                                    </button>
+                                  </div>
+
+                                  <div className="mt-2">
+                                    <label className="block text-sm font-medium mb-1">
+                                      Dosage Instructions
+                                    </label>
+                                    <input
+                                      type="text"
+                                      placeholder="e.g., 1 tablet twice daily"
+                                      value={
+                                        prescriptionItems[
+                                          item.request_pharmacy_id
+                                        ]?.dosage || ""
+                                      }
+                                      onChange={(e) =>
+                                        handlePrescriptionChange(
+                                          item.request_pharmacy_id,
+                                          "dosage",
+                                          e.target.value
+                                        )
+                                      }
+                                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                                    />
+                                  </div>
+
+                                  <div className="mt-2 flex items-center gap-2">
+                                    <label className="text-sm">Quantity:</label>
+                                    <button
+                                      onClick={() =>
+                                        handleQuantityChange(
+                                          item.request_pharmacy_id,
+                                          "decrease"
+                                        )
+                                      }
+                                      className="p-1 rounded-md bg-gray-100 hover:bg-gray-200"
+                                    >
+                                      <Minus className="h-4 w-4" />
+                                    </button>
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      max={item.requested_quantity}
+                                      value={item.quantity}
+                                      onChange={(e) =>
+                                        handleQuantityInput(
+                                          item.request_pharmacy_id,
+                                          e.target.value
+                                        )
+                                      }
+                                      className="w-12 text-center border border-gray-300 rounded-md px-1 py-1 text-sm"
+                                    />
+                                    <button
+                                      onClick={() =>
+                                        handleQuantityChange(
+                                          item.request_pharmacy_id,
+                                          "increase"
+                                        )
+                                      }
+                                      className="p-1 rounded-md bg-gray-100 hover:bg-gray-200"
+                                    >
+                                      <Plus className="h-4 w-4" />
+                                    </button>
+                                    <span className="text-sm text-gray-600 ml-1">
+                                      of {item.requested_quantity}
+                                    </span>
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                          {selectedItems.length > 0 && (
+                            <div className="mt-3 p-3 bg-gray-50 rounded-lg flex justify-between items-center">
+                              <span className="font-medium">Total Cost:</span>
+                              <span className="font-bold text-primary text-lg">
+                                ₦{totalCost.toFixed(2)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 border-t flex justify-end gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsPrescriptionModalOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button onClick={addPrescriptionToReport}>
+                      Add to Report
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+            {/* Lab Test Modal */}
+            {isLabModalOpen && (
+              <div className="fixed inset-0 bg-[#1E1E1E40] flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+                  <div className="p-4 border-b">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-lg font-bold">
+                        Select Laboratory Tests
+                      </h3>
+                      <button
+                        onClick={() => setIsLabModalOpen(false)}
+                        className="text-gray-500 hover:text-gray-700"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="p-4 flex-1 overflow-auto">
+                    <div className="mb-4">
+                      <input
+                        type="search"
+                        placeholder="Search laboratory tests..."
+                        value={labTestSearch}
+                        onChange={(e) => setLabTestSearch(e.target.value)}
+                        className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="font-medium mb-2">Available Tests</h4>
+                        <div className="border border-gray-200 rounded-lg overflow-hidden">
+                          <ul className="divide-y max-h-[300px] overflow-y-auto">
+                            {filteredLabTests?.map((test) => (
+                              <li
+                                key={test.id}
+                                className={`p-3 cursor-pointer hover:bg-blue-50 ${
+                                  isLabTestSelected(test.id)
+                                    ? "bg-blue-100"
+                                    : ""
+                                }`}
+                                onClick={() => handleToggleLabTest(test)}
+                              >
+                                <div className="flex justify-between">
+                                  <div>
+                                    <p className="font-medium">{test.name}</p>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <span className="font-medium text-primary mr-2">
+                                      ₦{test.amount}
+                                    </span>
+                                    <div
+                                      className={`w-5 h-5 rounded border flex items-center justify-center ${
+                                        isLabTestSelected(test.id)
+                                          ? "bg-primary border-primary"
+                                          : "border-gray-300"
+                                      }`}
+                                    >
+                                      {isLabTestSelected(test.id) && (
+                                        <Check className="h-4 w-4 text-white" />
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-medium mb-2">Selected Tests</h4>
+                        <div className="border border-gray-200 rounded-lg p-3 overflow-y-auto h-[400px]">
+                          {selectedLabTests.length === 0 ? (
+                            <p className="text-gray-500 text-center py-4">
+                              No tests selected
+                            </p>
+                          ) : (
+                            <ul className="space-y-3">
+                              {selectedLabTests.map((test) => (
+                                <li
+                                  key={test.id}
+                                  className="border border-gray-200 rounded p-3"
+                                >
+                                  <div className="flex justify-between items-start">
+                                    <div>
+                                      <p className="font-medium">{test.name}</p>
+                                      <p className="text-primary font-medium">
+                                        ₦{test.amount}
+                                      </p>
+                                    </div>
+                                    <button
+                                      onClick={() => handleToggleLabTest(test)}
+                                      className="text-red-500 hover:text-red-700"
+                                    >
+                                      <Trash2 size={16} />
+                                    </button>
+                                  </div>
+
+                                  <div className="mt-2 flex items-center gap-2">
+                                    <label className="text-sm">Quantity:</label>
+                                    <button
+                                      onClick={() =>
+                                        setSelectedLabTests((prev) =>
+                                          prev.map((t) =>
+                                            t.id === test.id
+                                              ? {
+                                                  ...t,
+                                                  quantity: Math.max(
+                                                    1,
+                                                    t.quantity - 1
+                                                  ),
+                                                }
+                                              : t
+                                          )
+                                        )
+                                      }
+                                      className="p-1 rounded-md bg-gray-100 hover:bg-gray-200"
+                                    >
+                                      <Minus className="h-4 w-4" />
+                                    </button>
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      value={test.quantity}
+                                      onChange={(e) => {
+                                        const value =
+                                          parseInt(e.target.value) || 1;
+                                        setSelectedLabTests((prev) =>
+                                          prev.map((t) =>
+                                            t.id === test.id
+                                              ? {
+                                                  ...t,
+                                                  quantity: Math.max(1, value),
+                                                }
+                                              : t
+                                          )
+                                        );
+                                      }}
+                                      className="w-12 text-center border border-gray-300 rounded-md px-1 py-1 text-sm"
+                                    />
+                                    <button
+                                      onClick={() =>
+                                        setSelectedLabTests((prev) =>
+                                          prev.map((t) =>
+                                            t.id === test.id
+                                              ? {
+                                                  ...t,
+                                                  quantity: t.quantity + 1,
+                                                }
+                                              : t
+                                          )
+                                        )
+                                      }
+                                      className="p-1 rounded-md bg-gray-100 hover:bg-gray-200"
+                                    >
+                                      <Plus className="h-4 w-4" />
+                                    </button>
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                          {selectedLabTests.length > 0 && (
+                            <div className="mt-3 p-3 bg-gray-50 rounded-lg flex justify-between items-center">
+                              <span className="font-medium">Total:</span>
+                              <span className="font-bold text-primary text-lg">
+                                ₦
+                                {selectedLabTests
+                                  .reduce(
+                                    (total, test) =>
+                                      total +
+                                      parseFloat(test.amount) * test.quantity,
+                                    0
+                                  )
+                                  .toFixed(2)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 border-t flex justify-end gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsLabModalOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button onClick={() => setIsLabModalOpen(false)}>
+                      Save Tests
+                    </Button>
+                  </div>
+                </div>
               </div>
             )}
 

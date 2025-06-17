@@ -500,6 +500,9 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
         setPartAmount={setPartAmount}
         isLoading={isLoading}
         handleSubmit={handleSubmit}
+        firstName={""}
+        lastName={""}
+        cardId={""}
       />
     </div>
   );

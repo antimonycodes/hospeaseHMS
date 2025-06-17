@@ -1,7 +1,5 @@
 import React, { useRef, useState } from "react";
 import { FileText, Camera, Printer, X } from "lucide-react";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 
 interface Patient {
   id: string;
@@ -44,21 +42,11 @@ const PaymentReceipt: React.FC<PaymentReceiptProps> = ({
   partAmount,
 }) => {
   const receiptRef = useRef<HTMLDivElement>(null);
-  const hospitalName = localStorage.getItem("hospitalName") || "Your Hospital";
-  const hospitalLogoPath = localStorage.getItem("hospitalLogo") || "";
-
-  // Replace with your server's base URL where images are hosted
-  const BASE_IMAGE_URL = "https://live.hospeasehms.com/storage/"; // TODO: Update with actual server URL
-  const hospitalLogo = hospitalLogoPath
-    ? hospitalLogoPath.startsWith("data:image")
-      ? hospitalLogoPath // Already base64
-      : `${BASE_IMAGE_URL}${hospitalLogoPath}` // Construct absolute URL
-    : "";
-
-  // Fallback image (base64 placeholder or local asset)
-  const fallbackLogo =
-    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHgQJ3pAAAAABJRU5ErkJggg=="; // 1x1 transparent pixel
   const [logoError, setLogoError] = useState(false);
+
+  // Mock data for demo purposes
+  const hospitalName = "Lifecare Hospital";
+  const hospitalLogoPath = "";
 
   const formatAmount = (amount: number): string => {
     return amount.toLocaleString("en-NG", {
@@ -78,45 +66,74 @@ const PaymentReceipt: React.FC<PaymentReceiptProps> = ({
     });
   };
 
-  const handleDownloadPDF = () => {
+  console.log(selectedPatient, "selectedPatient");
+
+  const handleDownloadPDF = async () => {
     if (!receiptRef.current) return;
 
-    html2canvas(receiptRef.current, { scale: 2, useCORS: true }).then(
-      (canvas) => {
-        const imgData = canvas.toDataURL("image/png");
-        const pdf = new jsPDF("p", "mm", "a4");
-        const imgWidth = 190; // Adjusted for A4 margins
-        const pageHeight = 295;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        let heightLeft = imgHeight;
-        let position = 10;
+    try {
+      // Dynamically import html2canvas and jsPDF
+      const html2canvas = (await import("html2canvas")).default;
+      const jsPDF = (await import("jspdf")).default;
 
+      const canvas = await html2canvas(receiptRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+        width: receiptRef.current.scrollWidth,
+        height: receiptRef.current.scrollHeight,
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgWidth = 190;
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 10;
+
+      pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight + 10;
+        pdf.addPage();
         pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
-
-        while (heightLeft >= 0) {
-          position = heightLeft - imgHeight + 10;
-          pdf.addPage();
-          pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-          heightLeft -= pageHeight;
-        }
-
-        pdf.save(`Receipt-${receiptNumber}.pdf`);
       }
-    );
+
+      pdf.save(`Receipt-${receiptNumber}.pdf`);
+    } catch (error) {
+      console.error("PDF generation failed:", error);
+      handlePrint();
+    }
   };
 
-  const handleDownloadImage = () => {
+  const handleDownloadImage = async () => {
     if (!receiptRef.current) return;
 
-    html2canvas(receiptRef.current, { scale: 2, useCORS: true }).then(
-      (canvas) => {
-        const link = document.createElement("a");
-        link.download = `Receipt-${receiptNumber}.png`;
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-      }
-    );
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+
+      const canvas = await html2canvas(receiptRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+        width: receiptRef.current.scrollWidth,
+        height: receiptRef.current.scrollHeight,
+      });
+
+      const link = document.createElement("a");
+      link.download = `Receipt-${receiptNumber}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch (error) {
+      console.error("Image generation failed:", error);
+    }
   };
 
   const handlePrint = () => {
@@ -128,46 +145,226 @@ const PaymentReceipt: React.FC<PaymentReceiptProps> = ({
       return;
     }
 
-    const printContent = receiptRef.current.outerHTML;
+    const printContent = receiptRef.current.innerHTML;
     printWindow.document.write(`
+      <!DOCTYPE html>
       <html>
         <head>
           <title>Print Receipt ${receiptNumber}</title>
           <style>
-            body { font-family: 'Inter', system-ui, sans-serif; margin: 20px; }
-            .receipt-container { max-width: 800px; margin: 0 auto; }
-            img { max-width: 100px; height: auto; }
-            table { width: 100%; border-collapse: collapse; }
-            th, td { padding: 8px 12px; text-align: left; }
-            th { background-color: #f3f4f6; }
-            tr:nth-child(even) { background-color: #f9fafb; }
-            .border-t { border-top: 2px solid #e5e7eb; }
-            .text-right { text-align: right; }
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            
+            body { 
+              font-family: Arial, sans-serif;
+              font-size: 14px;
+              line-height: 1.4;
+              color: #000;
+              background: white;
+              padding: 20px;
+            }
+            
+            .receipt-container { 
+              max-width: 800px; 
+              margin: 0 auto;
+              background: white;
+              padding: 20px;
+              border: 1px solid #ddd;
+            }
+            
+            .receipt-header {
+              text-align: center;
+              margin-bottom: 30px;
+              border-bottom: 2px solid #000;
+              padding-bottom: 15px;
+            }
+            
+            .hospital-name {
+              font-size: 24px;
+              font-weight: bold;
+              margin-bottom: 5px;
+            }
+            
+            .receipt-title {
+              font-size: 18px;
+              font-weight: bold;
+            }
+            
+            .receipt-info {
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 20px;
+              font-size: 12px;
+            }
+            
+            .patient-info {
+              background: #f8f9fa;
+              padding: 15px;
+              margin-bottom: 20px;
+              border: 1px solid #ddd;
+            }
+            
+            .patient-info h3 {
+              font-size: 14px;
+              font-weight: bold;
+              margin-bottom: 10px;
+            }
+            
+            .patient-details {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 15px;
+            }
+            
+            .patient-details div {
+              font-size: 12px;
+            }
+            
+            .patient-details .label {
+              color: #666;
+              margin-bottom: 2px;
+            }
+            
+            .patient-details .value {
+              font-weight: bold;
+              color: #000;
+            }
+            
+            .payment-details h3 {
+              font-size: 14px;
+              font-weight: bold;
+              margin-bottom: 10px;
+            }
+            
+            table { 
+              width: 100%; 
+              border-collapse: collapse;
+              margin-bottom: 20px;
+            }
+            
+            th, td { 
+              padding: 8px 12px; 
+              text-align: left; 
+              border: 1px solid #000;
+              font-size: 12px;
+            }
+            
+            th { 
+              background-color: #f0f0f0; 
+              font-weight: bold;
+            }
+            
             .text-center { text-align: center; }
-            .font-bold { font-weight: 700; }
-            .text-sm { font-size: 0.875rem; }
-            .text-gray-500 { color: #6b7280; }
-            .text-gray-800 { color: #1f2937; }
-            .text-green-600 { color: #16a34a; }
-            .bg-gray-50 { background-color: #f9fafb; }
-            .rounded-lg { border-radius: 8px; }
-            .p-4 { padding: 16px; }
+            .text-right { text-align: right; }
+            
+            .total-row {
+              font-weight: bold;
+              border-top: 2px solid #000;
+            }
+            
+            .payment-method {
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 20px;
+              font-size: 12px;
+            }
+            
+            .payment-method div {
+              margin-right: 20px;
+            }
+            
+            .payment-method .label {
+              color: #666;
+              margin-bottom: 2px;
+            }
+            
+            .payment-method .value {
+              font-weight: bold;
+              text-transform: capitalize;
+            }
+            
+            .footer {
+              text-align: center;
+              border-top: 1px solid #ddd;
+              padding-top: 15px;
+              font-size: 12px;
+              color: #666;
+            }
+            
+            .footer .thank-you {
+              font-weight: bold;
+              color: #000;
+              margin-bottom: 5px;
+            }
+            
+            @media print {
+              body { 
+                font-size: 12px;
+                padding: 10px;
+              }
+              
+              .receipt-container {
+                padding: 10px;
+                border: none;
+              }
+            }
           </style>
         </head>
         <body>
-          <div class="receipt-container">${printContent}</div>
+          <div class="receipt-container">
+            ${printContent}
+          </div>
         </body>
       </html>
     `);
+
     printWindow.document.close();
     printWindow.focus();
-    printWindow.print();
-    printWindow.close();
+
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 250);
   };
+
+  // Sample data for demonstration
+  const samplePatient = selectedPatient || {
+    id: "1",
+    attributes: {
+      first_name: "John",
+      last_name: "Doe",
+      card_id: "h5456432-99",
+    },
+  };
+
+  const sampleItems =
+    selectedItems.length > 0
+      ? selectedItems
+      : [
+          {
+            id: "1",
+            attributes: {
+              amount: 500,
+              name: "Vitamin C",
+              isPharmacy: true,
+            },
+            quantity: 1,
+            total: 500,
+          },
+        ];
+
+  const sampleTotal = totalAmount || 500;
+  const sampleReceiptNumber = receiptNumber || "RCP40467604";
+  const sampleDate = paymentDate || new Date("2025-06-17T07:07:00");
+  const samplePaymentMethod = paymentMethod || "pos";
+  const samplePaymentType = paymentType || "full";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6 backdrop-blur-sm h-screen overflow-y-auto">
-      <div className="bg-white w-full max-w-2xl rounded-xl shadow-xl h-[90vh] flex flex-col">
+      <div className="bg-white w-full max-w-4xl rounded-xl shadow-xl h-[90vh] flex flex-col">
         <div className="flex justify-between items-center p-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-800">Payment Receipt</h2>
           <button
@@ -207,142 +404,312 @@ const PaymentReceipt: React.FC<PaymentReceiptProps> = ({
             </button>
           </div>
 
+          {/* Receipt content - optimized for all export formats */}
           <div
-            id="receipt-content"
             ref={receiptRef}
-            className="bg-white p-8 border border-gray-200 rounded-lg shadow-sm max-w-[800px] mx-auto"
+            style={{
+              backgroundColor: "#ffffff",
+              color: "#000000",
+              fontFamily: "Arial, sans-serif",
+              fontSize: "14px",
+              lineHeight: "1.4",
+              padding: "30px",
+              border: "1px solid #ddd",
+              maxWidth: "800px",
+              margin: "0 auto",
+            }}
           >
             {/* Receipt Header */}
-            <div className="text-center mb-8">
-              {(hospitalLogo && !logoError) || hospitalLogoPath ? (
-                <img
-                  src={hospitalLogo || fallbackLogo}
-                  alt={`${hospitalName} logo`}
-                  className="mx-auto mb-4 h-16 object-contain"
-                  onError={() => setLogoError(true)}
-                />
-              ) : (
-                <div className="mx-auto mb-4 h-16 flex items-center justify-center text-gray-500 text-sm">
-                  No logo available
-                </div>
-              )}
-              <h1 className="text-3xl font-bold text-gray-800">
+            <div
+              style={{
+                textAlign: "center",
+                marginBottom: "30px",
+                borderBottom: "2px solid #000000",
+                paddingBottom: "15px",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "24px",
+                  fontWeight: "bold",
+                  marginBottom: "5px",
+                  color: "#000000",
+                }}
+              >
                 {hospitalName}
-              </h1>
-              <h2 className="text-xl font-semibold text-gray-600 mt-2">
+              </div>
+              <div
+                style={{
+                  fontSize: "18px",
+                  fontWeight: "bold",
+                  color: "#000000",
+                }}
+              >
                 Payment Receipt
-              </h2>
+              </div>
             </div>
 
             {/* Receipt Info */}
-            <div className="flex justify-between mb-8 text-sm">
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: "20px",
+                fontSize: "12px",
+              }}
+            >
               <div>
-                <p className="font-medium text-gray-500">Receipt No:</p>
-                <p className="font-bold text-gray-800">{receiptNumber}</p>
+                <div style={{ color: "#666666", marginBottom: "2px" }}>
+                  Receipt No:
+                </div>
+                <div style={{ fontWeight: "bold", color: "#000000" }}>
+                  {sampleReceiptNumber}
+                </div>
               </div>
-              <div className="text-right">
-                <p className="font-medium text-gray-500">Date:</p>
-                <p className="text-gray-800">{formatDate(paymentDate)}</p>
+              <div style={{ textAlign: "right" }}>
+                <div style={{ color: "#666666", marginBottom: "2px" }}>
+                  Date:
+                </div>
+                <div style={{ color: "#000000" }}>{formatDate(sampleDate)}</div>
               </div>
             </div>
 
             {/* Patient Info */}
-            <div className="mb-8 bg-gray-50 p-6 rounded-lg">
-              <h3 className="font-semibold text-gray-800 mb-3">
+            <div
+              style={{
+                backgroundColor: "#f8f9fa",
+                padding: "15px",
+                marginBottom: "20px",
+                border: "1px solid #ddd",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "14px",
+                  fontWeight: "bold",
+                  marginBottom: "10px",
+                  color: "#000000",
+                }}
+              >
                 Patient Information
-              </h3>
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "15px",
+                  fontSize: "12px",
+                }}
+              >
                 <div>
-                  <p className="text-gray-500">Name:</p>
-                  <p className="font-medium text-gray-800">
-                    {selectedPatient?.attributes?.first_name || "N/A"}{" "}
-                    {selectedPatient?.attributes?.last_name || ""}
-                  </p>
+                  <div style={{ color: "#666666", marginBottom: "2px" }}>
+                    Name:
+                  </div>
+                  <div style={{ fontWeight: "bold", color: "#000000" }}>
+                    {samplePatient.attributes.first_name}{" "}
+                    {samplePatient.attributes.last_name}
+                  </div>
                 </div>
                 <div>
-                  <p className="text-gray-500">Card ID:</p>
-                  <p className="font-medium text-gray-800">
-                    {selectedPatient?.attributes?.card_id || "N/A"}
-                  </p>
+                  <div style={{ color: "#666666", marginBottom: "2px" }}>
+                    Card ID:
+                  </div>
+                  <div style={{ fontWeight: "bold", color: "#000000" }}>
+                    {samplePatient.attributes.card_id}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Items */}
-            <div className="mb-8">
-              <h3 className="font-semibold text-gray-800 mb-3">
+            {/* Payment Details */}
+            <div style={{ marginBottom: "20px" }}>
+              <div
+                style={{
+                  fontSize: "14px",
+                  fontWeight: "bold",
+                  marginBottom: "10px",
+                  color: "#000000",
+                }}
+              >
                 Payment Details
-              </h3>
-              <table className="w-full border-collapse">
+              </div>
+
+              <table
+                style={{
+                  width: "100%",
+                  borderCollapse: "collapse",
+                  fontSize: "12px",
+                }}
+              >
                 <thead>
-                  <tr className="bg-gray-100 text-gray-700 text-sm">
-                    <th className="py-3 px-4 text-left font-semibold">Item</th>
-                    <th className="py-3 px-4 text-center font-semibold">Qty</th>
-                    <th className="py-3 px-4 text-right font-semibold">
+                  <tr style={{ backgroundColor: "#f0f0f0" }}>
+                    <th
+                      style={{
+                        padding: "8px 12px",
+                        textAlign: "left",
+                        border: "1px solid #000000",
+                        fontWeight: "bold",
+                        color: "#000000",
+                      }}
+                    >
+                      Item
+                    </th>
+                    <th
+                      style={{
+                        padding: "8px 12px",
+                        textAlign: "center",
+                        border: "1px solid #000000",
+                        fontWeight: "bold",
+                        color: "#000000",
+                      }}
+                    >
+                      Qty
+                    </th>
+                    <th
+                      style={{
+                        padding: "8px 12px",
+                        textAlign: "right",
+                        border: "1px solid #000000",
+                        fontWeight: "bold",
+                        color: "#000000",
+                      }}
+                    >
                       Unit Price
                     </th>
-                    <th className="py-3 px-4 text-right font-semibold">
+                    <th
+                      style={{
+                        padding: "8px 12px",
+                        textAlign: "right",
+                        border: "1px solid #000000",
+                        fontWeight: "bold",
+                        color: "#000000",
+                      }}
+                    >
                       Amount
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {selectedItems.length > 0 ? (
-                    selectedItems.map((item, index) => (
-                      <tr
-                        key={index}
-                        className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
-                      >
-                        <td className="py-3 px-4 text-gray-600">
-                          {item.attributes.name}
-                        </td>
-                        <td className="py-3 px-4 text-center text-gray-600">
-                          {item.quantity}
-                        </td>
-                        <td className="py-3 px-4 text-right text-gray-600">
-                          ₦{formatAmount(item.attributes.amount)}
-                        </td>
-                        <td className="py-3 px-4 text-right text-gray-600">
-                          ₦{formatAmount(item.total)}
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
+                <tbody>
+                  {sampleItems.map((item, index) => (
+                    <tr key={index}>
                       <td
-                        colSpan={4}
-                        className="py-3 px-4 text-center text-gray-500"
+                        style={{
+                          padding: "8px 12px",
+                          border: "1px solid #000000",
+                          color: "#000000",
+                        }}
                       >
-                        No items selected
+                        {item.attributes.name}
+                      </td>
+                      <td
+                        style={{
+                          padding: "8px 12px",
+                          textAlign: "center",
+                          border: "1px solid #000000",
+                          color: "#000000",
+                        }}
+                      >
+                        {item.quantity}
+                      </td>
+                      <td
+                        style={{
+                          padding: "8px 12px",
+                          textAlign: "right",
+                          border: "1px solid #000000",
+                          color: "#000000",
+                        }}
+                      >
+                        ₦{formatAmount(item.attributes.amount)}
+                      </td>
+                      <td
+                        style={{
+                          padding: "8px 12px",
+                          textAlign: "right",
+                          border: "1px solid #000000",
+                          color: "#000000",
+                        }}
+                      >
+                        ₦{formatAmount(item.total)}
                       </td>
                     </tr>
-                  )}
+                  ))}
                 </tbody>
-                <tfoot className="border-t-2 border-gray-300 font-semibold">
-                  <tr className="text-gray-800">
-                    <td colSpan={3} className="py-4 px-4 text-right">
+                <tfoot>
+                  <tr
+                    style={{
+                      fontWeight: "bold",
+                      borderTop: "2px solid #000000",
+                    }}
+                  >
+                    <td
+                      colSpan={3}
+                      style={{
+                        padding: "12px",
+                        textAlign: "right",
+                        border: "1px solid #000000",
+                        color: "#000000",
+                      }}
+                    >
                       Total:
                     </td>
-                    <td className="py-4 px-4 text-right text-green-600">
-                      ₦{formatAmount(totalAmount)}
+                    <td
+                      style={{
+                        padding: "12px",
+                        textAlign: "right",
+                        border: "1px solid #000000",
+                        color: "#000000",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      ₦{formatAmount(sampleTotal)}
                     </td>
                   </tr>
-                  {paymentType === "part" && partAmount !== undefined && (
+                  {samplePaymentType === "part" && partAmount !== undefined && (
                     <>
-                      <tr className="text-gray-800">
-                        <td colSpan={3} className="py-2 px-4 text-right">
+                      <tr>
+                        <td
+                          colSpan={3}
+                          style={{
+                            padding: "8px 12px",
+                            textAlign: "right",
+                            border: "1px solid #000000",
+                            color: "#000000",
+                          }}
+                        >
                           Amount Paid:
                         </td>
-                        <td className="py-2 px-4 text-right">
+                        <td
+                          style={{
+                            padding: "8px 12px",
+                            textAlign: "right",
+                            border: "1px solid #000000",
+                            color: "#000000",
+                          }}
+                        >
                           ₦{formatAmount(partAmount)}
                         </td>
                       </tr>
-                      <tr className="text-gray-800">
-                        <td colSpan={3} className="py-2 px-4 text-right">
+                      <tr>
+                        <td
+                          colSpan={3}
+                          style={{
+                            padding: "8px 12px",
+                            textAlign: "right",
+                            border: "1px solid #000000",
+                            color: "#000000",
+                          }}
+                        >
                           Balance:
                         </td>
-                        <td className="py-2 px-4 text-right">
-                          ₦{formatAmount(totalAmount - partAmount)}
+                        <td
+                          style={{
+                            padding: "8px 12px",
+                            textAlign: "right",
+                            border: "1px solid #000000",
+                            color: "#000000",
+                          }}
+                        >
+                          ₦{formatAmount(sampleTotal - partAmount)}
                         </td>
                       </tr>
                     </>
@@ -352,27 +719,67 @@ const PaymentReceipt: React.FC<PaymentReceiptProps> = ({
             </div>
 
             {/* Payment Method */}
-            <div className="flex justify-between mb-8 text-sm">
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: "20px",
+                fontSize: "12px",
+              }}
+            >
               <div>
-                <p className="text-gray-500">Payment Method:</p>
-                <p className="font-medium text-gray-800 capitalize">
-                  {paymentMethod}
-                </p>
+                <div style={{ color: "#666666", marginBottom: "2px" }}>
+                  Payment Method:
+                </div>
+                <div
+                  style={{
+                    fontWeight: "bold",
+                    textTransform: "capitalize",
+                    color: "#000000",
+                  }}
+                >
+                  {samplePaymentMethod}
+                </div>
               </div>
               <div>
-                <p className="text-gray-500">Payment Type:</p>
-                <p className="font-medium text-gray-800 capitalize">
-                  {paymentType === "full" ? "Full Payment" : "Part Payment"}
-                </p>
+                <div style={{ color: "#666666", marginBottom: "2px" }}>
+                  Payment Type:
+                </div>
+                <div
+                  style={{
+                    fontWeight: "bold",
+                    textTransform: "capitalize",
+                    color: "#000000",
+                  }}
+                >
+                  {samplePaymentType === "full"
+                    ? "Full Payment"
+                    : "Part Payment"}
+                </div>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="mt-8 pt-4 border-t border-gray-200 text-center text-gray-500 text-sm">
-              <p className="font-medium">Thank you for your payment!</p>
-              <p className="mt-1">
+            <div
+              style={{
+                textAlign: "center",
+                borderTop: "1px solid #ddd",
+                paddingTop: "15px",
+                fontSize: "12px",
+              }}
+            >
+              <div
+                style={{
+                  fontWeight: "bold",
+                  color: "#000000",
+                  marginBottom: "5px",
+                }}
+              >
+                Thank you for your payment!
+              </div>
+              <div style={{ color: "#666666" }}>
                 For inquiries, contact {hospitalName} Finance Department.
-              </p>
+              </div>
             </div>
           </div>
         </div>
@@ -380,7 +787,7 @@ const PaymentReceipt: React.FC<PaymentReceiptProps> = ({
         <div className="flex justify-end p-6 border-t bg-gray-50">
           <button
             onClick={onClose}
-            className="bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-dark transition-colors"
+            className="px-6 py-3 bg-primary text-white rounded-lg font-medium "
             aria-label="Close receipt modal"
           >
             Done

@@ -274,14 +274,16 @@ export const useReportStore = create<ReportStore>((set, get) => ({
       );
 
       if (response.status === 200) {
+        toast.success(response.data.message);
+        get().getSingleReport(id);
         return true;
       }
       toast.success(response.data.message);
-
-      // Handle success, e.g., set success state
+      return null;
     } catch (error: any) {
       console.error("Error submitting the report:", error);
-      // toast.error(error.response.data.message);
+      toast.error(error.response.data.message);
+
       // Handle error state
       set({ isResponding: false });
     } finally {

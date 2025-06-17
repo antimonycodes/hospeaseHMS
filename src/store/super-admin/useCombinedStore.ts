@@ -58,10 +58,13 @@ export interface AllItems {}
 
 interface CombinedStore {
   isLoading: boolean;
+  isPaymentModalOpen: boolean;
   isDeleting: boolean;
   items: any[];
   categories: any[];
   pagination: Pagination | null;
+  paymentData: any[];
+  bills: any[];
 
   createItem: (data: CreateItem) => Promise<any>;
   getAllItems: (
@@ -79,14 +82,20 @@ interface CombinedStore {
   getAllCategory: () => Promise<any>;
   updatePatientsCategory: (id: any, name: any) => Promise<any>;
   deletePatientsCategory: (id: any) => Promise<any>;
+  openPaymentModal: (data?: any) => void;
+  getAllBills: () => Promise<any>;
+  updateBill: (id: any, data: any) => Promise<any>;
 }
 
 export const useCombinedStore = create<CombinedStore>((set, get) => ({
   isLoading: false,
+  isPaymentModalOpen: false,
   isDeleting: false,
   items: [],
   pagination: null,
   categories: [],
+  paymentData: [],
+  bills: [],
 
   createItem: async (data) => {
     set({ isLoading: true });
@@ -341,6 +350,59 @@ export const useCombinedStore = create<CombinedStore>((set, get) => ({
       return null;
     } finally {
       set({ isDeleting: false });
+    }
+  },
+  openPaymentModal: (data?: any[]) =>
+    set((state) => ({
+      isPaymentModalOpen: !state.isPaymentModalOpen,
+      paymentData: data || [],
+    })),
+  getAllBills: async (page = "1", perPage = "1000") => {
+    set({ isLoading: true });
+    try {
+      const endpoint = `/medical-report/doctor-bill/all-records?page=${page}&per_page=${perPage}`;
+      const response = await api.get(endpoint);
+      if (isSuccessfulResponse(response)) {
+        set({ bills: response.data.data.data });
+        set({ pagination: response.data.data.pagination });
+        return true;
+      }
+      return null;
+    } catch (error) {
+      handleErrorToast(error);
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  updateBill: async (
+    id,
+    data
+
+    // endpoint = `/medical-report/service-charge/update/${id}`
+  ) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.put(
+        `/medical-report/doctor-bill/update/${id}`,
+
+        data
+      );
+
+      if (isSuccessfulResponse(response)) {
+        // toast.success(response.data?.msg);
+        // set({ items: response.data.data.data });
+        get().getAllBills();
+        console.log(response);
+        return true;
+      }
+      return null;
+    } catch (error) {
+      //   handleErrorToast(error, "Failed.");
+      console.log(error);
+      return null;
+    } finally {
+      set({ isLoading: false });
     }
   },
 }));

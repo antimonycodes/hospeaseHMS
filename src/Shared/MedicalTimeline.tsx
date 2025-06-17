@@ -19,6 +19,8 @@ import { useReportStore } from "../store/super-admin/useReoprt";
 import Loader from "./Loader";
 import { ReportItem } from "../components/Doctor/Patient-Details-Props/ReportItem";
 import { NoteItem } from "../components/Doctor/Patient-Details-Props/NoteItem";
+import { useCombinedStore } from "../store/super-admin/useCombinedStore";
+import PaymentModal from "../components/Frontdesk/payment/PaymentModal";
 
 // Reusable Component for Patient Info
 export const InfoRow = ({
@@ -63,6 +65,8 @@ const MedicalTimeline: React.FC<MedicalTimelineProps> = ({
 
   const { getAllReport, allReports, getMedicalNote, allNotes } =
     useReportStore();
+  const { openPaymentModal, isPaymentModalOpen, paymentData } =
+    useCombinedStore();
 
   // Group data by date utility function
   const groupByDate = (data: any[]) => {
@@ -306,7 +310,7 @@ const MedicalTimeline: React.FC<MedicalTimelineProps> = ({
                           </div>
 
                           {isReport ? (
-                            <ReportItem report={item} />
+                            <ReportItem report={item} patientId={patientId} />
                           ) : (
                             <NoteItem note={item} />
                           )}
@@ -319,6 +323,15 @@ const MedicalTimeline: React.FC<MedicalTimelineProps> = ({
           </div>
         ))}
       </div>
+      {isPaymentModalOpen && (
+        <PaymentModal
+          patientId={patientId}
+          paymentData={paymentData}
+          firstName={patient?.first_name}
+          lastName={patient?.last_name}
+          cardId={patient.card_id}
+        />
+      )}
     </div>
   );
 };
