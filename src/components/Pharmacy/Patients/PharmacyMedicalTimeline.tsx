@@ -337,7 +337,7 @@ const PharmacyMedicalTimeline: React.FC<PharmacyMedicalTimelineProps> = ({
 
                           {isReport ? (
                             <div className="bg-white border rounded-md p-4">
-                              <ReportItem report={item} />
+                              <ReportItem report={item} patientId={patientId} />
                             </div>
                           ) : (
                             <NoteItem note={item} />

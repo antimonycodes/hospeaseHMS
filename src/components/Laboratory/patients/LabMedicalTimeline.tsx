@@ -315,7 +315,7 @@ const LabMedicalTimeline: React.FC<LabMedicalTimelineProps> = ({
                           </div>
 
                           {isReport ? (
-                            <ReportItem report={item} />
+                            <ReportItem report={item} patientId={patientId} />
                           ) : (
                             <NoteItem note={item} />
                           )}

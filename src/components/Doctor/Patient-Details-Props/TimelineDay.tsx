@@ -145,7 +145,11 @@ const TimelineEntry = ({ item, itemIdx, totalItems }: any) => {
 
       <div className="text-xs text-gray-500 mb-1">{time}</div>
 
-      {isReport ? <ReportItem report={item} /> : <NoteItem note={item} />}
+      {isReport ? (
+        <ReportItem report={item} patientId={""} />
+      ) : (
+        <NoteItem note={item} />
+      )}
     </div>
   );
 };

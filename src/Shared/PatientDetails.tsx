@@ -378,7 +378,7 @@ const PatientDetails = () => {
                             </div>
 
                             {isReport ? (
-                              <ReportItem report={item} />
+                              <ReportItem report={item} patientId={id ?? ""} />
                             ) : (
                               <NoteItem note={item} />
                             )}
