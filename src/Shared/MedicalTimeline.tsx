@@ -79,33 +79,33 @@ const MedicalTimeline: React.FC<MedicalTimelineProps> = ({
     }, {});
   };
 
-  useEffect(() => {
-    // If external data is provided, use it
-    if (externalMergedData) {
-      setMergedData(externalMergedData);
-      return;
-    }
+  // useEffect(() => {
+  //   // If external data is provided, use it
+  //   if (externalMergedData) {
+  //     setMergedData(externalMergedData);
+  //     return;
+  //   }
 
-    // Otherwise, fetch and process the data
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        await getAllReport(patientId);
-        await getMedicalNote(patientId, "doctor");
-        await getMedicalNote(patientId, "consultant");
-        await getMedicalNote(patientId, "medical-director");
-      } catch (error) {
-        console.error("Error fetching timeline data:", error);
-        toast.error("Failed to load medical timeline");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  //   // Otherwise, fetch and process the data
+  //   const fetchData = async () => {
+  //     setIsLoading(true);
+  //     try {
+  //       await getAllReport(patientId);
+  //       await getMedicalNote(patientId, "doctor");
+  //       await getMedicalNote(patientId, "consultant");
+  //       await getMedicalNote(patientId, "medical-director");
+  //     } catch (error) {
+  //       console.error("Error fetching timeline data:", error);
+  //       toast.error("Failed to load medical timeline");
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
 
-    if (patientId) {
-      fetchData();
-    }
-  }, [patientId, getAllReport, getMedicalNote, externalMergedData]);
+  //   if (patientId) {
+  //     fetchData();
+  //   }
+  // }, [patientId, getAllReport, getMedicalNote, externalMergedData]);
 
   useEffect(() => {
     if (externalMergedData) return;

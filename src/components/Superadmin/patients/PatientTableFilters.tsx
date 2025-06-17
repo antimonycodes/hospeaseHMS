@@ -44,6 +44,8 @@ const PatientTableFilters = ({
 
   const formValues = watch();
 
+  console.log(patientCategories, " patientCategories");
+
   // Track active filters count
   const activeFiltersCount = Object.values(formValues).filter(
     (value) => value !== ""

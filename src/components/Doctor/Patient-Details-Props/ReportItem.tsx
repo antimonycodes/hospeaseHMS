@@ -20,10 +20,10 @@ export const ReportItem = ({
 
   const staff = report.attributes.staff_details;
   const department = report.attributes.department?.name || "Unknown Department";
-  const role = report.attributes.role || "Unknown Role"; // Role of report creator
+  const role = report.attributes.role || "Unknown Role";
   const createdAt = report.attributes.created_at || "";
   const isPaid = report.attributes.is_paid || false;
-  const userRole = useRole(); // Current user's role
+  const userRole = useRole();
   const { getAllRoles, roles } = useGlobalStore();
 
   const { openPaymentModal, isPaymentModalOpen } = useCombinedStore();
@@ -32,23 +32,18 @@ export const ReportItem = ({
     getAllRoles();
   }, [getAllRoles]);
 
-  // Check if current user can process payments
-  const canProcessPayment =
-    userRole === "admin" || userRole === "front-desk-manager";
-
-  // Check if this is the original report (not a department copy)
-  // Original reports typically have staff_details and status "sent"
-  const isOriginalReport =
-    report.attributes.staff_details !== null ||
-    report.attributes.status === "sent";
-
   // Check if there are valid pharmacy items
   const hasValidPharmacyItems = report.attributes.requested_pharmacy_items;
 
   // Check if there are valid laboratory items
   const hasValidLabItems = report.attributes.laboratory_service_items;
 
-  // Helper function to prepare pharmacy payment data
+  const showButton = () => {
+    if (userRole === "front-desk-manager" || userRole === "admin") {
+      return true;
+    }
+  };
+
   const preparePharmacyPaymentData = () => {
     const validPharmacyItems = report.attributes.requested_items.filter(
       (item: any) =>
@@ -116,11 +111,6 @@ export const ReportItem = ({
 
   // Component for showing payment status
   const PaymentStatusButton = () => {
-    // Only show to authorized users and on original reports
-    if (!canProcessPayment || !isOriginalReport) {
-      return null;
-    }
-
     if (isPaid) {
       return (
         <div className="flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 rounded-md">
@@ -167,7 +157,9 @@ export const ReportItem = ({
             <h2 className="text-md font-semibold text-gray-800 mb-3">
               Requested Drugs
             </h2>
-            <PaymentStatusButton />
+            {showButton() &&
+              role !== "pharmacist" &&
+              (hasValidLabItems ? null : <PaymentStatusButton />)}
           </div>
 
           <div className="space-y-2">
@@ -220,8 +212,9 @@ export const ReportItem = ({
             <h2 className="text-md font-semibold text-gray-800 mb-3">
               Laboratory Services
             </h2>
-            {/* Only show button if there are no pharmacy items (to avoid duplicate buttons) */}
-            {!hasValidPharmacyItems && <PaymentStatusButton />}
+            {showButton() &&
+              role !== "laboratory" &&
+              (hasValidPharmacyItems ? null : <PaymentStatusButton />)}
           </div>
 
           <div className="space-y-2">
@@ -237,9 +230,6 @@ export const ReportItem = ({
                       <div className="flex flex-col">
                         <span className="font-medium text-gray-700">
                           {item.service_charges.name}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          ID: {item.service_charges.id}
                         </span>
                       </div>
                       <div className="text-right">
