@@ -43,9 +43,10 @@ const PaymentReceipt: React.FC<PaymentReceiptProps> = ({
 }) => {
   const receiptRef = useRef<HTMLDivElement>(null);
   const [logoError, setLogoError] = useState(false);
+  const hName = localStorage.getItem("hospitalName");
+  console.log(hName);
 
-  // Mock data for demo purposes
-  const hospitalName = "Lifecare Hospital";
+  const hospitalName = hName;
   const hospitalLogoPath = "";
 
   const formatAmount = (amount: number): string => {
