@@ -378,12 +378,7 @@ export const useCombinedStore = create<CombinedStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
-  updateBill: async (
-    id,
-    data
-
-    // endpoint = `/medical-report/service-charge/update/${id}`
-  ) => {
+  updateBill: async (id, data) => {
     set({ isLoading: true });
     try {
       const response = await api.put(
