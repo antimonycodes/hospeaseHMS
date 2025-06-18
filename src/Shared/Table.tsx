@@ -1,3 +1,4 @@
+// Updated Table.tsx - Add row click functionality
 import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import React from "react";
 import Loader from "./Loader";
@@ -8,7 +9,6 @@ interface Column<T> {
   render?: (value: T[keyof T], row: T, rowIndex: number) => React.ReactNode;
 }
 
-// Pagination data interface to match backend response
 interface PaginationData {
   total: number;
   per_page: number;
@@ -26,8 +26,10 @@ interface TableProps<T> {
   paginationData?: PaginationData | null;
   radius?: string;
   onPageChange?: (page: number) => void;
+  onRowClick?: (row: T, rowIndex: any) => void; // New prop for row clicks
   loading?: boolean;
   emptyMessage?: string;
+  clickableRows?: boolean; // Optional prop to enable/disable row clicks
 }
 
 const Table = <T extends Record<string, any>>({
@@ -39,6 +41,8 @@ const Table = <T extends Record<string, any>>({
   emptyMessage,
   radius = "rounded-b-lg",
   onPageChange,
+  onRowClick,
+  clickableRows = false,
   loading = false,
 }: TableProps<T>) => {
   // Handle edge case where data is empty
@@ -96,6 +100,22 @@ const Table = <T extends Record<string, any>>({
     return items;
   };
 
+  const handleRowClick = (
+    row: T,
+    rowIndex: number,
+    event: React.MouseEvent
+  ) => {
+    // Prevent row click if clicking on interactive elements
+    const target = event.target as HTMLElement;
+    if (target.closest("button, a, input, select, textarea")) {
+      return;
+    }
+
+    if (clickableRows && onRowClick) {
+      onRowClick(row, rowIndex);
+    }
+  };
+
   return (
     <div
       className={`overflow-hidden custom-shadow overflow-x-auto border border-[#EAECF0] ${radius}`}
@@ -133,7 +153,15 @@ const Table = <T extends Record<string, any>>({
             </tr>
           ) : (
             data.map((row, rowIndex) => (
-              <tr key={String(row[rowKey])}>
+              <tr
+                key={String(row[rowKey])}
+                onClick={(e) => handleRowClick(row, rowIndex, e)}
+                className={
+                  clickableRows
+                    ? "cursor-pointer hover:bg-gray-50 transition-colors duration-150"
+                    : ""
+                }
+              >
                 {columns.map((column, colIndex) => (
                   <td
                     key={colIndex}
@@ -151,7 +179,7 @@ const Table = <T extends Record<string, any>>({
       </table>
 
       {pagination && paginationData && totalPages > 0 && (
-        <div className=" w-full bg-red-800 flex flex-col sm:flex-row items-center justify-between px-4 py-3 bg-white border-t border-[#EAECF0]">
+        <div className="w-full flex flex-col sm:flex-row items-center justify-between px-4 py-3 bg-white border-t border-[#EAECF0]">
           {/* Showing entries info */}
           <div className="text-sm text-[#667085] mb-2 sm:mb-0">
             Showing {startItem} to {endItem} of {totalItems} entries

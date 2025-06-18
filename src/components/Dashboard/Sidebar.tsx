@@ -75,6 +75,13 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
     navigate("/signin");
   };
 
+  const renderIcon = (icon: string | React.ReactElement) => {
+    if (typeof icon === "string") {
+      return <img src={icon} className="w-5 min-w-5" alt="icon" />;
+    }
+    return <span className="w-5 min-w-5">{icon}</span>;
+  };
+
   const renderMenuItem = (item: SidebarRoute) => {
     const isActive = isRouteActive(item);
     const hasChildren = item.children && item.children.length > 0;
@@ -95,11 +102,7 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
               onClick={() => !isCollapsed && toggleDropdown(item.name)}
             >
               <div className="flex items-center gap-3">
-                <img
-                  src={isActive ? item.activeIcon : item.icon}
-                  className="w-5 min-w-5"
-                  alt={item.name}
-                />
+                {renderIcon(isActive ? item.activeIcon : item.icon)}
                 {!isCollapsed && (
                   <span className="text-sm truncate">{item.name}</span>
                 )}
@@ -128,15 +131,11 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
                           : "hover:bg-primary/25 text-[#3F3F46]"
                       }`}
                   >
-                    <img
-                      src={
-                        location.pathname === child.path
-                          ? child.activeIcon
-                          : child.icon
-                      }
-                      className="w-4 min-w-4"
-                      alt={child.name}
-                    />
+                    {renderIcon(
+                      location.pathname === child.path
+                        ? child.activeIcon
+                        : child.icon
+                    )}
                     <span className="text-sm truncate">{child.name}</span>
                   </Link>
                 ))}
@@ -154,11 +153,7 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
               }
               ${isCollapsed ? "justify-center" : ""}`}
           >
-            <img
-              src={isActive ? item.activeIcon : item.icon}
-              className="w-5 min-w-5"
-              alt={item.name}
-            />
+            {renderIcon(isActive ? item.activeIcon : item.icon)}
             {!isCollapsed && (
               <span className="text-sm truncate">{item.name}</span>
             )}
@@ -187,11 +182,7 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
               onClick={() => toggleDropdown(item.name)}
             >
               <div className="flex items-center gap-3">
-                <img
-                  src={isActive ? item.activeIcon : item.icon}
-                  className="w-5 min-w-5"
-                  alt={item.name}
-                />
+                {renderIcon(isActive ? item.activeIcon : item.icon)}
                 <span className="text-sm truncate">{item.name}</span>
               </div>
               {hasChildren && (
@@ -219,15 +210,11 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
                       }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <img
-                      src={
-                        location.pathname === child.path
-                          ? child.activeIcon
-                          : child.icon
-                      }
-                      className="w-4 min-w-4"
-                      alt={child.name}
-                    />
+                    {renderIcon(
+                      location.pathname === child.path
+                        ? child.activeIcon
+                        : child.icon
+                    )}
                     <span className="text-sm truncate">{child.name}</span>
                   </Link>
                 ))}
@@ -245,11 +232,7 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
               }`}
             onClick={() => setIsMobileMenuOpen(false)}
           >
-            <img
-              src={isActive ? item.activeIcon : item.icon}
-              className="w-5 min-w-5"
-              alt={item.name}
-            />
+            {renderIcon(isActive ? item.activeIcon : item.icon)}
             <span className="text-sm truncate">{item.name}</span>
           </Link>
         )}
@@ -257,7 +240,6 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
     );
   };
 
-  // Animation variants for the mobile menu
   const sidebarVariants = {
     open: {
       x: 0,
@@ -271,7 +253,6 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
     },
   };
 
-  // Animation variants for the backdrop
   const backdropVariants = {
     open: { opacity: 0.5, display: "block" },
     closed: { opacity: 0, display: "none", transition: { delay: 0.2 } },
@@ -279,7 +260,6 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
 
   return (
     <>
-      {/* Mobile menu backdrop */}
       <motion.div
         initial="closed"
         animate={isMobileMenuOpen ? "open" : "closed"}
@@ -288,7 +268,6 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
         onClick={() => setIsMobileMenuOpen(false)}
       />
 
-      {/* Mobile menu */}
       <motion.div
         initial="closed"
         animate={isMobileMenuOpen ? "open" : "closed"}
@@ -326,7 +305,6 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) => {
         </div>
       </motion.div>
 
-      {/* Desktop Sidebar */}
       <div
         className={`hidden md:block h-screen bg-white mt-2 border-r border-gray-100 transition-all duration-300 ease-in-out overflow-x-auto ${
           isCollapsed ? "w-20" : "w-64"

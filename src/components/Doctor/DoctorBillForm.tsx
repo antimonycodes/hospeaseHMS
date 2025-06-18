@@ -33,6 +33,15 @@ interface CreatedBill {
   };
 }
 
+interface PaymentSource {
+  type: string;
+  id: number;
+  attributes: {
+    name: string;
+    created_at: string;
+  };
+}
+
 interface DoctorBillFormProps {
   patient?: Patient;
   selectedPatient?: Patient;
@@ -44,10 +53,10 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({
   selectedPatient,
   patientId,
 }) => {
-  const [description, setDescription] = useState("");
+  const [selectedPaymentSource, setSelectedPaymentSource] = useState("");
   const [amount, setAmount] = useState("");
   const [user, setUser] = useState<User | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false); // New state for complete process
+  const [isProcessing, setIsProcessing] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{
     type: "success" | "error";
     message: string;
@@ -59,12 +68,18 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({
   console.log(patientId);
 
   const patientIdToBeUsed = selectedPatientId || patientId;
-  // const patientId = patient?.id || (idFromParams ? Number(idFromParams) : null);
 
-  const { createDoctorBill, isBillLoading, createPayment } = useFinanceStore();
+  const {
+    createDoctorBill,
+    isBillLoading,
+    createPayment,
+    paymentSources,
+    getPaymentSource,
+  } = useFinanceStore();
 
   // Load user data on component mount
   useEffect(() => {
+    getPaymentSource(); // Fetch payment sources on mount
     const storedUser = sessionStorage.getItem("user-info");
     if (storedUser) {
       try {
@@ -78,6 +93,8 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({
       console.log("No user found in sessionStorage");
     }
   }, []);
+
+  console.log(paymentSources, "payment sources");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -98,22 +115,26 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({
       return;
     }
 
-    setIsProcessing(true); // Start processing - disable button
-    setStatusMessage(null); // Clear any previous messages
+    if (!selectedPaymentSource) {
+      setStatusMessage({
+        type: "error",
+        message: "Please select a payment source",
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+    setStatusMessage(null);
 
     try {
       // Step 1: Create the doctor bill
       const billData = {
-        name: description.trim(),
+        name: selectedPaymentSource, // Use selected payment source name
         amount: Number(amount) || 0,
+        patient_id: Number(patientIdToBeUsed),
       };
 
-      // Run both operations concurrently for better performance
-      const [billResponse] = await Promise.all([
-        createDoctorBill(billData),
-        // We can't run createPayment concurrently since it needs the bill ID
-        // But we can prepare the payment data while the bill is being created
-      ]);
+      const [billResponse] = await Promise.all([createDoctorBill(billData)]);
 
       if (billResponse) {
         const createdBill = billResponse as CreatedBill;
@@ -124,7 +145,7 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({
 
         if (paymentSuccess) {
           // Clear form only on complete success
-          setDescription("");
+          setSelectedPaymentSource("");
           setAmount("");
           setStatusMessage({
             type: "success",
@@ -145,7 +166,7 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({
         message: "Failed to process doctor bill",
       });
     } finally {
-      setIsProcessing(false); // Re-enable button
+      setIsProcessing(false);
     }
   };
 
@@ -167,8 +188,9 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({
       return false;
     }
 
-    // Create payment source from user's first and last name
-    const paymentSource = `${user.attributes.first_name} ${user.attributes.last_name}`;
+    // Use the selected payment source name for payment source
+    const paymentSourceName = selectedPaymentSource;
+    const doctorName = `${user.attributes.first_name} ${user.attributes.last_name}`;
 
     // Parse the amount correctly - remove commas and convert to number
     const billAmount = parseFloat(
@@ -176,11 +198,12 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({
     );
 
     const payload = {
-      payment_source: paymentSource,
+      payment_source: paymentSourceName, // Use selected payment source
       payment_type: "pending",
       total_amount: billAmount.toString(),
       part_amount: null,
       payment_method: "cash",
+      from_doctor: doctorName,
       patient_id: Number(patientIdToBeUsed),
       department_id: Number(departmentId),
       payments: [
@@ -200,7 +223,7 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({
 
     try {
       const success = await createPayment(payload);
-      return !!success; // Convert to boolean
+      return !!success;
     } catch (error) {
       console.error("Payment creation error:", error);
       setStatusMessage({ type: "error", message: "Payment processing failed" });
@@ -266,19 +289,25 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({
       )}
 
       <div className="space-y-1">
-        <label htmlFor="description" className="block font-medium">
-          Description
+        <label htmlFor="paymentSource" className="block font-medium">
+          Bill type
         </label>
-        <input
-          id="description"
-          name="description"
-          type="text"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="w-full border border-gray-300 rounded px-3 py-2"
+        <select
+          id="paymentSource"
+          name="paymentSource"
+          value={selectedPaymentSource}
+          onChange={(e) => setSelectedPaymentSource(e.target.value)}
+          className="w-full border border-gray-300 rounded px-3 py-2 bg-white"
           required
           disabled={isButtonDisabled}
-        />
+        >
+          <option value="">Select bill type</option>
+          {paymentSources?.map((source: PaymentSource) => (
+            <option key={source.id} value={source.attributes.name}>
+              {source.attributes.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="space-y-1">
@@ -294,7 +323,7 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({
           onChange={(e) => setAmount(e.target.value)}
           className="w-full border border-gray-300 rounded px-3 py-2"
           required
-          disabled={isButtonDisabled} // Disable input during processing
+          disabled={isButtonDisabled}
         />
       </div>
 

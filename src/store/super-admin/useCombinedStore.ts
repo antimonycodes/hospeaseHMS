@@ -65,6 +65,7 @@ interface CombinedStore {
   pagination: Pagination | null;
   paymentData: any[];
   bills: any[];
+  stats: any[];
 
   createItem: (data: CreateItem) => Promise<any>;
   getAllItems: (
@@ -85,6 +86,7 @@ interface CombinedStore {
   openPaymentModal: (data?: any) => void;
   getAllBills: () => Promise<any>;
   updateBill: (id: any, data: any) => Promise<any>;
+  monthlyStats: (data?: any) => Promise<any>;
 }
 
 export const useCombinedStore = create<CombinedStore>((set, get) => ({
@@ -96,6 +98,7 @@ export const useCombinedStore = create<CombinedStore>((set, get) => ({
   categories: [],
   paymentData: [],
   bills: [],
+  stats: [],
 
   createItem: async (data) => {
     set({ isLoading: true });
@@ -400,6 +403,23 @@ export const useCombinedStore = create<CombinedStore>((set, get) => ({
     } catch (error) {
       //   handleErrorToast(error, "Failed.");
       console.log(error);
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  monthlyStats: async (data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.post(`/admin/generate-monthly-report`, data);
+
+      if (isSuccessfulResponse(response)) {
+        set({ stats: response.data.data });
+        return true;
+      }
+      return null;
+    } catch (error) {
+      handleErrorToast(error);
       return null;
     } finally {
       set({ isLoading: false });

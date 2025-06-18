@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Search, Filter, User, Bed, AlertTriangle, Clock } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAdmissionStore } from "../../store/super-admin/useAdmissionStore";
 import Loader from "../../Shared/Loader";
+import Table from "../../Shared/Table";
 
 interface NextOfKin {
   [key: string]: any;
@@ -68,6 +69,25 @@ interface AdmissionRecord {
   };
 }
 
+// Table data types
+type AdmissionTableData = {
+  id: number;
+  name: string;
+  patientId: string;
+  gender: string;
+  bedNumber: string;
+  ward: string;
+  diagnosis: string;
+  status: string;
+  totalStay: string;
+};
+
+type Column = {
+  key: keyof AdmissionTableData;
+  label: string;
+  render?: (value: any, row: AdmissionTableData) => React.ReactNode;
+};
+
 // API Response structure
 interface ApiResponse {
   status: boolean;
@@ -85,10 +105,14 @@ interface ApiResponse {
 
 const AdmissionOverview: React.FC = () => {
   const { admissionList, isLoading, allAdmission } = useAdmissionStore();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredPatients, setFilteredPatients] = useState<AdmissionRecord[]>(
     []
   );
+  const [formattedAdmissions, setFormattedAdmissions] = useState<
+    AdmissionTableData[]
+  >([]);
 
   useEffect(() => {
     // Fetch admission data on component mount
@@ -119,6 +143,24 @@ const AdmissionOverview: React.FC = () => {
       setFilteredPatients(filtered);
     }
   }, [admissionList, searchTerm]);
+
+  // Format admissions for table
+  useEffect(() => {
+    const formatted = filteredPatients.map((admission) => ({
+      id: admission.id,
+      name: `${capitalizeFirst(
+        admission.attributes.patient.attributes.first_name
+      )} ${capitalizeFirst(admission.attributes.patient.attributes.last_name)}`,
+      patientId: admission.attributes.patient.attributes.card_id,
+      gender: capitalizeFirst(admission.attributes.patient.attributes.gender),
+      bedNumber: admission.attributes.bed_number,
+      ward: admission.attributes.clinical_department.name,
+      diagnosis: admission.attributes.diagnosis,
+      status: admission.attributes.status,
+      totalStay: `${formatDate(admission.attributes.created_at)} days`,
+    }));
+    setFormattedAdmissions(formatted);
+  }, [filteredPatients]);
 
   // Calculate statistics from the actual data
   const totalPatients = admissionList.length;
@@ -174,6 +216,75 @@ const AdmissionOverview: React.FC = () => {
   const capitalizeFirst = (str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   };
+
+  // Handle row click navigation
+  const handleRowClick = (admission: AdmissionTableData) => {
+    navigate(`/dashboard/admission-details/${admission.id}`);
+  };
+
+  // Handle page change (if you implement pagination later)
+  const handlePageChange = (page: number) => {
+    // Implement pagination logic here when needed
+    console.log("Page changed to:", page);
+  };
+
+  // Table columns configuration
+  const columns: Column[] = [
+    {
+      key: "name",
+      label: "Name",
+      render: (_, row) => (
+        <span className="font-medium text-[#101828]">{row.name}</span>
+      ),
+    },
+    {
+      key: "patientId",
+      label: "Patient ID",
+      render: (_, row) => (
+        <span className="text-[#667085] text-sm">{row.patientId}</span>
+      ),
+    },
+    {
+      key: "gender",
+      label: "Gender",
+      render: (_, row) => (
+        <span className="text-[#667085] text-sm">{row.gender}</span>
+      ),
+    },
+    {
+      key: "bedNumber",
+      label: "Bed Number",
+      render: (_, row) => (
+        <span className="text-[#667085] text-sm">{row.bedNumber}</span>
+      ),
+    },
+    {
+      key: "ward",
+      label: "Ward",
+      render: (_, row) => (
+        <span className="text-[#667085] text-sm">{row.ward}</span>
+      ),
+    },
+    {
+      key: "diagnosis",
+      label: "Diagnosis",
+      render: (_, row) => (
+        <span className="text-[#667085] text-sm">{row.diagnosis}</span>
+      ),
+    },
+    {
+      key: "status",
+      label: "Status",
+      render: (_, row) => <StatusBadge status={row.status} />,
+    },
+    {
+      key: "totalStay",
+      label: "Total Stay (Days)",
+      render: (_, row) => (
+        <span className="text-[#667085] text-sm">{row.totalStay}</span>
+      ),
+    },
+  ];
 
   if (isLoading) {
     return <Loader />;
@@ -252,105 +363,32 @@ const AdmissionOverview: React.FC = () => {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="text-left py-3 px-6 font-medium text-gray-700 text-sm">
-                    Name
-                  </th>
-                  <th className="text-left py-3 px-6 font-medium text-gray-700 text-sm">
-                    Patient ID
-                  </th>
-                  <th className="text-left py-3 px-6 font-medium text-gray-700 text-sm">
-                    Gender
-                  </th>
-                  <th className="text-left py-3 px-6 font-medium text-gray-700 text-sm">
-                    Bed Number
-                  </th>
-                  <th className="text-left py-3 px-6 font-medium text-gray-700 text-sm">
-                    Ward
-                  </th>
-                  <th className="text-left py-3 px-6 font-medium text-gray-700 text-sm">
-                    Diagnosis
-                  </th>
-                  <th className="text-left py-3 px-6 font-medium text-gray-700 text-sm">
-                    Status
-                  </th>
-                  <th className="text-left py-3 px-6 font-medium text-gray-700 text-sm">
-                    Total stay (DAYS)
-                  </th>
-                  <th className="text-left py-3 px-6 font-medium text-gray-700 text-sm">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {filteredPatients.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={9}
-                      className="py-8 px-6 text-center text-gray-500"
-                    >
-                      {searchTerm
-                        ? "No patients found matching your search."
-                        : "No admission records found."}
-                    </td>
-                  </tr>
-                ) : (
-                  filteredPatients.map((admission) => (
-                    <tr key={admission.id} className="hover:bg-gray-50">
-                      <td className="py-4 px-6 text-sm text-gray-900 font-medium">
-                        {`${capitalizeFirst(
-                          admission.attributes.patient.attributes.first_name
-                        )} ${capitalizeFirst(
-                          admission.attributes.patient.attributes.last_name
-                        )}`}
-                      </td>
-                      <td className="py-4 px-6 text-sm text-gray-600">
-                        {admission.attributes.patient.attributes.card_id}
-                      </td>
-                      <td className="py-4 px-6 text-sm text-gray-600">
-                        {capitalizeFirst(
-                          admission.attributes.patient.attributes.gender
-                        )}
-                      </td>
-                      <td className="py-4 px-6 text-sm text-gray-600">
-                        {admission.attributes.bed_number}
-                      </td>
-                      <td className="py-4 px-6 text-sm text-gray-600">
-                        {admission.attributes.clinical_department.name}
-                      </td>
-                      <td className="py-4 px-6 text-sm text-gray-600">
-                        {admission.attributes.diagnosis}
-                      </td>
-                      <td className="py-4 px-6">
-                        <StatusBadge status={admission.attributes.status} />
-                      </td>
-                      <td className="py-4 px-6 text-sm text-gray-600">
-                        {formatDate(admission.attributes.created_at)} days
-                      </td>
-                      <td className="py-4 px-6">
-                        <Link
-                          to={`/dashboard/admission-details/${admission.id}`}
-                        >
-                          <button className="text-primary text-sm font-medium ">
-                            View More
-                          </button>
-                        </Link>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+          {/* Use the Table component */}
+          <div className="overflow-hidden">
+            <Table
+              data={formattedAdmissions}
+              columns={columns}
+              rowKey="id"
+              pagination={false} // Set to true when you implement pagination
+              paginationData={null} // Add pagination data when needed
+              loading={isLoading}
+              onPageChange={handlePageChange}
+              clickableRows={true}
+              onRowClick={handleRowClick}
+              radius="rounded-none" // Remove border radius since parent has it
+              emptyMessage={
+                searchTerm
+                  ? "No patients found matching your search."
+                  : "No admission records found."
+              }
+            />
           </div>
 
-          {/* Pagination - You can implement this based on your backend pagination */}
+          {/* Custom pagination footer */}
           <div className="px-6 py-4 border-t border-gray-200">
             <div className="flex items-center justify-between">
               <p className="text-sm text-gray-700">
-                Showing {filteredPatients.length} of {totalPatients} results
+                Showing {formattedAdmissions.length} of {totalPatients} results
               </p>
               {/* Add pagination controls here if needed */}
             </div>

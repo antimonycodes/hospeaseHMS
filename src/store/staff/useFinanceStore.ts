@@ -484,6 +484,7 @@ export const useFinanceStore = create<FinanceStore>((set, get) => ({
 
       if (isSuccessfulResponse(response)) {
         toast.success(response.data?.message);
+        get().getPaymentSource();
         return true;
       }
       return null;

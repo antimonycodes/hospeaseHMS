@@ -67,8 +67,12 @@ const DpatientsInfo = ({
     id: patient.id,
   }));
   const handleViewMore = (id: string) => {
-    console.log("Navigating to patient ID:", id);
+    // console.log("Navigating to patient ID:", id);
     navigate(`/dashboard/doctor/patients/${id}`);
+  };
+  const handleRowClick = (patient: DpatientsData) => {
+    // console.log("Navigating to patient ID:", patient.id);
+    navigate(`/dashboard/doctor/patients/${patient.id}`);
   };
 
   const columns: Columns[] = [
@@ -142,6 +146,8 @@ const DpatientsInfo = ({
         paginationData={pagination}
         loading={isLoading}
         onPageChange={handlePageChange}
+        clickableRows={true} // Enable clickable rows
+        onRowClick={handleRowClick} // Handle row clicks
       />
     </div>
   );

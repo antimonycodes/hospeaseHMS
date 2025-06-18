@@ -70,6 +70,7 @@ import AdmissionOverview from "./components/Admission/AdmissionOverview";
 import AdmissionPage from "./components/Admission/AdmissionPage";
 import AdmissionDetails from "./components/Admission/AdmissionDetails";
 import Bills from "./pages/Bills";
+import Reports from "./pages/Reports";
 
 function App() {
   return (
@@ -201,6 +202,7 @@ function App() {
               <Route path="service-charges" element={<ServiceCharges />} />
               <Route path="reset" element={<ResetApp />} />
               <Route path="bills" element={<Bills />} />
+              <Route path="reports" element={<Reports />} />
               <Route path="admission" element={<AdmissionPage />} />
               <Route
                 path="admission-details/:id"

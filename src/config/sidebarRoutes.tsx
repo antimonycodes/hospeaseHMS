@@ -1,12 +1,23 @@
 // src/config/sidebarRoutes.ts
 import { getImageSrc } from "../utils/imageUtils";
+import {
+  RefreshCw,
+  DollarSign,
+  ReceiptText,
+  BedDouble,
+  BarChart2,
+  Users2,
+  Activity,
+} from "lucide-react";
+
+import type { ReactElement } from "react";
 
 export interface SidebarRoute {
   name: string;
   path: string;
-  icon: string; // Default icon
-  activeIcon: string; // Icon for active state
-  children?: SidebarRoute[]; // Optional nested routes
+  icon: string | ReactElement;
+  activeIcon: string | ReactElement;
+  children?: SidebarRoute[];
 }
 
 export const sidebarRoutes: Record<string, SidebarRoute[]> = {
@@ -24,10 +35,10 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       activeIcon: getImageSrc("patientsWhite.svg"),
     },
     {
-      name: "Admission",
-      path: "/dashboard/admission",
-      icon: getImageSrc("patientsicon.svg"),
-      activeIcon: getImageSrc("Adm-white.svg"),
+      name: "Admissions",
+      path: "/dashboard/admissions",
+      icon: <BedDouble />,
+      activeIcon: <BedDouble className=" text-white" />,
     },
     {
       name: "Front Desk",
@@ -62,14 +73,14 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
         {
           name: "Staff",
           path: "/dashboard/pharmacy/staffs",
-          icon: getImageSrc("staffs.svg"),
-          activeIcon: getImageSrc("usersWhite.svg"),
+          icon: <Users2 />,
+          activeIcon: <Users2 className="text-white" />,
         },
         {
           name: "Info",
           path: "/dashboard/pharmacy/info",
-          icon: getImageSrc("patientsicon.svg"),
-          activeIcon: getImageSrc("patienticonsLight.svg"),
+          icon: <Activity />,
+          activeIcon: <Activity className="text-white" />,
         },
       ],
     },
@@ -82,14 +93,14 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
         {
           name: "Staff",
           path: "/dashboard/inventory/staffs",
-          icon: getImageSrc("staffs.svg"),
-          activeIcon: getImageSrc("usersWhite.svg"),
+          icon: <Users2 />,
+          activeIcon: <Users2 className="text-white" />,
         },
         {
           name: "Info",
           path: "/dashboard/inventory/info",
-          icon: getImageSrc("patientsicon.svg"),
-          activeIcon: getImageSrc("patienticonsLight.svg"),
+          icon: <Activity />,
+          activeIcon: <Activity className="text-white" />,
         },
       ],
     },
@@ -102,8 +113,8 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
         {
           name: "Staff",
           path: "/dashboard/laboratory/staffs",
-          icon: getImageSrc("staffs.svg"),
-          activeIcon: getImageSrc("usersWhite.svg"),
+          icon: <Users2 />,
+          activeIcon: <Users2 className="text-white" />,
         },
         // {
         //   name: "Info",
@@ -122,14 +133,14 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
         {
           name: "Staff",
           path: "/dashboard/finance/staffs",
-          icon: getImageSrc("staffs.svg"),
-          activeIcon: getImageSrc("usersWhite.svg"),
+          icon: <Users2 />,
+          activeIcon: <Users2 className="text-white" />,
         },
         {
           name: "Info",
           path: "/dashboard/finance/info",
-          icon: getImageSrc("patientsicon.svg"),
-          activeIcon: getImageSrc("patienticonsLight.svg"),
+          icon: <Activity />,
+          activeIcon: <Activity className="text-white" />,
         },
       ],
     },
@@ -145,6 +156,14 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
     //   icon: getImageSrc("usericon.svg"),
     //   activeIcon: getImageSrc("usersWhite.svg"),
     // },
+
+    {
+      name: "Reports",
+      path: "/dashboard/reports",
+      icon: <BarChart2 />,
+      activeIcon: <BarChart2 className="text-white" />,
+    },
+
     {
       name: "Shifts",
       path: "/dashboard/shifts",
@@ -154,8 +173,8 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
     {
       name: "Service Charges",
       path: "/dashboard/service-charges",
-      icon: getImageSrc("usericon.svg"),
-      activeIcon: getImageSrc("usersWhite.svg"),
+      icon: <ReceiptText />,
+      activeIcon: <ReceiptText className="text-white" />,
     },
     {
       name: "Profile",
@@ -178,8 +197,8 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
     {
       name: "Reset App",
       path: "/dashboard/reset",
-      icon: getImageSrc("staffs.svg"),
-      activeIcon: getImageSrc("usersWhite.svg"),
+      icon: <RefreshCw size={20} />,
+      activeIcon: <RefreshCw size={20} className="text-white" />,
     },
   ],
   "platform-manager": [

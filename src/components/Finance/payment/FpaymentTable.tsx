@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import PaymentTableFilter, { FilterValues } from "./PaymentTableFilters";
 
 interface PaymentAttributes {
+  from_doctor: string;
   patient: { id: number; first_name: string; last_name: string };
   amount: string;
   purpose: string;
@@ -192,7 +193,9 @@ const FpaymentTable = ({
       });
     }
   }, [payments]);
-  const handleViewMore = (payment: PaymentAttributes) => {
+
+  // Handle row click - navigate to payment details
+  const handleRowClick = (payment: PaymentAttributes) => {
     navigate(`/dashboard/finance/payment/${payment.id}`);
   };
 
@@ -261,6 +264,13 @@ const FpaymentTable = ({
       ),
     },
     {
+      key: "from_doctor",
+      label: "Doctor name",
+      render: (_, row) => (
+        <span className="text-[#667085] text-sm">{row.from_doctor || "-"}</span>
+      ),
+    },
+    {
       key: "payment_method",
       label: "Payment Method",
       render: (_, row) => (
@@ -294,16 +304,12 @@ const FpaymentTable = ({
         </span>
       ),
     },
+
     {
       key: "id",
       label: "",
       render: (_, row) => (
-        <span
-          className="text-primary text-sm font-medium cursor-pointer"
-          onClick={() => handleViewMore(row)}
-        >
-          View More
-        </span>
+        <span className="text-primary text-sm font-medium">View Details</span>
       ),
     },
   ];
@@ -336,6 +342,8 @@ const FpaymentTable = ({
           paginationData={pagination}
           loading={isLoading}
           onPageChange={handlePageChange}
+          clickableRows={true} // Enable clickable rows
+          onRowClick={handleRowClick} // Handle row clicks
         />
       )}
     </div>
