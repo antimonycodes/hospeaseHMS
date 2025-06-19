@@ -32,7 +32,7 @@ import Input from "../../Shared/Input";
 import { useFinanceStore } from "../../store/staff/useFinanceStore";
 import DoctorBillForm from "./DoctorBillForm";
 
-const CLINICAL_COMPLAINTS_GROUPED = [
+export const CLINICAL_COMPLAINTS_GROUPED = [
   {
     category: "General Symptoms",
     complaints: [

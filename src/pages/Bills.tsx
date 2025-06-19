@@ -5,9 +5,11 @@ import { FaMoneyBill, FaEdit, FaTimes } from "react-icons/fa";
 import { useRole } from "../hooks/useRole";
 import Button from "../Shared/Button";
 import toast from "react-hot-toast";
+import { useFinanceStore } from "../store/staff/useFinanceStore";
 
 const Bills = () => {
   const { getAllBills, bills, isLoading, updateBill } = useCombinedStore();
+  const { updatePayment } = useFinanceStore();
   const role = useRole();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   type BillType = {
@@ -22,6 +24,7 @@ const Bills = () => {
       };
       created_by: { first_name?: string; last_name?: string };
       created_at: string;
+      finance_id?: string | number;
     };
   };
   const [currentBill, setCurrentBill] = useState<BillType | null>(null);
@@ -58,6 +61,7 @@ const Bills = () => {
     }
 
     try {
+      // First update the bill
       const response = await updateBill(currentBill?.id, {
         name: formData.name,
         amount: formData.amount,
@@ -65,11 +69,27 @@ const Bills = () => {
       });
 
       if (response) {
-        toast.success("Bill updated successfully");
+        // toast.success("Bill updated successfully");
+        console.log(response);
+
+        // Now update the payment amount using the response data
+        if (response) {
+          const payload = {
+            total_amount: response.attributes.amount.replace(/,/g, ""),
+            // amount_paid: 24,
+            // payment_type: null,
+            // payment_method: null,
+            // amount_paid: null,
+          };
+
+          await updatePayment(currentBill?.attributes.finance_id, payload);
+          // toast.success("Payment amount updated successfully");
+        }
+
         setIsEditModalOpen(false);
       }
     } catch (error) {
-      toast.error("Failed to update bill");
+      // toast.error("Failed to update bill or payment amount");
       console.error(error);
     }
   };

@@ -391,8 +391,9 @@ export const useCombinedStore = create<CombinedStore>((set, get) => ({
         // toast.success(response.data?.msg);
         // set({ items: response.data.data.data });
         get().getAllBills();
-        console.log(response);
-        return true;
+        console.log(response.data.data);
+        return response.data.data;
+        // return true;
       }
       return null;
     } catch (error) {

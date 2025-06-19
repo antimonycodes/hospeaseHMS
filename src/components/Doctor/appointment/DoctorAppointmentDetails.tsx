@@ -577,7 +577,9 @@ const DoctorAppointmentDetails = () => {
       {/* Consultation Section */}
       {status === "accepted" &&
         selectedAppointment?.attributes?.patient?.id && (
-          <DoctorReportSystem patientId={patientId} />
+          <DoctorReportSystem
+            patientId={selectedAppointment?.attributes?.patient?.id}
+          />
         )}
 
       {id && (

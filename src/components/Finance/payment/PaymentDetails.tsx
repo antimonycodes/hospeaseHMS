@@ -74,6 +74,19 @@ const PaymentDetails = () => {
   const [showRefundModal, setShowRefundModal] = useState(false);
   const [refundType, setRefundType] = useState<"full" | "partial">("full");
   const [refundAmountInput, setRefundAmountInput] = useState("");
+  const attributes = selectedPayment?.attributes || {};
+  const serviceCharges = attributes.purchased_item || [];
+  // Add payment method options
+  const paymentMethods = [
+    { value: "cash", label: "Cash" },
+    { value: "pos", label: "POS" },
+    { value: "transfer", label: "Transfer" },
+    { value: "hmo", label: "HMO" },
+  ];
+
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(
+    attributes.payment_method?.toLowerCase() || "transfer"
+  );
 
   useEffect(() => {
     if (id) {
@@ -135,9 +148,6 @@ const PaymentDetails = () => {
     );
   }
 
-  const attributes = selectedPayment.attributes || {};
-  const serviceCharges = attributes.purchased_item || [];
-
   // Calculate financial values
   const totalAmount = parseFloat(attributes.amount?.replace(/,/g, "") || 0);
   const partAmount = parseFloat(
@@ -194,7 +204,9 @@ const PaymentDetails = () => {
 
     const payload = {
       payment_type: paymentTypeToUse,
+      // totalAmount: totalAmount,
       amount_paid: amount,
+      payment_method: selectedPaymentMethod, // Use the selected payment method
     };
 
     setIsSubmitting(true);
@@ -215,6 +227,9 @@ const PaymentDetails = () => {
     setShowPaymentModal(false);
     setPaymentType("");
     setAmountToPay("0");
+    setSelectedPaymentMethod(
+      attributes.payment_method?.toLowerCase() || "transfer"
+    );
   };
 
   const isHmoPayment = attributes.payment_method?.toLowerCase() === "hmo";
@@ -424,6 +439,24 @@ const PaymentDetails = () => {
             <h3 className="text-lg font-medium mb-4">
               {paymentType === "full" ? "Full Payment" : "Part Payment"}
             </h3>
+            {/*  */}
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                Payment Method
+              </label>
+              <select
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                value={selectedPaymentMethod}
+                onChange={(e) => setSelectedPaymentMethod(e.target.value)}
+              >
+                {paymentMethods.map((method) => (
+                  <option key={method.value} value={method.value}>
+                    {method.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {/*  */}
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2">
                 Amount to Pay (₦)

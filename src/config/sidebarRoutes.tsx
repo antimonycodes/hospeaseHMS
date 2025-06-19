@@ -36,7 +36,7 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
     },
     {
       name: "Admissions",
-      path: "/dashboard/admissions",
+      path: "/dashboard/admission",
       icon: <BedDouble />,
       activeIcon: <BedDouble className=" text-white" />,
     },
@@ -743,6 +743,12 @@ export const sidebarRoutes: Record<string, SidebarRoute[]> = {
       path: "/dashboard/appointments",
       icon: getImageSrc("appointmentsdark.svg"),
       activeIcon: getImageSrc("appointmentLight.svg"),
+    },
+    {
+      name: "Bills",
+      path: "/dashboard/bills",
+      icon: getImageSrc("financeicon.svg"),
+      activeIcon: getImageSrc("financeWhite.svg"),
     },
     {
       name: "Doctors",

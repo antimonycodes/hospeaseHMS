@@ -160,7 +160,7 @@ const FluidBalance = ({ admissionId }: any) => {
         <h1 className="text-md lg:text-2xl font-bold text-gray-900">
           FLUID CHART
         </h1>
-        {(role === "nurse" || role === "admin") && (
+        {(role === "nurse" || role === "admin" || role === "matron") && (
           <button
             onClick={() => openModal()}
             disabled={isLoading}

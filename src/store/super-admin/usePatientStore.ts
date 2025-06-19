@@ -116,6 +116,7 @@ interface PatientStore {
   getPatientById: (id: string) => Promise<void>;
   updatePatient: (id: string, patientData: any) => Promise<any>;
   getPharPatientById: (id: string) => Promise<any>;
+  getMedPatientById: (id: string) => Promise<any>;
   getFdeskPatientById: (id: string) => Promise<any>;
   getLabPatientById: (id: string) => Promise<any>;
   getPatientByIdDoc: (id: string) => Promise<any>;
@@ -355,6 +356,25 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       // toast.error(
       //   error.response?.data?.message || "Failed to fetch patient details"
       // );
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  getMedPatientById: async (id: any) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(`/medical-director/patient/${id}`);
+      console.log("API Response:", response.data); // Log full response
+      set({ selectedPatient: response.data.data });
+      console.log("Selected Patient Set:", response.data.data);
+    } catch (error: any) {
+      console.error(
+        "Error fetching patient:",
+        error.response?.data || error.message
+      );
+      toast.error(
+        error.response?.data?.message || "Failed to fetch patient details"
+      );
     } finally {
       set({ isLoading: false });
     }

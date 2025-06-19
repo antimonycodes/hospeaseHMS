@@ -176,7 +176,7 @@ const PharmacyStock = ({ openModal, closeModal, isModalOpen }: any) => {
         <AddRequestModal
           onClose={closeModal}
           endpoint="/inventory/requests/create"
-          refreshEndpoint="/inventory/requests/all-records?status=pending"
+          refreshEndpoint="/inventory/requests/all-records"
           fetchEndpoint="/medical-report/department-request-records"
           stockEndpoint="/inventory/all-inventory-items"
         />

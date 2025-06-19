@@ -24,6 +24,7 @@ import { ReportItem } from "../components/Doctor/Patient-Details-Props/ReportIte
 import { NoteItem } from "../components/Doctor/Patient-Details-Props/NoteItem";
 import toast from "react-hot-toast";
 import MedicalTimeline from "./MedicalTimeline";
+import DoctorReportSystem from "../components/Admission/DoctorReportSystem";
 
 const PatientDetails = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -230,6 +231,8 @@ const PatientDetails = () => {
           </div>
         </div>
       </div>
+
+      {id && <DoctorReportSystem patientId={id} />}
 
       {/* emr */}
       {id && (

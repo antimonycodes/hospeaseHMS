@@ -42,7 +42,7 @@ interface TransferSuccessData {
   doctorName: string;
 }
 
-interface VitalsData {
+export interface VitalsData {
   weight: string;
   height: string;
   bmi: string;

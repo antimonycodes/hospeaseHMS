@@ -5,6 +5,7 @@ import Loader from "../../../Shared/Loader";
 import { ChevronLeft, FileText, Loader2 } from "lucide-react";
 import { useReportStore } from "../../../store/super-admin/useReoprt";
 import MedicalTimeline from "../../../Shared/MedicalTimeline";
+import { VitalsData } from "../../Nurse/patients/NurseDetail";
 
 interface NextOfKin {
   name: string;
@@ -56,6 +57,30 @@ const MatronPatientDetails = () => {
   const [reportNote, setReportNote] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const { deptCreateReport, isCreating } = useReportStore();
+
+  // Vitals state
+  const [vitals, setVitals] = useState<VitalsData>({
+    weight: "",
+    height: "",
+    bmi: "",
+    systolic: "",
+    diastolic: "",
+    temperature: "",
+    respiratoryRate: "",
+    heartRate: "",
+    urineOutput: "",
+    bloodSugarF: "",
+    bloodSugarR: "",
+    spo2: "",
+    avpu: "",
+    trauma: "",
+    mobility: "",
+    oxygenSupplementation: "",
+    intake: "",
+    output: "",
+    vitalTakenTime: "",
+    comments: "",
+  });
 
   useEffect(() => {
     if (id) {

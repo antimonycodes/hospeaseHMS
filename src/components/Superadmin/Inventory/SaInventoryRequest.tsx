@@ -52,7 +52,9 @@ const SaInventoryRequest = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    getAllRequest("/medical-report/department-request-records");
+    getAllRequest(
+      "/medical-report/department-request-records"
+    );
   }, [getAllRequest]);
 
   const openModal = () => setIsModalOpen(true);

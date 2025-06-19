@@ -18,6 +18,8 @@ import { usePatientStore } from "../../store/super-admin/usePatientStore";
 import { useReportStore } from "../../store/super-admin/useReoprt";
 import { useGlobalStore } from "../../store/super-admin/useGlobal";
 import Button from "../../Shared/Button";
+import { useMatronNurse } from "../Matron/nurse/useMatronNurse";
+import { useRole } from "../../hooks/useRole";
 const CLINICAL_COMPLAINTS_GROUPED = [
   {
     category: "General Symptoms",
@@ -169,7 +171,12 @@ const DoctorReportSystem = ({ patientId }: DoctorReportSystemProps) => {
   >([]);
 
   const { id } = useParams();
-  const { selectedPatient, getPatientByIdDoc } = usePatientStore();
+  const {
+    selectedPatient,
+    getPatientByIdDoc,
+    getMedPatientById,
+    getPatientById,
+  } = usePatientStore();
   const {
     createReport,
     createNote,
@@ -185,6 +192,9 @@ const DoctorReportSystem = ({ patientId }: DoctorReportSystemProps) => {
     labItems,
   } = useReportStore();
   const { getAllRoles, roles } = useGlobalStore();
+  const role = useRole();
+  // const { getMedPatientById } = useMatronNurse();
+
   const [itemSearch, setItemSearch] = useState("");
   const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [isAdmitModalOpen, setIsAdmitModalOpen] = useState(false);
@@ -448,19 +458,30 @@ const DoctorReportSystem = ({ patientId }: DoctorReportSystemProps) => {
   }, [selectedParameters]);
 
   useEffect(() => {
-    getAllRoles();
     getPharmacyStocks();
     getLaboratoryItems();
   }, [getAllRoles, getPharmacyStocks, getLaboratoryItems]);
+  useEffect(() => {
+    getAllRoles();
+  }, []);
 
   console.log(patientId, "Patient ID");
   useEffect(() => {
     if (patientId) {
-      getPatientByIdDoc(patientId);
-      getAllReport(patientId);
+      if (role === "doctor") {
+        getPatientByIdDoc(patientId);
+      } else if (role === "medical-director") {
+        getMedPatientById(patientId);
+      } else {
+        getPatientByIdDoc(patientId);
+      }
+      // getAllReport(patientId);
       getMedicalNote(patientId, "doctor");
+      getMedicalNote(patientId, "consultant");
+      getMedicalNote(patientId, "admin");
+      getMedicalNote(patientId, "medical-director");
     }
-  }, [patientId, getPatientByIdDoc, getAllReport, getMedicalNote]);
+  }, [patientId]);
 
   console.log(selectedPatient, "Select");
 
@@ -528,10 +549,14 @@ const DoctorReportSystem = ({ patientId }: DoctorReportSystemProps) => {
         setSelectedDepartment("");
         setSelectedItems([]);
         setSelectedLabTests([]);
-        setSelectedParameters([]); // Reset selected parameters
+        setSelectedParameters([]);
         setItemSearch("");
         setLabTestSearch("");
         getAllReport(patientId);
+        // getMedicalNote(patientId, "doctor");
+        // getMedicalNote(patientId, "consultant");
+        // getMedicalNote(patientId, "admin");
+        // getMedicalNote(patientId, "medical-director");
       }
     } catch (error) {
       // Error handling is done in the toast already
@@ -552,7 +577,11 @@ const DoctorReportSystem = ({ patientId }: DoctorReportSystemProps) => {
 
       if (response) {
         setNote("");
+        // getAllReport(patientId);
         getMedicalNote(patientId, "doctor");
+        getMedicalNote(patientId, "consultant");
+        getMedicalNote(patientId, "admin");
+        getMedicalNote(patientId, "medical-director");
       }
     } catch (error) {
       // Error handling is done in the toast already
@@ -562,6 +591,7 @@ const DoctorReportSystem = ({ patientId }: DoctorReportSystemProps) => {
   console.log(patient);
 
   if (!selectedPatient) return <Loader />;
+  if (isLoading) return <Loader />;
   return (
     <div>
       <div className="bg-white rounded-lg custom-shadow mb-6 p-4 sm:p-6">

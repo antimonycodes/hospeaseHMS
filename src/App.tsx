@@ -134,10 +134,7 @@ function App() {
                 path="appointment/frontdesk/:id"
                 element={<FrontdeskDetails />}
               />
-              <Route
-                path="matron/patients/:id"
-                element={<MatronPatientDetails />}
-              />
+              <Route path="matron/patients/:id" element={<NurseDetail />} />
               <Route
                 path="matron/nurses/:id"
                 element={<MatronNurseDetails />}

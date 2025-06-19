@@ -170,12 +170,16 @@ const AdmissionDetails: React.FC = () => {
             >
               <ArrowLeft size={24} className="text-gray-600" />
             </button>
-            {(role === "nurse" || role === "doctor" || role === "admin") && (
+            {(role === "nurse" ||
+              role === "doctor" ||
+              role === "matron" ||
+              role === "admin" ||
+              role === "medical-director") && (
               <Button
                 disabled={status === "discharged"}
                 onClick={handleDischarge}
               >
-                Discharge Patient
+                {status === "discharged" ? " Discharged" : "Discharge Patient"}
               </Button>
             )}
           </div>
@@ -421,6 +425,8 @@ const AdmissionDetails: React.FC = () => {
                 </span>
                 {(role === "nurse" ||
                   role === "doctor" ||
+                  role === "matron" ||
+                  role === "medical-director" ||
                   role === "admin") && (
                   <button
                     onClick={() => setShowStatusModal(true)}
@@ -459,7 +465,8 @@ const AdmissionDetails: React.FC = () => {
             {patient?.id && (
               <>
                 {role === "admin" ||
-                  (role === "doctor" && (
+                  role === "doctor" ||
+                  (role === "medical-director" && (
                     <DoctorReportSystem patientId={patient.id.toString()} />
                   ))}
                 <MedicalTimeline

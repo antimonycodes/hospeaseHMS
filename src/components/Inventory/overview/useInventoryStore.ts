@@ -175,14 +175,19 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
   },
 
   getAllRequest: async (
-    endpoint = "/inventory/requests/all-records?status=pending"
+    endpoint = "/inventory/requests/all-records",
+    page = "1",
+    perPage = "1000"
   ) => {
     set({ isLoading: true });
     try {
-      const response = await api.get(endpoint);
+      const separator = endpoint.includes("?") ? "&" : "?";
+      const fullEndpoint = endpoint.includes("page=")
+        ? endpoint
+        : `${endpoint}${separator}page=${page}&per_page=${perPage}`;
 
-      // Store the entire response data structure
-      // This includes both the data array and pagination object
+      const response = await api.get(fullEndpoint);
+
       if (response.data && response.data.data) {
         set({ requests: response.data.data });
         // toast.success(response.data.message || "Requests fetched successfully");

@@ -202,7 +202,7 @@ const VitalSigns = ({ admissionId }: any) => {
         <h1 className="text-md lg:text-2xl font-bold text-gray-900">
           VITAL SIGNS MONITORING
         </h1>
-        {(role === "nurse" || role === "admin") && (
+        {(role === "nurse" || role === "admin" || role === "matron") && (
           <button
             onClick={() => openModal()}
             className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-md"

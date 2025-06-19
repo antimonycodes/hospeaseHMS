@@ -132,8 +132,8 @@ const SaInventoryPage = () => {
         <AddRequestModal
           onClose={closeRequest}
           endpoint="/admin/inventory/requests/create"
-          refreshEndpoint="/medical-report/department-request-records"
-          fetchEndpoint="/medical-report/department-request-records"
+          refreshEndpoint="/medical-report/department-request-records?perPage=1000"
+          fetchEndpoint="/medical-report/department-request-records?perPage=1000"
           stockEndpoint="/admin/inventory/all-inventory-items"
         />
       )}

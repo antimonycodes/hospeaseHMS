@@ -142,7 +142,7 @@ const AddDoctorModal: React.FC<AddDoctorModalProps> = ({
               {modalTitle}
             </h2>
             <button onClick={() => setShowModal(false)}>
-              <X className="text-black" />
+              <X className="text-black"/>
             </button>
           </div>
 

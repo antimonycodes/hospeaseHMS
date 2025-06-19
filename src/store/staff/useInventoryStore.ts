@@ -32,11 +32,19 @@ export const useInventoryStore = create<InventoryStore>((set) => ({
   requests: [],
 
   getAllRequest: async (
-    endpoint = "/inventory/requests/all-records?status=pending"
+    endpoint = "/inventory/requests/all-records",
+    page = "1",
+    perPage = "1000"
   ) => {
     set({ isLoading: true });
     try {
-      const response = await api.get(endpoint);
+      const separator = endpoint.includes("?") ? "&" : "?";
+      const fullEndpoint = endpoint.includes("page=")
+        ? endpoint
+        : `${endpoint}${separator}page=${page}&per_page=${perPage}`;
+
+      const response = await api.get(fullEndpoint);
+
       const fetchedRequests = response.data.data || [];
       set({ requests: fetchedRequests });
       console.log(response.data.message);
