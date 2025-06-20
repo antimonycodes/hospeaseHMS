@@ -77,12 +77,29 @@ const columns: Column<StockActivityType>[] = [
   },
   {
     key: "id",
-    label: "Price",
+    label: "Selling Price",
     render: (_, item) => (
       <span className="text-[#667085] text-sm">
         ₦{item.attributes.stock_request?.requests?.service_item_price}
       </span>
     ),
+  },
+  {
+    key: "id",
+    label: "Total",
+    render: (_, item) => {
+      const price = parseFloat(
+        item.attributes.stock_request?.requests?.service_item_price || "0"
+      );
+      const quantity = item.attributes.quantity_deducted || 0;
+      const total = price * quantity;
+
+      return (
+        <span className="text-[#667085] text-sm font-medium">
+          ₦{total.toLocaleString()}
+        </span>
+      );
+    },
   },
   {
     key: "id",
