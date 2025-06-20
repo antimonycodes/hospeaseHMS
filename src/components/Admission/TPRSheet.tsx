@@ -6,6 +6,7 @@ import {
   Heart,
   Activity,
   Gauge,
+  Loader2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAdmissionStore } from "../../store/super-admin/useAdmissionStore";
@@ -447,9 +448,16 @@ const TPRSheet = ({ admissionId }: any) => {
                 <button
                   type="button"
                   onClick={handleSubmit}
+                  disabled={isLoading}
                   className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md  transition-colors"
                 >
-                  {editingEntry ? "Update Entry" : "Add Entry"}
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : editingEntry ? (
+                    "Update Entry"
+                  ) : (
+                    "Add Entry"
+                  )}
                 </button>
               </div>
             </div>

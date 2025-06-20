@@ -36,9 +36,9 @@ const BookAppointmentModal = ({ onClose }: BookAppointmentModalProps) => {
     patient_id: 0,
     user_id: null as number | null,
     department_id: null as number | null,
+    appointmentType: "staff",
     date: "",
     time: "",
-    appointmentType: "staff",
   });
 
   const getFilteredDepartments = () => {
@@ -58,6 +58,16 @@ const BookAppointmentModal = ({ onClose }: BookAppointmentModalProps) => {
     getAllRoles();
     getAllStaffs();
     getAllPatientsNoPerPage();
+
+    // Set current date and time
+    const now = new Date();
+    const formattedDate = now.toISOString().split("T")[0]; // YYYY-MM-DD
+    const formattedTime = now.toTimeString().split(" ")[0].slice(0, 5); // HH:MM
+    setAppointmentData((prev) => ({
+      ...prev,
+      date: formattedDate,
+      time: formattedTime,
+    }));
   }, [getAllRoles, getAllStaffs, getAllPatientsNoPerPage]);
 
   useEffect(() => {
@@ -140,13 +150,12 @@ const BookAppointmentModal = ({ onClose }: BookAppointmentModalProps) => {
     const success = await bookAppointment(finalAppointmentData);
     if (success) {
       onClose();
-      // window.location.reload();
     }
   };
 
   const isFormValid = () => {
-    const { patient_id, date, time, appointmentType } = appointmentData;
-    if (!patient_id || !date || !time) {
+    const { patient_id, appointmentType } = appointmentData;
+    if (!patient_id) {
       return false;
     }
     if (appointmentType === "staff" && !appointmentData.user_id) {
@@ -255,28 +264,6 @@ const BookAppointmentModal = ({ onClose }: BookAppointmentModalProps) => {
 
         <div className="mt-8">
           <h3 className="text-lg font-semibold mb-4">Appointment Details</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label className="text-sm text-gray-600">Choose Date</label>
-              <input
-                type="date"
-                name="date"
-                value={appointmentData.date}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg px-3 py-4"
-              />
-            </div>
-            <div>
-              <label className="text-sm text-gray-600">Choose Time</label>
-              <input
-                type="time"
-                name="time"
-                value={appointmentData.time}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg px-3 py-4"
-              />
-            </div>
-          </div>
 
           <div className="mb-6">
             <label className="text-sm text-gray-600">Appointment With</label>

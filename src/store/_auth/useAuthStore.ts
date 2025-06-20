@@ -79,7 +79,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         });
         const token = response.data.data.token;
         sessionStorage.setItem("userId", response.data.data.user.id);
-        sessionStorage.setItem(
+        localStorage.setItem(
           "user-info",
           JSON.stringify(response.data.data.user)
         );

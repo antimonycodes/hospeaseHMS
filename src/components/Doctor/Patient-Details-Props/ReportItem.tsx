@@ -124,7 +124,7 @@ export const ReportItem = ({
   };
 
   return (
-    <div className="p-4  rounded-lg border border-[#667085]  hover:shadow-md transition mb-4">
+    <div className="p-2  rounded-lg border border-[#667085]  hover:custom-shadow transition mb-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <StaffAvatar staff={staff} />

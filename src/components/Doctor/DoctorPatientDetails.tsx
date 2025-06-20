@@ -248,43 +248,60 @@ const DoctorPatientDetails = () => {
         setComplaintDurations(restDurations);
         return updated;
       } else {
-        setComplaintDurations((prevDurations) => ({
-          ...prevDurations,
-          [complaint]: { value: 1, unit: "days" },
-        }));
         return [...prev, complaint];
       }
     });
   };
 
   // Handle duration change
-  const handleDurationChange = (
-    complaint: string,
-    field: string,
-    value: any
-  ) => {
+  // const handleDurationChange = (
+  //   complaint: string,
+  //   field: string,
+  //   value: any
+  // ) => {
+  //   setComplaintDurations((prev) => ({
+  //     ...prev,
+  //     [complaint]: {
+  //       ...prev[complaint],
+  //       [field]: value,
+  //     },
+  //   }));
+  // };
+  const handleDurationChange = (complaint: any, field: any, value: any) => {
     setComplaintDurations((prev) => ({
       ...prev,
       [complaint]: {
         ...prev[complaint],
-        [field]: value,
+        [field]: field === "value" ? value : value, // Keep value as string for text input
       },
     }));
   };
 
-  // Option 1: Each complaint on its own line (Recommended)
   const addComplaintsToNote = () => {
     const complaintsText = selectedComplaints
       .map((complaint) => {
         const duration = complaintDurations[complaint];
-        return duration
-          ? `${complaint}: ${duration.value} ${duration.unit}`
-          : `${complaint}: Not specified`;
+
+        // Check if both value and unit are provided
+        if (duration?.value && duration?.unit) {
+          return `${complaint}: ${duration.value} ${duration.unit}`;
+        }
+        // If only value is provided
+        else if (duration?.value && !duration?.unit) {
+          return `${complaint}: ${duration.value}`;
+        }
+        // If only unit is provided (unlikely but handle it)
+        else if (!duration?.value && duration?.unit) {
+          return `${complaint}: ${duration.unit}`;
+        }
+        // If no duration details are provided
+        else {
+          return complaint;
+        }
       })
       .join("\n");
 
     const formattedComplaints = `PATIENT COMPLAINTS:\n${complaintsText}`;
-
     setNote((prev) =>
       prev ? `${prev}\n\n${formattedComplaints}` : formattedComplaints
     );
@@ -694,12 +711,14 @@ const DoctorPatientDetails = () => {
         {activeTab === "note" && (
           <div className="space-y-4">
             <div>
-              <h4 className="text-sm font-medium mb-2">Common Complaints</h4>
+              <h4 className="text-sm font-medium mb-2">
+                Select Common Complaints
+              </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 {CLINICAL_COMPLAINTS_GROUPED.map((group) => (
                   <div
                     key={group.category}
-                    className="bg-gray-50 p-3 rounded-lg"
+                    className="bg-gray-50 mt-2 rounded-lg"
                   >
                     <h5 className="font-medium text-gray-700 mb-2">
                       {group.category}
@@ -734,20 +753,22 @@ const DoctorPatientDetails = () => {
                             {isSelected && (
                               <div className="flex gap-1">
                                 <input
-                                  type="number"
-                                  min="1"
-                                  value={duration?.value || 1}
+                                  type="text"
+                                  inputMode="numeric"
+                                  pattern="[0-9]*"
+                                  value={duration?.value || ""}
                                   onChange={(e) =>
                                     handleDurationChange(
                                       complaint,
                                       "value",
-                                      parseInt(e.target.value) || 1
+                                      e.target.value
                                     )
                                   }
+                                  placeholder="0"
                                   className="w-12 border border-gray-300 rounded px-1 py-1 text-sm"
                                 />
                                 <select
-                                  value={duration?.unit || "days"}
+                                  value={duration?.unit || ""}
                                   onChange={(e) =>
                                     handleDurationChange(
                                       complaint,
@@ -757,6 +778,7 @@ const DoctorPatientDetails = () => {
                                   }
                                   className="border border-gray-300 rounded px-1 py-1 text-sm"
                                 >
+                                  <option value="">Select</option>
                                   <option value="hours">Hours</option>
                                   <option value="days">Days</option>
                                   <option value="weeks">Weeks</option>
@@ -773,53 +795,6 @@ const DoctorPatientDetails = () => {
                 ))}
               </div>
             </div>
-
-            {/* {selectedComplaints.length > 0 && (
-              <div className="bg-blue-50 p-4 rounded-lg mb-4">
-                <h4 className="font-medium text-gray-700 mb-3">
-                  Selected Complaints
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {selectedComplaints.map((complaint) => (
-                    <div key={complaint} className="flex items-center gap-2">
-                      <span className="font-medium">{complaint}</span>
-                      <div className="flex items-center gap-1">
-                        <input
-                          type="number"
-                          min="1"
-                          value={complaintDurations[complaint]?.value || 1}
-                          onChange={(e) =>
-                            handleDurationChange(
-                              complaint,
-                              "value",
-                              parseInt(e.target.value) || 1
-                            )
-                          }
-                          className="w-12 border border-gray-300 rounded px-2 py-1 text-sm"
-                        />
-                        <select
-                          value={complaintDurations[complaint]?.unit || "days"}
-                          onChange={(e) =>
-                            handleDurationChange(
-                              complaint,
-                              "unit",
-                              e.target.value
-                            )
-                          }
-                          className="border border-gray-300 rounded px-2 py-1 text-sm"
-                        >
-                          <option value="hours">Hours</option>
-                          <option value="days">Days</option>
-                          <option value="weeks">Weeks</option>
-                          <option value="months">Months</option>
-                          <option value="years">Years</option>
-                        </select>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )} */}
 
             <textarea
               rows={5}
@@ -846,7 +821,7 @@ const DoctorPatientDetails = () => {
                 onClick={handleNoteSubmit}
                 disabled={isCreating}
                 className={`bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition flex items-center justify-center
-                 ${isCreating ? "opacity-50 cursor-not-allowed" : ""}`}
+         ${isCreating ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 {isCreating ? (
                   <>

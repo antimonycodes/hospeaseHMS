@@ -1,4 +1,4 @@
-import { Edit2, Plus, X } from "lucide-react";
+import { Edit2, Loader2, Plus, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useAdmissionStore } from "../../store/super-admin/useAdmissionStore";
@@ -482,11 +482,13 @@ const FluidBalance = ({ admissionId }: any) => {
                   disabled={isLoading}
                   className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-dark transition-colors disabled:opacity-50"
                 >
-                  {isLoading
-                    ? "Saving..."
-                    : editingEntry
-                    ? "Update Entry"
-                    : "Add Entry"}
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : editingEntry ? (
+                    "Update Entry"
+                  ) : (
+                    "Add Entry"
+                  )}
                 </button>
               </div>
             </div>

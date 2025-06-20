@@ -1,20 +1,26 @@
-import { Edit2, Plus, X } from "lucide-react";
+import { Edit2, Loader2, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAdmissionStore } from "../../store/super-admin/useAdmissionStore";
 import { useDoctorStore } from "../../store/super-admin/useDoctorStore";
 import { useFinanceStore } from "../../store/staff/useFinanceStore";
 import { useRole } from "../../hooks/useRole";
+import { useReportStore } from "../../store/super-admin/useReoprt";
+import Select from "react-select";
 
 const MedicationSheet = ({ admissionId }: any) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<any | null>(null);
   // const { isLoading, createMedication } = useAdmissionStore();
   const { getAllDoctors, doctors } = useFinanceStore();
+  const { getPharmacyStocks, pharmacyStocks } = useReportStore();
   const baseEndpoint = "/medical-reports/all-doctors";
 
   useEffect(() => {
     getAllDoctors();
-  }, [getAllDoctors]);
+    getPharmacyStocks();
+  }, [getAllDoctors, getPharmacyStocks]);
+
+  console.log(pharmacyStocks, "pharmacyStocks");
 
   const {
     isLoading,
@@ -51,7 +57,7 @@ const MedicationSheet = ({ admissionId }: any) => {
     setEntries(transformedEntries);
   }, [medicationEntries]);
 
-  console.log(medicationEntries, "medd");
+  // console.log(medicationEntries, "medd");
 
   const [entries, setEntries] = useState<any[]>([]);
 
@@ -106,12 +112,25 @@ const MedicationSheet = ({ admissionId }: any) => {
     setEditingEntry(null);
     resetForm();
   };
+  const medicationOptions = pharmacyStocks.map((stock: any) => ({
+    value: stock?.service_item_name,
+    label: stock?.service_item_name,
+  }));
 
+  // Update the handleInputChange to handle Select changes
   const handleInputChange = (field: any, value: any) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    // Special handling for Select component
+    if (field === "name" && value && value.value) {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value.value,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    }
   };
 
   const handleSubmit = async () => {
@@ -353,13 +372,34 @@ const MedicationSheet = ({ admissionId }: any) => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Medication Name <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange("name", e.target.value)}
-                    placeholder="Enter medication name"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  <Select
+                    options={medicationOptions}
+                    value={
+                      formData.name
+                        ? {
+                            value: formData.name,
+                            label: formData.name,
+                          }
+                        : null
+                    }
+                    onChange={(selectedOption) =>
+                      handleInputChange("name", selectedOption)
+                    }
+                    placeholder="Search medication..."
+                    isSearchable
                     required
+                    className="react-select-container"
+                    classNamePrefix="react-select"
+                    styles={{
+                      control: (provided) => ({
+                        ...provided,
+                        minHeight: "42px",
+                        borderColor: "#d1d5db",
+                        "&:hover": {
+                          borderColor: "#d1d5db",
+                        },
+                      }),
+                    }}
                   />
                 </div>
 
@@ -439,13 +479,13 @@ const MedicationSheet = ({ admissionId }: any) => {
                   disabled={isLoading}
                   className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading
-                    ? editingEntry
-                      ? "Updating..."
-                      : "Adding..."
-                    : editingEntry
-                    ? "Update Entry"
-                    : "Add Entry"}
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : editingEntry ? (
+                    "Update Entry"
+                  ) : (
+                    "Add Entry"
+                  )}
                 </button>
               </div>
             </div>

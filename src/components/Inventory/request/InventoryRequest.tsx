@@ -4,6 +4,7 @@ import Table from "../../../Shared/Table";
 import AddRequestModal from "./AddRequestModal";
 import { useInventoryStore } from "../../../store/staff/useInventoryStore";
 import RequestHistory from "./RequestHistory";
+import StockActivity from "../../Superadmin/pharmacy/StockActivity";
 
 export type RequestData = {
   id: number;
@@ -187,9 +188,9 @@ const PharmacyStock = ({ openModal, closeModal, isModalOpen }: any) => {
 
 // Main Tabbed Component
 const InventoryRequest = () => {
-  const [activeTab, setActiveTab] = useState<"pharmacy" | "history">(
-    "pharmacy"
-  );
+  const [activeTab, setActiveTab] = useState<
+    "pharmacy" | "history" | "activities"
+  >("pharmacy");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openModal = () => setIsModalOpen(true);
@@ -197,6 +198,7 @@ const InventoryRequest = () => {
   const tabs = [
     { id: "pharmacy", label: "Pharmacy Stock" },
     { id: "history", label: "Request History" },
+    { id: "activities", label: "Sales History" },
   ];
 
   return (
@@ -240,6 +242,7 @@ const InventoryRequest = () => {
           />
         )}
         {activeTab === "history" && <RequestHistory />}
+        {activeTab === "activities" && <StockActivity />}
       </div>
     </div>
   );

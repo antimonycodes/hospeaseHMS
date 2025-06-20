@@ -13,14 +13,14 @@ export const NoteItem = ({ note }: { note: any }) => {
   const doctorNote = note.attributes.note;
 
   return (
-    <div className="p-4 bg-white rounded-lg border-l-4 border border-blue-200 border-l-primary hover:shadow-md transition mb-4">
+    <div className="p-2 bg-white rounded-lg border-l-4 border border-blue-200 border-l-primary hover:shadow-md transition mb-4">
       <div className="flex justify-between items-start mb-2">
         <div>
           <div className="flex items-center gap-3">
             <DoctorAvatar staff={staff} />
             <StaffInfo name={doctorName} role="Doctor" />
           </div>
-          <h2 className="text-lg font-semibold text-gray-800 mt-2">
+          <h2 className="text-md font-semibold text-gray-800 mt-2">
             History & Evaluation
           </h2>
         </div>
@@ -31,7 +31,7 @@ export const NoteItem = ({ note }: { note: any }) => {
       </div>
 
       {/* Doctor's Note Content */}
-      <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+      <div className=" bg-gray-50 rounded-lg">
         <div className="text-sm text-gray-600">
           <FormattedReportNote note={doctorNote} />
         </div>

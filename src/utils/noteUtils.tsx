@@ -54,7 +54,7 @@ export const FormattedReportNote: React.FC<FormattedReportNoteProps> = ({
 
         // Regular line without colon
         return (
-          <div key={index} className="text-black">
+          <div key={index} className="text-[#667085]">
             {line}
           </div>
         );

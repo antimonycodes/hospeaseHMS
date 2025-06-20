@@ -80,7 +80,7 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({
   // Load user data on component mount
   useEffect(() => {
     getPaymentSource(); // Fetch payment sources on mount
-    const storedUser = sessionStorage.getItem("user-info");
+    const storedUser = localStorage.getItem("user-info");
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);

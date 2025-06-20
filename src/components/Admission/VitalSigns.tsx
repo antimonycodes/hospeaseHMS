@@ -1,4 +1,4 @@
-import { Edit2, Plus, X } from "lucide-react";
+import { Edit2, Loader2, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAdmissionStore } from "../../store/super-admin/useAdmissionStore";
 import { useRole } from "../../hooks/useRole";
@@ -525,9 +525,16 @@ const VitalSigns = ({ admissionId }: any) => {
                 <button
                   type="button"
                   onClick={handleSubmit}
+                  disabled={isLoading}
                   className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md transition-colors"
                 >
-                  {editingEntry ? "Update Entry" : "Record Vital Signs"}
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : editingEntry ? (
+                    "Update Entry"
+                  ) : (
+                    "Add Entry"
+                  )}
                 </button>
               </div>
             </div>

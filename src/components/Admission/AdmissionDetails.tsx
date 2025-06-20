@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Edit2, X, Loader2 } from "lucide-react";
+import { ArrowLeft, Edit2, X, Loader2, FileText } from "lucide-react";
 import FluidBalance from "./FluidBalance";
 import MedicationSheet from "./MedicationSheet";
 import TPRSheet from "./TPRSheet";
@@ -10,10 +10,14 @@ import Loader from "../../Shared/Loader";
 import { useRole } from "../../hooks/useRole";
 import MedicalTimeline from "../../Shared/MedicalTimeline";
 import DoctorReportSystem from "./DoctorReportSystem";
+import { useReportStore } from "../../store/super-admin/useReoprt";
 
 const AdmissionDetails: React.FC = () => {
+  const [reportNote, setReportNote] = useState("");
+
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [activeTab, setActiveTab] = useState("Clinical History");
+  const { deptCreateReport, isCreating, getAllReport } = useReportStore();
 
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -156,6 +160,21 @@ const AdmissionDetails: React.FC = () => {
 
   const selectedP = patient.attributes;
   console.log(selectedP, "ert");
+
+  const handleReportSubmit = async () => {
+    const response = await deptCreateReport({
+      patient_id: patient.id ?? null,
+      note: reportNote,
+      file: null,
+      status: "completed",
+    });
+    if (response) {
+      setReportNote("");
+
+      await getAllReport(patient.id.toString());
+    }
+    console.log("Report submitted successfully:", response);
+  };
 
   return (
     <div className="min-h-screen">
@@ -464,11 +483,60 @@ const AdmissionDetails: React.FC = () => {
           <div>
             {patient?.id && (
               <>
-                {role === "admin" ||
+                {(role === "admin" ||
                   role === "doctor" ||
-                  (role === "medical-director" && (
-                    <DoctorReportSystem patientId={patient.id.toString()} />
-                  ))}
+                  role === "medical-director") && (
+                  <DoctorReportSystem patientId={patient.id.toString()} />
+                )}
+
+                {role === "nurse" && (
+                  <>
+                    {/* nurse report */}
+                    <div className="bg-white rounded-lg custom-shadow mb-6 p-4 sm:p-6">
+                      <button
+                        className={`flex mb-4 text-primary items-center gap-1 px-3 py-1 rounded-md transition
+             `}
+                      >
+                        <FileText size={16} />
+                        Add Nurse's Report
+                      </button>
+
+                      <div className="space-y-4">
+                        <textarea
+                          // disabled
+                          rows={8}
+                          value={reportNote}
+                          onChange={(e) => setReportNote(e.target.value)}
+                          placeholder="Add reports."
+                          className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-primary"
+                        />
+                        {/* <input
+                          type="file"
+                          accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
+                          onChange={(e) => setFile(e.target.files?.[0] || null)}
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90"
+                        /> */}
+
+                        <button
+                          onClick={handleReportSubmit}
+                          className={`bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition flex items-center justify-center
+              ${isCreating ? "opacity-50 cursor-not-allowed" : ""}
+              `}
+                          disabled={isCreating}
+                        >
+                          {isCreating ? (
+                            <>
+                              Adding
+                              <Loader2 className=" size-6 mr-2 animate-spin" />
+                            </>
+                          ) : (
+                            "Add Report"
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
                 <MedicalTimeline
                   patientId={patient.id.toString()}
                   patient={selectedP}
