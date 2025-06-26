@@ -17,6 +17,8 @@ import { useReportStore } from "../../../store/super-admin/useReoprt";
 import { useGlobalStore } from "../../../store/super-admin/useGlobal";
 import toast from "react-hot-toast";
 import Button from "../../../Shared/Button";
+import EditPatientModal from "../../../Shared/EditPatientModal";
+import { useRole } from "../../../hooks/useRole";
 
 interface InfoRowItem {
   label: string;
@@ -48,12 +50,15 @@ interface PatientAttributes {
 
 const FrontdeskPatientDetails = () => {
   const { id } = useParams<{ id: string }>();
-  const { selectedPatient, getFdeskPatientById, isLoading } = usePatientStore();
+  const { selectedPatient, getFdeskPatientById, updatePatient, isLoading } =
+    usePatientStore();
   const navigate = useNavigate();
   const { show } = useStickyNoteStore();
   const [activeTab, setActiveTab] = useState("report");
   const [reportNote, setReportNote] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  // const [isLoading, setIsLoading] = useState(false);
+
   const [selectedDepartment, setSelectedDepartment] = useState("");
 
   // Pharmacy related states
@@ -287,6 +292,28 @@ const FrontdeskPatientDetails = () => {
       }
     } catch (error) {
       // Error handling is done in the toast already
+    }
+  };
+
+  const role = useRole();
+
+  const updateEndpoint =
+    role === "admin" ? "/admin/patient/update" : "/front-desk/patient/update";
+
+  const handleSavePatient = async (updatedPatientData: any) => {
+    if (!id) return;
+
+    // setIsLoading(true);
+    try {
+      await updatePatient(id, updatedPatientData, updateEndpoint);
+      // toast.success("Patient information updated successfully");
+      setIsEditModalOpen(false);
+      getFdeskPatientById(id);
+    } catch (error) {
+      console.error("Error updating patient:", error);
+      toast.error("Failed to update patient information");
+    } finally {
+      // setIsLoading(false);
     }
   };
 
@@ -790,6 +817,15 @@ const FrontdeskPatientDetails = () => {
           patientId={id}
           patient={patient}
           showDownloadCompleteButton={false}
+        />
+      )}
+      {isEditModalOpen && (
+        <EditPatientModal
+          isLoading={isLoading}
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          patientData={selectedPatient?.attributes}
+          onSave={handleSavePatient}
         />
       )}
     </div>

@@ -4,6 +4,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useCombinedStore } from "../store/super-admin/useCombinedStore";
 import { useGlobalStore } from "../store/super-admin/useGlobal";
+import toast from "react-hot-toast";
+import { useRole } from "../hooks/useRole";
 
 interface NextOfKin {
   name: string;
@@ -60,10 +62,13 @@ const EditPatientModal = ({
   const { branches, getBranches, clinicaldepts, getClinicaldept } =
     useGlobalStore();
   const { getAllCategory, categories } = useCombinedStore();
+  const role = useRole();
+  const branchEndpoint =
+    role === "admin" ? "/admin/branches/fetch" : "/front-desk/branches/fetch";
 
   useEffect(() => {
     getAllCategory();
-    getBranches();
+    getBranches(branchEndpoint);
     getClinicaldept();
   }, [getAllCategory, getBranches, getClinicaldept]);
 
@@ -89,7 +94,7 @@ const EditPatientModal = ({
   // Update form data when patientData changes or modal opens
   useEffect(() => {
     if (patientData && isOpen) {
-      console.log("Setting form data with patient:", patientData);
+      // console.log("Setting form data with patient:", patientData);
 
       setFormData({
         ...patientData,
@@ -134,10 +139,10 @@ const EditPatientModal = ({
     }
   }, [patientData, isOpen, branches]);
 
-  console.log("Current formData:", formData);
-  console.log("Available branches:", branches);
-  console.log("Available categories:", categories);
-  console.log("Available clinical depts:", clinicaldepts);
+  // console.log("Current formData:", formData);
+  // console.log("Available branches:", branches);
+  // console.log("Available categories:", categories);
+  // console.log("Available clinical depts:", clinicaldepts);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -185,8 +190,8 @@ const EditPatientModal = ({
     if (!formData) return;
 
     // Validate required fields
-    if (!formData.branch_id || !formData.patient_category_id) {
-      alert("Please select both Branch and Category");
+    if (!formData.branch_id) {
+      toast.error("Please select both Branch and Category");
       return;
     }
 

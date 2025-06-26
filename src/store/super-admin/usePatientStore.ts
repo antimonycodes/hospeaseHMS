@@ -114,7 +114,11 @@ interface PatientStore {
   ) => Promise<void>;
   getAllPatientsNoPerPage: () => Promise<void>;
   getPatientById: (id: string) => Promise<void>;
-  updatePatient: (id: string, patientData: any) => Promise<any>;
+  updatePatient: (
+    id: string,
+    patientData: any,
+    endpoint?: string
+  ) => Promise<any>;
   getPharPatientById: (id: string) => Promise<any>;
   getMedPatientById: (id: string) => Promise<any>;
   getFdeskPatientById: (id: string) => Promise<any>;
@@ -480,14 +484,14 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
     }
   },
 
-  updatePatient: async (id: string, patientData: any) => {
+  updatePatient: async (
+    id: string,
+    patientData: any,
+    endpoint = "/admin/patient/update"
+  ) => {
     set({ isLoading: true });
     try {
-      const response = await api.put(
-        // `/admin/patient/update/${id}`,
-        `/admin/patient/update/${id}`,
-        patientData
-      );
+      const response = await api.put(`${endpoint}/${id}`, patientData);
 
       if (isSuccessfulResponse(response)) {
         console.log(response);
