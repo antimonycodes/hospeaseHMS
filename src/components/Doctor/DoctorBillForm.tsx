@@ -6,7 +6,6 @@ import { useParams } from "react-router-dom";
 // Type definitions
 interface Patient {
   id: number;
-  // Add other patient properties as needed
 }
 
 interface User {
@@ -24,6 +23,7 @@ interface CreatedBill {
   attributes: {
     name: string;
     amount: string;
+    department_id: string;
     created_by: {
       id: number;
       first_name: string;
@@ -99,13 +99,13 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!user) {
-      setStatusMessage({
-        type: "error",
-        message: "User information not available",
-      });
-      return;
-    }
+    // if (!user) {
+    //   setStatusMessage({
+    //     type: "error",
+    //     message: "User information not available",
+    //   });
+    //   return;
+    // }
 
     if (!patientIdToBeUsed) {
       setStatusMessage({
@@ -118,7 +118,7 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({
     if (!selectedPaymentSource) {
       setStatusMessage({
         type: "error",
-        message: "Please select a payment source",
+        message: "Please select a bill type",
       });
       return;
     }
@@ -127,9 +127,8 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({
     setStatusMessage(null);
 
     try {
-      // Step 1: Create the doctor bill
       const billData = {
-        name: selectedPaymentSource, // Use selected payment source name
+        name: selectedPaymentSource,
         amount: Number(amount) || 0,
         patient_id: Number(patientIdToBeUsed),
       };
@@ -173,37 +172,32 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({
   const handleCreatePayment = async (
     createdBill: CreatedBill
   ): Promise<boolean> => {
-    if (!user) {
-      setStatusMessage({ type: "error", message: "Missing user information" });
-      return false;
-    }
-
-    const departmentId = user.attributes?.department?.id;
-
-    if (!departmentId) {
-      setStatusMessage({
-        type: "error",
-        message: "Department information not available",
-      });
-      return false;
-    }
-
-    // Use the selected payment source name for payment source
     const paymentSourceName = selectedPaymentSource;
-    const doctorName = `${user.attributes.first_name} ${user.attributes.last_name}`;
 
-    // Parse the amount correctly - remove commas and convert to number
     const billAmount = parseFloat(
       createdBill.attributes.amount.replace(/,/g, "")
     );
 
+    // Fixed: Correctly access department_id from the created bill
+    const departmentId = createdBill?.attributes?.department_id;
+
+    console.log("Department ID from created bill:", departmentId);
+
+    if (!departmentId) {
+      setStatusMessage({
+        type: "error",
+        message: "Department information not available from created bill",
+      });
+      return false;
+    }
+
     const payload = {
-      payment_source: paymentSourceName, // Use selected payment source
+      payment_source: paymentSourceName,
       payment_type: "pending",
       total_amount: billAmount.toString(),
       part_amount: null,
       payment_method: "cash",
-      from_doctor: doctorName,
+      from_doctor: createdBill?.attributes?.created_by,
       patient_id: Number(patientIdToBeUsed),
       department_id: Number(departmentId),
       payments: [

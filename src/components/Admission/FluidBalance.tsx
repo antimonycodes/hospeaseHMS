@@ -353,19 +353,13 @@ const FluidBalance = ({ admissionId }: any) => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Type *
                   </label>
-                  <select
+                  <input
+                    type="text"
                     value={formData.type}
                     onChange={(e) => handleInputChange("type", e.target.value)}
-                    required
+                    // placeholder="0"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Select type</option>
-                    {typeOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
 
                 {/* IV Input */}

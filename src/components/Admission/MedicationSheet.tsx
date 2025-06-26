@@ -372,7 +372,15 @@ const MedicationSheet = ({ admissionId }: any) => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Medication Name <span className="text-red-500">*</span>
                   </label>
-                  <Select
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => handleInputChange("name", e.target.value)}
+                    placeholder="e.g., Paracetamol, Ibuprofen"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                  {/* <Select
                     options={medicationOptions}
                     value={
                       formData.name
@@ -400,7 +408,7 @@ const MedicationSheet = ({ admissionId }: any) => {
                         },
                       }),
                     }}
-                  />
+                  /> */}
                 </div>
 
                 {/* Dosage */}

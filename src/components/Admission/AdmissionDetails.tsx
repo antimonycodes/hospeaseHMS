@@ -16,7 +16,7 @@ const AdmissionDetails: React.FC = () => {
   const [reportNote, setReportNote] = useState("");
 
   const [showStatusModal, setShowStatusModal] = useState(false);
-  const [activeTab, setActiveTab] = useState("Clinical History");
+  const [activeTab, setActiveTab] = useState("Medical timeline");
   const { deptCreateReport, isCreating, getAllReport } = useReportStore();
 
   const navigate = useNavigate();
@@ -33,7 +33,7 @@ const AdmissionDetails: React.FC = () => {
   } = useAdmissionStore();
 
   const tabs = [
-    "Clinical History",
+    "Medical timeline",
     "Fluid Balance",
     "Medications",
     "TPR",
@@ -479,7 +479,7 @@ const AdmissionDetails: React.FC = () => {
         </div>
 
         {/* Tab Content */}
-        {activeTab === "Clinical History" && (
+        {activeTab === "Medical timeline" && (
           <div>
             {patient?.id && (
               <>

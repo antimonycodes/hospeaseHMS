@@ -170,8 +170,7 @@ const Bills = () => {
               <div>
                 <p className="text-gray-500">Created By</p>
                 <p className="text-xl font-bold">
-                  {billsData[0]?.attributes?.created_by?.first_name}{" "}
-                  {billsData[0]?.attributes?.created_by?.last_name}
+                  {billsData[0]?.attributes?.created_by}
                 </p>
               </div>
             </div>

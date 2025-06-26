@@ -1,9 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Search, Filter, User, Bed, AlertTriangle, Clock } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import {
+  Search,
+  Filter,
+  User,
+  Bed,
+  AlertTriangle,
+  Clock,
+  Eye,
+} from "lucide-react";
+// import { useNavigate } from "react-router-dom";
 import { useAdmissionStore } from "../../store/super-admin/useAdmissionStore";
 import Loader from "../../Shared/Loader";
 import Table from "../../Shared/Table";
+import { useNavigate } from "react-router-dom";
 
 interface NextOfKin {
   [key: string]: any;
@@ -80,6 +89,7 @@ type AdmissionTableData = {
   diagnosis: string;
   status: string;
   totalStay: string;
+  actions?: string;
 };
 
 type Column = {
@@ -105,14 +115,18 @@ interface ApiResponse {
 
 const AdmissionOverview: React.FC = () => {
   const { admissionList, isLoading, allAdmission } = useAdmissionStore();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState<"admitted" | "discharged">(
+    "admitted"
+  );
   const [filteredPatients, setFilteredPatients] = useState<AdmissionRecord[]>(
     []
   );
   const [formattedAdmissions, setFormattedAdmissions] = useState<
     AdmissionTableData[]
   >([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Fetch admission data on component mount
@@ -120,11 +134,27 @@ const AdmissionOverview: React.FC = () => {
   }, [allAdmission]);
 
   useEffect(() => {
-    // Filter patients based on search term
-    if (searchTerm.trim() === "") {
-      setFilteredPatients(admissionList);
+    // Filter patients based on tab and search term
+    let tabFilteredPatients = admissionList;
+
+    // Filter by tab first
+    if (activeTab === "discharged") {
+      tabFilteredPatients = admissionList.filter(
+        (admission) =>
+          admission.attributes.status.toLowerCase() === "discharged"
+      );
     } else {
-      const filtered = admissionList.filter((admission) => {
+      tabFilteredPatients = admissionList.filter(
+        (admission) =>
+          admission.attributes.status.toLowerCase() !== "discharged"
+      );
+    }
+
+    // Then filter by search term
+    if (searchTerm.trim() === "") {
+      setFilteredPatients(tabFilteredPatients);
+    } else {
+      const filtered = tabFilteredPatients.filter((admission) => {
         const patientName =
           `${admission.attributes.patient.attributes.first_name} ${admission.attributes.patient.attributes.last_name}`.toLowerCase();
         const patientId =
@@ -142,7 +172,7 @@ const AdmissionOverview: React.FC = () => {
       });
       setFilteredPatients(filtered);
     }
-  }, [admissionList, searchTerm]);
+  }, [admissionList, searchTerm, activeTab]);
 
   // Format admissions for table
   useEffect(() => {
@@ -164,6 +194,12 @@ const AdmissionOverview: React.FC = () => {
 
   // Calculate statistics from the actual data
   const totalPatients = admissionList.length;
+  const admittedPatients = admissionList.filter(
+    (admission) => admission.attributes.status.toLowerCase() !== "discharged"
+  ).length;
+  const dischargedPatients = admissionList.filter(
+    (admission) => admission.attributes.status.toLowerCase() === "discharged"
+  ).length;
   const criticalCases = admissionList.filter((admission) =>
     admission.attributes.status.toLowerCase().includes("critical")
   ).length;
@@ -198,12 +234,37 @@ const AdmissionOverview: React.FC = () => {
 
   const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
     const baseClasses = "px-3 py-1 rounded-full text-xs font-medium";
-    const statusClasses = status.toLowerCase().includes("critical")
-      ? "bg-red-100 text-red-700"
-      : "bg-green-100 text-green-700";
+    let statusClasses = "";
+
+    if (status.toLowerCase().includes("critical")) {
+      statusClasses = "bg-red-100 text-red-700";
+    } else if (status.toLowerCase() === "discharged") {
+      statusClasses = "bg-gray-100 text-gray-700";
+    } else if (status.toLowerCase().includes("ready for discharge")) {
+      statusClasses = "bg-yellow-100 text-yellow-700";
+    } else {
+      statusClasses = "bg-green-100 text-green-700";
+    }
 
     return <span className={`${baseClasses} ${statusClasses}`}>{status}</span>;
   };
+
+  const TabButton: React.FC<{
+    tab: "admitted" | "discharged";
+    label: string;
+    count: number;
+  }> = ({ tab, label, count }) => (
+    <button
+      onClick={() => setActiveTab(tab)}
+      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+        activeTab === tab
+          ? " text-primary border border-primary"
+          : "text-gray-600 "
+      }`}
+    >
+      {label} ({count})
+    </button>
+  );
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -220,6 +281,17 @@ const AdmissionOverview: React.FC = () => {
   // Handle row click navigation
   const handleRowClick = (admission: AdmissionTableData) => {
     navigate(`/dashboard/admission-details/${admission.id}`);
+    // console.log("Navigate to:", `/dashboard/admission-details/${admission.id}`);
+  };
+
+  // Handle view more action
+  const handleViewMore = (
+    admission: AdmissionTableData,
+    event: React.MouseEvent
+  ) => {
+    event.stopPropagation(); // Prevent row click when clicking the button
+    navigate(`/dashboard/admission-details/${admission.id}`);
+    // console.log("View more for patient:", admission.id);
   };
 
   // Handle page change (if you implement pagination later)
@@ -284,6 +356,19 @@ const AdmissionOverview: React.FC = () => {
         <span className="text-[#667085] text-sm">{row.totalStay}</span>
       ),
     },
+    {
+      key: "actions",
+      label: "Actions",
+      render: (_, row) => (
+        <button
+          onClick={(e) => handleViewMore(row, e)}
+          className="inline-flex items-center gap-1 px-3 py-1 text-sm text-primary  rounded-md transition-colors"
+        >
+          {/* <Eye size={14} /> */}
+          View More
+        </button>
+      ),
+    },
   ];
 
   if (isLoading) {
@@ -304,7 +389,7 @@ const AdmissionOverview: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
             title="TOTAL PATIENTS"
-            value={totalPatients}
+            value={admittedPatients}
             icon={<User size={24} />}
             bgColor="bg-green-100"
             iconColor="text-green-600"
@@ -332,15 +417,12 @@ const AdmissionOverview: React.FC = () => {
           />
         </div>
 
-        {/* Patients Table */}
+        {/* Patients Table with Tabs */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-900">
-                Patients on Admission{" "}
-                <span className="text-primary text-sm ml-2">
-                  {totalPatients}
-                </span>
+                Patient Admissions
               </h2>
               <div className="flex items-center gap-3">
                 <div className="relative">
@@ -361,6 +443,20 @@ const AdmissionOverview: React.FC = () => {
                 </button>
               </div>
             </div>
+
+            {/* Tabs */}
+            <div className="flex items-center gap-2">
+              <TabButton
+                tab="admitted"
+                label="Admitted"
+                count={admittedPatients}
+              />
+              <TabButton
+                tab="discharged"
+                label="Discharged"
+                count={dischargedPatients}
+              />
+            </div>
           </div>
 
           {/* Use the Table component */}
@@ -378,8 +474,8 @@ const AdmissionOverview: React.FC = () => {
               radius="rounded-none" // Remove border radius since parent has it
               emptyMessage={
                 searchTerm
-                  ? "No patients found matching your search."
-                  : "No admission records found."
+                  ? `No ${activeTab} patients found matching your search.`
+                  : `No ${activeTab} records found.`
               }
             />
           </div>
@@ -388,7 +484,11 @@ const AdmissionOverview: React.FC = () => {
           <div className="px-6 py-4 border-t border-gray-200">
             <div className="flex items-center justify-between">
               <p className="text-sm text-gray-700">
-                Showing {formattedAdmissions.length} of {totalPatients} results
+                Showing {formattedAdmissions.length} of{" "}
+                {activeTab === "admitted"
+                  ? admittedPatients
+                  : dischargedPatients}{" "}
+                {activeTab} results
               </p>
               {/* Add pagination controls here if needed */}
             </div>

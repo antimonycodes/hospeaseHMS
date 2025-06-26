@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import Button from "../../../Shared/Button";
 import Loader from "../../../Shared/Loader";
+import PaymentReceipt from "./PaymentReceipt"; // Import your receipt component
 
 const InfoRow = ({
   label,
@@ -74,8 +75,12 @@ const PaymentDetails = () => {
   const [showRefundModal, setShowRefundModal] = useState(false);
   const [refundType, setRefundType] = useState<"full" | "partial">("full");
   const [refundAmountInput, setRefundAmountInput] = useState("");
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [receiptData, setReceiptData] = useState<any>(null);
+
   const attributes = selectedPayment?.attributes || {};
   const serviceCharges = attributes.purchased_item || [];
+
   // Add payment method options
   const paymentMethods = [
     { value: "cash", label: "Cash" },
@@ -110,6 +115,43 @@ const PaymentDetails = () => {
       const success = await refundPayment(selectedPayment.id, payload);
       if (success) {
         await getPaymentById(selectedPayment.id);
+
+        // Prepare receipt data for refund
+        const receiptItems = serviceCharges.map((item: any) => ({
+          id: item.id,
+          attributes: {
+            amount: parseFloat(item.attributes.amount),
+            name: item.attributes.items_purchased,
+            isPharmacy: false, // Adjust as needed
+          },
+          quantity: item.attributes.quantity || 1,
+          total:
+            parseFloat(item.attributes.amount) *
+            (item.attributes.quantity || 1),
+        }));
+
+        setReceiptData({
+          receiptNumber: selectedPayment.id,
+          paymentDate: new Date(),
+          selectedPatient: {
+            id: attributes.patient?.id,
+            attributes: {
+              first_name: attributes.patient?.first_name,
+              last_name: attributes.patient?.last_name,
+              card_id: attributes.patient?.card_id || "",
+            },
+          },
+          selectedItems: receiptItems,
+          totalAmount: parseFloat(attributes.amount?.replace(/,/g, "") || 0),
+          paymentMethod: selectedPaymentMethod,
+          paymentType: refundType === "full" ? "refunded" : "partial-refund",
+          partAmount:
+            refundType === "partial"
+              ? parseFloat(refundAmountInput)
+              : undefined,
+        });
+
+        setShowReceipt(true);
         setShowRefundModal(false);
       }
     } catch (error) {
@@ -204,9 +246,8 @@ const PaymentDetails = () => {
 
     const payload = {
       payment_type: paymentTypeToUse,
-      // totalAmount: totalAmount,
       amount_paid: amount,
-      payment_method: selectedPaymentMethod, // Use the selected payment method
+      payment_method: selectedPaymentMethod,
     };
 
     setIsSubmitting(true);
@@ -214,6 +255,40 @@ const PaymentDetails = () => {
       const result = await updatePayment(id, payload);
       if (result) {
         await getPaymentById(id ?? "");
+
+        // Prepare receipt data for payment
+        const receiptItems = serviceCharges.map((item: any) => ({
+          id: item.id,
+          attributes: {
+            amount: parseFloat(item.attributes.amount),
+            name: item.attributes.items_purchased,
+            isPharmacy: false, // Adjust as needed
+          },
+          quantity: item.attributes.quantity || 1,
+          total:
+            parseFloat(item.attributes.amount) *
+            (item.attributes.quantity || 1),
+        }));
+
+        setReceiptData({
+          receiptNumber: selectedPayment.id,
+          paymentDate: new Date(),
+          selectedPatient: {
+            id: attributes.patient?.id,
+            attributes: {
+              first_name: attributes.patient?.first_name,
+              last_name: attributes.patient?.last_name,
+              card_id: attributes.patient?.card_id || "",
+            },
+          },
+          selectedItems: receiptItems,
+          totalAmount: parseFloat(attributes.amount?.replace(/,/g, "") || 0),
+          paymentMethod: selectedPaymentMethod,
+          paymentType: paymentTypeToUse,
+          partAmount: paymentTypeToUse === "part" ? amount : undefined,
+        });
+
+        setShowReceipt(true);
         setShowPaymentModal(false);
       }
     } catch (error) {
@@ -494,6 +569,21 @@ const PaymentDetails = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Receipt Modal */}
+      {showReceipt && receiptData && (
+        <PaymentReceipt
+          onClose={() => setShowReceipt(false)}
+          receiptNumber={receiptData.receiptNumber}
+          paymentDate={receiptData.paymentDate}
+          selectedPatient={receiptData.selectedPatient}
+          selectedItems={receiptData.selectedItems}
+          totalAmount={receiptData.totalAmount}
+          paymentMethod={receiptData.paymentMethod}
+          paymentType={receiptData.paymentType}
+          partAmount={receiptData.partAmount}
+        />
       )}
     </div>
   );
