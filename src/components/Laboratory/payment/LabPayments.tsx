@@ -5,6 +5,11 @@ import { useFinanceStore } from "../../../store/staff/useFinanceStore";
 import { useNavigate } from "react-router-dom";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 
+interface Department {
+  id: number;
+  name: string;
+}
+
 interface PaymentAttributes {
   patient: { id: number; first_name: string; last_name: string };
   amount: string;
@@ -14,8 +19,9 @@ interface PaymentAttributes {
   is_active?: boolean;
   user_id: string;
   created_at: string;
-  id: number; // Added id
-  department: { name: string };
+  id: number;
+  department: Department[]; // Changed from single object to array
+  payment_source?: string;
 }
 
 interface PaymentData {
@@ -85,6 +91,15 @@ const LabPaymnets = () => {
     );
   }, [payments]);
 
+  // Helper function to format department names
+  const formatDepartmentNames = (departments: Department[]): string => {
+    if (!departments || departments.length === 0) {
+      return "N/A";
+    }
+
+    return departments.map((dept) => dept.name).join(", ");
+  };
+
   // const baseEndpoint = "/medical-report/patient-payment-history";
 
   const [perPage, setPerPage] = useState(pagination?.per_page || 10);
@@ -117,7 +132,7 @@ const LabPaymnets = () => {
       label: "Department",
       render: (_, row) => (
         <span className="text-[#667085] text-sm">
-          {row.department?.name || "N/A"}
+          {formatDepartmentNames(row.department)}
         </span>
       ),
     },
