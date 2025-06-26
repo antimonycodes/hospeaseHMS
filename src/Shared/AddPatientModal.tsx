@@ -6,6 +6,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useGlobalStore } from "../store/super-admin/useGlobal";
 import { useCombinedStore } from "../store/super-admin/useCombinedStore";
+import toast from "react-hot-toast";
 
 interface AddPatientModalProps {
   onClose: () => void;
@@ -89,15 +90,15 @@ const AddPatientModal = ({
 
   const handleSubmit = async () => {
     // Validate required fields
-    if (!patient.branch_id || !patient.patient_category_id) {
-      alert("Please select both Branch and Category");
+    if (!patient.branch_id) {
+      toast.error("Please select a Branch");
       return;
     }
 
-    // Debug: Log the patient data before submission
-    console.log("Patient data before submission:", patient);
-    console.log("Branch ID:", patient.branch_id);
-    console.log("Category ID:", patient.patient_category_id);
+    // // Debug: Log the patient data before submission
+    // console.log("Patient data before submission:", patient);
+    // console.log("Branch ID:", patient.branch_id);
+    // console.log("Category ID:", patient.patient_category_id);
 
     // Prepare the payload with proper data types
     const payload = {
@@ -116,7 +117,7 @@ const AddPatientModal = ({
       next_of_kin: [nextOfKin],
     };
 
-    console.log("Final payload being sent:", payload);
+    // console.log("Final payload being sent:", payload);
 
     try {
       const response = await createPatient(payload, endpoint);
@@ -124,7 +125,7 @@ const AddPatientModal = ({
         onClose();
       }
     } catch (error) {
-      console.error("Error creating patient:", error);
+      // console.error("Error creating patient:", error);
     }
   };
 

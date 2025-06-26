@@ -18,7 +18,6 @@ import { useGlobalStore } from "../store/super-admin/useGlobal";
 import { useReportStore } from "../store/super-admin/useReoprt";
 import PaymentReceipt from "../components/Finance/payment/PaymentReceipt";
 import ItemSelection from "../components/Finance/payment/ItemSelection";
-// import PaymentDetails from "../components/Finance/payment/PaymentDetails";
 import PaymentSummary from "../components/Finance/payment/PaymentSummary";
 import PaymentDetails from "../components/Finance/payment/PaymentDeets";
 
@@ -58,6 +57,7 @@ export interface Item {
     name: string;
     isPharmacy: boolean;
     availableQuantity?: number;
+    departmentId: string | number; // Add department tracking
   };
   quantity: number;
   total: number;
@@ -182,10 +182,6 @@ const PatientSearch: React.FC<{
   );
 };
 
-// ItemSelection Component
-
-// PaymentDetails Component
-
 // Main AddPaymentModal Component
 const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
   onClose,
@@ -215,6 +211,8 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
   const [patientOptions, setPatientOptions] = useState<Patient[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [selectedItems, setSelectedItems] = useState<Item[]>([]);
+  const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]); // Array of selected departments
+  const [currentDepartment, setCurrentDepartment] = useState(""); // Currently active department for selection
   const [paymentMethod, setPaymentMethod] = useState("");
   const [paymentType, setPaymentType] = useState("");
   const [showSummary, setShowSummary] = useState(false);
@@ -224,7 +222,6 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
   const [paymentComplete, setPaymentComplete] = useState(false);
   const [receiptNumber, setReceiptNumber] = useState("");
   const [paymentDate, setPaymentDate] = useState<Date | null>(null);
-  const [departmentId, setDepartmentId] = useState("");
   const [partAmount, setPartAmount] = useState("");
   const [hmoDiscount, setHmoDiscount] = useState(0);
 
@@ -292,6 +289,44 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
     0
   );
 
+  // Handle department selection
+  const handleDepartmentChange = (departmentId: string) => {
+    setCurrentDepartment(departmentId);
+
+    // Add to selected departments if not already included
+    if (departmentId && !selectedDepartments.includes(departmentId)) {
+      setSelectedDepartments((prev) => [...prev, departmentId]);
+    }
+  };
+
+  // Remove department and its associated items
+  const removeDepartment = (departmentId: string) => {
+    setSelectedDepartments((prev) => prev.filter((id) => id !== departmentId));
+    setSelectedItems((prev) =>
+      prev.filter((item) => item.attributes.departmentId !== departmentId)
+    );
+
+    // If removing current department, reset current department
+    if (currentDepartment === departmentId) {
+      setCurrentDepartment("");
+    }
+
+    toast.success("Department and its items removed");
+  };
+
+  // Get department name by ID
+  const getDepartmentName = (departmentId: string) => {
+    const dept = departmentOptions.find((d) => d.id === departmentId);
+    return dept?.name || "Unknown Department";
+  };
+
+  // Get items count by department
+  const getItemsCountByDepartment = (departmentId: string) => {
+    return selectedItems.filter(
+      (item) => item.attributes.departmentId === departmentId
+    ).length;
+  };
+
   const handleSubmit = async () => {
     const payload = {
       payment_source: paymentSource,
@@ -300,7 +335,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
       part_amount: paymentType === "full" ? null : partAmount,
       payment_method: paymentMethod,
       patient_id: Number(selectedPatient?.id),
-      department_id: Number(departmentId),
+      department_id: selectedDepartments.map((id) => Number(id)), // Array of department IDs
       payments: selectedItems.map((item) => ({
         patient_id: Number(selectedPatient?.id),
         amount: item.total,
@@ -308,6 +343,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
         request_pharmacy_id: item.attributes.isPharmacy
           ? Number(item.id)
           : null,
+        doctor_bill_id: null,
         quantity: item.quantity,
         item_name: item.attributes.name,
       })),
@@ -332,7 +368,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
     !selectedPatient ||
     !paymentMethod ||
     !paymentType ||
-    !departmentId;
+    selectedDepartments.length === 0;
 
   const formatAmount = (amount: number): string => {
     return amount.toLocaleString("en-NG", {
@@ -382,34 +418,70 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
             isLoading={isLoading}
             searchPatients={searchPatients}
           />
+
           {selectedPatient && (
-            <div className="mb-6">
-              <label
-                htmlFor="departmentId"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Department*
-              </label>
-              <select
-                id="departmentId"
-                name="departmentId"
-                value={departmentId}
-                onChange={(e) => {
-                  setDepartmentId(e.target.value);
-                  setSelectedItems([]);
-                }}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 outline-none focus:ring-primary focus:border-primary bg-white"
-              >
-                <option value="">Select Department</option>
-                {departmentOptions.map((dept) => (
-                  <option key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <>
+              {/* Department Selection */}
+              <div className="mb-6">
+                <label
+                  htmlFor="currentDepartment"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Select Department to Add Items*
+                </label>
+                <select
+                  id="currentDepartment"
+                  name="currentDepartment"
+                  value={currentDepartment}
+                  onChange={(e) => handleDepartmentChange(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 outline-none focus:ring-primary focus:border-primary bg-white"
+                >
+                  <option value="">Select Department</option>
+                  {departmentOptions.map((dept) => (
+                    <option key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Selected Departments Summary */}
+              {selectedDepartments.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium text-gray-700 mb-3">
+                    Selected Departments ({selectedDepartments.length})
+                  </h3>
+                  <div className="space-y-2">
+                    {selectedDepartments.map((deptId) => (
+                      <div
+                        key={deptId}
+                        className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3"
+                      >
+                        <div className="flex items-center">
+                          <div className="w-3 h-3 bg-primary rounded-full mr-3"></div>
+                          <span className="font-medium text-primary">
+                            {getDepartmentName(deptId)}
+                          </span>
+                          <span className="ml-2 text-sm text-primary/70">
+                            ({getItemsCountByDepartment(deptId)} items)
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => removeDepartment(deptId)}
+                          className="text-red-500 hover:text-red-700 p-1"
+                          title="Remove department and all its items"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
-          {departmentId && (
+
+          {currentDepartment && (
             <>
               <ItemSelection
                 activeTab={activeTab}
@@ -420,7 +492,7 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                 setIsSelectOpen={setIsSelectOpen}
                 itemSearch={itemSearch}
                 setItemSearch={setItemSearch}
-                departmentId={departmentId}
+                departmentId={currentDepartment}
                 items={items as ServiceItem[]}
                 pharmacyStocks={pharmacyStocks as PharmacyStock[]}
                 roles={roles}
@@ -454,7 +526,8 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
             </p>
             {selectedItems.length > 0 && (
               <p className="text-sm text-gray-500">
-                {selectedItems.length} item(s)
+                {selectedItems.length} item(s) from {selectedDepartments.length}{" "}
+                department(s)
               </p>
             )}
           </div>
@@ -463,7 +536,9 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
               <button
                 onClick={() => setActiveTab("payment")}
                 className="bg-primary text-white px-6 py-3 rounded-lg font-medium flex items-center"
-                disabled={selectedItems.length === 0 || !departmentId}
+                disabled={
+                  selectedItems.length === 0 || selectedDepartments.length === 0
+                }
               >
                 Continue to Payment
               </button>

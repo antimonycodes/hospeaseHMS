@@ -5,6 +5,11 @@ import { useFinanceStore } from "../../../store/staff/useFinanceStore";
 import { useNavigate } from "react-router-dom";
 import PaymentTableFilter, { FilterValues } from "./PaymentTableFilters";
 
+interface Department {
+  id: number;
+  name: string;
+}
+
 interface PaymentAttributes {
   from_doctor: string;
   patient: { id: number; first_name: string; last_name: string };
@@ -16,7 +21,7 @@ interface PaymentAttributes {
   user_id: string;
   created_at: string;
   id: number;
-  department: { name: string };
+  department: Department[]; // Changed from single object to array
   payment_source?: string;
 }
 
@@ -76,6 +81,7 @@ const PaymentTypeBadge = ({
           text: "text-[#F83E41]",
           label: "Pending",
         };
+      case "refund":
       case "refunded":
         return {
           bg: "bg-[#E1F5FE]",
@@ -106,6 +112,15 @@ const PaymentTypeBadge = ({
       {label}
     </span>
   );
+};
+
+// Helper function to format department names
+const formatDepartmentNames = (departments: Department[]): string => {
+  if (!departments || departments.length === 0) {
+    return "N/A";
+  }
+
+  return departments.map((dept) => dept.name).join(", ");
 };
 
 const FpaymentTable = ({
@@ -149,11 +164,12 @@ const FpaymentTable = ({
         }))
       );
 
-      // Extract unique departments
+      // Extract unique departments - Updated to handle array structure
       const departments = Array.from(
         new Set(
           payments
-            .map((payment) => payment.attributes?.department?.name)
+            .flatMap((payment) => payment.attributes?.department || [])
+            .map((dept) => dept.name)
             .filter((name): name is string => name !== undefined)
         )
       );
@@ -259,7 +275,7 @@ const FpaymentTable = ({
       label: "Department",
       render: (_, row) => (
         <span className="text-[#667085] text-sm">
-          {row.department?.name || "N/A"}
+          {formatDepartmentNames(row.department)}
         </span>
       ),
     },

@@ -445,10 +445,10 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   createPatient: async (data, endpoint = "/admin/patient/create") => {
     set({ isLoading: true });
     try {
-      // Debug: Log what we're receiving
-      console.log("Data received in createPatient:", data);
-      console.log("Branch ID received:", data.branch_id);
-      console.log("Category ID received:", data.patient_category_id);
+      // // Debug: Log what we're receiving
+      // console.log("Data received in createPatient:", data);
+      // console.log("Branch ID received:", data.branch_id);
+      // console.log("Category ID received:", data.patient_category_id);
 
       const payload = {
         ...data,
@@ -456,8 +456,8 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
         patient_category_id: data.patient_category_id ?? null,
       };
 
-      // Debug: Log the final payload
-      console.log("Final payload being sent:", payload);
+      // // Debug: Log the final payload
+      // console.log("Final payload being sent:", payload);
 
       const response = await api.post(endpoint, payload);
       if (response.status === 201) {
@@ -473,7 +473,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
       }
       return null;
     } catch (error: any) {
-      console.error("Error in createPatient:", error.response?.data);
+      console.error("Error in createPatient:", error.response?.message);
       return null;
     } finally {
       set({ isLoading: false });
