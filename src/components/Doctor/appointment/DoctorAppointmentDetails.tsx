@@ -20,6 +20,7 @@ import DoctorBillForm from "../DoctorBillForm";
 import Button from "../../../Shared/Button";
 import AdmitPatientModal from "../../../Shared/AdmitPatientModal";
 import DoctorReportSystem from "../../Admission/DoctorReportSystem";
+import PatientDiagnosis from "../diagnosis/PatientDiagnosis";
 
 // InfoRow reusable component
 type InfoRowItem = {
@@ -458,6 +459,13 @@ const DoctorAppointmentDetails = () => {
                 },
                 { label: "House Address", value: nextOfKin?.address },
               ]}
+            />
+            <PatientDiagnosis
+              patientId={
+                selectedAppointment?.attributes?.patient?.id
+                  ? Number(selectedAppointment?.attributes?.patient?.id)
+                  : 0
+              }
             />
           </>
         )}

@@ -11,6 +11,7 @@ import { useRole } from "../../hooks/useRole";
 import MedicalTimeline from "../../Shared/MedicalTimeline";
 import DoctorReportSystem from "./DoctorReportSystem";
 import { useReportStore } from "../../store/super-admin/useReoprt";
+import PatientDiagnosis from "../Doctor/diagnosis/PatientDiagnosis";
 
 const AdmissionDetails: React.FC = () => {
   const [reportNote, setReportNote] = useState("");
@@ -368,6 +369,8 @@ const AdmissionDetails: React.FC = () => {
             </div>
           </div>
         </div>
+
+        <PatientDiagnosis patientId={id ? Number(patient?.id) : 0} />
 
         <hr className="text-[#979797]" />
 
