@@ -31,6 +31,7 @@ import AdmitPatientModal from "../../Shared/AdmitPatientModal";
 import Input from "../../Shared/Input";
 import { useFinanceStore } from "../../store/staff/useFinanceStore";
 import DoctorBillForm from "./DoctorBillForm";
+import PatientDiagnosis from "./diagnosis/PatientDiagnosis";
 
 export const CLINICAL_COMPLAINTS_GROUPED = [
   {
@@ -606,6 +607,7 @@ const DoctorPatientDetails = () => {
               </Link>
             </div>
             {/*  */}
+            {/*  */}
             {patient.is_admitted !== true ? (
               <Button onClick={() => setIsAdmitModalOpen((prev) => !prev)}>
                 Admit Patient
@@ -639,6 +641,8 @@ const DoctorPatientDetails = () => {
                 value={patient.address}
               />
             </div>
+            <PatientDiagnosis patientId={id ? Number(id) : 0} />
+
             <hr className="text-[#979797]" />
             <div className="">
               <div className="">

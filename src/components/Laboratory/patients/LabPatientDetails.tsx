@@ -1,28 +1,15 @@
-import React, { useEffect, useState, useRef } from "react";
+// LabPatientDetails.tsx
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import { useReportStore } from "../../../store/super-admin/useReoprt";
 import Loader from "../../../Shared/Loader";
-import {
-  Loader2,
-  FileText,
-  Download,
-  Search,
-  Eye,
-  Save,
-  User,
-  Calendar,
-  Clock,
-  TestTube,
-  ChevronDown,
-  ChevronRight,
-  Microscope,
-  Activity,
-  ChevronLeft,
-} from "lucide-react";
+import { ChevronLeft, TestTube } from "lucide-react";
 import LabMedicalTimeline from "./LabMedicalTimeline";
-import jsPDF from "jspdf";
-import { labTests } from "./utils";
+import TestSelectionPanel from "./TestSelectionPanel";
+import TestParametersPanel from "./TestParametersPanel";
+import ReportPreviewModal from "./ReportPreviewModal";
+import { labTests } from "./labTestData";
 
 const LabPatientDetails = () => {
   const { patientId, caseId } = useParams();
@@ -37,13 +24,12 @@ const LabPatientDetails = () => {
   const selectedPatient = usePatientStore((state) => state.selectedPatient);
   const isLoading = usePatientStore((state) => state.isLoading);
 
-  // Enhanced state management
-  type TestResults = { [key: string]: string | number | undefined } & {
-    comments?: string;
-  };
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedTest, setSelectedTest] = useState("");
-  const [testResults, setTestResults] = useState<TestResults>({});
+  const [selectedTests, setSelectedTests] = useState<{
+    [category: string]: string[];
+  }>({});
+  const [testResults, setTestResults] = useState<{
+    [testName: string]: { [param: string]: string | number };
+  }>({});
   const [file, setFile] = useState<File | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showPreview, setShowPreview] = useState(false);
@@ -51,33 +37,9 @@ const LabPatientDetails = () => {
   const [expandedCategories, setExpandedCategories] = useState<
     Record<string, boolean>
   >({});
-  const [additionalFiles, setAdditionalFiles] = useState([]);
+  const [additionalFiles, setAdditionalFiles] = useState<File[]>([]);
 
   const navigate = useNavigate();
-
-  // Comprehensive lab test categories and parameters
-  type LabTestParameter = {
-    name: string;
-    unit: string;
-    normalRange: string;
-    type: string;
-    options?: string[];
-  };
-
-  type LabTest = {
-    parameters: LabTestParameter[];
-  };
-
-  type LabTestCategory = {
-    icon: React.ReactNode;
-    tests: {
-      [testName: string]: LabTest;
-    };
-  };
-
-  type LabTestsType = {
-    [category: string]: LabTestCategory;
-  };
 
   useEffect(() => {
     if (patientId) {
@@ -88,19 +50,53 @@ const LabPatientDetails = () => {
 
   const patient = selectedPatient?.attributes;
 
-  const handleTestSelect = (
-    category: React.SetStateAction<string>,
-    test: React.SetStateAction<string>
-  ) => {
-    setSelectedCategory(category);
-    setSelectedTest(test);
-    setTestResults({});
+  const handleTestSelect = (category: string, testName: string) => {
+    setSelectedTests((prev) => {
+      const newSelectedTests = { ...prev };
+      if (!newSelectedTests[category]) {
+        newSelectedTests[category] = [];
+      }
+
+      if (newSelectedTests[category].includes(testName)) {
+        // Remove test if already selected
+        newSelectedTests[category] = newSelectedTests[category].filter(
+          (t) => t !== testName
+        );
+        if (newSelectedTests[category].length === 0) {
+          delete newSelectedTests[category];
+        }
+      } else {
+        // Add test if not selected
+        newSelectedTests[category].push(testName);
+      }
+
+      return newSelectedTests;
+    });
+
+    // Initialize empty results for new test
+    if (!testResults[testName]) {
+      const initialResults: { [param: string]: string | number } = {};
+      labTests[category].tests[testName].parameters.forEach((param) => {
+        initialResults[param.name] = "";
+      });
+      setTestResults((prev) => ({
+        ...prev,
+        [testName]: initialResults,
+      }));
+    }
   };
 
-  const handleParameterChange = (paramName: string, value: string) => {
+  const handleParameterChange = (
+    testName: string,
+    paramName: string,
+    value: string
+  ) => {
     setTestResults((prev) => ({
       ...prev,
-      [paramName]: value,
+      [testName]: {
+        ...prev[testName],
+        [paramName]: value,
+      },
     }));
   };
 
@@ -115,7 +111,7 @@ const LabPatientDetails = () => {
     const currentDate = new Date();
     return {
       hospitalName: "Hospital Management System",
-      reportTitle: "LABORATORY REPORT",
+      reportTitle: "COMPREHENSIVE LABORATORY REPORT",
       patientInfo: {
         name: `${patient?.first_name || ""} ${patient?.last_name || ""}`.trim(),
         patientId: patient?.card_id || "",
@@ -124,144 +120,52 @@ const LabPatientDetails = () => {
         phone: patient?.phone_number || "",
         address: patient?.address || "",
       },
-      testInfo: {
-        category: selectedCategory,
-        test: selectedTest,
+      reportInfo: {
         date: currentDate.toLocaleDateString(),
         time: currentDate.toLocaleTimeString(),
       },
     };
   };
 
-  const generateReportImage = () => {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    if (!ctx) {
-      throw new Error("Failed to get 2D context for canvas.");
-    }
-
-    // Set canvas size (standard letter size at 96 DPI)
-    canvas.width = 816; // 8.5 inches * 96 DPI
-    canvas.height = 1056; // 11 inches * 96 DPI
-
-    // White background
-    ctx.fillStyle = "white";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Add border
-    ctx.strokeStyle = "#ccc";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
-
-    const header = generatePatientReportHeader();
-
-    // Header
-    ctx.fillStyle = "#333";
-    ctx.font = "bold 28px Arial";
-    ctx.fillText("LABORATORY REPORT", 50, 80);
-
-    // Underline
-    ctx.beginPath();
-    ctx.moveTo(50, 90);
-    ctx.lineTo(400, 90);
-    ctx.strokeStyle = "#333";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // Patient Information Section
-    ctx.font = "bold 18px Arial";
-    ctx.fillText("Patient Information:", 50, 140);
-
-    ctx.font = "16px Arial";
-    let yPos = 170;
-    const patientInfo = [
-      `Name: ${header.patientInfo?.name || "N/A"}`,
-      `ID: ${header.patientInfo?.patientId || "N/A"}`,
-      `Date: ${header.testInfo?.date || new Date().toLocaleDateString()}`,
-      `Test Category: ${selectedCategory}`,
-      `Test Name: ${selectedTest}`,
-    ];
-
-    patientInfo.forEach((info) => {
-      ctx.fillText(info, 70, yPos);
-      yPos += 25;
-    });
-
-    // Test Results Section
-    yPos += 20;
-    ctx.font = "bold 18px Arial";
-    ctx.fillText("Test Results:", 50, yPos);
-
-    yPos += 30;
-    ctx.font = "16px Arial";
-
-    if (Object.keys(testResults).length > 0) {
-      Object.entries(testResults).forEach(([key, value]) => {
-        ctx.fillText(`${key}: ${value}`, 70, yPos);
-        yPos += 25;
-      });
-    } else {
-      ctx.fillText("No results available", 70, yPos);
-    }
-
-    // Footer
-    ctx.font = "12px Arial";
-    ctx.fillStyle = "#666";
-    ctx.fillText(
-      `Generated on: ${new Date().toLocaleString()}`,
-      50,
-      canvas.height - 60
-    );
-    ctx.fillText(`Status: ${status}`, 50, canvas.height - 40);
-
-    return canvas;
-  };
   const handleReportSubmit = async () => {
-    // if (!selectedTest || Object.keys(testResults).length === 0  ) {
-    //   alert("Please select a test and fill in the results");
-    //   return;
-    // }
-
     try {
-      // Create form data object
-      const formData = {
-        note: `Digital Lab Report: ${selectedTest}`,
+      // Define the formData type properly
+      const formData: {
+        note: string;
+        status: string;
+        file?: File;
+        testResults: {};
+        patientHeader: any;
+      } = {
+        note: "Comprehensive Laboratory Report",
         status,
-        file: file, // Use the external file directly if it exists
-        testCategory: selectedCategory,
-        testName: selectedTest,
-        testResults: testResults,
+        testResults: {},
         patientHeader: generatePatientReportHeader(),
       };
 
-      // Only generate inline file if no external file is provided
-      if (!file) {
-        const canvas = generateReportImage();
-
-        // Convert canvas to blob
-        const blob = await new Promise((resolve) => {
-          canvas.toBlob(resolve, "image/png", 0.95);
+      // Structure test results by category
+      const structuredResults: { [category: string]: any } = {};
+      Object.entries(selectedTests).forEach(([category, tests]) => {
+        structuredResults[category] = {};
+        tests.forEach((testName) => {
+          structuredResults[category][testName] = testResults[testName];
         });
+      });
 
-        const generatedFile = new File(
-          [blob as BlobPart],
-          `Lab_Report_${selectedTest}_${
-            new Date().toISOString().split("T")[0]
-          }.png`,
-          { type: "image/png" }
-        );
+      formData.testResults = structuredResults;
 
-        formData.file = generatedFile;
+      // Only add file if one is provided
+      if (file) {
+        formData.file = file;
       }
 
       const success = await respondToReport(caseId, formData);
       if (success) {
         await getSingleReport(patientId);
+        setSelectedTests({});
         setTestResults({});
-        setSelectedTest("");
-        setSelectedCategory("");
         setStatus("In Progress");
-        setFile(null); // Reset the file input
+        setFile(null);
         alert("Lab report submitted successfully!");
       }
     } catch (error) {
@@ -269,47 +173,10 @@ const LabPatientDetails = () => {
       alert("Error generating report. Please try again.");
     }
   };
-  const downloadReport = () => {
-    try {
-      const canvas = generateReportImage();
 
-      // Convert to blob and download
-      canvas.toBlob(
-        (blob: any) => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `Lab_Report_${selectedTest}_${
-            new Date().toISOString().split("T")[0]
-          }.png`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        },
-        "image/png",
-        0.95
-      );
-    } catch (error) {
-      console.error("Error downloading report:", error);
-      alert("Error downloading report. Please try again.");
-    }
-  };
-
-  const generateReportContent = (header: {
-    hospitalName: any;
-    reportTitle: any;
-    patientInfo: {
-      name: any;
-      patientId: any;
-      age: any;
-      gender: any;
-      phone: any;
-      address: any;
-    };
-    testInfo: { category: any; test: any; date: any; time: any };
-  }) => {
-    return `
+  const generateReportContent = (): string => {
+    const header = generatePatientReportHeader();
+    let reportText = `
 ${header.hospitalName}
 ${"=".repeat(50)}
 
@@ -324,88 +191,50 @@ Gender: ${header.patientInfo.gender}
 Phone: ${header.patientInfo.phone}
 Address: ${header.patientInfo.address}
 
-TEST INFORMATION:
------------------
-Test Category: ${header.testInfo.category}
-Test Name: ${header.testInfo.test}
-Date: ${header.testInfo.date}
-Time: ${header.testInfo.time}
-
-RESULTS:
---------
-${Object.entries(testResults)
-  .map(([param, value]) => `${param}: ${value}`)
-  .join("\n")}
+REPORT INFORMATION:
+------------------
+Date: ${header.reportInfo.date}
+Time: ${header.reportInfo.time}
+Status: ${status}
 
 ${"=".repeat(50)}
-Generated by Hospital Management System
-Report ID: HMS-${Date.now()}
-    `;
+`;
+
+    // Add test results for each category
+    Object.entries(selectedTests).forEach(([category, tests]) => {
+      reportText += `\n${category.toUpperCase()}:\n${"-".repeat(
+        category.length
+      )}\n`;
+
+      tests.forEach((testName) => {
+        reportText += `\nTest: ${testName}\n`;
+        const testData = labTests[category].tests[testName];
+        const results = testResults[testName] || {};
+
+        testData.parameters.forEach((param) => {
+          const value = results[param.name] || "Not Provided";
+          reportText += `${param.name}: ${value} ${param.unit || ""}\n`;
+          reportText += `  Normal Range: ${param.normalRange}\n`;
+        });
+
+        reportText += "\n";
+      });
+    });
+
+    // Add comments if any
+    reportText += `\n${"=".repeat(50)}\n`;
+    reportText += "Generated by Hospital Management System\n";
+    reportText += `Report ID: HMS-${Date.now()}\n`;
+
+    return reportText;
   };
 
-  const renderParameterInput = (param: {
-    name: string;
-    type: string | (string & {}) | undefined;
-    options: any[];
-  }) => {
-    const value = testResults[param.name] || "";
-
-    switch (param.type) {
-      case "select":
-        return (
-          <select
-            value={value}
-            onChange={(e) => handleParameterChange(param.name, e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-          >
-            <option value="">Select...</option>
-            {param.options?.map((option: any) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        );
-      case "textarea":
-        return (
-          <textarea
-            value={value}
-            onChange={(e) => handleParameterChange(param.name, e.target.value)}
-            rows={4}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-            placeholder="Enter details..."
-          />
-        );
-      default:
-        return (
-          <input
-            type={param.type}
-            value={value}
-            onChange={(e) => handleParameterChange(param.name, e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-            placeholder={`Enter ${param.name.toLowerCase()}`}
-          />
-        );
-    }
+  const countSelectedTests = () => {
+    return Object.values(selectedTests).reduce(
+      (total, tests) => total + tests.length,
+      0
+    );
   };
-
-  const filteredTests = Object.entries(labTests).reduce(
-    (acc: Record<string, any>, [category, categoryData]) => {
-      const filteredCategoryTests = Object.entries(categoryData.tests).filter(
-        ([testName]) =>
-          testName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          category.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      if (filteredCategoryTests.length > 0) {
-        acc[category] = {
-          ...categoryData,
-          tests: Object.fromEntries(filteredCategoryTests),
-        };
-      }
-      return acc;
-    },
-    {} as Record<string, any>
-  );
 
   if (isReportLoading || isLoading) return <Loader />;
 
@@ -418,7 +247,6 @@ Report ID: HMS-${Date.now()}
           onClick={() => navigate(-1)}
         >
           <ChevronLeft size={16} />
-
           <span className="font-medium">Back to Patients</span>
         </button>
       </div>
@@ -460,202 +288,62 @@ Report ID: HMS-${Date.now()}
         </div>
       )}
 
-      {/* Enhanced Digital Laboratory Test System */}
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
         {/* Test Selection Panel */}
-        <div className="xl:col-span-1">
-          <div className="bg-white rounded-xl shadow-lg p-6 sticky top-4">
-            <div className="flex items-center mb-4">
-              <TestTube className="h-6 w-6 text-blue-600 mr-2" />
-              <h2 className="text-xl font-semibold text-gray-900">Lab Tests</h2>
-            </div>
-
-            {/* Search */}
-            <div className="relative mb-4">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search tests..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-              />
-            </div>
-
-            {/* Test Categories */}
-            <div className="space-y-2 max-h-96 overflow-y-auto">
-              {Object.entries(filteredTests).map(
-                ([category, categoryData]: any) => (
-                  <div
-                    key={category}
-                    className="border border-gray-200 rounded-lg"
-                  >
-                    <button
-                      onClick={() => toggleCategory(category)}
-                      className="w-full flex items-center justify-between p-3 text-left hover:bg-gray-50 transition-colors duration-200"
-                    >
-                      <div className="flex items-center">
-                        {categoryData.icon}
-                        <span className="ml-2 font-medium text-gray-900">
-                          {category}
-                        </span>
-                      </div>
-                      {expandedCategories[category] ? (
-                        <ChevronDown className="h-4 w-4 text-gray-500" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4 text-gray-500" />
-                      )}
-                    </button>
-
-                    {expandedCategories[category] && (
-                      <div className="border-t border-gray-200 bg-gray-50">
-                        {Object.entries(categoryData.tests).map(
-                          ([testName]) => (
-                            <button
-                              key={testName}
-                              onClick={() =>
-                                handleTestSelect(category, testName)
-                              }
-                              className={`w-full text-left p-3 text-sm hover:bg-white transition-colors duration-200 ${
-                                selectedTest === testName
-                                  ? "bg-blue-50 text-blue-800 border-l-4 border-blue-500"
-                                  : "text-gray-700"
-                              }`}
-                            >
-                              {testName}
-                            </button>
-                          )
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )
-              )}
-            </div>
-          </div>
-        </div>
+        <TestSelectionPanel
+          labTests={labTests}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          expandedCategories={expandedCategories}
+          toggleCategory={toggleCategory}
+          selectedTests={selectedTests}
+          handleTestSelect={handleTestSelect}
+        />
 
         {/* Test Parameters Panel */}
         <div className="xl:col-span-3">
-          {selectedTest && (
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center">
-                  <Microscope className="h-6 w-6 text-blue-600 mr-3" />
-                  <div>
-                    <h2 className="text-2xl font-semibold text-gray-900">
-                      {selectedTest}
-                    </h2>
-                    <p className="text-gray-600">{selectedCategory}</p>
-                  </div>
-                </div>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => setShowPreview(!showPreview)}
-                    className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200"
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    Preview
-                  </button>
-                  <button
-                    onClick={downloadReport}
-                    disabled={Object.keys(testResults).length === 0}
-                    className="flex items-center px-4 py-2 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Download
-                  </button>
-                </div>
-              </div>
-
-              {/* Parameters Form */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                {labTests[selectedCategory]?.tests[
-                  selectedTest
-                ]?.parameters.map((param: any, index: any) => (
-                  <div key={index} className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700">
-                      {param.name}
-                      {param.unit && (
-                        <span className="text-gray-500 ml-1 font-normal">
-                          ({param.unit})
-                        </span>
-                      )}
-                    </label>
-                    {renderParameterInput(param)}
-                    <p className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
-                      Normal range: {param.normalRange}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Comments Section */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Additional Comments/Observations
-                </label>
-                <textarea
-                  value={testResults.comments || ""}
-                  onChange={(e) =>
-                    handleParameterChange("comments", e.target.value)
-                  }
-                  rows={4}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="Enter any additional observations, recommendations, or notes..."
-                />
-              </div>
-            </div>
+          {countSelectedTests() > 0 && (
+            <TestParametersPanel
+              labTests={labTests}
+              selectedTests={selectedTests}
+              testResults={testResults}
+              handleParameterChange={handleParameterChange}
+              setShowPreview={setShowPreview}
+              status={status}
+              setStatus={setStatus}
+              file={file}
+              setFile={setFile}
+              isResponding={isResponding}
+              handleReportSubmit={handleReportSubmit}
+              generateReportContent={generateReportContent}
+            />
           )}
 
-          {/* Status and Submit */}
-          <div className="bg-white rounded-xl shadow-lg p-6 mt-6">
-            {/* Status Dropdown */}
-            <div className="mb-4">
-              <h4 className="text-gray-600 text-sm mb-2">Progress Status</h4>
-              <select
-                className="w-full appearance-none bg-white border border-gray-300 rounded-md p-2 pr-8"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-              >
-                <option value="In Progress">In Progress</option>
-                <option value="Completed">Completed</option>
-              </select>
+          {countSelectedTests() === 0 && (
+            <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+              <div className="text-gray-500 mb-4">
+                <TestTube className="h-12 w-12 mx-auto" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No Tests Selected
+              </h3>
+              <p className="text-gray-600">
+                Select tests from the panel on the left to begin creating a lab
+                report.
+              </p>
             </div>
-
-            <div className="mb-4">
-              <input
-                type="file"
-                className="w-full border border-gray-300 rounded-md p-2"
-                onChange={(e) =>
-                  setFile(e.target.files ? e.target.files[0] : null)
-                }
-              />
-            </div>
-
-            <button
-              className={`px-8 py-3 bg-primary text-white font-semibold rounded-lg flex items-center justify-center transition-colors duration-200 ${
-                isResponding ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              onClick={handleReportSubmit}
-              disabled={isResponding}
-            >
-              {isResponding ? (
-                <>
-                  Submitting
-                  <Loader2 className="h-5 w-5 ml-2 animate-spin" />
-                </>
-              ) : (
-                <>
-                  <Save className="h-5 w-5 mr-2" />
-                  Submit Report
-                </>
-              )}
-            </button>
-          </div>
+          )}
         </div>
       </div>
+
+      {/* Report Preview Modal */}
+      <ReportPreviewModal
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
+        reportContent={generateReportContent()}
+      />
     </div>
   );
 };
+
 export default LabPatientDetails;

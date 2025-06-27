@@ -62,6 +62,7 @@ interface CombinedStore {
   isDeleting: boolean;
   items: any[];
   categories: any[];
+  diagnosis: any[];
   pagination: Pagination | null;
   paymentData: any[];
   bills: any[];
@@ -86,6 +87,9 @@ interface CombinedStore {
   openPaymentModal: (data?: any) => void;
   getAllBills: () => Promise<any>;
   updateBill: (id: any, data: any) => Promise<any>;
+  createDiagnosis: (data: any) => Promise<any>;
+  updateDiagnosis: (id: any, data: any) => Promise<any>;
+  allDiagnosis: (id: any) => Promise<any>;
   monthlyStats: (data?: any) => Promise<any>;
 }
 
@@ -99,6 +103,7 @@ export const useCombinedStore = create<CombinedStore>((set, get) => ({
   paymentData: [],
   bills: [],
   stats: [],
+  diagnosis: [],
 
   createItem: async (data) => {
     set({ isLoading: true });
@@ -411,6 +416,67 @@ export const useCombinedStore = create<CombinedStore>((set, get) => ({
 
       if (isSuccessfulResponse(response)) {
         set({ stats: response.data.data });
+        return true;
+      }
+      return null;
+    } catch (error) {
+      handleErrorToast(error);
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  createDiagnosis: async (data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.post(
+        `/medical-report/patient-diagnosis/create`,
+        data
+      );
+
+      if (isSuccessfulResponse(response)) {
+        toast.success(response.data?.message);
+        // get().allDiagnosis();
+        return true;
+      }
+      return null;
+    } catch (error) {
+      handleErrorToast(error);
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  updateDiagnosis: async (id, data) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.put(
+        `/medical-report/patient-diagnosis/update/${id}`,
+        data
+      );
+
+      if (isSuccessfulResponse(response)) {
+        toast.success(response.data?.message);
+        // get().allDiagnosis();
+        return true;
+      }
+      return null;
+    } catch (error) {
+      handleErrorToast(error);
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  allDiagnosis: async (id) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get(
+        `/medical-report/patient-diagnosis/all/${id}`
+      );
+
+      if (isSuccessfulResponse(response)) {
+        set({ diagnosis: response.data.data });
         return true;
       }
       return null;
