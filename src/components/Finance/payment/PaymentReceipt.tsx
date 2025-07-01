@@ -800,6 +800,7 @@
 // };
 
 // export default PaymentReceipt;
+
 import React, { useRef, useState, useEffect } from "react";
 import { FileText, Camera, Printer, X } from "lucide-react";
 import { useFinanceStore } from "../../../store/staff/useFinanceStore";

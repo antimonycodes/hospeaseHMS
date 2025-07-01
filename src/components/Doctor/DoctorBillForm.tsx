@@ -199,7 +199,7 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({
       payment_method: "cash",
       from_doctor: createdBill?.attributes?.created_by,
       patient_id: Number(patientIdToBeUsed),
-      department_id: Number(departmentId),
+      department_id: [Number(departmentId)],
       payments: [
         {
           patient_id: Number(patientIdToBeUsed),
@@ -225,7 +225,6 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({
     }
   };
 
-  // Button should be disabled during any processing
   const isButtonDisabled = isBillLoading || isProcessing;
 
   return (

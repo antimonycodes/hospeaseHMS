@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
-  XIcon,
+  X,
   PlusCircle,
   Loader2,
   Edit,
   Trash2,
   AlertTriangle,
+  Search,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useCombinedStore } from "../../../store/super-admin/useCombinedStore";
@@ -52,12 +53,30 @@ const departmentDisplayNames: Record<string, string> = {
   finance: "Others",
 };
 
+// Debounce hook
+function useDebounce(value: string, delay: number) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 const Prices = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<Item | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editItem, setEditItem] = useState<Item | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     price: "",
@@ -78,6 +97,10 @@ const Prices = () => {
   const { getAllRoles } = useGlobalStore();
   const roles = useGlobalStore((state) => state.roles) as RolesState;
   const [perPage, setPerPage] = useState(pagination?.per_page || 10);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Debounce search term to avoid excessive API calls
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   const getDepartmentOptions = () =>
     allowedDepartments
@@ -87,10 +110,30 @@ const Prices = () => {
         name: departmentDisplayNames[dept] || dept,
       }));
 
+  // Fetch items with search
+  const fetchItems = useCallback(
+    (page = 1, search = "") => {
+      setCurrentPage(page);
+      getAllItems(page.toString(), perPage.toString(), search);
+    },
+    [getAllItems, perPage]
+  );
+
   useEffect(() => {
-    getAllItems();
     getAllRoles();
-  }, [getAllItems, getAllRoles]);
+  }, [getAllRoles]);
+
+  // Initial load
+  useEffect(() => {
+    fetchItems(1);
+  }, [fetchItems]);
+
+  // Search effect
+  useEffect(() => {
+    if (debouncedSearchTerm !== undefined) {
+      fetchItems(1, debouncedSearchTerm);
+    }
+  }, [debouncedSearchTerm, fetchItems]);
 
   const resetForm = () => {
     setFormData({
@@ -105,6 +148,14 @@ const Prices = () => {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const clearSearch = () => {
+    setSearchTerm("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -133,6 +184,8 @@ const Prices = () => {
       );
       resetForm();
       setIsModalOpen(false);
+      // Refresh with current search
+      fetchItems(currentPage, debouncedSearchTerm);
     }
   };
 
@@ -140,7 +193,8 @@ const Prices = () => {
     const result = await deleteItem(id);
     if (result) {
       toast.success("Item deleted successfully");
-      getAllItems();
+      // Refresh with current search
+      fetchItems(currentPage, debouncedSearchTerm);
       setIsDeleteModalOpen(false);
       setItemToDelete(null);
     }
@@ -212,8 +266,10 @@ const Prices = () => {
   ];
 
   const handlePageChange = useCallback(
-    (page: number) => getAllItems(page.toString(), perPage.toString()),
-    [getAllItems, perPage]
+    (page: number) => {
+      fetchItems(page, debouncedSearchTerm);
+    },
+    [fetchItems, debouncedSearchTerm]
   );
 
   if (isLoading && !items?.length) return <Loader />;
@@ -241,6 +297,37 @@ const Prices = () => {
         </Button>
       </div>
 
+      {/* Search Bar */}
+      <div className="mb-6">
+        <div className="relative max-w-md">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-5 w-5 text-gray-400" />
+          </div>
+          <input
+            type="text"
+            placeholder="Search items by name"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary focus:border-primary"
+          />
+          {searchTerm && (
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+              <button
+                onClick={clearSearch}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+          )}
+        </div>
+        {searchTerm && (
+          <p className="text-sm text-gray-600 mt-2">
+            {isLoading ? "Searching..." : `Showing results for "${searchTerm}"`}
+          </p>
+        )}
+      </div>
+
       <Table
         columns={columns}
         data={items || []}
@@ -261,10 +348,10 @@ const Prices = () => {
                   {isEditMode ? "Edit Item" : "Add New Item"}
                 </h2>
                 <button onClick={() => setIsModalOpen(false)}>
-                  <XIcon className="w-6 h-6 text-gray-500 hover:text-gray-700" />
+                  <X className="w-6 h-6 text-gray-500 hover:text-gray-700" />
                 </button>
               </div>
-              <form onSubmit={handleSubmit}>
+              <div onSubmit={handleSubmit}>
                 {["name", "price"].map((field) => (
                   <div key={field} className="mb-4">
                     <label
@@ -334,7 +421,7 @@ const Prices = () => {
                     )}
                   </Button>
                 </div>
-              </form>
+              </div>
             </div>
           </div>
         </div>

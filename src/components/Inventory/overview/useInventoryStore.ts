@@ -112,7 +112,11 @@ interface InventoryStore {
     per_page?: string,
     page?: string
   ) => Promise<void>;
-  getAllStocksSa: (endpoint?: string) => Promise<void>;
+  getAllStocksSa: (
+    endpoint?: string,
+    per_page?: string,
+    page?: string
+  ) => Promise<void>;
   createStock: (
     data: any,
     endpoint?: string,
@@ -367,15 +371,53 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
   ) => {
     set({ isLoading: true });
     try {
-      const response = await api.get(
-        `${endpoint}?page=${page}&per_page=${perPage}`
-      );
+      // Check if endpoint already contains query parameters
+      const separator = endpoint.includes("?") ? "&" : "?";
+      const fullEndpoint = endpoint.includes("page=")
+        ? endpoint
+        : `${endpoint}${separator}page=${page}&per_page=${perPage}`;
 
+      const response = await api.get(fullEndpoint);
       set({ stocks: response.data.data?.data || [] });
       // toast.success(response.data.message || "Stocks fetched successfully");
     } catch (error: any) {
-      console.error("getAllStocks error:", error.response?.data);
+      console.error("getAllStocksSa error:", error.response?.data);
       toast.error(error.response?.data?.message || "Failed to fetch stocks");
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  searchStocksSa: async (filters: {
+    search?: string;
+    category?: string;
+    profit_range?: string;
+    stock_status?: string;
+    expiry_status?: string;
+    from_date?: string;
+    to_date?: string;
+  }) => {
+    set({ isLoading: true });
+    try {
+      const queryParams = new URLSearchParams();
+
+      // Add pagination
+      queryParams.append("page", "1");
+      queryParams.append("per_page", "1000");
+
+      // Add filters
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value && value.trim() !== "") {
+          queryParams.append(key, value.trim());
+        }
+      });
+
+      const response = await api.get(
+        `/admin/inventory/all-inventory-items?${queryParams.toString()}`
+      );
+      set({ stocks: response.data.data?.data || [] });
+    } catch (error: any) {
+      console.error("searchStocks error:", error.response?.data);
+      toast.error(error.response?.data?.message || "Failed to search stocks");
     } finally {
       set({ isLoading: false });
     }

@@ -61,6 +61,103 @@
 //   );
 // };
 
+// // Updated helper function to extract item name and details with proper unit price calculation
+// const getItemDetails = (item: any) => {
+//   const attrs = item.attributes;
+
+//   // Check for service_charge first
+//   if (attrs.service_charge && attrs.service_charge.name) {
+//     const totalAmount = parseFloat(attrs.amount.replace(/,/g, ""));
+//     return {
+//       name: attrs.service_charge.name,
+//       quantity: 1,
+//       unitPrice: totalAmount, // Use amount as unit price for services
+//       totalAmount: totalAmount,
+//       type: "Service Charge",
+//     };
+//   }
+
+//   // Check for pharmacy_reqs
+//   if (attrs.pharmacy_reqs && attrs.pharmacy_reqs.item) {
+//     const quantity = parseInt(attrs.pharmacy_reqs.quantity) || 1;
+//     const totalAmount = parseFloat(attrs.amount.replace(/,/g, "")) * quantity;
+//     const unitPrice = parseFloat(attrs.amount.replace(/,/g, ""));
+
+//     return {
+//       name: attrs.pharmacy_reqs.item,
+//       quantity: quantity,
+//       unitPrice: unitPrice,
+//       totalAmount: totalAmount,
+//       type: "Pharmacy Item",
+//     };
+//   }
+
+//   // Check for doctor_bill
+//   if (attrs.doctor_bill && attrs.doctor_bill.name) {
+//     const totalAmount = parseFloat(attrs.amount.replace(/,/g, ""));
+//     return {
+//       name: attrs.doctor_bill.name,
+//       quantity: 1,
+//       unitPrice: totalAmount,
+//       totalAmount: totalAmount,
+//       type: "Doctor Bill",
+//     };
+//   }
+
+//   // Fallback for unknown structure
+//   const totalAmount = parseFloat(attrs.amount?.replace(/,/g, "") || "0");
+//   return {
+//     name: attrs.items_purchased || "Unknown Item",
+//     quantity: attrs.quantity || 1,
+//     unitPrice: totalAmount,
+//     totalAmount: totalAmount,
+//     type: "Other",
+//   };
+// };
+
+// // Helper function to prepare receipt data
+// const prepareReceiptData = (
+//   serviceCharges: any[],
+//   paymentInfo: any,
+//   paymentMethod: string,
+//   paymentType: string,
+//   partAmount?: number
+// ) => {
+//   const receiptItems = serviceCharges.map((item: any) => {
+//     const itemDetails = getItemDetails(item);
+//     return {
+//       id: item.id,
+//       attributes: {
+//         amount: itemDetails.unitPrice, // Use unit price here
+//         name: itemDetails.name,
+//         isPharmacy: itemDetails.type === "Pharmacy Item",
+//       },
+//       quantity: itemDetails.quantity,
+//       total: itemDetails.totalAmount, // Use total amount here
+//     };
+//   });
+
+//   return {
+//     receiptNumber: paymentInfo.id,
+//     paymentDate: new Date(),
+//     selectedPatient: {
+//       id: paymentInfo.attributes.patient?.id,
+//       attributes: {
+//         first_name: paymentInfo.attributes.patient?.first_name,
+//         last_name: paymentInfo.attributes.patient?.last_name,
+//         card_id: paymentInfo.attributes.patient?.card_id || "",
+//       },
+//     },
+//     selectedItems: receiptItems,
+//     totalAmount: parseFloat(
+//       paymentInfo.attributes.amount?.replace(/,/g, "") || "0"
+//     ),
+//     paymentMethod: paymentMethod,
+//     paymentType: paymentType,
+//     partAmount: partAmount,
+//   };
+// };
+
 // const PaymentDetails = () => {
 //   const navigate = useNavigate();
 //   const { id } = useParams<{ id: string }>();
@@ -116,41 +213,16 @@
 //       if (success) {
 //         await getPaymentById(selectedPayment.id);
 
-//         // Prepare receipt data for refund
-//         const receiptItems = serviceCharges.map((item: any) => ({
-//           id: item.id,
-//           attributes: {
-//             amount: parseFloat(item.attributes.amount),
-//             name: item.attributes.items_purchased,
-//             isPharmacy: false, // Adjust as needed
-//           },
-//           quantity: item.attributes.quantity || 1,
-//           total:
-//             parseFloat(item.attributes.amount) *
-//             (item.attributes.quantity || 1),
-//         }));
+//         // Use the new receipt preparation function
+//         const receiptDataObj = prepareReceiptData(
+//           serviceCharges,
+//           selectedPayment,
+//           selectedPaymentMethod,
+//           refundType === "full" ? "refunded" : "partial-refund",
+//           refundType === "partial" ? parseFloat(refundAmountInput) : undefined
+//         );
 
-//         setReceiptData({
-//           receiptNumber: selectedPayment.id,
-//           paymentDate: new Date(),
-//           selectedPatient: {
-//             id: attributes.patient?.id,
-//             attributes: {
-//               first_name: attributes.patient?.first_name,
-//               last_name: attributes.patient?.last_name,
-//               card_id: attributes.patient?.card_id || "",
-//             },
-//           },
-//           selectedItems: receiptItems,
-//           totalAmount: parseFloat(attributes.amount?.replace(/,/g, "") || 0),
-//           paymentMethod: selectedPaymentMethod,
-//           paymentType: refundType === "full" ? "refunded" : "partial-refund",
-//           partAmount:
-//             refundType === "partial"
-//               ? parseFloat(refundAmountInput)
-//               : undefined,
-//         });
-
+//         setReceiptData(receiptDataObj);
 //         setShowReceipt(true);
 //         setShowRefundModal(false);
 //       }
@@ -229,6 +301,9 @@
 //       : attributes.payment_type?.charAt(0).toUpperCase() +
 //           attributes.payment_type?.slice(1) || "Unknown";
 
+//   const departmentNames =
+//     attributes.department?.map((dept: any) => dept.name).join(", ") || "-";
+
 //   const handlePaymentAction = (type: string) => {
 //     setPaymentType(type);
 //     setAmountToPay(type === "full" ? outstanding.toString() : "");
@@ -256,38 +331,16 @@
 //       if (result) {
 //         await getPaymentById(id ?? "");
 
-//         // Prepare receipt data for payment
-//         const receiptItems = serviceCharges.map((item: any) => ({
-//           id: item.id,
-//           attributes: {
-//             amount: parseFloat(item.attributes.amount),
-//             name: item.attributes.items_purchased,
-//             isPharmacy: false, // Adjust as needed
-//           },
-//           quantity: item.attributes.quantity || 1,
-//           total:
-//             parseFloat(item.attributes.amount) *
-//             (item.attributes.quantity || 1),
-//         }));
+//         // Use the new receipt preparation function
+//         const receiptDataObj = prepareReceiptData(
+//           serviceCharges,
+//           selectedPayment,
+//           selectedPaymentMethod,
+//           paymentTypeToUse,
+//           paymentTypeToUse === "part" ? amount : undefined
+//         );
 
-//         setReceiptData({
-//           receiptNumber: selectedPayment.id,
-//           paymentDate: new Date(),
-//           selectedPatient: {
-//             id: attributes.patient?.id,
-//             attributes: {
-//               first_name: attributes.patient?.first_name,
-//               last_name: attributes.patient?.last_name,
-//               card_id: attributes.patient?.card_id || "",
-//             },
-//           },
-//           selectedItems: receiptItems,
-//           totalAmount: parseFloat(attributes.amount?.replace(/,/g, "") || 0),
-//           paymentMethod: selectedPaymentMethod,
-//           paymentType: paymentTypeToUse,
-//           partAmount: paymentTypeToUse === "part" ? amount : undefined,
-//         });
-
+//         setReceiptData(receiptDataObj);
 //         setShowReceipt(true);
 //         setShowPaymentModal(false);
 //       }
@@ -330,11 +383,10 @@
 //           <InfoRow label="Patient ID" value={attributes.patient?.id} />
 //           <InfoRow label="Last Name" value={attributes.patient?.last_name} />
 //           <InfoRow label="First Name" value={attributes.patient?.first_name} />
-//           <InfoRow label="Purpose" value={attributes.department?.name} />
+//           <InfoRow label="Department" value={departmentNames} />
 //         </div>
 
 //         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-//           <InfoRow label="Department" value={attributes.department?.name} />
 //           {isHmoPayment && originalPrice && (
 //             <InfoRow
 //               label="Original Price"
@@ -392,17 +444,30 @@
 //         <div className="mt-8">
 //           <h3 className="text-lg font-medium mb-4">Order Summary</h3>
 //           <div className="space-y-2">
-//             {serviceCharges.map((item: any) => (
-//               <div key={item.id} className="flex justify-between">
-//                 <span className="text-gray-600">
-//                   {item.attributes.items_purchased}
-//                   {item.attributes.quantity
-//                     ? ` x${item.attributes.quantity}`
-//                     : ""}
-//                 </span>
-//                 <span className="font-medium">₦{item.attributes.amount}</span>
-//               </div>
-//             ))}
+//             {serviceCharges.map((item: any) => {
+//               const itemDetails = getItemDetails(item);
+//               return (
+//                 <div key={item.id} className="flex justify-between">
+//                   <span className="text-gray-600">
+//                     {itemDetails.name}
+//                     {itemDetails.quantity > 1
+//                       ? ` x${itemDetails.quantity}`
+//                       : ""}
+//                     <span className="text-xs text-gray-400 ml-2">
+//                       ({itemDetails.type})
+//                     </span>
+//                     {itemDetails.quantity > 1 && (
+//                       <span className="text-xs text-gray-400 ml-2">
+//                         @ ₦{formatCurrency(itemDetails.unitPrice)} each
+//                       </span>
+//                     )}
+//                   </span>
+//                   <span className="font-medium">
+//                     ₦{formatCurrency(itemDetails.totalAmount)}
+//                   </span>
+//                 </div>
+//               );
+//             })}
 
 //             {isHmoPayment && originalPrice && (
 //               <div className="flex justify-between text-gray-500">
@@ -514,7 +579,6 @@
 //             <h3 className="text-lg font-medium mb-4">
 //               {paymentType === "full" ? "Full Payment" : "Part Payment"}
 //             </h3>
-//             {/*  */}
 //             <div className="mb-4">
 //               <label className="block text-gray-700 text-sm font-bold mb-2">
 //                 Payment Method
@@ -531,7 +595,6 @@
 //                 ))}
 //               </select>
 //             </div>
-//             {/*  */}
 //             <div className="mb-4">
 //               <label className="block text-gray-700 text-sm font-bold mb-2">
 //                 Amount to Pay (₦)
@@ -653,46 +716,102 @@ const PaymentStatusBadge = ({ status }: { status: string }) => {
   );
 };
 
-// Helper function to extract item name and details from the new structure
+// Updated helper function to extract item name and details with proper unit price calculation
 const getItemDetails = (item: any) => {
   const attrs = item.attributes;
 
   // Check for service_charge first
   if (attrs.service_charge && attrs.service_charge.name) {
+    const totalAmount = parseFloat(attrs.amount.replace(/,/g, ""));
     return {
       name: attrs.service_charge.name,
       quantity: 1,
-      amount: attrs.amount,
+      unitPrice: totalAmount, // Use amount as unit price for services
+      totalAmount: totalAmount,
       type: "Service Charge",
     };
   }
 
   // Check for pharmacy_reqs
   if (attrs.pharmacy_reqs && attrs.pharmacy_reqs.item) {
+    const totalAmount = parseFloat(attrs.amount.replace(/,/g, ""));
+    const serviceItemPrice = parseFloat(attrs.pharmacy_reqs.service_item_price);
+
+    // Calculate actual quantity manually: total amount ÷ unit price
+    const actualQuantity = Math.round(totalAmount / serviceItemPrice);
+
     return {
       name: attrs.pharmacy_reqs.item,
-      quantity: attrs.pharmacy_reqs.quantity || 1,
-      amount: attrs.amount,
+      quantity: actualQuantity, // Use calculated quantity instead of backend quantity
+      unitPrice: serviceItemPrice, // Use service_item_price as unit price
+      totalAmount: totalAmount,
       type: "Pharmacy Item",
     };
   }
 
   // Check for doctor_bill
   if (attrs.doctor_bill && attrs.doctor_bill.name) {
+    const totalAmount = parseFloat(attrs.amount.replace(/,/g, ""));
     return {
       name: attrs.doctor_bill.name,
       quantity: 1,
-      amount: attrs.amount,
+      unitPrice: totalAmount,
+      totalAmount: totalAmount,
       type: "Doctor Bill",
     };
   }
 
   // Fallback for unknown structure
+  const totalAmount = parseFloat(attrs.amount?.replace(/,/g, "") || "0");
   return {
     name: attrs.items_purchased || "Unknown Item",
     quantity: attrs.quantity || 1,
-    amount: attrs.amount,
+    unitPrice: totalAmount,
+    totalAmount: totalAmount,
     type: "Other",
+  };
+};
+
+// Helper function to prepare receipt data
+const prepareReceiptData = (
+  serviceCharges: any[],
+  paymentInfo: any,
+  paymentMethod: string,
+  paymentType: string,
+  partAmount?: number
+) => {
+  const receiptItems = serviceCharges.map((item: any) => {
+    const itemDetails = getItemDetails(item);
+    return {
+      id: item.id,
+      attributes: {
+        amount: itemDetails.unitPrice, // Use calculated unit price
+        name: itemDetails.name,
+        isPharmacy: itemDetails.type === "Pharmacy Item",
+      },
+      quantity: itemDetails.quantity, // Use calculated quantity
+      total: itemDetails.totalAmount, // Use total amount
+    };
+  });
+
+  return {
+    receiptNumber: paymentInfo.id,
+    paymentDate: new Date(),
+    selectedPatient: {
+      id: paymentInfo.attributes.patient?.id,
+      attributes: {
+        first_name: paymentInfo.attributes.patient?.first_name,
+        last_name: paymentInfo.attributes.patient?.last_name,
+        card_id: paymentInfo.attributes.patient?.card_id || "",
+      },
+    },
+    selectedItems: receiptItems,
+    totalAmount: parseFloat(
+      paymentInfo.attributes.amount?.replace(/,/g, "") || "0"
+    ),
+    paymentMethod: paymentMethod,
+    paymentType: paymentType,
+    partAmount: partAmount,
   };
 };
 
@@ -751,42 +870,16 @@ const PaymentDetails = () => {
       if (success) {
         await getPaymentById(selectedPayment.id);
 
-        // Prepare receipt data for refund using updated structure
-        const receiptItems = serviceCharges.map((item: any) => {
-          const itemDetails = getItemDetails(item);
-          return {
-            id: item.id,
-            attributes: {
-              amount: parseFloat(itemDetails.amount),
-              name: itemDetails.name,
-              isPharmacy: itemDetails.type === "Pharmacy Item",
-            },
-            quantity: itemDetails.quantity,
-            total: parseFloat(itemDetails.amount) * itemDetails.quantity,
-          };
-        });
+        // Use the new receipt preparation function
+        const receiptDataObj = prepareReceiptData(
+          serviceCharges,
+          selectedPayment,
+          selectedPaymentMethod,
+          refundType === "full" ? "refunded" : "partial-refund",
+          refundType === "partial" ? parseFloat(refundAmountInput) : undefined
+        );
 
-        setReceiptData({
-          receiptNumber: selectedPayment.id,
-          paymentDate: new Date(),
-          selectedPatient: {
-            id: attributes.patient?.id,
-            attributes: {
-              first_name: attributes.patient?.first_name,
-              last_name: attributes.patient?.last_name,
-              card_id: attributes.patient?.card_id || "",
-            },
-          },
-          selectedItems: receiptItems,
-          totalAmount: parseFloat(attributes.amount?.replace(/,/g, "") || 0),
-          paymentMethod: selectedPaymentMethod,
-          paymentType: refundType === "full" ? "refunded" : "partial-refund",
-          partAmount:
-            refundType === "partial"
-              ? parseFloat(refundAmountInput)
-              : undefined,
-        });
-
+        setReceiptData(receiptDataObj);
         setShowReceipt(true);
         setShowRefundModal(false);
       }
@@ -865,7 +958,6 @@ const PaymentDetails = () => {
       : attributes.payment_type?.charAt(0).toUpperCase() +
           attributes.payment_type?.slice(1) || "Unknown";
 
-  // Get department names from the new array structure
   const departmentNames =
     attributes.department?.map((dept: any) => dept.name).join(", ") || "-";
 
@@ -896,39 +988,16 @@ const PaymentDetails = () => {
       if (result) {
         await getPaymentById(id ?? "");
 
-        // Prepare receipt data for payment using updated structure
-        const receiptItems = serviceCharges.map((item: any) => {
-          const itemDetails = getItemDetails(item);
-          return {
-            id: item.id,
-            attributes: {
-              amount: parseFloat(itemDetails.amount),
-              name: itemDetails.name,
-              isPharmacy: itemDetails.type === "Pharmacy Item",
-            },
-            quantity: itemDetails.quantity,
-            total: parseFloat(itemDetails.amount) * itemDetails.quantity,
-          };
-        });
+        // Use the new receipt preparation function
+        const receiptDataObj = prepareReceiptData(
+          serviceCharges,
+          selectedPayment,
+          selectedPaymentMethod,
+          paymentTypeToUse,
+          paymentTypeToUse === "part" ? amount : undefined
+        );
 
-        setReceiptData({
-          receiptNumber: selectedPayment.id,
-          paymentDate: new Date(),
-          selectedPatient: {
-            id: attributes.patient?.id,
-            attributes: {
-              first_name: attributes.patient?.first_name,
-              last_name: attributes.patient?.last_name,
-              card_id: attributes.patient?.card_id || "",
-            },
-          },
-          selectedItems: receiptItems,
-          totalAmount: parseFloat(attributes.amount?.replace(/,/g, "") || 0),
-          paymentMethod: selectedPaymentMethod,
-          paymentType: paymentTypeToUse,
-          partAmount: paymentTypeToUse === "part" ? amount : undefined,
-        });
-
+        setReceiptData(receiptDataObj);
         setShowReceipt(true);
         setShowPaymentModal(false);
       }
@@ -1044,8 +1113,15 @@ const PaymentDetails = () => {
                     <span className="text-xs text-gray-400 ml-2">
                       ({itemDetails.type})
                     </span>
+                    {itemDetails.quantity > 1 && (
+                      <span className="text-xs text-gray-400 ml-2">
+                        @ ₦{formatCurrency(itemDetails.unitPrice)} each
+                      </span>
+                    )}
                   </span>
-                  <span className="font-medium">₦{itemDetails.amount}</span>
+                  <span className="font-medium">
+                    ₦{formatCurrency(itemDetails.totalAmount)}
+                  </span>
                 </div>
               );
             })}

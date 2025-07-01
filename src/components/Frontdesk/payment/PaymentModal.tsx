@@ -208,7 +208,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
       part_amount: paymentType === "full" ? null : partAmount,
       payment_method: paymentMethod,
       patient_id: Number(patientId),
-      department_id: correctDepartmentId,
+      department_id: [correctDepartmentId],
       case_report_id: caseReportId,
       payments: items.map((item) => ({
         patient_id: Number(patientId),

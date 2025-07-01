@@ -642,8 +642,7 @@ const DoctorPatientDetails = () => {
               />
             </div>
             <PatientDiagnosis patientId={id ? Number(id) : 0} />
-
-            <hr className="text-[#979797]" />
+            <hr className="text-[#979797]" />_
             <div className="">
               <div className="">
                 <h3 className="text-sm font-medium text-gray-800 mb-4">

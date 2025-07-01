@@ -410,7 +410,7 @@ const EditPatientModal = ({
                 value={formData.patient_category_id}
                 onChange={handleInputChange}
                 className="w-full border border-gray-300 rounded p-4 text-sm appearance-none pr-8"
-                required
+                // required
               >
                 <option value="" disabled>
                   Select Category
