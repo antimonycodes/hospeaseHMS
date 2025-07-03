@@ -264,8 +264,8 @@ const RequestHistory = () => {
     return (
       <div className="w-full bg-white rounded-b-lg shadow-sm">
         <div className="p-8 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading request history...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          {/* <p className="text-gray-600">Loading request history...</p> */}
         </div>
       </div>
     );

@@ -351,7 +351,7 @@ const Prices = () => {
                   <X className="w-6 h-6 text-gray-500 hover:text-gray-700" />
                 </button>
               </div>
-              <div onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit}>
                 {["name", "price"].map((field) => (
                   <div key={field} className="mb-4">
                     <label
@@ -421,7 +421,7 @@ const Prices = () => {
                     )}
                   </Button>
                 </div>
-              </div>
+              </form>
             </div>
           </div>
         </div>

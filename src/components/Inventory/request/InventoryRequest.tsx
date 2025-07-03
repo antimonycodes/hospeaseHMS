@@ -49,7 +49,7 @@ interface Column<T> {
 // Empty Request History Component
 
 // Pharmacy Stock Component (current functionality)
-const PharmacyStock = ({ openModal, closeModal, isModalOpen }: any) => {
+export const PharmacyStock = ({ openModal, closeModal, isModalOpen }: any) => {
   const { getAllRequest, requests, isLoading } =
     useInventoryStore() as unknown as {
       getAllRequest: () => void;

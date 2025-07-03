@@ -14,7 +14,7 @@ const InventoryDash = () => {
     getInventoryStats();
   }, [getInventoryStats]);
 
-  console.log("Inventory Stats:", stats);
+  // console.log("Inventory Stats:", stats);
 
   const InventoryStatsData = stats
     ? [

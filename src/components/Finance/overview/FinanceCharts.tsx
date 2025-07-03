@@ -15,6 +15,21 @@ type DataPoint = {
   earnings: number; // Single value for simplicity
 };
 
+// Helper function to format currency
+const formatNaira = (amount: number) => {
+  return `₦${amount.toLocaleString()}`;
+};
+
+// Custom YAxis tick formatter
+const formatYAxisTick = (value: number) => {
+  if (value >= 1000000) {
+    return `₦${(value / 1000000).toFixed(1)}M`;
+  } else if (value >= 1000) {
+    return `₦${(value / 1000).toFixed(0)}K`;
+  }
+  return `₦${value}`;
+};
+
 const FinanceCharts = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [chartType, setChartType] = useState<"income" | "expenses">("income");
@@ -71,7 +86,7 @@ const FinanceCharts = () => {
     return data.months.map((month: string, index: number) => ({
       month: month.slice(0, 3), // Shorten to "Jan", "Feb", etc.
       earnings: parseFloat(
-        data.monthly_earnings[index].replace(",", "") || "0"
+        data.monthly_earnings[index].replace(/,/g, "") || "0"
       ),
     }));
   };
@@ -88,7 +103,7 @@ const FinanceCharts = () => {
           <p className="font-semibold">{label}</p>
           {payload.map((pld: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: pld.color }}>
-              {pld.name}: {pld.value}
+              {pld.name}: {formatNaira(pld.value)}
             </p>
           ))}
         </div>
@@ -140,6 +155,7 @@ const FinanceCharts = () => {
                 domain={[0, "auto"]} // Dynamic range based on data
                 tick={{ fontSize: isMobile ? 12 : 14, fill: "black" }}
                 width={isMobile ? 30 : 40}
+                tickFormatter={formatYAxisTick}
               />
               <Tooltip content={<CustomTooltip />} />
               <Bar

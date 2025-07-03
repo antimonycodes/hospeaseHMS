@@ -17,13 +17,13 @@ const FinanceOverview = () => {
     ? [
         {
           title: "Income ",
-          number: stats.total_income_balance || "0",
+          number: `₦${stats.total_income_balance}` || "0",
           icon: getImageSrc("incomeIcon.png"),
           category: "finance",
         },
         {
           title: "Expenses",
-          number: stats.total_expenses_balance || "0",
+          number: `₦${stats.total_expenses_balance}` || "0",
           icon: getImageSrc("hugeicons.png"),
           category: "finance",
         },

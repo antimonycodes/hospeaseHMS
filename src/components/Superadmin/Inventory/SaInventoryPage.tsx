@@ -66,7 +66,7 @@ const SaInventoryPage = () => {
           className="flex items-center text-[12px] gap-2 px-2 md:px-4"
           onClick={openRequest}
         >
-          Add Request
+          Disburse
           <Plus size={20} />
         </Button>
       );

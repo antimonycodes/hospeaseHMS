@@ -134,13 +134,13 @@ const StockActivity = () => {
 
   return (
     <div>
-      <Tablehead tableTitle="Stock Activity Log" showButton={false} />
+      <Tablehead tableTitle="Pharmarcy Sales Activity Log" showButton={false} />
       <div className="w-full bg-white rounded-b-[8px] shadow-table">
         {isLoading ? (
           <Loader />
         ) : activities.length === 0 ? (
           <p className="p-4 text-center text-gray-500">
-            No stock activity found
+            No pharmacy sales activity found
           </p>
         ) : (
           <Table
