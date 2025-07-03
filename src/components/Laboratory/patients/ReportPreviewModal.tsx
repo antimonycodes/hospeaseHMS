@@ -16,7 +16,7 @@ const ReportPreviewModal: React.FC<ReportPreviewModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-[#1E1E1E40]  flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
         <div className="flex justify-between items-center border-b p-4">
           <h2 className="text-xl font-semibold">Report Preview</h2>

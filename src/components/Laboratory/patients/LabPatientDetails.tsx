@@ -10,6 +10,8 @@ import TestSelectionPanel from "./TestSelectionPanel";
 import TestParametersPanel from "./TestParametersPanel";
 import ReportPreviewModal from "./ReportPreviewModal";
 import { labTests } from "./labTestData";
+import toast from "react-hot-toast";
+import jsPDF from "jspdf";
 
 const LabPatientDetails = () => {
   const { patientId, caseId } = useParams();
@@ -38,6 +40,7 @@ const LabPatientDetails = () => {
     Record<string, boolean>
   >({});
   const [additionalFiles, setAdditionalFiles] = useState<File[]>([]);
+  const defaultHospitalName = localStorage.getItem("hospitalName");
 
   const navigate = useNavigate();
 
@@ -110,8 +113,8 @@ const LabPatientDetails = () => {
   const generatePatientReportHeader = () => {
     const currentDate = new Date();
     return {
-      hospitalName: "Hospital Management System",
-      reportTitle: "COMPREHENSIVE LABORATORY REPORT",
+      hospitalName: defaultHospitalName || "",
+      reportTitle: " LABORATORY REPORT",
       patientInfo: {
         name: `${patient?.first_name || ""} ${patient?.last_name || ""}`.trim(),
         patientId: patient?.card_id || "",
@@ -127,8 +130,173 @@ const LabPatientDetails = () => {
     };
   };
 
+  // Generate PDF as Blob for submission
+  const generatePDFBlob = async (): Promise<Blob> => {
+    const doc = new jsPDF();
+    const header = generatePatientReportHeader();
+    let yPosition = 20;
+
+    // Set fonts and colors
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+
+    // Hospital header
+    doc.text(header.hospitalName, 105, yPosition, { align: "center" });
+    yPosition += 10;
+
+    doc.setFontSize(14);
+    doc.text(header.reportTitle, 105, yPosition, { align: "center" });
+    yPosition += 15;
+
+    // Draw line
+    doc.setLineWidth(0.5);
+    doc.line(20, yPosition, 190, yPosition);
+    yPosition += 15;
+
+    // Patient Information
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("PATIENT INFORMATION:", 20, yPosition);
+    yPosition += 8;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    const patientInfo = [
+      `Name: ${header.patientInfo.name}`,
+      `Patient ID: ${header.patientInfo.patientId}`,
+      `Age: ${header.patientInfo.age}`,
+      `Gender: ${header.patientInfo.gender}`,
+      `Phone: ${header.patientInfo.phone}`,
+      `Address: ${header.patientInfo.address}`,
+    ];
+
+    patientInfo.forEach((info) => {
+      doc.text(info, 20, yPosition);
+      yPosition += 6;
+    });
+
+    yPosition += 5;
+
+    // Report Information
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text("REPORT INFORMATION:", 20, yPosition);
+    yPosition += 8;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(`Date: ${header.reportInfo.date}`, 20, yPosition);
+    yPosition += 6;
+    doc.text(`Time: ${header.reportInfo.time}`, 20, yPosition);
+    yPosition += 6;
+    doc.text(`Status: ${status}`, 20, yPosition);
+    yPosition += 15;
+
+    // Test Results - Only include categories and tests that have filled parameters
+    Object.entries(selectedTests).forEach(([category, tests]) => {
+      // Filter tests that have filled parameters
+      const testsWithData = tests.filter((testName) => {
+        const testData = labTests[category].tests[testName];
+        const results = testResults[testName] || {};
+        return testData.parameters.some((param) => {
+          const value = results[param.name];
+          return value && value.toString().trim() !== "";
+        });
+      });
+
+      // Only add category if it has tests with data
+      if (testsWithData.length > 0) {
+        // Check if we need a new page
+        if (yPosition > 250) {
+          doc.addPage();
+          yPosition = 20;
+        }
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.text(category.toUpperCase(), 20, yPosition);
+        yPosition += 8;
+
+        testsWithData.forEach((testName) => {
+          // Check if we need a new page
+          if (yPosition > 240) {
+            doc.addPage();
+            yPosition = 20;
+          }
+
+          const testData = labTests[category].tests[testName];
+          const results = testResults[testName] || {};
+
+          // Check if this test has any filled parameters
+          const hasFilledParameters = testData.parameters.some((param) => {
+            const value = results[param.name];
+            return value && value.toString().trim() !== "";
+          });
+
+          // Only add the test to PDF if it has filled parameters
+          if (hasFilledParameters) {
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(11);
+            doc.text(`Test: ${testName}`, 25, yPosition);
+            yPosition += 7;
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+
+            testData.parameters.forEach((param) => {
+              const value = results[param.name];
+              // Only include parameters that have been filled in
+              if (value && value.toString().trim() !== "") {
+                doc.text(
+                  `${param.name}: ${value} ${param.unit || ""}`,
+                  30,
+                  yPosition
+                );
+                yPosition += 5;
+                doc.setTextColor(100, 100, 100);
+                doc.text(`Normal Range: ${param.normalRange}`, 35, yPosition);
+                doc.setTextColor(0, 0, 0);
+                yPosition += 7;
+              }
+            });
+
+            yPosition += 3;
+          }
+        });
+
+        yPosition += 5;
+      }
+    });
+
+    // Footer
+    if (yPosition > 250) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    doc.setLineWidth(0.5);
+    doc.line(20, yPosition, 190, yPosition);
+    yPosition += 10;
+
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(9);
+    // doc.text("Generated by Hospital Management System", 20, yPosition);
+    yPosition += 5;
+    doc.text(`Report ID: HMS-${Date.now()}`, 20, yPosition);
+
+    return doc.output("blob");
+  };
+
   const handleReportSubmit = async () => {
     try {
+      // Generate PDF blob
+      const pdfBlob = await generatePDFBlob();
+
+      // Convert blob to File
+      const pdfFile = new File([pdfBlob], `Lab_Report_${Date.now()}.pdf`, {
+        type: "application/pdf",
+      });
+
       // Define the formData type properly
       const formData: {
         note: string;
@@ -154,10 +322,8 @@ const LabPatientDetails = () => {
 
       formData.testResults = structuredResults;
 
-      // Only add file if one is provided
-      if (file) {
-        formData.file = file;
-      }
+      // Add the generated PDF file
+      formData.file = pdfFile;
 
       const success = await respondToReport(caseId, formData);
       if (success) {
@@ -166,11 +332,11 @@ const LabPatientDetails = () => {
         setTestResults({});
         setStatus("In Progress");
         setFile(null);
-        alert("Lab report submitted successfully!");
+        toast.success("Lab report submitted successfully!");
       }
     } catch (error) {
       console.error("Error generating report:", error);
-      alert("Error generating report. Please try again.");
+      toast.error("Error generating report. Please try again.");
     }
   };
 
@@ -200,30 +366,54 @@ Status: ${status}
 ${"=".repeat(50)}
 `;
 
-    // Add test results for each category
+    // Add test results for each category - only include filled parameters
     Object.entries(selectedTests).forEach(([category, tests]) => {
-      reportText += `\n${category.toUpperCase()}:\n${"-".repeat(
-        category.length
-      )}\n`;
-
-      tests.forEach((testName) => {
-        reportText += `\nTest: ${testName}\n`;
+      // Filter tests that have filled parameters
+      const testsWithData = tests.filter((testName) => {
         const testData = labTests[category].tests[testName];
         const results = testResults[testName] || {};
-
-        testData.parameters.forEach((param) => {
-          const value = results[param.name] || "Not Provided";
-          reportText += `${param.name}: ${value} ${param.unit || ""}\n`;
-          reportText += `  Normal Range: ${param.normalRange}\n`;
+        return testData.parameters.some((param) => {
+          const value = results[param.name];
+          return value && value.toString().trim() !== "";
         });
-
-        reportText += "\n";
       });
+
+      // Only add category if it has tests with data
+      if (testsWithData.length > 0) {
+        reportText += `\n${category.toUpperCase()}:\n${"-".repeat(
+          category.length
+        )}\n`;
+
+        testsWithData.forEach((testName) => {
+          const testData = labTests[category].tests[testName];
+          const results = testResults[testName] || {};
+
+          // Check if this test has filled parameters
+          const filledParameters = testData.parameters.filter((param) => {
+            const value = results[param.name];
+            return value && value.toString().trim() !== "";
+          });
+
+          if (filledParameters.length > 0) {
+            reportText += `\nTest: ${testName}\n`;
+
+            filledParameters.forEach((param) => {
+              const value = results[param.name];
+              reportText += `${param.name}: ${value} ${param.unit || ""}\n`;
+              if (param.normalRange) {
+                reportText += `  Normal Range: ${param.normalRange}\n`;
+              }
+            });
+
+            reportText += "\n";
+          }
+        });
+      }
     });
 
     // Add comments if any
     reportText += `\n${"=".repeat(50)}\n`;
-    reportText += "Generated by Hospital Management System\n";
+    // reportText += "Generated by Hospital Management System\n";
     reportText += `Report ID: HMS-${Date.now()}\n`;
 
     return reportText;
@@ -316,6 +506,7 @@ ${"=".repeat(50)}
               isResponding={isResponding}
               handleReportSubmit={handleReportSubmit}
               generateReportContent={generateReportContent}
+              generatePDFBlob={generatePDFBlob}
             />
           )}
 

@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 export type LabTestParameter = {
   name: string;
   unit: string;
-  normalRange: string;
+  normalRange?: string;
   type: string;
   options?: string[];
 };

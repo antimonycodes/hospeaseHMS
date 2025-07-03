@@ -218,10 +218,12 @@ export const useReportStore = create<ReportStore>((set, get) => ({
       set({ isCreating: false });
     }
   },
-  getAllReport: async (id) => {
+  getAllReport: async (id, { perPage = 100, page = 1 } = {}) => {
     set({ isLoading: true });
     try {
-      const response = await api.get(`/medical-report/case-report/${id}`);
+      const response = await api.get(
+        `/medical-report/case-report/${id}?perPage=${perPage}&page=${page}`
+      );
       if (response.status === 200) {
         set({ allReports: response.data.data.data });
         console.log(response.data.data.data, "fghjk");
@@ -236,20 +238,27 @@ export const useReportStore = create<ReportStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
-  getSingleReport: async (id) => {
-    set({ isReportLoading: false });
+  getSingleReport: async (id: number, perPage = 100, page = 1) => {
+    set({ isReportLoading: true });
     try {
-      const response = await api.get(`/medical-report/case-report/${id}`);
+      const response = await api.get(
+        `/medical-report/case-report/${id}?perPage=${perPage}&page=${page}`
+      );
+
       if (response.status === 200) {
-        set({ singleReport: response.data.data.data });
-        // toast.success(response.data.message);
-        // return response.data;
+        const reportList = response.data?.data?.data || [];
+        const pagination = response.data?.data?.pagination || null;
+
+        set({
+          singleReport: reportList,
+          // reportPagination: pagination, // optional: store pagination state
+        });
       }
+
       return response.data;
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || "Something went wrong";
-      // toast.error(errorMsg);
-      // throw error;
+      console.error("Fetch error:", errorMsg);
     } finally {
       set({ isReportLoading: false });
     }

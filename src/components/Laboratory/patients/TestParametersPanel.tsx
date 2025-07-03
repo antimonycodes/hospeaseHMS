@@ -20,6 +20,7 @@ interface TestParametersPanelProps {
   isResponding: boolean;
   handleReportSubmit: () => void;
   generateReportContent: () => string;
+  generatePDFBlob: () => Promise<Blob>;
 }
 
 const TestParametersPanel: React.FC<TestParametersPanelProps> = ({
@@ -35,6 +36,7 @@ const TestParametersPanel: React.FC<TestParametersPanelProps> = ({
   isResponding,
   handleReportSubmit,
   generateReportContent,
+  generatePDFBlob,
 }) => {
   const renderParameterInput = (
     testName: string,
@@ -92,17 +94,20 @@ const TestParametersPanel: React.FC<TestParametersPanelProps> = ({
     }
   };
 
-  const downloadReport = () => {
-    const reportContent = generateReportContent();
-    const blob = new Blob([reportContent], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `Lab_Report_${new Date().toISOString().split("T")[0]}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  const downloadPDFReport = async () => {
+    try {
+      const pdfBlob = await generatePDFBlob();
+      const url = URL.createObjectURL(pdfBlob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Lab_Report_${new Date().toISOString().split("T")[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    }
   };
 
   return (
@@ -169,7 +174,7 @@ const TestParametersPanel: React.FC<TestParametersPanelProps> = ({
               tests selected
             </p>
           </div>
-          <div className="flex space-x-2">
+          <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
             <button
               onClick={() => setShowPreview(true)}
               className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200"
@@ -178,11 +183,11 @@ const TestParametersPanel: React.FC<TestParametersPanelProps> = ({
               Preview
             </button>
             <button
-              onClick={downloadReport}
+              onClick={downloadPDFReport}
               className="flex items-center px-4 py-2 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 transition-colors duration-200"
             >
               <Download className="h-4 w-4 mr-2" />
-              Download
+              Download PDF
             </button>
           </div>
         </div>
@@ -199,7 +204,7 @@ const TestParametersPanel: React.FC<TestParametersPanelProps> = ({
             >
               <option value="In Progress">In Progress</option>
               <option value="Completed">Completed</option>
-              <option value="Pending Review">Pending Review</option>
+              {/* <option value="Pending Review">Pending Review</option> */}
             </select>
           </div>
           <div>
@@ -210,6 +215,7 @@ const TestParametersPanel: React.FC<TestParametersPanelProps> = ({
               type="file"
               className="w-full p-2 border border-gray-300 rounded-lg"
               onChange={(e) => setFile(e.target.files?.[0] || null)}
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
             />
           </div>
         </div>
@@ -226,8 +232,8 @@ const TestParametersPanel: React.FC<TestParametersPanelProps> = ({
         </div>
 
         <button
-          className={`w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg flex items-center justify-center transition-colors duration-200 ${
-            isResponding ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
+          className={`w-full px-6 py-3 bg-primary text-white font-medium rounded-lg flex items-center justify-center transition-colors duration-200 ${
+            isResponding ? "opacity-50 cursor-not-allowed" : ""
           }`}
           onClick={handleReportSubmit}
           disabled={isResponding}
@@ -235,12 +241,12 @@ const TestParametersPanel: React.FC<TestParametersPanelProps> = ({
           {isResponding ? (
             <>
               <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-              Submitting...
+              Submitting PDF Report...
             </>
           ) : (
             <>
               <Save className="h-5 w-5 mr-2" />
-              Submit Complete Report
+              Submit Complete PDF Report
             </>
           )}
         </button>
