@@ -70,6 +70,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   const [departmentId, setDepartmentId] = useState("");
   const [partAmount, setPartAmount] = useState("");
   const [hmoDiscount, setHmoDiscount] = useState(0);
+  const [amountPaid, setAmountPaid] = useState(0); // New state for amountPaid
+  const [balance, setBalance] = useState(0); // New state for balance
+  const [currentPayment, setCurrentPayment] = useState(0); // New state for currentPayment
 
   const {
     searchPatients,
@@ -81,7 +84,6 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     paymentSources,
   } = useFinanceStore();
   const { getAllRoles, roles } = useGlobalStore();
-
   const { getAllReport, allReports, getMedicalNote, allNotes } =
     useReportStore();
 
@@ -95,8 +97,6 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
       setHmoDiscount(Number(storedHmoDiscount));
     }
   }, [getAllDoctors, getPaymentSource, getAllRoles]);
-
-  console.log(items);
 
   // Calculate total amount (original amount)
   const totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
@@ -132,19 +132,6 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     setItems(updatedItems);
   };
 
-  // Process payment
-  const handleProcessPayment = async () => {
-    setIsProcessing(true);
-    try {
-      console.log("Processing payment for items:", items);
-      openPaymentModal();
-    } catch (error) {
-      console.error("Payment processing failed:", error);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
   // Transform items for receipt display
   const transformItemsForReceipt = () => {
     return items.map((item, index) => ({
@@ -172,8 +159,6 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     };
   };
 
-  console.log(paymentData);
-
   const handleSubmit = async () => {
     const endpoint = "frontdesk/save-patient-payment";
     const refreshEndpoint = "/finance/all-revenues";
@@ -181,21 +166,16 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     // Determine the correct department_id based on item types
     let correctDepartmentId = null;
 
-    // Check if we have pharmacy items
     const hasPharmacyItems = items.some(
       (item) => item.request_pharmacy_id !== null
     );
-    // Check if we have lab items
     const hasLabItems = items.some((item) => item.service_charge_id !== null);
 
     if (hasPharmacyItems && hasLabItems) {
-      // Mixed items
       correctDepartmentId = roles["pharmacist"]?.id;
     } else if (hasPharmacyItems) {
-      // Only pharmacy items
       correctDepartmentId = roles["pharmacist"]?.id;
     } else if (hasLabItems) {
-      // Only lab items
       correctDepartmentId = roles["laboratory"]?.id;
     }
 
@@ -204,8 +184,13 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     const payload = {
       payment_source: paymentSource,
       payment_type: paymentType,
-      total_amount: finalTotalAmount.toString(), // Use final amount (after HMO discount)
-      part_amount: paymentType === "full" ? null : partAmount,
+      total_amount: finalTotalAmount.toString(),
+      part_amount:
+        paymentType === "full"
+          ? null
+          : paymentType === "pending"
+          ? "0"
+          : partAmount,
       payment_method: paymentMethod,
       patient_id: Number(patientId),
       department_id: [correctDepartmentId],
@@ -214,7 +199,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         patient_id: Number(patientId),
         amount:
           paymentMethod === "HMO" && hmoDiscount > 0
-            ? item.amount * (hmoDiscount / 100) // Apply HMO discount to individual items
+            ? item.amount * (hmoDiscount / 100)
             : item.amount,
         service_charge_id: item.service_charge_id || null,
         request_pharmacy_id: item.request_pharmacy_id || null,
@@ -227,10 +212,32 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     try {
       const success = await createPayment(payload, endpoint, refreshEndpoint);
       if (success) {
+        // Calculate payment details for receipt
+        let currentPayment = 0;
+        let amountPaid = 0;
+        let balance = finalTotalAmount;
+
+        if (paymentType === "full") {
+          currentPayment = finalTotalAmount;
+          amountPaid = finalTotalAmount;
+          balance = 0;
+        } else if (paymentType === "part") {
+          currentPayment = parseAmount(partAmount) || finalTotalAmount;
+          amountPaid = currentPayment;
+          balance = finalTotalAmount - amountPaid;
+        } else if (paymentType === "pending") {
+          currentPayment = 0;
+          amountPaid = 0;
+          balance = finalTotalAmount;
+        }
+
         setReceiptNumber(`RCP${Date.now().toString().slice(-8)}`);
         setPaymentDate(new Date());
         setSelectedItems(transformItemsForReceipt());
         setSelectedPatient(transformPatientForReceipt());
+        setAmountPaid(amountPaid); // Update state with calculated amountPaid
+        setBalance(balance); // Update state with calculated balance
+        setCurrentPayment(currentPayment); // Update state with calculated currentPayment
         setPaymentComplete(true);
         setShowSummary(false);
         toast.success("Payment successfully processed");
@@ -239,6 +246,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
       toast.error("Payment processing failed");
     }
   };
+
   const parseAmount = (
     amountStr: string | number | null | undefined
   ): number => {
@@ -251,7 +259,6 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   };
 
   const fetchData = async () => {
-    // setIsLoading(true);
     try {
       await getAllReport(patientId);
       await getMedicalNote(patientId, "doctor");
@@ -260,12 +267,10 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     } catch (error) {
       console.error("Error fetching timeline data:", error);
       toast.error("Failed to load medical timeline");
-    } finally {
-      // setIsLoading(false);
     }
   };
 
-  const handleCLose = () => {
+  const handleClose = () => {
     openPaymentModal();
     fetchData();
   };
@@ -273,18 +278,22 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   if (paymentComplete) {
     return (
       <PaymentReceipt
-        onClose={handleCLose}
+        onClose={handleClose}
         receiptNumber={receiptNumber}
         paymentDate={paymentDate}
-        selectedPatient={transformPatientForReceipt()}
-        selectedItems={transformItemsForReceipt()}
-        totalAmount={finalTotalAmount} // Use finalTotalAmount for HMO calculations
+        selectedPatient={selectedPatient}
+        selectedItems={selectedItems}
+        totalAmount={finalTotalAmount}
+        amountPaid={amountPaid} // Use state variable
+        balance={balance} // Use state variable
         paymentMethod={paymentMethod}
         paymentType={paymentType}
-        partAmount={parseAmount(partAmount)}
+        currentPaymentAmount={currentPayment} // Use state variable
+        isNewPayment={true}
       />
     );
   }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6 backdrop-blur-sm">
       <div className="bg-white w-full max-w-4xl h-[80%] rounded-xl shadow-lg overflow-hidden flex flex-col">
@@ -532,7 +541,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         firstName={firstName}
         lastName={lastName}
         selectedItems={selectedItems}
-        totalAmount={finalTotalAmount} // Pass the final amount (after HMO discount)
+        totalAmount={finalTotalAmount}
         paymentMethod={paymentMethod}
         paymentType={paymentType}
         partAmount={partAmount}

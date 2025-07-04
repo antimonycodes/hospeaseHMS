@@ -224,6 +224,19 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
   const [paymentDate, setPaymentDate] = useState<Date | null>(null);
   const [partAmount, setPartAmount] = useState("");
   const [hmoDiscount, setHmoDiscount] = useState(0);
+  const [receiptData, setReceiptData] = useState<{
+    receiptNumber: string;
+    paymentDate: Date | null;
+    selectedPatient: Patient | null;
+    selectedItems: Item[];
+    totalAmount: number;
+    amountPaid: number;
+    balance: number;
+    paymentMethod: string;
+    paymentType: string;
+    currentPaymentAmount?: number;
+    isNewPayment?: boolean;
+  } | null>(null);
 
   const allowedDepartments = ["pharmacist", "laboratory", "finance"];
   const getDepartmentOptions = () => {
@@ -332,10 +345,15 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
       payment_source: paymentSource,
       payment_type: paymentType,
       total_amount: totalAmount.toString(),
-      part_amount: paymentType === "full" ? null : partAmount,
+      part_amount:
+        paymentType === "full"
+          ? null
+          : paymentType === "pending"
+          ? "0"
+          : partAmount,
       payment_method: paymentMethod,
       patient_id: Number(selectedPatient?.id),
-      department_id: selectedDepartments.map((id) => Number(id)), // Array of department IDs
+      department_id: selectedDepartments.map((id) => Number(id)),
       payments: selectedItems.map((item) => ({
         patient_id: Number(selectedPatient?.id),
         amount: item.total,
@@ -352,11 +370,49 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
     try {
       const success = await createPayment(payload, endpoint, refreshEndpoint);
       if (success) {
+        // Calculate payment details for receipt
+        let currentPayment = 0;
+        let amountPaid = 0;
+        let balance = totalAmount;
+
+        if (paymentType === "full") {
+          currentPayment = totalAmount;
+          amountPaid = totalAmount;
+          balance = 0;
+        } else if (paymentType === "part") {
+          currentPayment = parseAmount(partAmount) || totalAmount;
+          amountPaid = currentPayment;
+          balance = totalAmount - amountPaid;
+        } else if (paymentType === "pending") {
+          currentPayment = 0; // No payment made
+          amountPaid = 0; // No amount paid
+          balance = totalAmount; // Full amount still owed
+        }
+
+        console.log(balance, "balance");
+        console.log(currentPayment, "current payment");
+        console.log(amountPaid, "amount paid");
+
         setReceiptNumber(`RCP${Date.now().toString().slice(-8)}`);
         setPaymentDate(new Date());
         setPaymentComplete(true);
         setShowSummary(false);
         toast.success("Payment successfully processed");
+
+        // Prepare receipt data
+        setReceiptData({
+          receiptNumber: `RCP${Date.now().toString().slice(-8)}`,
+          paymentDate: new Date(),
+          selectedPatient,
+          selectedItems,
+          totalAmount,
+          amountPaid,
+          balance,
+          paymentMethod,
+          paymentType,
+          currentPaymentAmount: currentPayment,
+          isNewPayment: true,
+        });
       }
     } catch (error) {
       toast.error("Payment processing failed");
@@ -377,18 +433,21 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
     });
   };
 
-  if (paymentComplete) {
+  if (paymentComplete && receiptData) {
     return (
       <PaymentReceipt
         onClose={onClose}
-        receiptNumber={receiptNumber}
-        paymentDate={paymentDate}
-        selectedPatient={selectedPatient}
-        selectedItems={selectedItems}
-        totalAmount={totalAmount}
-        paymentMethod={paymentMethod}
-        paymentType={paymentType}
-        partAmount={parseAmount(partAmount)}
+        receiptNumber={receiptData.receiptNumber}
+        paymentDate={receiptData.paymentDate}
+        selectedPatient={receiptData.selectedPatient}
+        selectedItems={receiptData.selectedItems}
+        totalAmount={receiptData.totalAmount}
+        amountPaid={receiptData.amountPaid}
+        balance={receiptData.balance}
+        paymentMethod={receiptData.paymentMethod}
+        paymentType={receiptData.paymentType}
+        currentPaymentAmount={receiptData.currentPaymentAmount}
+        isNewPayment={true}
       />
     );
   }
