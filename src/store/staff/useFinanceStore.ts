@@ -58,6 +58,8 @@ interface Payment {
 interface FinanceStats {
   total_income_balance: string;
   total_expenses_balance: string;
+  total_monthly_expenses_balance: string;
+  total_monthly_balance: string;
 }
 
 export interface LabStats {
@@ -339,6 +341,8 @@ export const useFinanceStore = create<FinanceStore>((set, get) => ({
       const statsData = response.data.data || {
         total_income_balance: "0",
         total_expenses_balance: "0",
+        total_monthly_expenses_balance: "0",
+        total_monthly_balance: "0",
       };
       set({ stats: statsData });
       console.log("Stats fetched:", statsData);

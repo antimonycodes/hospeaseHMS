@@ -4,6 +4,7 @@ import Loader from "../../../Shared/Loader";
 import { useFinanceStore } from "../../../store/staff/useFinanceStore";
 import { useNavigate } from "react-router-dom";
 import PaymentTableFilter, { FilterValues } from "./PaymentTableFilters";
+import ExportButton from "./ExportButton";
 
 interface Department {
   id: number;
@@ -21,7 +22,7 @@ interface PaymentAttributes {
   user_id: string;
   created_at: string;
   id: number;
-  department: Department[]; // Changed from single object to array
+  department: Department[];
   payment_source?: string;
 }
 
@@ -59,7 +60,6 @@ const PaymentTypeBadge = ({
 }) => {
   const type = paymentType?.toLowerCase() || "";
 
-  // Define badge styles based on payment/refund type
   const getBadgeStyle = () => {
     switch (type) {
       case "full":
@@ -119,8 +119,49 @@ const formatDepartmentNames = (departments: Department[]): string => {
   if (!departments || departments.length === 0) {
     return "N/A";
   }
-
   return departments.map((dept) => dept.name).join(", ");
+};
+
+// Helper function to format payment type for export
+const formatPaymentTypeForExport = (
+  paymentType: string | undefined
+): string => {
+  const type = paymentType?.toLowerCase() || "";
+
+  switch (type) {
+    case "full":
+      return "Full Payment";
+    case "part":
+    case "partial":
+      return "Part Payment";
+    case "pending":
+      return "Pending";
+    case "refund":
+    case "refunded":
+      return "Refunded";
+    case "partially_refunded":
+      return "Partially Refunded";
+    default:
+      return type.charAt(0).toUpperCase() + type.slice(1);
+  }
+};
+
+// Helper function to format date for export
+const formatDateForExport = (dateString: string): string => {
+  if (!dateString) return "N/A";
+
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return dateString;
+  }
 };
 
 const FpaymentTable = ({
@@ -164,7 +205,7 @@ const FpaymentTable = ({
         }))
       );
 
-      // Extract unique departments - Updated to handle array structure
+      // Extract unique departments
       const departments = Array.from(
         new Set(
           payments
@@ -320,7 +361,6 @@ const FpaymentTable = ({
         </span>
       ),
     },
-
     {
       key: "id",
       label: "",
@@ -330,20 +370,104 @@ const FpaymentTable = ({
     },
   ];
 
+  // Define export columns (excluding the "View Details" column)
+  const exportColumns = [
+    {
+      key: "patient",
+      label: "Patient Name",
+      formatter: (value: any) =>
+        value ? `${value.first_name} ${value.last_name}` : "Unknown",
+    },
+    {
+      key: "amount",
+      label: "Total Amount",
+      formatter: (value: any) => value || "N/A",
+    },
+    {
+      key: "department",
+      label: "Department",
+      formatter: (value: Department[]) => formatDepartmentNames(value),
+    },
+    {
+      key: "from_doctor",
+      label: "Doctor Name",
+      formatter: (value: any) => value || "-",
+    },
+    {
+      key: "payment_method",
+      label: "Payment Method",
+      formatter: (value: any) => value || "N/A",
+    },
+    {
+      key: "payment_type",
+      label: "Payment Type",
+      formatter: (value: any) => formatPaymentTypeForExport(value),
+    },
+    {
+      key: "payment_source",
+      label: "Source",
+      formatter: (value: any) => value || "N/A",
+    },
+    {
+      key: "created_at",
+      label: "Date",
+      formatter: (value: any) => formatDateForExport(value),
+    },
+    {
+      key: "purpose",
+      label: "Purpose",
+      formatter: (value: any) => value || "N/A",
+    },
+  ];
+
+  // Prepare additional info for export
+  const getExportAdditionalInfo = () => {
+    const activeFilters = Object.entries(filters)
+      .filter(([_, value]) => value)
+      .reduce((acc, [key, value]) => {
+        acc[key.replace("_", " ").toUpperCase()] = value;
+        return acc;
+      }, {} as Record<string, string>);
+
+    return {
+      totalRecords: pagination?.total || transformedPayments.length,
+      dateRange:
+        filters.from_date && filters.to_date
+          ? `${filters.from_date} to ${filters.to_date}`
+          : undefined,
+      filters: activeFilters,
+    };
+  };
+
   if (isLoading) {
     return <Loader />;
   }
 
   return (
     <div>
-      <PaymentTableFilter
-        onFilterChange={handleFilterChange}
-        departments={filterOptions.departments}
-        paymentMethods={filterOptions.paymentMethods}
-        paymentTypes={filterOptions.paymentTypes}
-        paymentSources={filterOptions.paymentSources}
-        isLoading={isLoading}
-      />
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex-1">
+          <PaymentTableFilter
+            onFilterChange={handleFilterChange}
+            departments={filterOptions.departments}
+            paymentMethods={filterOptions.paymentMethods}
+            paymentTypes={filterOptions.paymentTypes}
+            paymentSources={filterOptions.paymentSources}
+            isLoading={isLoading}
+          />
+        </div>
+
+        {/* Export Button */}
+        <div className="ml-4">
+          <ExportButton
+            data={transformedPayments}
+            columns={exportColumns}
+            filename="payments_report"
+            title="Payments Report"
+            additionalInfo={getExportAdditionalInfo()}
+          />
+        </div>
+      </div>
 
       {!transformedPayments.length ? (
         <div className="mt-10 text-center text-gray-500">
@@ -358,8 +482,8 @@ const FpaymentTable = ({
           paginationData={pagination}
           loading={isLoading}
           onPageChange={handlePageChange}
-          clickableRows={true} // Enable clickable rows
-          onRowClick={handleRowClick} // Handle row clicks
+          clickableRows={true}
+          onRowClick={handleRowClick}
         />
       )}
     </div>

@@ -6,6 +6,7 @@ import Button from "../../../Shared/Button";
 import Loader from "../../../Shared/Loader";
 import PaymentReceipt from "./PaymentReceipt"; // Import your receipt component
 import toast from "react-hot-toast";
+import PaymentHistory from "./PaymentHistory";
 
 const InfoRow = ({
   label,
@@ -619,6 +620,9 @@ const PaymentDetails = () => {
             )}
           </div>
         </div>
+
+        {/* Payment History Section */}
+        <PaymentHistory paymentHistory={attributes.payment_history} />
       </div>
 
       {showRefundModal && (

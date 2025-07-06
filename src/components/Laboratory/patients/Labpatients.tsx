@@ -139,7 +139,7 @@ const Labpatients = () => {
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   };
-  if (isLoading) return <Loader />;
+  if (isLoading || !patients) return <Loader />;
 
   return (
     <div className="mt-2">

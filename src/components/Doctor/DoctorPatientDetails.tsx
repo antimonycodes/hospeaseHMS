@@ -486,6 +486,8 @@ const DoctorPatientDetails = () => {
       getPatientByIdDoc(id);
       getAllReport(id);
       getMedicalNote(id, "doctor");
+      getMedicalNote(id, "consultant");
+      getMedicalNote(id, "medical-director");
     }
   }, [id, getPatientByIdDoc, getAllReport, getMedicalNote]);
 

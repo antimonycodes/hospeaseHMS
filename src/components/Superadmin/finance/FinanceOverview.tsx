@@ -13,19 +13,64 @@ const FinanceOverview = () => {
 
   console.log("Stats in Foverview:", stats);
 
+  // Calculate net balance (income - expenses)
+  const calculateNetBalance = () => {
+    if (!stats) return "0";
+    const income = parseFloat(
+      stats.total_income_balance?.replace(/,/g, "") || "0"
+    );
+    const expenses = parseFloat(
+      stats.total_expenses_balance?.replace(/,/g, "") || "0"
+    );
+    const netBalance = income - expenses;
+    return netBalance.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
+  // Calculate monthly net balance
+  const calculateMonthlyNetBalance = () => {
+    if (!stats) return "0";
+    const monthlyIncome = parseFloat(
+      stats.total_monthly_balance?.replace(/,/g, "") || "0"
+    );
+    const monthlyExpenses = parseFloat(
+      stats.total_monthly_expenses_balance?.replace(/,/g, "") || "0"
+    );
+    const monthlyNet = monthlyIncome - monthlyExpenses;
+    return monthlyNet.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
   const financeStatsData = stats
     ? [
         {
-          title: "Income ",
-          number: `₦${stats.total_income_balance}` || "0",
+          title: "Total Income",
+          number: `₦${stats.total_income_balance}` || "₦0",
           icon: getImageSrc("incomeIcon.png"),
           category: "finance",
+          description: "All-time revenue",
         },
         {
-          title: "Expenses",
-          number: `₦${stats.total_expenses_balance}` || "0",
+          title: "Total Expenses",
+          number: `₦${stats.total_expenses_balance}` || "₦0",
           icon: getImageSrc("hugeicons.png"),
           category: "finance",
+          description: "All-time expenses",
+        },
+
+        {
+          title: "This Month Income",
+          number: `₦${stats.total_monthly_balance}` || "₦0",
+          icon: getImageSrc("incomeIcon.png"),
+
+          category: "finance",
+          description: "Current month revenue",
+        },
+        {
+          title: "This Month Expenses",
+          number: `₦${stats.total_monthly_expenses_balance}` || "₦0",
+          icon: getImageSrc("hugeicons.png"),
+
+          category: "finance",
+          description: "Current month expenses",
         },
       ]
     : [];
@@ -36,12 +81,15 @@ const FinanceOverview = () => {
     <div className="font-inter">
       <div className="flex flex-col gap-4">
         {isLoading ? (
-          <div>Loading stats...</div>
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            {/* <span className="ml-2">Loading finance stats...</span> */}
+          </div>
         ) : (
           <OverviewCard
             cardTitle="Finance Dashboard"
             category="finance"
-            limit={3}
+            limit={6} // Updated to show all 6 cards
             data={financeStatsData}
           />
         )}

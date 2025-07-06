@@ -65,26 +65,63 @@ const MedicalTimeline: React.FC<MedicalTimelineProps> = ({
     useReportStore();
   const { openPaymentModal, isPaymentModalOpen, paymentData } =
     useCombinedStore();
+  console.log(allNotes, "notessss");
 
   const groupByDate = (data: any[]) => {
+    console.log("Grouping data:", data); // Debug log
     return data.reduce((acc: { [key: string]: any[] }, item) => {
-      const rawDate = new Date(item.attributes?.created_at);
-      const date = rawDate.toLocaleDateString("en-CA");
+      // Handle both report and note date formats
+      let dateStr = item.attributes?.created_at;
+
+      // Parse the date string and convert to YYYY-MM-DD format
+      let date: string;
+      try {
+        // Handle different date formats
+        if (dateStr.includes(",")) {
+          // Format: "Jul 05, 2025 06:54 AM"
+          const dateObj = new Date(dateStr);
+          date = dateObj.toLocaleDateString("en-CA"); // YYYY-MM-DD format
+        } else {
+          // Fallback for other formats
+          const dateObj = new Date(dateStr);
+          date = dateObj.toLocaleDateString("en-CA");
+        }
+      } catch (error) {
+        console.error("Error parsing date:", dateStr, error);
+        date = new Date().toLocaleDateString("en-CA"); // fallback to today
+      }
+
       if (!acc[date]) acc[date] = [];
       acc[date].push(item);
       return acc;
     }, {});
   };
 
+  const separateNotesAndReports = (data: any[]) => {
+    const notes: any[] = [];
+    const reports: any[] = [];
+
+    data.forEach((item) => {
+      if (item.type === "Doctor Report") {
+        notes.push(item);
+      } else if (item.type === "Case Report") {
+        reports.push(item);
+      }
+    });
+
+    return { notes, reports };
+  };
+
   useEffect(() => {
-    if (externalMergedData) {
-      setMergedData(externalMergedData);
-      return;
-    }
+    // if (externalMergedData) {
+    //   setMergedData(externalMergedData);
+    //   return;
+    // }
 
     const fetchData = async () => {
       setIsLoading(true);
       try {
+        console.log("Fetching data for patient:", patientId);
         await getAllReport(patientId);
         await getMedicalNote(patientId, "doctor");
         await getMedicalNote(patientId, "consultant");
@@ -105,10 +142,29 @@ const MedicalTimeline: React.FC<MedicalTimelineProps> = ({
   useEffect(() => {
     if (externalMergedData) return;
 
-    if (allReports.length > 0 || allNotes.length > 0) {
+    console.log("Processing reports:", allReports);
+    console.log("Processing notes:", allNotes);
+
+    // Check if we have any data at all
+    const hasData = allReports.length > 0 || allNotes.length > 0;
+
+    if (hasData) {
       const processData = () => {
-        const groupedReports = groupByDate(allReports);
-        const groupedNotes = groupByDate(allNotes);
+        // Combine all data first
+        const allData = [...allReports, ...allNotes];
+        console.log("Combined data:", allData);
+
+        // Separate notes and reports based on type
+        const { notes, reports } = separateNotesAndReports(allData);
+        console.log("Separated notes:", notes);
+        console.log("Separated reports:", reports);
+
+        // Group by date
+        const groupedReports = groupByDate(reports);
+        const groupedNotes = groupByDate(notes);
+
+        console.log("Grouped reports:", groupedReports);
+        console.log("Grouped notes:", groupedNotes);
 
         const allDates = Array.from(
           new Set([
@@ -117,7 +173,9 @@ const MedicalTimeline: React.FC<MedicalTimelineProps> = ({
           ])
         );
 
-        return allDates
+        console.log("All dates:", allDates);
+
+        const processedData = allDates
           .map((date) => ({
             date,
             reports: groupedReports[date] || [],
@@ -127,6 +185,9 @@ const MedicalTimeline: React.FC<MedicalTimelineProps> = ({
           .sort(
             (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
           );
+
+        console.log("Processed data:", processedData);
+        return processedData;
       };
 
       setMergedData(processData());
@@ -267,16 +328,36 @@ const MedicalTimeline: React.FC<MedicalTimelineProps> = ({
               {day.isExpanded && (
                 <div className="p-2 space-y-3">
                   {[...day.reports, ...day.notes]
-                    .sort(
-                      (a, b) =>
-                        new Date(b.attributes.created_at).getTime() -
-                        new Date(a.attributes.created_at).getTime()
-                    )
+                    .sort((a, b) => {
+                      // Handle different date formats for sorting
+                      const dateA = new Date(a.attributes.created_at);
+                      const dateB = new Date(b.attributes.created_at);
+                      return dateB.getTime() - dateA.getTime();
+                    })
                     .map((item, itemIdx) => {
-                      const isReport = "case_report_id" in item;
+                      // Correct way to determine if it's a report or note
+                      // Notes have type: "Doctor Report"
+                      // Reports have type: "Case Report"
+                      const isReport =
+                        item.type === "Case Report" ||
+                        item.case_report_id !== undefined;
+                      const isNote = item.type === "Doctor Report";
+
+                      console.log(
+                        "Item type:",
+                        item.type,
+                        "isReport:",
+                        isReport,
+                        "isNote:",
+                        isNote,
+                        item
+                      );
+
                       return (
                         <div
-                          key={isReport ? item.case_report_id : item.id}
+                          key={
+                            isReport ? item.case_report_id || item.id : item.id
+                          }
                           className="relative pl-6 pb-3"
                         >
                           {itemIdx !==
@@ -299,8 +380,12 @@ const MedicalTimeline: React.FC<MedicalTimelineProps> = ({
 
                           {isReport ? (
                             <ReportItem report={item} patientId={patientId} />
-                          ) : (
+                          ) : isNote ? (
                             <NoteItem note={item} />
+                          ) : (
+                            <div className="text-gray-500 italic">
+                              Unknown item type: {item.type}
+                            </div>
                           )}
                         </div>
                       );

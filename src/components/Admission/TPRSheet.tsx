@@ -37,12 +37,7 @@ const TPRSheet = ({ admissionId }: any) => {
     // Transform API data to component format
     const transformedEntries = tprData.map((tpr, index) => ({
       id: tpr.id,
-      date: new Date(tpr.attributes.created_at).toISOString().split("T")[0],
-      time: new Date(tpr.attributes.created_at).toLocaleTimeString("en-NG", {
-        hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
+      time: tpr.attributes.created_at,
       temperature: tpr.attributes.temperature,
       pulse: tpr.attributes.pulse,
       respiration: tpr.attributes.respiration,
@@ -58,6 +53,7 @@ const TPRSheet = ({ admissionId }: any) => {
   const [entries, setEntries] = useState<any[]>([]);
 
   const [formData, setFormData] = useState<any>({
+    manual_time_stamp: "",
     temperature: "",
     pulse: "",
     respiration: "",
@@ -67,6 +63,7 @@ const TPRSheet = ({ admissionId }: any) => {
 
   const resetForm = () => {
     setFormData({
+      manual_time_stamp: "",
       temperature: "",
       pulse: "",
       respiration: "",
@@ -79,6 +76,8 @@ const TPRSheet = ({ admissionId }: any) => {
     if (entry) {
       setEditingEntry(entry);
       setFormData({
+        manual_time_stamp: entry.created_at,
+
         temperature: entry.temperature,
         pulse: entry.pulse,
         respiration: entry.respiration,
@@ -100,6 +99,7 @@ const TPRSheet = ({ admissionId }: any) => {
 
   const handleSubmit = async () => {
     const newEntry = {
+      manual_time_stamp: formData.manual_time_stamp,
       admission_id: admissionId,
       temperature: formData.temperature,
       pulse: formData.pulse,
@@ -346,6 +346,21 @@ const TPRSheet = ({ admissionId }: any) => {
 
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Time */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Date & Time
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.manual_time_stamp}
+                    onChange={(e) =>
+                      handleInputChange("manual_time_stamp", e.target.value)
+                    }
+                    // placeholder="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
                 {/* Temperature */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">

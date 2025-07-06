@@ -26,8 +26,9 @@ const FluidBalance = ({ admissionId }: any) => {
   const [entries, setEntries] = useState<FluidEntry[]>([]);
 
   const [formData, setFormData] = useState({
+    manual_time_stamp: "",
     type: "",
-    date: "",
+    // date: "",
     time: "",
     ivInput: "",
     oralInput: "",
@@ -66,8 +67,9 @@ const FluidBalance = ({ admissionId }: any) => {
 
   const resetForm = () => {
     setFormData({
+      manual_time_stamp: "",
       type: "",
-      date: "",
+      // date: "",
       time: "",
       ivInput: "",
       oralInput: "",
@@ -83,8 +85,9 @@ const FluidBalance = ({ admissionId }: any) => {
     if (entry) {
       setEditingEntry(entry);
       setFormData({
+        manual_time_stamp: entry.created_at,
         type: entry.type,
-        date: entry.date,
+        // date: entry.date,
         time: entry.time,
         ivInput: entry.ivInput.toString(),
         oralInput: entry.oralInput.toString(),
@@ -289,7 +292,7 @@ const FluidBalance = ({ admissionId }: any) => {
                       </span>
                     </td>
                     <td className="px-4 py-3 w-full text-sm text-gray-900">
-                      {entry.created_at}
+                      {entry.updated_at}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-900">
                       {entry.ivInput}ml
@@ -348,6 +351,21 @@ const FluidBalance = ({ admissionId }: any) => {
 
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Time */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Date & Time
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.manual_time_stamp}
+                    onChange={(e) =>
+                      handleInputChange("manual_time_stamp", e.target.value)
+                    }
+                    // placeholder="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
                 {/* Type */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">

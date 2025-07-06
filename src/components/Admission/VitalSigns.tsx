@@ -5,7 +5,7 @@ import { useRole } from "../../hooks/useRole";
 
 type VitalSignsEntry = {
   time: any;
-  date: any;
+  // date: any;
   id: any;
 
   temperature: any; // in °C
@@ -31,12 +31,7 @@ const VitalSigns = ({ admissionId }: any) => {
     // Transform API data to component format
     const transformedEntries = vitasData.map((vital, index) => ({
       id: vital.id,
-      date: new Date(vital.attributes.created_at).toISOString().split("T")[0],
-      time: new Date(vital.attributes.created_at).toLocaleTimeString("en-NG", {
-        hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
+      time: vital.attributes.created_at,
       temperature: vital.attributes.temperature,
       pulse: vital.attributes.pulse,
       respiration: vital.attributes.respiration_rate,
@@ -55,6 +50,7 @@ const VitalSigns = ({ admissionId }: any) => {
   const [entries, setEntries] = useState<VitalSignsEntry[]>([]);
 
   const [formData, setFormData] = useState({
+    manual_time_stamp: "",
     temperature: "",
     pulse: "",
     respiration: "",
@@ -66,6 +62,7 @@ const VitalSigns = ({ admissionId }: any) => {
 
   const resetForm = () => {
     setFormData({
+      manual_time_stamp: "",
       temperature: "",
       pulse: "",
       respiration: "",
@@ -80,6 +77,7 @@ const VitalSigns = ({ admissionId }: any) => {
     if (entry) {
       setEditingEntry(entry);
       setFormData({
+        manual_time_stamp: entry.created_at,
         temperature: entry.temperature.toString(),
         pulse: entry.pulse.toString(),
         respiration: entry.respiration.toString(),
@@ -138,7 +136,7 @@ const VitalSigns = ({ admissionId }: any) => {
         ...entries,
         {
           id: Math.random().toString(36).substr(2, 9), // Temporary ID
-          date: now.toISOString().split("T")[0],
+          // date: now.toISOString().split("T")[0],
           time: now.toLocaleTimeString("en-NG", {
             hour12: false,
             hour: "2-digit",
@@ -171,7 +169,7 @@ const VitalSigns = ({ admissionId }: any) => {
 
   // Today's entries
   const today = new Date().toISOString().split("T")[0];
-  const todaysEntries = entries.filter((entry) => entry.date === today).length;
+  const todaysEntries = entries.filter((entry) => entry.time === today).length;
 
   // Average calculations
   const avgTemperature =
@@ -298,7 +296,7 @@ const VitalSigns = ({ admissionId }: any) => {
                     {index + 1}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900">
-                    {entry.date} {entry.time}
+                    {entry.time}
                   </td>
                   <td
                     className={`px-4 py-3 text-sm font-medium ${
@@ -387,6 +385,21 @@ const VitalSigns = ({ admissionId }: any) => {
 
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Time */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Date & Time
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.manual_time_stamp}
+                    onChange={(e) =>
+                      handleInputChange("manual_time_stamp", e.target.value)
+                    }
+                    // placeholder="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
                 {/* Temperature */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">

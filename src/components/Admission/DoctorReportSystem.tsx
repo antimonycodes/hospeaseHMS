@@ -478,7 +478,7 @@ const DoctorReportSystem = ({ patientId }: DoctorReportSystemProps) => {
       } else {
         getPatientByIdDoc(patientId);
       }
-      // getAllReport(patientId);
+      getAllReport(patientId);
       getMedicalNote(patientId, "doctor");
       getMedicalNote(patientId, "consultant");
       getMedicalNote(patientId, "admin");

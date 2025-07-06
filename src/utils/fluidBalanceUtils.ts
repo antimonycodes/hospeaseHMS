@@ -1,7 +1,7 @@
 export interface FluidEntry {
   id: any;
   type: string;
-  date: string;
+  // date: string;
   time: string;
   ivInput: number;
   oralInput: number;
@@ -48,12 +48,8 @@ export const transformApiEntryToComponent = (
   return {
     id: entry.id,
     type: entry.attributes.type,
-    date: new Date(entry.attributes.created_at).toISOString().split("T")[0],
-    time: new Date(entry.attributes.created_at).toLocaleTimeString("en-NG", {
-      hour12: false,
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
+    // date: new Date(entry.attributes.created_at).toISOString().split("T")[0],
+    time: entry.created_at,
 
     ivInput: parseFluidValue(entry.attributes.iv_input),
     oralInput: parseFluidValue(entry.attributes.oral_input),
@@ -120,7 +116,7 @@ export const calculateFluidStats = (entries: FluidEntry[]) => {
   const fluidBalance = totalInput - totalOutput;
 
   const today = new Date().toISOString().split("T")[0];
-  const todaysEntries = entries.filter((entry) => entry.date === today).length;
+  const todaysEntries = entries.filter((entry) => entry.time === today).length;
 
   const typeStats = entries.reduce((acc, entry) => {
     acc[entry.type] = (acc[entry.type] || 0) + 1;

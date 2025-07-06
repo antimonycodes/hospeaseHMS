@@ -179,7 +179,7 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({
     );
 
     // Fixed: Correctly access department_id from the created bill
-    const departmentId = createdBill?.attributes?.department_id;
+    const departmentId = createdBill?.attributes?.department_id || 158;
 
     console.log("Department ID from created bill:", departmentId);
 
@@ -199,7 +199,7 @@ const DoctorBillForm: React.FC<DoctorBillFormProps> = ({
       payment_method: "cash",
       from_doctor: createdBill?.attributes?.created_by,
       patient_id: Number(patientIdToBeUsed),
-      department_id: [Number(departmentId)],
+      department_id: [Number(departmentId) || 158],
       payments: [
         {
           patient_id: Number(patientIdToBeUsed),

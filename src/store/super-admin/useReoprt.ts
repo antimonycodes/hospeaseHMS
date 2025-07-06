@@ -358,14 +358,23 @@ export const useReportStore = create<ReportStore>((set, get) => ({
         `/medical-report/medical-report/${id}?type=${type}`
       );
       if (response.status === 200) {
-        set({ allNotes: response.data.data.data });
-        console.log(response.data.data.data);
+        const newNotes = response.data.data.data;
+        console.log(`Fetched ${type} notes:`, newNotes, "api respose");
+        set((state) => ({
+          allNotes: [
+            // Filter out duplicates by ID to avoid adding the same note multiple times
+            ...state.allNotes.filter(
+              (note) => !newNotes.some((newNote: any) => newNote.id === note.id)
+            ),
+            ...newNotes,
+          ],
+        }));
         return true;
       }
       return null;
-    } catch (error: any) {
-      console.error("Error fetching medical note:", error);
-      // toast.error(error.response?.data?.message || "Failed to fetch note");
+    } catch (error) {
+      console.error(`Error fetching ${type} notes:`, error);
+      // toast.error(error.response?.data?.message || `Failed to fetch ${type} note`);
       return null;
     } finally {
       set({ isLoading: false });

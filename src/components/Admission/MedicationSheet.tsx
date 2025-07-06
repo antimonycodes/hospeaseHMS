@@ -36,17 +36,8 @@ const MedicationSheet = ({ admissionId }: any) => {
     // Transform API data to component format
     const transformedEntries = medicationData.map((medication, index) => ({
       id: medication.id,
-      date: new Date(medication.attributes.created_at)
-        .toISOString()
-        .split("T")[0],
-      time: new Date(medication.attributes.created_at).toLocaleTimeString(
-        "en-NG",
-        {
-          hour12: false,
-          hour: "2-digit",
-          minute: "2-digit",
-        }
-      ),
+
+      time: medication.attributes.created_at,
       name: medication.attributes.drug_name,
       dosage: medication.attributes.dosage,
       route: medication.attributes.route,
@@ -62,6 +53,7 @@ const MedicationSheet = ({ admissionId }: any) => {
   const [entries, setEntries] = useState<any[]>([]);
 
   const [formData, setFormData] = useState({
+    manual_time_stamp: "",
     name: "",
     dosage: "",
     route: "",
@@ -84,6 +76,8 @@ const MedicationSheet = ({ admissionId }: any) => {
 
   const resetForm = () => {
     setFormData({
+      manual_time_stamp: "",
+
       name: "",
       dosage: "",
       route: "",
@@ -95,6 +89,7 @@ const MedicationSheet = ({ admissionId }: any) => {
     if (entry) {
       setEditingEntry(entry);
       setFormData({
+        manual_time_stamp: entry.created_at,
         name: entry.name.toString(),
         dosage: entry.dosage.toString(),
         route: entry.route,
@@ -367,6 +362,21 @@ const MedicationSheet = ({ admissionId }: any) => {
 
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Time */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Date & Time
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.manual_time_stamp}
+                    onChange={(e) =>
+                      handleInputChange("manual_time_stamp", e.target.value)
+                    }
+                    // placeholder="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
                 {/* Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
