@@ -1,6 +1,15 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useGlobalStore } from "../../../store/super-admin/useGlobal";
+import {
+  ChevronDown,
+  Download,
+  FileText,
+  FileSpreadsheet,
+  FileImage,
+} from "lucide-react";
+import { exportData, ExportOptions } from "../../../utils/exportUtils";
+import toast from "react-hot-toast";
 
 interface FilterProps {
   onFilterChange: (filters: FilterValues) => void;
@@ -9,6 +18,20 @@ interface FilterProps {
   paymentTypes: string[];
   paymentSources: string[];
   isLoading?: boolean;
+  // Export-related props
+  exportData?: any[];
+  exportColumns?: Array<{
+    key: string;
+    label: string;
+    width?: number;
+    formatter?: (value: any) => string;
+  }>;
+  exportTitle?: string;
+  exportAdditionalInfo?: {
+    totalRecords?: number;
+    dateRange?: string;
+    filters?: Record<string, string>;
+  };
 }
 
 export interface FilterValues {
@@ -30,6 +53,143 @@ interface RolesState {
   [key: string]: Role;
 }
 
+// Export Button Component
+const ExportButton = ({
+  data,
+  columns,
+  filename = "export",
+  title,
+  additionalInfo,
+  className = "",
+}: {
+  data: any[];
+  columns: Array<{
+    key: string;
+    label: string;
+    width?: number;
+    formatter?: (value: any) => string;
+  }>;
+  filename?: string;
+  title?: string;
+  additionalInfo?: {
+    totalRecords?: number;
+    dateRange?: string;
+    filters?: Record<string, string>;
+  };
+  className?: string;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async (format: "csv" | "excel" | "pdf") => {
+    setIsExporting(true);
+    setIsOpen(false);
+
+    try {
+      const exportOptions: ExportOptions = {
+        filename,
+        title,
+        columns,
+        data,
+        additionalInfo,
+      };
+      exportData(format, exportOptions);
+      toast.success(`Export completed successfully!`);
+    } catch (error) {
+      console.error("Export failed:", error);
+      toast.error("Export failed. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const exportOptions = [
+    {
+      format: "csv" as const,
+      label: "Export as CSV",
+      icon: FileText,
+      description: "Comma-separated values",
+    },
+    {
+      format: "excel" as const,
+      label: "Export as Excel",
+      icon: FileSpreadsheet,
+      description: "Microsoft Excel format",
+    },
+    {
+      format: "pdf" as const,
+      label: "Export as PDF",
+      icon: FileImage,
+      description: "Portable document format",
+    },
+  ];
+
+  return (
+    <div className={`relative inline-block text-left ${className}`}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        disabled={isExporting || data.length === 0}
+        className={`
+          inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium
+          text-white bg-primary border border-transparent rounded-lg
+          hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary
+          disabled:opacity-50 disabled:cursor-not-allowed
+          ${isExporting ? "animate-pulse" : ""}
+        `}
+      >
+        <Download size={16} />
+        {isExporting ? "Exporting..." : "Export"}
+        <ChevronDown
+          size={16}
+          className={`transform transition-transform ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-10"
+            onClick={() => setIsOpen(false)}
+          />
+          {/* Dropdown */}
+          <div className="absolute right-0 z-20 mt-2 w-64 bg-white rounded-md shadow-lg border border-gray-200">
+            <div className="py-1">
+              {exportOptions.map((option) => {
+                const Icon = option.icon;
+                return (
+                  <button
+                    key={option.format}
+                    onClick={() => handleExport(option.format)}
+                    className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-start gap-3 transition-colors"
+                  >
+                    <Icon size={18} className="text-gray-600 mt-0.5" />
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {option.label}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {option.description}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            {data.length === 0 && (
+              <div className="px-4 py-3 text-xs text-gray-500 border-t">
+                No data available to export
+              </div>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
 const PaymentTableFilter = ({
   onFilterChange,
   departments = [],
@@ -37,6 +197,10 @@ const PaymentTableFilter = ({
   paymentTypes = [],
   paymentSources = [],
   isLoading = false,
+  exportData = [],
+  exportColumns = [],
+  exportTitle = "Payments Report",
+  exportAdditionalInfo,
 }: FilterProps) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const { register, handleSubmit, reset, watch, getValues } =
@@ -51,8 +215,10 @@ const PaymentTableFilter = ({
         to_date: "",
       },
     });
+
   const { getAllRoles } = useGlobalStore();
   const roles = useGlobalStore((state) => state.roles) as RolesState;
+
   const allowedDepartments = ["pharmacist", "laboratory", "finance"];
 
   const getDepartmentOptions = () => {
@@ -106,7 +272,6 @@ const PaymentTableFilter = ({
       from_date: "",
       to_date: "",
     });
-
     // Also apply the reset filters immediately
     onFilterChange({
       search: "",
@@ -146,18 +311,31 @@ const PaymentTableFilter = ({
             </svg>
           </div>
         </div>
-        <div className="flex items-center">
+
+        <div className="flex items-center space-x-2">
+          {/* Export Button */}
+          {exportData.length > 0 && exportColumns.length > 0 && (
+            <ExportButton
+              data={exportData}
+              columns={exportColumns}
+              filename="payments_report"
+              title={exportTitle}
+              additionalInfo={exportAdditionalInfo}
+            />
+          )}
+
           <button
             type="button"
             onClick={handleReset}
-            className="px-4 py-2 mr-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
           >
             Reset
           </button>
+
           <button
             type="button"
             onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className="flex items-center px-4 py-2 ml-4 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+            className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
           >
             <svg
               className="w-5 h-5 mr-2"
@@ -180,11 +358,12 @@ const PaymentTableFilter = ({
               </span>
             )}
           </button>
+
           {activeFiltersCount > 0 && (
             <button
               type="button"
               onClick={handleReset}
-              className="px-4 py-2 ml-2 text-sm font-medium text-primary bg-white border border-primary rounded-lg hover:bg-gray-50"
+              className="px-4 py-2 text-sm font-medium text-primary bg-white border border-primary rounded-lg hover:bg-gray-50"
             >
               Clear
             </button>
@@ -217,6 +396,7 @@ const PaymentTableFilter = ({
                 ))}
               </select>
             </div>
+
             <div>
               <label className="block mb-1 text-sm font-medium text-gray-700">
                 Payment Method
@@ -233,6 +413,7 @@ const PaymentTableFilter = ({
                 ))}
               </select>
             </div>
+
             <div>
               <label className="block mb-1 text-sm font-medium text-gray-700">
                 Payment Type
@@ -249,6 +430,7 @@ const PaymentTableFilter = ({
                 ))}
               </select>
             </div>
+
             <div>
               <label className="block mb-1 text-sm font-medium text-gray-700">
                 Payment Source
@@ -265,6 +447,7 @@ const PaymentTableFilter = ({
                 ))}
               </select>
             </div>
+
             <div>
               <label className="block mb-1 text-sm font-medium text-gray-700">
                 From Date
@@ -275,6 +458,7 @@ const PaymentTableFilter = ({
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
               />
             </div>
+
             <div>
               <label className="block mb-1 text-sm font-medium text-gray-700">
                 To Date
@@ -288,13 +472,6 @@ const PaymentTableFilter = ({
           </div>
 
           <div className="flex justify-end mt-4">
-            {/* <button
-              type="button"
-              onClick={handleReset}
-              className="px-4 py-2 mr-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-            >
-              Reset
-            </button> */}
             <button
               type="button"
               onClick={applyFilters}
