@@ -101,6 +101,7 @@ const VitalSigns = ({ admissionId }: any) => {
 
   const handleSubmit = async () => {
     const newEntry = {
+      manual_time_stamp: formData.manual_time_stamp,
       admission_id: admissionId,
       temperature: formData.temperature,
       pulse: formData.pulse,

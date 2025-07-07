@@ -292,7 +292,7 @@ const FluidBalance = ({ admissionId }: any) => {
                       </span>
                     </td>
                     <td className="px-4 py-3 w-full text-sm text-gray-900">
-                      {entry.updated_at}
+                      {entry.created_at}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-900">
                       {entry.ivInput}ml

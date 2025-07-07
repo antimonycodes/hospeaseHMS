@@ -142,6 +142,7 @@ const MedicationSheet = ({ admissionId }: any) => {
       }
 
       const medicationData = {
+        manual_time_stamp: formData.manual_time_stamp,
         admission_id: admissionId,
         drug_name: formData.name,
         dosage: formData.dosage,
@@ -311,7 +312,7 @@ const MedicationSheet = ({ admissionId }: any) => {
                     {index + 1}
                   </td>
                   <td className="px-4 text-nowrap py-3 text-sm text-gray-900">
-                    {entry.date} {entry.time}
+                    {entry.time}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900">
                     {entry.name}

@@ -73,6 +73,7 @@ export const transformApiEntryToComponent = (
  */
 export const transformComponentToApiData = (
   formData: {
+    manual_time_stamp: any;
     type: any;
     ivInput: any;
     oralInput: any;
@@ -85,6 +86,7 @@ export const transformComponentToApiData = (
 ) => {
   return {
     type: formData.type,
+    manual_time_stamp: formData.manual_time_stamp,
     iv_input: formatFluidValue(formData.ivInput),
     oral_input: formatFluidValue(formData.oralInput),
     urine_input: formatFluidValue(formData.urineOutput),
