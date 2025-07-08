@@ -519,11 +519,20 @@ export const useFinanceStore = create<FinanceStore>((set, get) => ({
       set({ isBillLoading: false });
     }
   },
-  getAllDoctors: async () => {
+  getAllDoctors: async (
+    page = "1",
+    perPage = "1000",
+    endpoint = "/medical-report/doctor/fetch"
+  ) => {
     set({ isLoading: true });
     try {
-      const endpoint = "/medical-report/doctor/fetch";
-      const response = await api.get(endpoint);
+      // Check if endpoint already contains query parameters
+      const separator = endpoint.includes("?") ? "&" : "?";
+      const fullEndpoint = endpoint.includes("page=")
+        ? endpoint
+        : `${endpoint}${separator}page=${page}&per_page=${perPage}`;
+      const response = await api.get(fullEndpoint);
+
       const fetchedDoctors = response.data.data.data; // Extract doctor array
       set({ doctors: fetchedDoctors });
       // set({ pagination: response.data.data.pagination });

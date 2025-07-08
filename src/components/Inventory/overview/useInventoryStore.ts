@@ -525,10 +525,20 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       set({ isLoading: false });
     }
   },
-  getStockActivity: async () => {
+  getStockActivity: async (
+    page = "1",
+    perPage = "1000",
+    endpoint = "/medical-report/stock-activity-logs"
+  ) => {
     set({ isLoading: true });
     try {
-      const response = await api.get("/medical-report/stock-activity-logs");
+      // Check if endpoint already contains query parameters
+      const separator = endpoint.includes("?") ? "&" : "?";
+      const fullEndpoint = endpoint.includes("page=")
+        ? endpoint
+        : `${endpoint}${separator}page=${page}&per_page=${perPage}`;
+
+      const response = await api.get(fullEndpoint);
       console.log("API Response:", response.data);
 
       // Make sure we're setting the correct data structure

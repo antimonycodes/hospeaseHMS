@@ -447,11 +447,12 @@ const FrontdeskPatientDetails = () => {
         <div className="flex gap-6 mb-4 text-sm font-medium text-[#667185]">
           <button
             className={`flex items-center gap-1 px-3 py-1 rounded-md transition text-primary bg-[#F0F4FF]`}
+            onClick={() => setActiveTab("report")}
           >
             <FileText size={16} />
             Add Report
           </button>
-          <button
+          {/* <button
             className={`flex items-center gap-1 px-3 py-1 rounded-md transition ${
               activeTab === "bill"
                 ? "text-primary bg-[#F0F4FF]"
@@ -459,11 +460,9 @@ const FrontdeskPatientDetails = () => {
             }`}
             onClick={() => setActiveTab("bill")}
           >
-            {/* <Bill /> */}
             <Banknote size={16} />
-            {/* <BanknoteArrowDown /> */}
             Add Doctor's Bill
-          </button>
+          </button> */}
         </div>
 
         {activeTab === "report" && (
@@ -829,7 +828,7 @@ const FrontdeskPatientDetails = () => {
             </button>
           </div>
         )}
-        {activeTab == "bill" && (
+        {/* {activeTab == "bill" && (
           // <div>
           //   <div className="space-y-4 mb-4">
           //     <label htmlFor="">Description</label>
@@ -847,7 +846,7 @@ const FrontdeskPatientDetails = () => {
             patient={selectedPatient?.attributes}
             selectedPatient={selectedPatient}
           />
-        )}
+        )} */}
       </div>
 
       {id && (

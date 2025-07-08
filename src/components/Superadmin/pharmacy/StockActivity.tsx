@@ -3,6 +3,8 @@ import { useInventoryStore } from "../../Inventory/overview/useInventoryStore";
 import Table from "../../../Shared/Table";
 import Tablehead from "../../ReusablepatientD/Tablehead";
 import Loader from "../../../Shared/Loader";
+import { BsFillImageFill } from "react-icons/bs";
+import { CurrencyIcon } from "lucide-react";
 
 export type StockActivityType = {
   id: number;
@@ -38,6 +40,193 @@ interface Column<T> {
   label: string;
   render?: (value: any, record: T) => React.ReactNode;
 }
+
+// Daily Stats Card Component
+interface DailyStatsCardProps {
+  stockActivities: StockActivityType[];
+  selectedDate?: string;
+}
+
+const DailyStatsCard: React.FC<DailyStatsCardProps> = ({
+  stockActivities,
+  selectedDate,
+}) => {
+  // Function to calculate daily stats
+  const calculateDailyStats = () => {
+    if (!stockActivities || stockActivities.length === 0) {
+      return { totalItems: 0, totalAmount: 0, dateLabel: "No Data" };
+    }
+
+    // If selectedDate is provided, filter by that date, otherwise use today's date
+    const today = new Date().toLocaleDateString("en-US", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+    });
+
+    const targetDate = selectedDate || today;
+
+    // Filter activities by the target date
+    const dailyActivities = stockActivities.filter((activity) => {
+      const activityDate = activity.attributes.created_at;
+      return activityDate === targetDate;
+    });
+
+    // Calculate totals
+    const totalItems = dailyActivities.reduce((sum, activity) => {
+      const quantity = parseInt(
+        activity.attributes.quantity_deducted?.toString() || "0"
+      );
+      return sum + quantity;
+    }, 0);
+
+    const totalAmount = dailyActivities.reduce((sum, activity) => {
+      const price = parseFloat(
+        activity.attributes.stock_request?.requests?.service_item_price || "0"
+      );
+      const quantity = parseInt(
+        activity.attributes.quantity_deducted?.toString() || "0"
+      );
+      return sum + price * quantity;
+    }, 0);
+
+    return {
+      totalItems,
+      totalAmount,
+      dateLabel: targetDate,
+      transactionCount: dailyActivities.length,
+    };
+  };
+
+  const { totalItems, totalAmount, dateLabel, transactionCount } =
+    calculateDailyStats();
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 mx-6">
+      {/* Daily Items Sold Card */}
+      <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-600">
+              Daily Items Sold
+            </p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">
+              {totalItems}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">{dateLabel}</p>
+          </div>
+          <div className="p-3 bg-blue-50 rounded-full">
+            <svg
+              className="w-6 h-6 text-blue-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      {/* Daily Total Amount Card */}
+      <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 mx-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-600">
+              Daily Total Amount
+            </p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">
+              ₦
+              {totalAmount.toLocaleString("en-NG", {
+                minimumFractionDigits: 2,
+              })}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">{dateLabel}</p>
+          </div>
+          <div className="p-3 bg-green-50 rounded-full">
+            <CurrencyIcon />
+          </div>
+        </div>
+      </div>
+
+      {/* Daily Transactions Card */}
+      <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-600">
+              Daily Transactions
+            </p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">
+              {transactionCount}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">{dateLabel}</p>
+          </div>
+          <div className="p-3 bg-purple-50 rounded-full">
+            <svg
+              className="w-6 h-6 text-purple-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Date Selector Component
+const DateSelector: React.FC<{
+  stockActivities: StockActivityType[];
+  selectedDate: string;
+  onDateChange: (date: string) => void;
+}> = ({ stockActivities, selectedDate, onDateChange }) => {
+  // Get unique dates from stock activities
+  const getAvailableDates = () => {
+    if (!stockActivities || stockActivities.length === 0) return [];
+
+    const dates = stockActivities.map(
+      (activity) => activity.attributes.created_at
+    );
+    return [...new Set(dates)].sort(
+      (a, b) => new Date(b).getTime() - new Date(a).getTime()
+    );
+  };
+
+  const availableDates = getAvailableDates();
+
+  return (
+    <div className="mb-4 mx-6 flex items-center gap-3">
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        Filter by Date
+      </label>
+      <select
+        value={selectedDate}
+        onChange={(e) => onDateChange(e.target.value)}
+        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      >
+        <option value="">Today</option>
+        {availableDates.map((date) => (
+          <option key={date} value={date}>
+            {date}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+};
 
 const columns: Column<StockActivityType>[] = [
   {
@@ -93,7 +282,6 @@ const columns: Column<StockActivityType>[] = [
       );
       const quantity = item.attributes.quantity_deducted || 0;
       const total = price * quantity;
-
       return (
         <span className="text-[#667085] text-sm font-medium">
           ₦{total.toLocaleString()}
@@ -120,6 +308,8 @@ const StockActivity = () => {
       isLoading: boolean;
     };
 
+  const [selectedDate, setSelectedDate] = React.useState<string>("");
+
   useEffect(() => {
     getStockActivity();
   }, [getStockActivity]);
@@ -133,8 +323,23 @@ const StockActivity = () => {
   console.log("Extracted activities:", activities);
 
   return (
-    <div>
-      <Tablehead tableTitle="Pharmarcy Sales Activity Log" showButton={false} />
+    <div className=" bg-white">
+      {/* Stats Cards Section */}
+      {!isLoading && activities.length > 0 && (
+        <div className="mb-6">
+          <DateSelector
+            stockActivities={activities}
+            selectedDate={selectedDate}
+            onDateChange={setSelectedDate}
+          />
+          <DailyStatsCard
+            stockActivities={activities}
+            selectedDate={selectedDate || undefined}
+          />
+        </div>
+      )}
+      <Tablehead tableTitle="" showButton={false} />
+
       <div className="w-full bg-white rounded-b-[8px] shadow-table">
         {isLoading ? (
           <Loader />

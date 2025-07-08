@@ -13,6 +13,12 @@ import {
   ChevronUp,
   ChevronDown,
   ChevronsUpDown,
+  TrendingUp,
+  Archive,
+  ShoppingCart,
+  DollarSign,
+  Currency,
+  CurrencyIcon,
 } from "lucide-react";
 import Table from "../../../Shared/Table";
 import Loader from "../../../Shared/Loader";
@@ -20,6 +26,7 @@ import RestockModal from "./RestockModal";
 import RestockHistoryModal from "./RestockHistoryModal";
 import { useInventoryStore } from "../overview/useInventoryStore";
 import { useNavigate } from "react-router-dom";
+import { FaMoneyBill } from "react-icons/fa";
 
 type StockData = {
   quantity_sold: string;
@@ -35,6 +42,17 @@ type StockData = {
   created_at: string;
   base_profit?: number; // Added base profit
 };
+interface StatCardProps {
+  title: string;
+  value: string;
+  icon: JSX.Element;
+  trend?: {
+    value: string;
+    isPositive: boolean;
+  };
+  bgColor: string;
+  iconColor: string;
+}
 
 type SortOrder = "asc" | "desc" | null;
 type SortableColumn = keyof StockData | "base_profit";
@@ -122,7 +140,7 @@ const InventoryStockTable = ({
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       handleFilterChange();
-    }, 500);
+    }, 1500);
 
     return () => clearTimeout(timeoutId);
   }, [filters.search]);
@@ -403,6 +421,96 @@ const InventoryStockTable = ({
 
   const navigate = useNavigate();
 
+  const StatCard = ({
+    title,
+    value,
+    icon,
+    trend,
+    bgColor,
+    iconColor,
+  }: StatCardProps) => (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
+          <p className="text-2xl font-bold text-gray-900">{value}</p>
+          {trend && (
+            <div className="flex items-center mt-2">
+              <TrendingUp
+                className={`w-4 h-4 ${
+                  trend.isPositive
+                    ? "text-green-500"
+                    : "text-red-500 rotate-180"
+                }`}
+              />
+              <span
+                className={`text-sm font-medium ml-1 ${
+                  trend.isPositive ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                {trend.value}
+              </span>
+            </div>
+          )}
+        </div>
+        <div className={`${bgColor} p-3 rounded-lg`}>
+          <div className={iconColor}>{icon}</div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Stats Calculation
+  const calculateStats = () => {
+    const totalItems = formattedStocks.length;
+
+    const totalQuantitySold = formattedStocks.reduce((sum, stock) => {
+      const qty = parseInt(stock.quantity_sold) || 0;
+      return sum + qty;
+    }, 0);
+
+    const totalProfit = formattedStocks.reduce((sum, stock) => {
+      let profit = 0;
+      if (typeof stock.profit === "string") {
+        profit = parseFloat(stock.profit.replace(/,/g, "")) || 0;
+      } else {
+        profit = stock.profit || 0;
+      }
+      return sum + profit;
+    }, 0);
+
+    const lowStockItems = formattedStocks.filter((stock) => {
+      const qty = parseInt(stock.quantity) || 0;
+      return qty < 10;
+    }).length;
+
+    const expiredItems = formattedStocks.filter((stock) =>
+      isExpired(stock.expiry_date, stock.is_expired)
+    ).length;
+
+    const expiringSoonItems = formattedStocks.filter(
+      (stock) =>
+        !isExpired(stock.expiry_date, stock.is_expired) &&
+        isExpiringSoon(stock.expiry_date)
+    ).length;
+
+    const totalInventoryValue = formattedStocks.reduce((sum, stock) => {
+      const qty = parseInt(stock.quantity) || 0;
+      const cost = stock.cost || 0;
+      return sum + qty * cost;
+    }, 0);
+
+    return {
+      totalItems,
+      totalQuantitySold,
+      totalProfit,
+      lowStockItems,
+      expiredItems,
+      expiringSoonItems,
+      totalInventoryValue,
+    };
+  };
+
   const columns: Columns[] = [
     {
       key: "item",
@@ -590,123 +698,173 @@ const InventoryStockTable = ({
 
   if (isLoading) return <Loader />;
 
+  // Calculate stats before rendering
+  const stats = calculateStats();
+
+  function formatLargeNumber(totalQuantitySold: number): string {
+    if (totalQuantitySold >= 1_000_000) {
+      return (
+        (totalQuantitySold / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M"
+      );
+    }
+    if (totalQuantitySold >= 1_000) {
+      return (totalQuantitySold / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+    }
+    return totalQuantitySold.toLocaleString();
+  }
+
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-      {/* Search and Filter Bar */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-          {/* Search Input */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Search items..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors"
-              value={filters.search}
-              onChange={(e) =>
-                setFilters((prev) => ({ ...prev, search: e.target.value }))
-              }
-            />
-          </div>
-
-          {/* Filter Toggle and Clear */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
-                showFilters
-                  ? "bg-primary text-white border-primary"
-                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-              }`}
-            >
-              <Filter className="w-4 h-4" />
-              Filters
-            </button>
-
-            {Object.values(filters).some((value) => value !== "") && (
-              <button
-                onClick={clearFilters}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                <X className="w-4 h-4" />
-                Clear
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Advanced Filters */}
-        {showFilters && (
-          <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Date Range */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  From Date
-                </label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input
-                    type="date"
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                    value={filters.from_date}
-                    onChange={(e) =>
-                      setFilters((prev) => ({
-                        ...prev,
-                        from_date: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  To Date
-                </label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input
-                    type="date"
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                    value={filters.to_date}
-                    onChange={(e) =>
-                      setFilters((prev) => ({
-                        ...prev,
-                        to_date: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Apply Filters Button */}
-            <div className="flex justify-end mt-4">
-              <button
-                onClick={applyFilters}
-                className="inline-flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
-              >
-                <Filter className="w-4 h-4" />
-                Apply Filters
-              </button>
-            </div>
-          </div>
-        )}
+    <div>
+      <div className="  py-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard
+          title="Total Items"
+          value={stats.totalItems.toLocaleString()}
+          icon={<Archive className="w-6 h-6" />}
+          bgColor="bg-blue-50"
+          iconColor="text-blue-600"
+        />
+        <StatCard
+          title="Total Quantity Sold"
+          value={formatLargeNumber(stats.totalQuantitySold)}
+          icon={<ShoppingCart className="w-6 h-6" />}
+          bgColor="bg-green-50"
+          iconColor="text-green-600"
+        />
+        <StatCard
+          title="Total Profit"
+          value={formatCurrency(stats.totalProfit)}
+          icon={<FaMoneyBill className="w-6 h-6" />}
+          bgColor="bg-emerald-50"
+          iconColor="text-emerald-600"
+        />
+        <StatCard
+          title="Inventory Value"
+          value={formatCurrency(stats.totalInventoryValue)}
+          icon={<Package className="w-6 h-6" />}
+          bgColor="bg-purple-50"
+          iconColor="text-purple-600"
+        />
       </div>
 
-      {/* Table */}
-      <SortableTable />
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        {/* Stats Cards */}
 
-      {/* Modals */}
-      {restockModalOpen && selectedStock && (
-        <RestockModal
-          onClose={() => setRestockModalOpen(false)}
-          isLoading={isLoading}
-          reStock={reStock}
-          stockItem={selectedStock}
-        />
-      )}
+        {/* Search and Filter Bar */}
+        <div className="p-4 border-b border-gray-200">
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            {/* Search Input */}
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search items..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors"
+                value={filters.search}
+                onChange={(e) =>
+                  setFilters((prev) => ({ ...prev, search: e.target.value }))
+                }
+              />
+            </div>
+
+            {/* Filter Toggle and Clear */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
+                  showFilters
+                    ? "bg-primary text-white border-primary"
+                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                }`}
+              >
+                <Filter className="w-4 h-4" />
+                Filters
+              </button>
+
+              {Object.values(filters).some((value) => value !== "") && (
+                <button
+                  onClick={clearFilters}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Advanced Filters */}
+          {showFilters && (
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Date Range */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    From Date
+                  </label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input
+                      type="date"
+                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                      value={filters.from_date}
+                      onChange={(e) =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          from_date: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    To Date
+                  </label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input
+                      type="date"
+                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                      value={filters.to_date}
+                      onChange={(e) =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          to_date: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Apply Filters Button */}
+              <div className="flex justify-end mt-4">
+                <button
+                  onClick={applyFilters}
+                  className="inline-flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                  <Filter className="w-4 h-4" />
+                  Apply Filters
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Table */}
+        <SortableTable />
+
+        {/* Modals */}
+        {restockModalOpen && selectedStock && (
+          <RestockModal
+            onClose={() => setRestockModalOpen(false)}
+            isLoading={isLoading}
+            reStock={reStock}
+            stockItem={selectedStock}
+          />
+        )}
+      </div>
     </div>
   );
 };
