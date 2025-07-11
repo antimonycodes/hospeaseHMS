@@ -215,6 +215,20 @@ const NurseAppointmentDetails = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [reportNote, setReportNote] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [departmentId, setDepartmentId] = useState<any>(null);
+
+  useEffect(() => {
+    const userInfoString = localStorage.getItem("user-info");
+    if (userInfoString) {
+      try {
+        const userInfo = JSON.parse(userInfoString);
+        const id = userInfo?.attributes?.department?.id ?? null;
+        setDepartmentId(id);
+      } catch (error) {
+        console.error("Error parsing user-info from localStorage:", error);
+      }
+    }
+  }, []);
   // Add transfer success state
   const [transferSuccess, setTransferSuccess] = useState<any | null>(null);
   const [vitals, setVitals] = useState<VitalsData>({
@@ -475,6 +489,7 @@ const NurseAppointmentDetails = () => {
       note: reportNote,
       file: file,
       status: "completed",
+      department_id: departmentId,
     });
     if (response) {
       setReportNote("");

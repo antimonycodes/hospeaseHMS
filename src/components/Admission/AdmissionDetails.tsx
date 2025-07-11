@@ -23,6 +23,20 @@ const AdmissionDetails: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const role = useRole();
+  const [departmentId, setDepartmentId] = useState<any>(null);
+
+  useEffect(() => {
+    const userInfoString = localStorage.getItem("user-info");
+    if (userInfoString) {
+      try {
+        const userInfo = JSON.parse(userInfoString);
+        const id = userInfo?.attributes?.department?.id ?? null;
+        setDepartmentId(id);
+      } catch (error) {
+        console.error("Error parsing user-info from localStorage:", error);
+      }
+    }
+  }, []);
 
   const {
     isLoading,
@@ -168,6 +182,7 @@ const AdmissionDetails: React.FC = () => {
       note: reportNote,
       file: null,
       status: "completed",
+      department_id: departmentId,
     });
     if (response) {
       setReportNote("");

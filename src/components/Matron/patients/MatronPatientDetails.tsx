@@ -57,6 +57,20 @@ const MatronPatientDetails = () => {
   const [reportNote, setReportNote] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const { deptCreateReport, isCreating } = useReportStore();
+  const [departmentId, setDepartmentId] = useState<any>(null);
+
+  useEffect(() => {
+    const userInfoString = localStorage.getItem("user-info");
+    if (userInfoString) {
+      try {
+        const userInfo = JSON.parse(userInfoString);
+        const id = userInfo?.attributes?.department?.id ?? null;
+        setDepartmentId(id);
+      } catch (error) {
+        console.error("Error parsing user-info from localStorage:", error);
+      }
+    }
+  }, []);
 
   // Vitals state
   const [vitals, setVitals] = useState<VitalsData>({
@@ -110,6 +124,7 @@ const MatronPatientDetails = () => {
       note: reportNote,
       file: file,
       status: "completed",
+      department_id: departmentId,
     });
     if (response) {
       setReportNote("");

@@ -63,6 +63,7 @@ const PharPatientDetails = () => {
   }, 0);
 
   // Get user department ID
+
   useEffect(() => {
     const userInfoString = localStorage.getItem("user-info");
     if (userInfoString) {
