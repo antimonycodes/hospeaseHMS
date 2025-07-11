@@ -98,8 +98,9 @@ const PharmacyMedicalTimeline: React.FC<PharmacyMedicalTimelineProps> = ({
   const filterPharmacyReports = (reports: any[]) => {
     return reports.filter(
       (report) =>
-        report.attributes?.department?.name?.toLowerCase() === "pharmacy" &&
-        report.attributes?.status !== "pending"
+        report.attributes?.department?.name?.toLowerCase() === "pharmacy"
+      //  &&
+      //   report.attributes?.status === "pending"
     );
   };
 
@@ -115,7 +116,7 @@ const PharmacyMedicalTimeline: React.FC<PharmacyMedicalTimelineProps> = ({
       setIsLoading(true);
       try {
         await getAllReport(patientId);
-        await getMedicalNote(patientId, "pharmacy"); // Changed to fetch pharmacy notes if they exist
+        // await getMedicalNote(patientId, "pharmacy"); // Changed to fetch pharmacy notes if they exist
       } catch (error) {
         console.error("Error fetching timeline data:", error);
         toast.error("Failed to load pharmacy timeline");
@@ -127,7 +128,7 @@ const PharmacyMedicalTimeline: React.FC<PharmacyMedicalTimelineProps> = ({
     if (patientId) {
       fetchData();
     }
-  }, [patientId, getAllReport, getMedicalNote, externalMergedData]);
+  }, [patientId, getAllReport, externalMergedData]);
 
   useEffect(() => {
     // Skip processing if using external data

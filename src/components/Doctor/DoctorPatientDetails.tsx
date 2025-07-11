@@ -1456,19 +1456,6 @@ const DoctorPatientDetails = () => {
           </div>
         )}
         {activeTab == "bill" && (
-          // <div>
-          //   <div className="space-y-4 mb-4">
-          //     <label htmlFor="">Description</label>
-          //     <Input name="description" value="" onChange="" />
-          //   </div>
-          //   <div className="space-y-4 mb-4">
-          //     <label htmlFor="">Amount</label>
-          //     <Input name="amount" value="" onChange="" />
-          //   </div>
-          //   <div className=" flex justify-end">
-          //     <Button>Add Doctor's Bill</Button>
-          //   </div>{" "}
-          // </div>
           <DoctorBillForm patient={patient} selectedPatient={selectedPatient} />
         )}
       </div>

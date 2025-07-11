@@ -177,17 +177,21 @@ const AdmissionOverview: React.FC = () => {
   // Format admissions for table
   useEffect(() => {
     const formatted = filteredPatients.map((admission) => ({
-      id: admission.id,
+      id: admission?.id,
       name: `${capitalizeFirst(
-        admission.attributes.patient.attributes.first_name
-      )} ${capitalizeFirst(admission.attributes.patient.attributes.last_name)}`,
-      patientId: admission.attributes.patient.attributes.card_id,
-      gender: capitalizeFirst(admission.attributes.patient.attributes.gender),
-      bedNumber: admission.attributes.bed_number,
-      ward: admission.attributes.clinical_department.name,
-      diagnosis: admission.attributes.diagnosis,
-      status: admission.attributes.status,
-      totalStay: `${formatDate(admission.attributes.created_at)} days`,
+        admission?.attributes?.patient.attributes?.first_name
+      )} ${capitalizeFirst(
+        admission?.attributes?.patient.attributes?.last_name
+      )}`,
+      patientId: admission?.attributes?.patient.attributes?.card_id || "N/A",
+      gender:
+        capitalizeFirst(admission?.attributes?.patient.attributes?.gender) ||
+        "N/A",
+      bedNumber: admission?.attributes?.bed_number || "N/A",
+      ward: admission?.attributes?.clinical_department?.name || "N/A",
+      diagnosis: admission?.attributes?.diagnosis || "N/A",
+      status: admission?.attributes?.status || "N/A",
+      totalStay: `${formatDate(admission?.attributes?.created_at)} days`,
     }));
     setFormattedAdmissions(formatted);
   }, [filteredPatients]);
@@ -274,7 +278,8 @@ const AdmissionOverview: React.FC = () => {
     return diffDays;
   };
 
-  const capitalizeFirst = (str: string) => {
+  const capitalizeFirst = (str: string | null | undefined) => {
+    if (!str) return ""; // Return empty string if null or undefined
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   };
 
@@ -371,7 +376,7 @@ const AdmissionOverview: React.FC = () => {
     },
   ];
 
-  if (isLoading) {
+  if (isLoading || !filteredPatients) {
     return <Loader />;
   }
 

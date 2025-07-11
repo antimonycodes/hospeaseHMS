@@ -158,7 +158,7 @@ export const ReportItem = ({
               Requested Drugs
             </h2>
             {showButton() &&
-              role !== "pharmacist" &&
+              role == "pharmacist" &&
               (hasValidLabItems ? null : <PaymentStatusButton />)}
           </div>
 

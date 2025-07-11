@@ -51,6 +51,10 @@ export interface ReportStore {
     note: string;
     file?: File | null;
     status: string | null;
+    department_id: number | null;
+    role?: any;
+
+    pharmacy_stocks?: Array<{ id: number; quantity: number }> | null;
   }) => Promise<any>;
   createNote: (data: any) => Promise<any>;
   getAllReport: (id: any) => Promise<any>;
@@ -299,7 +303,16 @@ export const useReportStore = create<ReportStore>((set, get) => ({
       set({ isResponding: false });
     }
   },
-  deptCreateReport: async ({ patient_id, note, file, status }) => {
+  deptCreateReport: async ({
+    patient_id,
+    note,
+    file,
+    status,
+    pharmacy_stocks = null, // Array of items with id and quantity
+    // laboratory_service_charge = null,
+    role,
+    department_id,
+  }) => {
     set({ isCreating: true });
     try {
       const form = new FormData();
@@ -319,11 +332,32 @@ export const useReportStore = create<ReportStore>((set, get) => ({
       // For status, don't append if null or use empty string based on backend requirements
       //   if (status !== null) {
       form.append("status", status ?? "");
+      if (department_id !== null) {
+        form.append("department_id", department_id.toString());
+      } else {
+        throw new Error("department_id cannot be null");
+      }
+
       //   }
       // If backend requires a field even when null, use this:
       // else {
       //   form.append("status", "");
       // }
+      if (
+        role === "pharmacist" &&
+        pharmacy_stocks !== null &&
+        pharmacy_stocks.length > 0
+      ) {
+        // For PHP-based backends that use the "[]" notation for arrays
+        pharmacy_stocks.forEach((item: any, index: any) => {
+          form.append(`pharmacy_stocks[${index}][id]`, item.id.toString());
+          form.append(
+            `pharmacy_stocks[${index}][quantity]`,
+            item.quantity.toString()
+          );
+        });
+      }
+      form.append("role", role.toString());
 
       const response = await api.post(
         "/medical-report/case-reports/respond",
