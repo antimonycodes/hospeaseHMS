@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import { useReportStore } from "../../../store/super-admin/useReoprt";
 import Loader from "../../../Shared/Loader";
-import { ChevronLeft, TestTube } from "lucide-react";
+import { ChevronLeft, TestTube, Upload } from "lucide-react";
 import LabMedicalTimeline from "./LabMedicalTimeline";
 import TestSelectionPanel from "./TestSelectionPanel";
 import TestParametersPanel from "./TestParametersPanel";
@@ -40,6 +40,7 @@ const LabPatientDetails = () => {
     Record<string, boolean>
   >({});
   const [additionalFiles, setAdditionalFiles] = useState<File[]>([]);
+  const [reportMode, setReportMode] = useState<"create" | "upload">("create"); // New state for mode
   const defaultHospitalName = localStorage.getItem("hospitalName");
 
   const navigate = useNavigate();
@@ -47,7 +48,7 @@ const LabPatientDetails = () => {
   useEffect(() => {
     if (patientId) {
       getLabPatientById(patientId);
-      getSingleReport(patientId);
+      // getSingleReport(patientId);
     }
   }, [patientId, getLabPatientById, getSingleReport, caseId]);
 
@@ -128,6 +129,20 @@ const LabPatientDetails = () => {
         time: currentDate.toLocaleTimeString(),
       },
     };
+  };
+
+  // Check if there are any tests with filled parameters
+  const hasFilledTestResults = () => {
+    return Object.entries(selectedTests).some(([category, tests]) => {
+      return tests.some((testName) => {
+        const testData = labTests[category].tests[testName];
+        const results = testResults[testName] || {};
+        return testData.parameters.some((param) => {
+          const value = results[param.name];
+          return value && value.toString().trim() !== "";
+        });
+      });
+    });
   };
 
   // Generate PDF as Blob for submission
@@ -289,14 +304,6 @@ const LabPatientDetails = () => {
 
   const handleReportSubmit = async () => {
     try {
-      // Generate PDF blob
-      const pdfBlob = await generatePDFBlob();
-
-      // Convert blob to File
-      const pdfFile = new File([pdfBlob], `Lab_Report_${Date.now()}.pdf`, {
-        type: "application/pdf",
-      });
-
       // Define the formData type properly
       const formData: {
         note: string;
@@ -305,25 +312,62 @@ const LabPatientDetails = () => {
         testResults: {};
         patientHeader: any;
       } = {
-        note: "Comprehensive Laboratory Report",
+        note:
+          reportMode === "upload"
+            ? "External Lab Report"
+            : "Comprehensive Laboratory Report",
         status,
         testResults: {},
         patientHeader: generatePatientReportHeader(),
       };
 
-      // Structure test results by category
-      const structuredResults: { [category: string]: any } = {};
-      Object.entries(selectedTests).forEach(([category, tests]) => {
-        structuredResults[category] = {};
-        tests.forEach((testName) => {
-          structuredResults[category][testName] = testResults[testName];
+      if (reportMode === "upload") {
+        // Upload mode - use the uploaded file
+        if (!file) {
+          toast.error("Please select a file to upload");
+          return;
+        }
+        formData.file = file;
+      } else {
+        // Create mode - generate PDF only if there are filled test results
+        if (!hasFilledTestResults()) {
+          toast.error(
+            "Please fill in at least one test parameter before submitting"
+          );
+          return;
+        }
+
+        // Generate PDF blob
+        const pdfBlob = await generatePDFBlob();
+
+        // Convert blob to File
+        const pdfFile = new File([pdfBlob], `Lab_Report_${Date.now()}.pdf`, {
+          type: "application/pdf",
         });
-      });
 
-      formData.testResults = structuredResults;
+        // Structure test results by category
+        const structuredResults: { [category: string]: any } = {};
+        Object.entries(selectedTests).forEach(([category, tests]) => {
+          structuredResults[category] = {};
+          tests.forEach((testName) => {
+            const testData = labTests[category].tests[testName];
+            const results = testResults[testName] || {};
 
-      // Add the generated PDF file
-      formData.file = pdfFile;
+            // Only include tests with filled parameters
+            const hasFilledParams = testData.parameters.some((param) => {
+              const value = results[param.name];
+              return value && value.toString().trim() !== "";
+            });
+
+            if (hasFilledParams) {
+              structuredResults[category][testName] = testResults[testName];
+            }
+          });
+        });
+
+        formData.testResults = structuredResults;
+        formData.file = pdfFile;
+      }
 
       const success = await respondToReport(caseId, formData);
       if (success) {
@@ -332,6 +376,7 @@ const LabPatientDetails = () => {
         setTestResults({});
         setStatus("In Progress");
         setFile(null);
+        setReportMode("create");
         toast.success("Lab report submitted successfully!");
       }
     } catch (error) {
@@ -478,50 +523,152 @@ ${"=".repeat(50)}
         </div>
       )}
 
+      {/* Report Mode Selection */}
+      <div className="mb-6">
+        <div className="flex space-x-4">
+          <button
+            onClick={() => setReportMode("create")}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              reportMode === "create"
+                ? "bg-primary text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}
+          >
+            <TestTube className="inline-block w-4 h-4 mr-2" />
+            Create Lab Report
+          </button>
+          <button
+            onClick={() => setReportMode("upload")}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              reportMode === "upload"
+                ? "bg-primary text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}
+          >
+            <Upload className="inline-block w-4 h-4 mr-2" />
+            Upload External Report
+          </button>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-        {/* Test Selection Panel */}
-        <TestSelectionPanel
-          labTests={labTests}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          expandedCategories={expandedCategories}
-          toggleCategory={toggleCategory}
-          selectedTests={selectedTests}
-          handleTestSelect={handleTestSelect}
-        />
+        {/* Test Selection Panel - Only show in create mode */}
+        {reportMode === "create" && (
+          <TestSelectionPanel
+            labTests={labTests}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            expandedCategories={expandedCategories}
+            toggleCategory={toggleCategory}
+            selectedTests={selectedTests}
+            handleTestSelect={handleTestSelect}
+          />
+        )}
 
-        {/* Test Parameters Panel */}
-        <div className="xl:col-span-3">
-          {countSelectedTests() > 0 && (
-            <TestParametersPanel
-              labTests={labTests}
-              selectedTests={selectedTests}
-              testResults={testResults}
-              handleParameterChange={handleParameterChange}
-              setShowPreview={setShowPreview}
-              status={status}
-              setStatus={setStatus}
-              file={file}
-              setFile={setFile}
-              isResponding={isResponding}
-              handleReportSubmit={handleReportSubmit}
-              generateReportContent={generateReportContent}
-              generatePDFBlob={generatePDFBlob}
-            />
-          )}
+        {/* Main Content Area */}
+        <div
+          className={
+            reportMode === "create" ? "xl:col-span-3" : "xl:col-span-4"
+          }
+        >
+          {reportMode === "create" ? (
+            // Create Report Mode
+            <>
+              {countSelectedTests() > 0 && (
+                <TestParametersPanel
+                  labTests={labTests}
+                  selectedTests={selectedTests}
+                  testResults={testResults}
+                  handleParameterChange={handleParameterChange}
+                  setShowPreview={setShowPreview}
+                  status={status}
+                  setStatus={setStatus}
+                  file={file}
+                  setFile={setFile}
+                  isResponding={isResponding}
+                  handleReportSubmit={handleReportSubmit}
+                  generateReportContent={generateReportContent}
+                  generatePDFBlob={generatePDFBlob}
+                />
+              )}
 
-          {countSelectedTests() === 0 && (
-            <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-              <div className="text-gray-500 mb-4">
-                <TestTube className="h-12 w-12 mx-auto" />
+              {countSelectedTests() === 0 && (
+                <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+                  <div className="text-gray-500 mb-4">
+                    <TestTube className="h-12 w-12 mx-auto" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No Tests Selected
+                  </h3>
+                  <p className="text-gray-600">
+                    Select tests from the panel on the left to begin creating a
+                    lab report.
+                  </p>
+                </div>
+              )}
+            </>
+          ) : (
+            // Upload Report Mode
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="text-center mb-6">
+                <div className="text-gray-500 mb-4">
+                  <Upload className="h-12 w-12 mx-auto" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Upload External Lab Report
+                </h3>
+                <p className="text-gray-600">
+                  Upload a lab report file (PDF, DOC, DOCX, JPG, PNG) for this
+                  patient.
+                </p>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                No Tests Selected
-              </h3>
-              <p className="text-gray-600">
-                Select tests from the panel on the left to begin creating a lab
-                report.
-              </p>
+
+              <div className="space-y-4">
+                {/* File Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Select Report File
+                  </label>
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    onChange={(e) => setFile(e.target.files?.[0] || null)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {file && (
+                    <p className="text-sm text-green-600 mt-2">
+                      Selected: {file.name}
+                    </p>
+                  )}
+                </div>
+
+                {/* Status Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Report Status
+                  </label>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Pending">Pending</option>
+                  </select>
+                </div>
+
+                {/* Submit Button */}
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleReportSubmit}
+                    disabled={!file || isResponding}
+                    className="px-6 py-2 bg-primary text-white rounded-lg  disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {isResponding ? "Uploading..." : "Upload Report"}
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>

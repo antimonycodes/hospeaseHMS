@@ -92,7 +92,7 @@ const LabMedicalTimeline: React.FC<LabMedicalTimelineProps> = ({
       setIsLoading(true);
       try {
         await getAllReport(patientId);
-        await getMedicalNote(patientId, "laboratory"); // Changed to fetch lab notes if they exist
+        // await getMedicalNote(patientId, "laboratory"); // Changed to fetch lab notes if they exist
       } catch (error) {
         console.error("Error fetching timeline data:", error);
         toast.error("Failed to load laboratory timeline");
