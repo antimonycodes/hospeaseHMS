@@ -16,6 +16,7 @@
     "@mui/x-date-pickers": "^7.28.3",
     "@neodrag/react": "^2.3.0",
     "@tailwindcss/vite": "^4.0.9",
+    "antd": "^5.26.4",
     "axios": "^1.8.4",
     "framer-motion": "^12.4.10",
     "html-to-image": "^1.11.13",

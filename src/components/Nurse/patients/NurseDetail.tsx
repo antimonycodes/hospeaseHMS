@@ -207,6 +207,7 @@ const NurseDetail = () => {
       file: file,
       status: "completed",
       department_id: departmentId,
+      role: "nurse",
     });
     if (response) {
       setReportNote("");

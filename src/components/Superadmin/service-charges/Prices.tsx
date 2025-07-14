@@ -7,6 +7,8 @@ import {
   Trash2,
   AlertTriangle,
   Search,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useCombinedStore } from "../../../store/super-admin/useCombinedStore";
@@ -41,8 +43,16 @@ interface RolesState {
 
 interface Column<T> {
   key: keyof T | string;
-  label: string;
+  label: string | React.ReactNode;
   render?: (value: any, row: T, index?: number) => React.ReactNode;
+}
+
+type SortField = "name" | "amount" | "department";
+type SortOrder = "asc" | "desc";
+
+interface SortConfig {
+  field: SortField;
+  order: SortOrder;
 }
 
 const allowedDepartments = ["pharmacist", "laboratory", "finance"];
@@ -77,6 +87,7 @@ const Prices = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editItem, setEditItem] = useState<Item | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     price: "",
@@ -109,6 +120,94 @@ const Prices = () => {
         id: roles[dept].id.toString(),
         name: departmentDisplayNames[dept] || dept,
       }));
+
+  // Sorting function
+  const sortData = (data: Item[], config: SortConfig | null) => {
+    if (!config) return data;
+
+    return [...data].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (config.field) {
+        case "name":
+          aValue = a.attributes.name?.toLowerCase() || "";
+          bValue = b.attributes.name?.toLowerCase() || "";
+          break;
+        case "amount":
+          aValue = a.attributes.amount || a.attributes.price || 0;
+          bValue = b.attributes.amount || b.attributes.price || 0;
+          break;
+        case "department":
+          const aDeptName = a.attributes.department.name.toLowerCase();
+          const bDeptName = b.attributes.department.name.toLowerCase();
+          aValue =
+            departmentDisplayNames[aDeptName] || a.attributes.department.name;
+          bValue =
+            departmentDisplayNames[bDeptName] || b.attributes.department.name;
+          aValue = aValue.toLowerCase();
+          bValue = bValue.toLowerCase();
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) {
+        return config.order === "asc" ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return config.order === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
+  };
+
+  // Apply sorting to items
+  const sortedItems = useMemo(() => {
+    return sortData(items || [], sortConfig);
+  }, [items, sortConfig]);
+
+  // Handle sorting
+  const handleSort = (field: SortField) => {
+    setSortConfig((prevConfig) => {
+      if (prevConfig && prevConfig.field === field) {
+        // Toggle order if same field
+        return {
+          field,
+          order: prevConfig.order === "asc" ? "desc" : "asc",
+        };
+      } else {
+        // Set new field with ascending order
+        return {
+          field,
+          order: "asc",
+        };
+      }
+    });
+  };
+
+  // Clear sorting
+  const clearSort = () => {
+    setSortConfig(null);
+  };
+
+  // Sort icon component
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (!sortConfig || sortConfig.field !== field) {
+      return (
+        <div className="w-4 h-4 flex flex-col">
+          <ChevronUp className="w-3 h-3 text-gray-300" />
+          <ChevronDown className="w-3 h-3 text-gray-300 -mt-1" />
+        </div>
+      );
+    }
+
+    return sortConfig.order === "asc" ? (
+      <ChevronUp className="w-4 h-4 text-primary" />
+    ) : (
+      <ChevronDown className="w-4 h-4 text-primary" />
+    );
+  };
 
   // Fetch items with search
   const fetchItems = useCallback(
@@ -224,17 +323,46 @@ const Prices = () => {
     },
     {
       key: "name",
-      label: "Item Name",
+      label: (
+        <button
+          onClick={() => handleSort("name")}
+          className="flex items-center gap-1 hover:bg-gray-100 px-2 py-1 rounded transition-colors"
+        >
+          Item Name
+          <SortIcon field="name" />
+        </button>
+      ),
       render: (_, row) => row.attributes.name,
     },
     {
       key: "amount",
-      label: "Amount",
-      render: (_, row) => row.attributes.amount || row.attributes.price,
+      label: (
+        <button
+          onClick={() => handleSort("amount")}
+          className="flex items-center gap-1 hover:bg-gray-100 px-2 py-1 rounded transition-colors"
+        >
+          Amount
+          <SortIcon field="amount" />
+        </button>
+      ),
+      render: (_, row) => {
+        const amount = row.attributes.amount || row.attributes.price;
+        return typeof amount === "number"
+          ? `₦${amount.toLocaleString()}`
+          : amount;
+      },
     },
     {
       key: "department",
-      label: "Department",
+      label: (
+        <button
+          onClick={() => handleSort("department")}
+          className="flex items-center gap-1 hover:bg-gray-100 px-2 py-1 rounded transition-colors"
+        >
+          Department
+          <SortIcon field="department" />
+        </button>
+      ),
       render: (_, row) => {
         const deptName = row.attributes.department.name.toLowerCase();
         return (
@@ -297,30 +425,49 @@ const Prices = () => {
         </Button>
       </div>
 
-      {/* Search Bar */}
+      {/* Search Bar and Sort Controls */}
       <div className="mb-6">
-        <div className="relative max-w-md">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <div className="relative max-w-md flex-1">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search items by name"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary focus:border-primary"
+            />
+            {searchTerm && (
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                <button
+                  onClick={clearSearch}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            )}
           </div>
-          <input
-            type="text"
-            placeholder="Search items by name"
-            value={searchTerm}
-            onChange={handleSearchChange}
-            className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary focus:border-primary"
-          />
-          {searchTerm && (
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+
+          {/* Sort Controls */}
+          {sortConfig && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">
+                Sorted by: {sortConfig.field} (
+                {sortConfig.order === "asc" ? "ascending" : "descending"})
+              </span>
               <button
-                onClick={clearSearch}
-                className="text-gray-400 hover:text-gray-600"
+                onClick={clearSort}
+                className="text-xs text-red-500 hover:text-red-700 underline"
               >
-                <X className="h-5 w-5" />
+                Clear sort
               </button>
             </div>
           )}
         </div>
+
         {searchTerm && (
           <p className="text-sm text-gray-600 mt-2">
             {isLoading ? "Searching..." : `Showing results for "${searchTerm}"`}
@@ -330,7 +477,7 @@ const Prices = () => {
 
       <Table
         columns={columns}
-        data={items || []}
+        data={sortedItems}
         rowKey="id"
         loading={isLoading}
         pagination

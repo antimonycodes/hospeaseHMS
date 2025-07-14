@@ -34,6 +34,8 @@ const RestockModal = ({
     cost: "",
   });
 
+  const { getAllStocks } = useInventoryStore();
+
   useEffect(() => {
     if (stockItem) {
       const rawCost = stockItem.attributes.cost;
@@ -62,10 +64,10 @@ const RestockModal = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!restockData.quantity || parseInt(restockData.quantity) <= 0) {
-      toast.error("Please enter a valid quantity");
-      return;
-    }
+    // if (!restockData.quantity || parseInt(restockData.quantity) <= 0) {
+    //   toast.error("Please enter a valid quantity");
+    //   return;
+    // }
 
     if (!reStock) {
       console.error("reStock function is not defined");
@@ -84,7 +86,8 @@ const RestockModal = ({
     try {
       await reStock(restockData);
       onClose();
-      window.location.reload();
+      // window.location.reload();
+      getAllStocks();
     } catch (error) {
       console.error("Error restocking:", error);
     }
@@ -148,7 +151,7 @@ const RestockModal = ({
                 onChange={handleChange}
                 disabled={isLoading}
                 className="w-full p-4 border border-[#D0D5DD] rounded-md text-sm"
-                min="1"
+                // min="0"
                 required
               />
             </div>

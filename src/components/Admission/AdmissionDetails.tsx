@@ -183,6 +183,7 @@ const AdmissionDetails: React.FC = () => {
       file: null,
       status: "completed",
       department_id: departmentId,
+      role: "nurse",
     });
     if (response) {
       setReportNote("");

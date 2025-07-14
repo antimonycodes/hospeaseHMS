@@ -14,6 +14,8 @@ import toast from "react-hot-toast";
 import jsPDF from "jspdf";
 
 const LabPatientDetails = () => {
+  const [departmentId, setDepartmentId] = useState<any>(null);
+
   const { patientId, caseId } = useParams();
   const { getLabPatientById } = usePatientStore();
   const {
@@ -22,6 +24,7 @@ const LabPatientDetails = () => {
     getSingleReport,
     singleReport,
     respondToReport,
+    deptCreateReport,
   } = useReportStore();
   const selectedPatient = usePatientStore((state) => state.selectedPatient);
   const isLoading = usePatientStore((state) => state.isLoading);
@@ -44,6 +47,18 @@ const LabPatientDetails = () => {
   const defaultHospitalName = localStorage.getItem("hospitalName");
 
   const navigate = useNavigate();
+  useEffect(() => {
+    const userInfoString = localStorage.getItem("user-info");
+    if (userInfoString) {
+      try {
+        const userInfo = JSON.parse(userInfoString);
+        const id = userInfo?.attributes?.department?.id ?? null;
+        setDepartmentId(id);
+      } catch (error) {
+        console.error("Error parsing user-info from localStorage:", error);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (patientId) {
@@ -146,36 +161,38 @@ const LabPatientDetails = () => {
   };
 
   // Generate PDF as Blob for submission
+
   const generatePDFBlob = async (): Promise<Blob> => {
     const doc = new jsPDF();
+    doc.setLineHeightFactor(1); // reduce global line spacing
     const header = generatePatientReportHeader();
     let yPosition = 20;
 
-    // Set fonts and colors
-    doc.setFontSize(16);
-    doc.setFont("helvetica", "bold");
-
-    // Hospital header
-    doc.text(header.hospitalName, 105, yPosition, { align: "center" });
-    yPosition += 10;
-
     doc.setFontSize(14);
-    doc.text(header.reportTitle, 105, yPosition, { align: "center" });
-    yPosition += 15;
-
-    // Draw line
-    doc.setLineWidth(0.5);
-    doc.line(20, yPosition, 190, yPosition);
-    yPosition += 15;
-
-    // Patient Information
-    doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.text("PATIENT INFORMATION:", 20, yPosition);
+    doc.text(header.hospitalName, 105, yPosition, { align: "center" });
     yPosition += 8;
 
-    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(header.reportTitle, 105, yPosition, { align: "center" });
+    yPosition += 10;
+
+    doc.setLineWidth(0.3);
+    doc.line(20, yPosition, 190, yPosition);
+    yPosition += 8;
+
+    const column1X = 20;
+    const column2X = 105;
+    let column1Y = yPosition;
+    let column2Y = yPosition;
+
+    // PATIENT INFO
     doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text("PATIENT INFORMATION:", column1X, column1Y);
+    column1Y += 5;
+    doc.setFont("helvetica", "normal");
+
     const patientInfo = [
       `Name: ${header.patientInfo.name}`,
       `Patient ID: ${header.patientInfo.patientId}`,
@@ -185,122 +202,418 @@ const LabPatientDetails = () => {
       `Address: ${header.patientInfo.address}`,
     ];
 
-    patientInfo.forEach((info) => {
-      doc.text(info, 20, yPosition);
-      yPosition += 6;
+    patientInfo.forEach((line) => {
+      doc.text(line, column1X, column1Y);
+      column1Y += 4;
     });
 
-    yPosition += 5;
-
-    // Report Information
+    // REPORT INFO
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    doc.text("REPORT INFORMATION:", 20, yPosition);
-    yPosition += 8;
-
+    doc.text("REPORT INFORMATION:", column2X, column2Y);
+    column2Y += 5;
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.text(`Date: ${header.reportInfo.date}`, 20, yPosition);
-    yPosition += 6;
-    doc.text(`Time: ${header.reportInfo.time}`, 20, yPosition);
-    yPosition += 6;
-    doc.text(`Status: ${status}`, 20, yPosition);
-    yPosition += 15;
 
-    // Test Results - Only include categories and tests that have filled parameters
+    const reportInfo = [
+      `Date: ${header.reportInfo.date}`,
+      `Time: ${header.reportInfo.time}`,
+      `Status: ${status}`,
+    ];
+
+    reportInfo.forEach((line) => {
+      doc.text(line, column2X, column2Y);
+      column2Y += 4;
+    });
+
+    yPosition = Math.max(column1Y, column2Y) + 10;
+
+    const categoriesWithData: Array<{ category: string; tests: string[] }> = [];
+
     Object.entries(selectedTests).forEach(([category, tests]) => {
-      // Filter tests that have filled parameters
-      const testsWithData = tests.filter((testName) => {
-        const testData = labTests[category].tests[testName];
+      const filledTests = tests.filter((testName) => {
+        const testData = labTests[category]?.tests[testName];
         const results = testResults[testName] || {};
-        return testData.parameters.some((param) => {
-          const value = results[param.name];
-          return value && value.toString().trim() !== "";
+        return testData?.parameters.some((param) => {
+          const val = results[param.name];
+          return val && val.toString().trim() !== "";
         });
       });
 
-      // Only add category if it has tests with data
-      if (testsWithData.length > 0) {
-        // Check if we need a new page
-        if (yPosition > 250) {
-          doc.addPage();
-          yPosition = 20;
-        }
-
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(12);
-        doc.text(category.toUpperCase(), 20, yPosition);
-        yPosition += 8;
-
-        testsWithData.forEach((testName) => {
-          // Check if we need a new page
-          if (yPosition > 240) {
-            doc.addPage();
-            yPosition = 20;
-          }
-
-          const testData = labTests[category].tests[testName];
-          const results = testResults[testName] || {};
-
-          // Check if this test has any filled parameters
-          const hasFilledParameters = testData.parameters.some((param) => {
-            const value = results[param.name];
-            return value && value.toString().trim() !== "";
-          });
-
-          // Only add the test to PDF if it has filled parameters
-          if (hasFilledParameters) {
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(11);
-            doc.text(`Test: ${testName}`, 25, yPosition);
-            yPosition += 7;
-
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(10);
-
-            testData.parameters.forEach((param) => {
-              const value = results[param.name];
-              // Only include parameters that have been filled in
-              if (value && value.toString().trim() !== "") {
-                doc.text(
-                  `${param.name}: ${value} ${param.unit || ""}`,
-                  30,
-                  yPosition
-                );
-                yPosition += 5;
-                doc.setTextColor(100, 100, 100);
-                doc.text(`Normal Range: ${param.normalRange}`, 35, yPosition);
-                doc.setTextColor(0, 0, 0);
-                yPosition += 7;
-              }
-            });
-
-            yPosition += 3;
-          }
-        });
-
-        yPosition += 5;
+      if (filledTests.length > 0) {
+        categoriesWithData.push({ category, tests: filledTests });
       }
     });
 
-    // Footer
-    if (yPosition > 250) {
+    const leftX = 20;
+    const rightX = 105;
+    const pageHeight = 280;
+    let leftY = yPosition;
+    let rightY = yPosition;
+
+    const calculateHeight = (category: string, tests: string[]) => {
+      let height = 5;
+      tests.forEach((testName) => {
+        const testData = labTests[category]?.tests[testName];
+        const results = testResults[testName] || {};
+        height += 4;
+        testData?.parameters.forEach((param) => {
+          const val = results[param.name];
+          if (val && val.toString().trim() !== "") {
+            height += param.normalRange ? 6 : 4;
+          }
+        });
+        height += 2;
+      });
+      return height;
+    };
+
+    const renderCategory = (
+      category: string,
+      tests: string[],
+      x: number,
+      y: number
+    ): number => {
+      let currentY = y;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.text(category.toUpperCase(), x, currentY);
+      currentY += 5;
+
+      tests.forEach((testName) => {
+        const testData = labTests[category]?.tests[testName];
+        const results = testResults[testName] || {};
+
+        const filledParams = testData?.parameters.filter((param) => {
+          const val = results[param.name];
+          return val && val.toString().trim() !== "";
+        });
+
+        if (filledParams?.length) {
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(9);
+          doc.text(`• ${testName}`, x + 2, currentY);
+          currentY += 4;
+
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(8);
+
+          filledParams.forEach((param) => {
+            const val = results[param.name];
+            doc.text(
+              `${param.name}: ${val} ${param.unit || ""}`,
+              x + 5,
+              currentY
+            );
+            currentY += 4;
+
+            if (param.normalRange) {
+              doc.setTextColor(100, 100, 100);
+              doc.text(`Range: ${param.normalRange}`, x + 8, currentY);
+              doc.setTextColor(0, 0, 0);
+              currentY += 2;
+            }
+          });
+
+          currentY += 2;
+        }
+      });
+
+      return currentY;
+    };
+
+    categoriesWithData.forEach(({ category, tests }) => {
+      const height = calculateHeight(category, tests);
+
+      let useLeft = true;
+      if (leftY + height > pageHeight && rightY + height <= pageHeight) {
+        useLeft = false;
+      } else if (leftY + height > pageHeight && rightY + height > pageHeight) {
+        doc.addPage();
+        leftY = 20;
+        rightY = 20;
+        useLeft = true;
+      } else if (rightY < leftY) {
+        useLeft = false;
+      }
+
+      if (useLeft) {
+        leftY = renderCategory(category, tests, leftX, leftY) + 5;
+      } else {
+        rightY = renderCategory(category, tests, rightX, rightY) + 5;
+      }
+    });
+
+    let finalY = Math.max(leftY, rightY);
+    if (finalY + 15 > pageHeight) {
       doc.addPage();
-      yPosition = 20;
+      finalY = 20;
     }
 
-    doc.setLineWidth(0.5);
-    doc.line(20, yPosition, 190, yPosition);
-    yPosition += 10;
+    doc.setLineWidth(0.3);
+    doc.line(20, finalY, 190, finalY);
+    finalY += 6;
 
     doc.setFont("helvetica", "italic");
-    doc.setFontSize(9);
-    // doc.text("Generated by Hospital Management System", 20, yPosition);
-    yPosition += 5;
-    doc.text(`Report ID: HMS-${Date.now()}`, 20, yPosition);
+    doc.setFontSize(8);
+    doc.text(`Report ID: HMS-${Date.now()}`, 20, finalY);
 
     return doc.output("blob");
   };
+  // const generatePDFBlob = async (): Promise<Blob> => {
+  //   // Initialize PDF with compact settings
+  //   const doc = new jsPDF({
+  //     unit: "mm",
+  //     format: "a4",
+  //     compress: true,
+  //   });
+
+  //   const header = generatePatientReportHeader();
+  //   let yPosition = 15; // Reduced initial spacing
+
+  //   // Set compact font settings
+  //   doc.setFont("helvetica");
+  //   doc.setFontSize(12); // Base font size
+
+  //   // Hospital header - more compact
+  //   doc.setFontSize(14);
+  //   doc.setFont("helvetica", "bold");
+  //   doc.text(header.hospitalName, 105, yPosition, { align: "center" });
+  //   yPosition += 7;
+
+  //   doc.setFontSize(12);
+  //   doc.text(header.reportTitle, 105, yPosition, { align: "center" });
+  //   yPosition += 10;
+
+  //   // Compact divider line
+  //   doc.setLineWidth(0.3);
+  //   doc.line(15, yPosition, 195, yPosition);
+  //   yPosition += 8;
+
+  //   // Two-column layout with tighter spacing
+  //   const column1X = 15;
+  //   const column2X = 105;
+  //   const columnWidth = 85;
+  //   let column1Y = yPosition;
+  //   let column2Y = yPosition;
+
+  //   // Patient Information - Compact
+  //   doc.setFontSize(10);
+  //   doc.setFont("helvetica", "bold");
+  //   doc.text("PATIENT INFORMATION:", column1X, column1Y);
+  //   column1Y += 5;
+
+  //   doc.setFont("helvetica", "normal");
+  //   const patientInfo = [
+  //     `Name: ${header.patientInfo.name}`,
+  //     `ID: ${header.patientInfo.patientId}`,
+  //     `Age/Sex: ${header.patientInfo.age}/${header.patientInfo.gender}`,
+  //     `Phone: ${header.patientInfo.phone}`,
+  //     `Address: ${header.patientInfo.address}`,
+  //   ];
+
+  //   patientInfo.forEach((info) => {
+  //     doc.text(info, column1X, column1Y);
+  //     column1Y += 5; // Tight line spacing
+  //   });
+
+  //   // Report Information - Compact
+  //   doc.setFont("helvetica", "bold");
+  //   doc.text("REPORT INFORMATION:", column2X, column2Y);
+  //   column2Y += 5;
+
+  //   doc.setFont("helvetica", "normal");
+  //   doc.text(`Date: ${header.reportInfo.date}`, column2X, column2Y);
+  //   column2Y += 5;
+  //   doc.text(`Time: ${header.reportInfo.time}`, column2X, column2Y);
+  //   column2Y += 5;
+  //   doc.text(`Status: ${status}`, column2X, column2Y);
+  //   column2Y += 5;
+
+  //   // Set yPosition to the bottom of the longer column
+  //   yPosition = Math.max(column1Y, column2Y) + 10;
+
+  //   // Prepare categories with test data
+  //   const categoriesWithData: Array<{
+  //     category: string;
+  //     tests: string[];
+  //   }> = [];
+
+  //   Object.entries(selectedTests).forEach(([category, tests]) => {
+  //     const testsWithData = tests.filter((testName) => {
+  //       const testData = labTests[category]?.tests[testName];
+  //       if (!testData) return false;
+
+  //       const results = testResults[testName] || {};
+  //       return testData.parameters.some((param: any) => {
+  //         const value = results[param.name];
+  //         return value && value.toString().trim() !== "";
+  //       });
+  //     });
+
+  //     if (testsWithData.length > 0) {
+  //       categoriesWithData.push({ category, tests: testsWithData });
+  //     }
+  //   });
+
+  //   // Two-column layout configuration
+  //   const leftColumnX = 15;
+  //   const rightColumnX = 105;
+  //   const pageHeight = 280;
+  //   let leftColumnY = yPosition;
+  //   let rightColumnY = yPosition;
+  //   let currentColumn: "left" | "right" = "left";
+
+  //   // Helper function to calculate category height
+  //   const calculateCategoryHeight = (
+  //     category: string,
+  //     tests: string[]
+  //   ): number => {
+  //     let height = 8; // Reduced category header space
+
+  //     tests.forEach((testName) => {
+  //       const testData = labTests[category]?.tests[testName];
+  //       if (!testData) return;
+
+  //       const results = testResults[testName] || {};
+
+  //       height += 6; // Reduced test name space
+
+  //       testData.parameters.forEach((param: any) => {
+  //         const value = results[param.name];
+  //         if (value && value.toString().trim() !== "") {
+  //           height += 6; // Reduced parameter space
+  //           if (param.normalRange) {
+  //             height += 4; // Reduced normal range space
+  //           }
+  //         }
+  //       });
+  //     });
+
+  //     return height;
+  //   };
+
+  //   // Helper function to render category content
+  //   const renderCategory = (
+  //     category: string,
+  //     tests: string[],
+  //     startX: number,
+  //     startY: number
+  //   ): number => {
+  //     let currentY = startY;
+
+  //     // Draw category header
+  //     doc.setFont("helvetica", "bold");
+  //     doc.setFontSize(10);
+  //     doc.text(category.toUpperCase(), startX, currentY);
+  //     currentY += 5;
+
+  //     // Draw tests for this category
+  //     tests.forEach((testName) => {
+  //       const testData = labTests[category]?.tests[testName];
+  //       if (!testData) return;
+
+  //       const results = testResults[testName] || {};
+  //       const filledParameters = testData.parameters.filter((param: any) => {
+  //         const value = results[param.name];
+  //         return value && value.toString().trim() !== "";
+  //       });
+
+  //       if (filledParameters.length > 0) {
+  //         // Test name
+  //         doc.setFont("helvetica", "bold");
+  //         doc.setFontSize(9);
+  //         doc.text(testName, startX + 2, currentY);
+  //         currentY += 4;
+
+  //         // Parameters
+  //         doc.setFont("helvetica", "normal");
+  //         doc.setFontSize(8);
+
+  //         filledParameters.forEach((param: any) => {
+  //           const value = results[param.name];
+  //           // Compact parameter display
+  //           const paramText = `${param.name}: ${value}${
+  //             param.unit ? ` ${param.unit}` : ""
+  //           }`;
+  //           doc.text(paramText, startX + 5, currentY);
+  //           currentY += 3.5;
+
+  //           // Only show normal range if it exists
+  //           if (param.normalRange) {
+  //             doc.setTextColor(100, 100, 100);
+  //             doc.setFontSize(7);
+  //             doc.text(`(${param.normalRange})`, startX + 8, currentY);
+  //             doc.setTextColor(0, 0, 0);
+  //             doc.setFontSize(8);
+  //             currentY += 3;
+  //           }
+  //         });
+  //       }
+  //     });
+
+  //     return currentY;
+  //   };
+
+  //   // Process categories with smart column balancing
+  //   categoriesWithData.forEach((categoryData) => {
+  //     const { category, tests } = categoryData;
+  //     const categoryHeight = calculateCategoryHeight(category, tests);
+
+  //     // Check if we need to switch columns or add new page
+  //     if (currentColumn === "left") {
+  //       if (leftColumnY + categoryHeight > pageHeight) {
+  //         if (rightColumnY + categoryHeight <= pageHeight) {
+  //           currentColumn = "right";
+  //         } else {
+  //           doc.addPage();
+  //           leftColumnY = 15;
+  //           rightColumnY = 15;
+  //           currentColumn = "left";
+  //         }
+  //       }
+  //     } else {
+  //       if (rightColumnY + categoryHeight > pageHeight) {
+  //         doc.addPage();
+  //         leftColumnY = 15;
+  //         rightColumnY = 15;
+  //         currentColumn = "left";
+  //       }
+  //     }
+
+  //     // Render the category in the appropriate column
+  //     if (currentColumn === "left") {
+  //       leftColumnY = renderCategory(category, tests, leftColumnX, leftColumnY);
+  //       leftColumnY += 4; // Reduced space between categories
+  //     } else {
+  //       rightColumnY = renderCategory(
+  //         category,
+  //         tests,
+  //         rightColumnX,
+  //         rightColumnY
+  //       );
+  //       rightColumnY += 4; // Reduced space between categories
+  //     }
+  //   });
+
+  //   // Compact footer
+  //   const footerY = Math.max(leftColumnY, rightColumnY);
+  //   let finalY = footerY;
+
+  //   if (finalY > pageHeight - 10) {
+  //     doc.addPage();
+  //     finalY = 15;
+  //   }
+
+  //   doc.setLineWidth(0.3);
+  //   doc.line(15, finalY, 195, finalY);
+  //   finalY += 5;
+
+  //   doc.setFont("helvetica", "italic");
+  //   doc.setFontSize(7);
+  //   doc.text(`Report ID: HMS-${Date.now()}`, 15, finalY);
+
+  //   return doc.output("blob");
+  // };
 
   const handleReportSubmit = async () => {
     try {
@@ -314,7 +627,7 @@ const LabPatientDetails = () => {
       } = {
         note:
           reportMode === "upload"
-            ? "External Lab Report"
+            ? " Lab Report"
             : "Comprehensive Laboratory Report",
         status,
         testResults: {},
@@ -384,6 +697,18 @@ const LabPatientDetails = () => {
       toast.error("Error generating report. Please try again.");
     }
   };
+
+  // const handleCreateReport = async () => {
+  //   const reportData = {
+  //     patient_id: patientId?.toString(),
+  //     note: "",
+  //     file,
+  //     status: "completed",
+  //     role: "laboratory",
+  //     department_id: departmentId,
+  //   };
+  //   const deptResponse = await deptCreateReport(reportData);
+  // };
 
   const generateReportContent = (): string => {
     const header = generatePatientReportHeader();

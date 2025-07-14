@@ -19,6 +19,7 @@ import {
   DollarSign,
   Currency,
   CurrencyIcon,
+  Edit,
 } from "lucide-react";
 import Table from "../../../Shared/Table";
 import Loader from "../../../Shared/Loader";
@@ -27,6 +28,7 @@ import RestockHistoryModal from "./RestockHistoryModal";
 import { useInventoryStore } from "../overview/useInventoryStore";
 import { useNavigate } from "react-router-dom";
 import { FaMoneyBill } from "react-icons/fa";
+import UpdateStockModal from "./UpdateStockModal";
 
 type StockData = {
   quantity_sold: string;
@@ -108,11 +110,13 @@ const InventoryStockTable = ({
     restockHistoryData,
     deleteStock,
     getAllStocks,
+    updateStock,
   } = useInventoryStore();
   const [restockModalOpen, setRestockModalOpen] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [selectedStock, setSelectedStock] = useState<any>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
 
   // Sorting state
   const [sortConfig, setSortConfig] = useState<SortConfig>({
@@ -610,6 +614,19 @@ const InventoryStockTable = ({
 
         return (
           <div className="flex items-center gap-2">
+            {/*  */}
+            <button
+              onClick={() => {
+                setSelectedStock(stock);
+                setUpdateModalOpen(true);
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+              title="Update Stock"
+            >
+              <Edit className="w-3.5 h-3.5" />
+              Update
+            </button>
+            {/*  */}
             <button onClick={() => handleDelete(stock.id)}>
               <Trash className="w-3.5 h-3.5 text-red-600" />
             </button>
@@ -862,6 +879,16 @@ const InventoryStockTable = ({
             isLoading={isLoading}
             reStock={reStock}
             stockItem={selectedStock}
+          />
+        )}
+
+        {updateModalOpen && selectedStock && (
+          <UpdateStockModal
+            visible={updateModalOpen}
+            onClose={() => setUpdateModalOpen(false)}
+            stockItem={selectedStock}
+            onUpdate={(id, formData) => updateStock(id, formData)}
+            isLoading={isLoading}
           />
         )}
       </div>

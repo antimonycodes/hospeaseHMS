@@ -125,6 +125,7 @@ const MatronPatientDetails = () => {
       file: file,
       status: "completed",
       department_id: departmentId,
+      role: "matron",
     });
     if (response) {
       setReportNote("");

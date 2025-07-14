@@ -122,6 +122,13 @@ interface InventoryStore {
     endpoint?: string,
     refreshEndpoint?: string
   ) => Promise<boolean | null>;
+
+  updateStock: (
+    id: any,
+    editableData: any,
+    // currentStockData: any,
+    endpoint?: any
+  ) => Promise<any>;
   deleteStock: (id: number, fetchEndpoint?: string) => Promise<boolean>;
   searchStaff: (query: string) => Promise<Staff[]>;
   getAllRequest: (endpoint?: string) => Promise<void>;
@@ -445,7 +452,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       form.append(
         "service_charge_id",
         data.service_charge_id?.toString() || ""
-      ); // Add service charge ID
+      );
 
       // Only append image if it exists
       if (data.image) {
@@ -477,6 +484,40 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       } else {
         toast.error(errorMessage);
       }
+      return false;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  updateStock: async (
+    id: number,
+    data: { cost: number; quantity: number; expiry_date: any },
+    endpoint = "/inventory/update-item"
+  ) => {
+    set({ isLoading: true });
+    try {
+      const payload = {
+        cost: data.cost,
+        quantity: data.quantity,
+        // expiry_date: data.expiry_date,
+      };
+
+      const response = await api.put(`${endpoint}/${id}`, payload, {
+        headers: { "Content-Type": "application/json" }, // Send as JSON
+      });
+
+      if (response.status === 200) {
+        toast.success(response.data.message || "Stock updated successfully");
+        await get().getAllStocks(); // Refresh the stock list
+        return true;
+      }
+      toast.error(response.data.message || "Failed to update stock");
+      return false;
+    } catch (error: any) {
+      console.error("updateStock error:", error);
+      const errorMessage =
+        error?.response?.data?.message || "Failed to update stock";
+      toast.error(errorMessage);
       return false;
     } finally {
       set({ isLoading: false });
@@ -575,7 +616,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
     }
   },
   reStockHistory: async (id) => {
-    console.log("⚠️ Calling reStockHistory for ID:", id);
+    // console.log("Calling reStockHistory for ID:", id);
 
     // Set loading state once
     set({ isLoading: true });
@@ -601,7 +642,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       set({ isLoading: false });
       return null;
     } catch (error: any) {
-      console.log("❌ Error fetching restock history:", error);
+      console.log("Error fetching restock history:", error);
       toast.error(error?.response?.data?.message || "Failed to fetch history");
 
       // Make sure to set loading to false even on error

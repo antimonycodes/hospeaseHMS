@@ -92,7 +92,7 @@ export const labTests: LabTestsType = {
           {
             name: "ESR",
             unit: "mm/hr",
-            normalRange: "Men: 2-10, Women: 3-15",
+            normalRange: "Men: 0-22, Women: 0-29",
             type: "number",
           },
         ],
@@ -282,7 +282,7 @@ export const labTests: LabTestsType = {
           {
             name: "Fasting Blood Sugar",
             unit: "mg/dL",
-            // normalRange: "70-115",
+            normalRange: "70-115",
             type: "number",
           },
           {
