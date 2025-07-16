@@ -245,9 +245,7 @@ export const useReportStore = create<ReportStore>((set, get) => ({
   getSingleReport: async (id: number, perPage = 100, page = 1) => {
     set({ isReportLoading: true });
     try {
-      const response = await api.get(
-        `/medical-report/case-report/${id}?perPage=${perPage}&page=${page}`
-      );
+      const response = await api.get(`/medical-report/case-report/${id}`);
 
       if (response.status === 200) {
         const reportList = response.data?.data?.data || [];

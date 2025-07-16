@@ -202,7 +202,7 @@ const TestParametersPanel: React.FC<TestParametersPanelProps> = ({
               value={status}
               onChange={(e) => setStatus(e.target.value)}
             >
-              <option value="In Progress">In Progress</option>
+              {/* <option value="In Progress">In Progress</option> */}
               <option value="Completed">Completed</option>
               {/* <option value="Pending Review">Pending Review</option> */}
             </select>

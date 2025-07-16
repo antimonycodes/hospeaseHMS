@@ -1,10 +1,9 @@
-// LabPatientDetails.tsx
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { usePatientStore } from "../../../store/super-admin/usePatientStore";
 import { useReportStore } from "../../../store/super-admin/useReoprt";
 import Loader from "../../../Shared/Loader";
-import { ChevronLeft, TestTube, Upload } from "lucide-react";
+import { ChevronLeft, TestTube, Upload, Plus, FileText } from "lucide-react";
 import LabMedicalTimeline from "./LabMedicalTimeline";
 import TestSelectionPanel from "./TestSelectionPanel";
 import TestParametersPanel from "./TestParametersPanel";
@@ -15,6 +14,11 @@ import jsPDF from "jspdf";
 
 const LabPatientDetails = () => {
   const [departmentId, setDepartmentId] = useState<any>(null);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [isUpdatingReport, setIsUpdatingReport] = useState(false);
+  const [existingReportFile, setExistingReportFile] = useState<string | null>(
+    null
+  );
 
   const { patientId, caseId } = useParams();
   const { getLabPatientById } = usePatientStore();
@@ -42,11 +46,11 @@ const LabPatientDetails = () => {
   const [expandedCategories, setExpandedCategories] = useState<
     Record<string, boolean>
   >({});
-  const [additionalFiles, setAdditionalFiles] = useState<File[]>([]);
-  const [reportMode, setReportMode] = useState<"create" | "upload">("create"); // New state for mode
+  const [reportMode, setReportMode] = useState<"create" | "upload">("create");
   const defaultHospitalName = localStorage.getItem("hospitalName");
 
   const navigate = useNavigate();
+
   useEffect(() => {
     const userInfoString = localStorage.getItem("user-info");
     if (userInfoString) {
@@ -63,9 +67,32 @@ const LabPatientDetails = () => {
   useEffect(() => {
     if (patientId) {
       getLabPatientById(patientId);
-      // getSingleReport(patientId);
+      getSingleReport(patientId);
     }
   }, [patientId, getLabPatientById, getSingleReport, caseId]);
+
+  console.log(singleReport);
+
+  // Check if there's an existing report file to determine if we're updating
+  useEffect(() => {
+    if (singleReport) {
+      const reports = singleReport;
+      const labReport = reports.find(
+        (report: any) =>
+          report.attributes.department.name === "Laboratory" &&
+          report.attributes.role === "laboratory" &&
+          report.attributes.file
+      );
+
+      if (labReport?.attributes?.file) {
+        setExistingReportFile(labReport.attributes.file);
+        setIsUpdatingReport(true);
+      } else {
+        setExistingReportFile(null);
+        setIsUpdatingReport(false);
+      }
+    }
+  }, [singleReport]);
 
   const patient = selectedPatient?.attributes;
 
@@ -130,7 +157,9 @@ const LabPatientDetails = () => {
     const currentDate = new Date();
     return {
       hospitalName: defaultHospitalName || "",
-      reportTitle: " LABORATORY REPORT",
+      reportTitle: isUpdatingReport
+        ? "UPDATED LABORATORY REPORT"
+        : "LABORATORY REPORT",
       patientInfo: {
         name: `${patient?.first_name || ""} ${patient?.last_name || ""}`.trim(),
         patientId: patient?.card_id || "",
@@ -146,7 +175,6 @@ const LabPatientDetails = () => {
     };
   };
 
-  // Check if there are any tests with filled parameters
   const hasFilledTestResults = () => {
     return Object.entries(selectedTests).some(([category, tests]) => {
       return tests.some((testName) => {
@@ -160,11 +188,9 @@ const LabPatientDetails = () => {
     });
   };
 
-  // Generate PDF as Blob for submission
-
   const generatePDFBlob = async (): Promise<Blob> => {
     const doc = new jsPDF();
-    doc.setLineHeightFactor(1); // reduce global line spacing
+    doc.setLineHeightFactor(1);
     const header = generatePatientReportHeader();
     let yPosition = 20;
 
@@ -217,6 +243,7 @@ const LabPatientDetails = () => {
       `Date: ${header.reportInfo.date}`,
       `Time: ${header.reportInfo.time}`,
       `Status: ${status}`,
+      ...(isUpdatingReport ? [`Update Type: Additional Tests`] : []),
     ];
 
     reportInfo.forEach((line) => {
@@ -359,290 +386,52 @@ const LabPatientDetails = () => {
 
     return doc.output("blob");
   };
-  // const generatePDFBlob = async (): Promise<Blob> => {
-  //   // Initialize PDF with compact settings
-  //   const doc = new jsPDF({
-  //     unit: "mm",
-  //     format: "a4",
-  //     compress: true,
-  //   });
-
-  //   const header = generatePatientReportHeader();
-  //   let yPosition = 15; // Reduced initial spacing
-
-  //   // Set compact font settings
-  //   doc.setFont("helvetica");
-  //   doc.setFontSize(12); // Base font size
-
-  //   // Hospital header - more compact
-  //   doc.setFontSize(14);
-  //   doc.setFont("helvetica", "bold");
-  //   doc.text(header.hospitalName, 105, yPosition, { align: "center" });
-  //   yPosition += 7;
-
-  //   doc.setFontSize(12);
-  //   doc.text(header.reportTitle, 105, yPosition, { align: "center" });
-  //   yPosition += 10;
-
-  //   // Compact divider line
-  //   doc.setLineWidth(0.3);
-  //   doc.line(15, yPosition, 195, yPosition);
-  //   yPosition += 8;
-
-  //   // Two-column layout with tighter spacing
-  //   const column1X = 15;
-  //   const column2X = 105;
-  //   const columnWidth = 85;
-  //   let column1Y = yPosition;
-  //   let column2Y = yPosition;
-
-  //   // Patient Information - Compact
-  //   doc.setFontSize(10);
-  //   doc.setFont("helvetica", "bold");
-  //   doc.text("PATIENT INFORMATION:", column1X, column1Y);
-  //   column1Y += 5;
-
-  //   doc.setFont("helvetica", "normal");
-  //   const patientInfo = [
-  //     `Name: ${header.patientInfo.name}`,
-  //     `ID: ${header.patientInfo.patientId}`,
-  //     `Age/Sex: ${header.patientInfo.age}/${header.patientInfo.gender}`,
-  //     `Phone: ${header.patientInfo.phone}`,
-  //     `Address: ${header.patientInfo.address}`,
-  //   ];
-
-  //   patientInfo.forEach((info) => {
-  //     doc.text(info, column1X, column1Y);
-  //     column1Y += 5; // Tight line spacing
-  //   });
-
-  //   // Report Information - Compact
-  //   doc.setFont("helvetica", "bold");
-  //   doc.text("REPORT INFORMATION:", column2X, column2Y);
-  //   column2Y += 5;
-
-  //   doc.setFont("helvetica", "normal");
-  //   doc.text(`Date: ${header.reportInfo.date}`, column2X, column2Y);
-  //   column2Y += 5;
-  //   doc.text(`Time: ${header.reportInfo.time}`, column2X, column2Y);
-  //   column2Y += 5;
-  //   doc.text(`Status: ${status}`, column2X, column2Y);
-  //   column2Y += 5;
-
-  //   // Set yPosition to the bottom of the longer column
-  //   yPosition = Math.max(column1Y, column2Y) + 10;
-
-  //   // Prepare categories with test data
-  //   const categoriesWithData: Array<{
-  //     category: string;
-  //     tests: string[];
-  //   }> = [];
-
-  //   Object.entries(selectedTests).forEach(([category, tests]) => {
-  //     const testsWithData = tests.filter((testName) => {
-  //       const testData = labTests[category]?.tests[testName];
-  //       if (!testData) return false;
-
-  //       const results = testResults[testName] || {};
-  //       return testData.parameters.some((param: any) => {
-  //         const value = results[param.name];
-  //         return value && value.toString().trim() !== "";
-  //       });
-  //     });
-
-  //     if (testsWithData.length > 0) {
-  //       categoriesWithData.push({ category, tests: testsWithData });
-  //     }
-  //   });
-
-  //   // Two-column layout configuration
-  //   const leftColumnX = 15;
-  //   const rightColumnX = 105;
-  //   const pageHeight = 280;
-  //   let leftColumnY = yPosition;
-  //   let rightColumnY = yPosition;
-  //   let currentColumn: "left" | "right" = "left";
-
-  //   // Helper function to calculate category height
-  //   const calculateCategoryHeight = (
-  //     category: string,
-  //     tests: string[]
-  //   ): number => {
-  //     let height = 8; // Reduced category header space
-
-  //     tests.forEach((testName) => {
-  //       const testData = labTests[category]?.tests[testName];
-  //       if (!testData) return;
-
-  //       const results = testResults[testName] || {};
-
-  //       height += 6; // Reduced test name space
-
-  //       testData.parameters.forEach((param: any) => {
-  //         const value = results[param.name];
-  //         if (value && value.toString().trim() !== "") {
-  //           height += 6; // Reduced parameter space
-  //           if (param.normalRange) {
-  //             height += 4; // Reduced normal range space
-  //           }
-  //         }
-  //       });
-  //     });
-
-  //     return height;
-  //   };
-
-  //   // Helper function to render category content
-  //   const renderCategory = (
-  //     category: string,
-  //     tests: string[],
-  //     startX: number,
-  //     startY: number
-  //   ): number => {
-  //     let currentY = startY;
-
-  //     // Draw category header
-  //     doc.setFont("helvetica", "bold");
-  //     doc.setFontSize(10);
-  //     doc.text(category.toUpperCase(), startX, currentY);
-  //     currentY += 5;
-
-  //     // Draw tests for this category
-  //     tests.forEach((testName) => {
-  //       const testData = labTests[category]?.tests[testName];
-  //       if (!testData) return;
-
-  //       const results = testResults[testName] || {};
-  //       const filledParameters = testData.parameters.filter((param: any) => {
-  //         const value = results[param.name];
-  //         return value && value.toString().trim() !== "";
-  //       });
-
-  //       if (filledParameters.length > 0) {
-  //         // Test name
-  //         doc.setFont("helvetica", "bold");
-  //         doc.setFontSize(9);
-  //         doc.text(testName, startX + 2, currentY);
-  //         currentY += 4;
-
-  //         // Parameters
-  //         doc.setFont("helvetica", "normal");
-  //         doc.setFontSize(8);
-
-  //         filledParameters.forEach((param: any) => {
-  //           const value = results[param.name];
-  //           // Compact parameter display
-  //           const paramText = `${param.name}: ${value}${
-  //             param.unit ? ` ${param.unit}` : ""
-  //           }`;
-  //           doc.text(paramText, startX + 5, currentY);
-  //           currentY += 3.5;
-
-  //           // Only show normal range if it exists
-  //           if (param.normalRange) {
-  //             doc.setTextColor(100, 100, 100);
-  //             doc.setFontSize(7);
-  //             doc.text(`(${param.normalRange})`, startX + 8, currentY);
-  //             doc.setTextColor(0, 0, 0);
-  //             doc.setFontSize(8);
-  //             currentY += 3;
-  //           }
-  //         });
-  //       }
-  //     });
-
-  //     return currentY;
-  //   };
-
-  //   // Process categories with smart column balancing
-  //   categoriesWithData.forEach((categoryData) => {
-  //     const { category, tests } = categoryData;
-  //     const categoryHeight = calculateCategoryHeight(category, tests);
-
-  //     // Check if we need to switch columns or add new page
-  //     if (currentColumn === "left") {
-  //       if (leftColumnY + categoryHeight > pageHeight) {
-  //         if (rightColumnY + categoryHeight <= pageHeight) {
-  //           currentColumn = "right";
-  //         } else {
-  //           doc.addPage();
-  //           leftColumnY = 15;
-  //           rightColumnY = 15;
-  //           currentColumn = "left";
-  //         }
-  //       }
-  //     } else {
-  //       if (rightColumnY + categoryHeight > pageHeight) {
-  //         doc.addPage();
-  //         leftColumnY = 15;
-  //         rightColumnY = 15;
-  //         currentColumn = "left";
-  //       }
-  //     }
-
-  //     // Render the category in the appropriate column
-  //     if (currentColumn === "left") {
-  //       leftColumnY = renderCategory(category, tests, leftColumnX, leftColumnY);
-  //       leftColumnY += 4; // Reduced space between categories
-  //     } else {
-  //       rightColumnY = renderCategory(
-  //         category,
-  //         tests,
-  //         rightColumnX,
-  //         rightColumnY
-  //       );
-  //       rightColumnY += 4; // Reduced space between categories
-  //     }
-  //   });
-
-  //   // Compact footer
-  //   const footerY = Math.max(leftColumnY, rightColumnY);
-  //   let finalY = footerY;
-
-  //   if (finalY > pageHeight - 10) {
-  //     doc.addPage();
-  //     finalY = 15;
-  //   }
-
-  //   doc.setLineWidth(0.3);
-  //   doc.line(15, finalY, 195, finalY);
-  //   finalY += 5;
-
-  //   doc.setFont("helvetica", "italic");
-  //   doc.setFontSize(7);
-  //   doc.text(`Report ID: HMS-${Date.now()}`, 15, finalY);
-
-  //   return doc.output("blob");
-  // };
 
   const handleReportSubmit = async () => {
+    if (isUpdatingReport) {
+      // Show completion modal for updates
+      // setShowCompletionModal(true);
+      await submitReport(true);
+    } else {
+      // Handle new report submission
+      await submitReport(false);
+    }
+  };
+
+  const submitReport = async (markAsCompleted: boolean = false) => {
     try {
-      // Define the formData type properly
       const formData: {
         note: string;
-        status: string;
-        file?: File;
+        status: string | null;
+        file?: File | null;
         testResults: {};
         patientHeader: any;
+        patient_id: string | number | null;
+        role?: any;
+        department_id: number | null;
       } = {
         note:
           reportMode === "upload"
-            ? " Lab Report"
+            ? isUpdatingReport
+              ? "Updated Lab Report"
+              : "Lab Report"
+            : isUpdatingReport
+            ? "Updated Comprehensive Laboratory Report"
             : "Comprehensive Laboratory Report",
-        status,
+        status: "completed" as string,
         testResults: {},
         patientHeader: generatePatientReportHeader(),
+        patient_id: null,
+        department_id: null,
       };
 
       if (reportMode === "upload") {
-        // Upload mode - use the uploaded file
         if (!file) {
           toast.error("Please select a file to upload");
           return;
         }
         formData.file = file;
       } else {
-        // Create mode - generate PDF only if there are filled test results
         if (!hasFilledTestResults()) {
           toast.error(
             "Please fill in at least one test parameter before submitting"
@@ -650,15 +439,11 @@ const LabPatientDetails = () => {
           return;
         }
 
-        // Generate PDF blob
         const pdfBlob = await generatePDFBlob();
-
-        // Convert blob to File
         const pdfFile = new File([pdfBlob], `Lab_Report_${Date.now()}.pdf`, {
           type: "application/pdf",
         });
 
-        // Structure test results by category
         const structuredResults: { [category: string]: any } = {};
         Object.entries(selectedTests).forEach(([category, tests]) => {
           structuredResults[category] = {};
@@ -666,7 +451,6 @@ const LabPatientDetails = () => {
             const testData = labTests[category].tests[testName];
             const results = testResults[testName] || {};
 
-            // Only include tests with filled parameters
             const hasFilledParams = testData.parameters.some((param) => {
               const value = results[param.name];
               return value && value.toString().trim() !== "";
@@ -682,7 +466,35 @@ const LabPatientDetails = () => {
         formData.file = pdfFile;
       }
 
-      const success = await respondToReport(caseId, formData);
+      let success = false;
+      if (isUpdatingReport) {
+        // Use deptCreateReport for updates
+        formData.patient_id = patientId ?? null;
+        formData.role = "laboratory";
+        formData.department_id =
+          departmentId !== undefined ? departmentId : null;
+
+        success = await deptCreateReport(formData);
+        success = await deptCreateReport(formData);
+
+        // If marking as completed, also update the original report status
+        // if (markAsCompleted && success) {
+        //   await respondToReport(caseId, {
+        //     note: "Lab tests completed",
+        //     status: "completed",
+        //   });
+        // }
+      } else {
+        // Use respondToReport for new reports
+        // Only pass the fields expected by respondToReport
+        const { note, status, file } = formData;
+        success = await respondToReport(caseId, {
+          note,
+          status: status ?? "completed",
+          file,
+        });
+      }
+
       if (success) {
         await getSingleReport(patientId);
         setSelectedTests({});
@@ -690,25 +502,21 @@ const LabPatientDetails = () => {
         setStatus("In Progress");
         setFile(null);
         setReportMode("create");
-        toast.success("Lab report submitted successfully!");
+        setShowCompletionModal(false);
+
+        const message = isUpdatingReport
+          ? markAsCompleted
+            ? "Lab report updated and case completed!"
+            : "Lab report updated successfully!"
+          : "Lab report submitted successfully!";
+
+        toast.success(message);
       }
     } catch (error) {
       console.error("Error generating report:", error);
       toast.error("Error generating report. Please try again.");
     }
   };
-
-  // const handleCreateReport = async () => {
-  //   const reportData = {
-  //     patient_id: patientId?.toString(),
-  //     note: "",
-  //     file,
-  //     status: "completed",
-  //     role: "laboratory",
-  //     department_id: departmentId,
-  //   };
-  //   const deptResponse = await deptCreateReport(reportData);
-  // };
 
   const generateReportContent = (): string => {
     const header = generatePatientReportHeader();
@@ -732,13 +540,12 @@ REPORT INFORMATION:
 Date: ${header.reportInfo.date}
 Time: ${header.reportInfo.time}
 Status: ${status}
+${isUpdatingReport ? `Update Type: Additional Tests\n` : ""}
 
 ${"=".repeat(50)}
 `;
 
-    // Add test results for each category - only include filled parameters
     Object.entries(selectedTests).forEach(([category, tests]) => {
-      // Filter tests that have filled parameters
       const testsWithData = tests.filter((testName) => {
         const testData = labTests[category].tests[testName];
         const results = testResults[testName] || {};
@@ -748,7 +555,6 @@ ${"=".repeat(50)}
         });
       });
 
-      // Only add category if it has tests with data
       if (testsWithData.length > 0) {
         reportText += `\n${category.toUpperCase()}:\n${"-".repeat(
           category.length
@@ -758,7 +564,6 @@ ${"=".repeat(50)}
           const testData = labTests[category].tests[testName];
           const results = testResults[testName] || {};
 
-          // Check if this test has filled parameters
           const filledParameters = testData.parameters.filter((param) => {
             const value = results[param.name];
             return value && value.toString().trim() !== "";
@@ -781,9 +586,7 @@ ${"=".repeat(50)}
       }
     });
 
-    // Add comments if any
     reportText += `\n${"=".repeat(50)}\n`;
-    // reportText += "Generated by Hospital Management System\n";
     reportText += `Report ID: HMS-${Date.now()}\n`;
 
     return reportText;
@@ -848,6 +651,31 @@ ${"=".repeat(50)}
         </div>
       )}
 
+      {/* Status Banner */}
+      {isUpdatingReport && (
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center">
+            <FileText className="h-5 w-5 text-blue-600 mr-2" />
+            <div>
+              <p className="font-medium text-blue-800">
+                Updating Existing Report
+              </p>
+              <p className="text-sm text-blue-600">
+                You are adding new test results to an existing lab report.
+                <a
+                  href={existingReportFile || undefined}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline ml-1 hover:text-blue-800"
+                >
+                  View current report
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Report Mode Selection */}
       <div className="mb-6">
         <div className="flex space-x-4">
@@ -860,7 +688,7 @@ ${"=".repeat(50)}
             }`}
           >
             <TestTube className="inline-block w-4 h-4 mr-2" />
-            Create Lab Report
+            {isUpdatingReport ? "Add New Tests" : "Create Lab Report"}
           </button>
           <button
             onClick={() => setReportMode("upload")}
@@ -871,7 +699,9 @@ ${"=".repeat(50)}
             }`}
           >
             <Upload className="inline-block w-4 h-4 mr-2" />
-            Upload External Report
+            {isUpdatingReport
+              ? "Upload Additional Report"
+              : "Upload External Report"}
           </button>
         </div>
       </div>
@@ -897,7 +727,6 @@ ${"=".repeat(50)}
           }
         >
           {reportMode === "create" ? (
-            // Create Report Mode
             <>
               {countSelectedTests() > 0 && (
                 <TestParametersPanel
@@ -914,6 +743,7 @@ ${"=".repeat(50)}
                   handleReportSubmit={handleReportSubmit}
                   generateReportContent={generateReportContent}
                   generatePDFBlob={generatePDFBlob}
+                  // isUpdatingReport={isUpdatingReport}
                 />
               )}
 
@@ -923,11 +753,14 @@ ${"=".repeat(50)}
                     <TestTube className="h-12 w-12 mx-auto" />
                   </div>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    No Tests Selected
+                    {isUpdatingReport
+                      ? "No Additional Tests Selected"
+                      : "No Tests Selected"}
                   </h3>
                   <p className="text-gray-600">
-                    Select tests from the panel on the left to begin creating a
-                    lab report.
+                    {isUpdatingReport
+                      ? "Select additional tests from the panel on the left to add to the existing report."
+                      : "Select tests from the panel on the left to begin creating a lab report."}
                   </p>
                 </div>
               )}
@@ -940,16 +773,18 @@ ${"=".repeat(50)}
                   <Upload className="h-12 w-12 mx-auto" />
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Upload External Lab Report
+                  {isUpdatingReport
+                    ? "Upload Additional Lab Report"
+                    : "Upload External Lab Report"}
                 </h3>
                 <p className="text-gray-600">
-                  Upload a lab report file (PDF, DOC, DOCX, JPG, PNG) for this
-                  patient.
+                  {isUpdatingReport
+                    ? "Upload an additional lab report file to supplement the existing report."
+                    : "Upload a lab report file (PDF, DOC, DOCX, JPG, PNG) for this patient."}
                 </p>
               </div>
 
               <div className="space-y-4">
-                {/* File Upload */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Select Report File
@@ -967,30 +802,34 @@ ${"=".repeat(50)}
                   )}
                 </div>
 
-                {/* Status Selection */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Report Status
-                  </label>
-                  <select
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="In Progress">In Progress</option>
-                    <option value="Completed">Completed</option>
-                    <option value="Pending">Pending</option>
-                  </select>
-                </div>
+                {!isUpdatingReport && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Report Status
+                    </label>
+                    <select
+                      value={status}
+                      onChange={(e) => setStatus(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {/* <option value="In Progress">In Progress</option> */}
+                      <option value="Completed">Completed</option>
+                      {/* <option value="Pending">Pending</option> */}
+                    </select>
+                  </div>
+                )}
 
-                {/* Submit Button */}
                 <div className="flex justify-end">
                   <button
                     onClick={handleReportSubmit}
                     disabled={!file || isResponding}
-                    className="px-6 py-2 bg-primary text-white rounded-lg  disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                    className="px-6 py-2 bg-primary text-white rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                   >
-                    {isResponding ? "Uploading..." : "Upload Report"}
+                    {isResponding
+                      ? "Processing..."
+                      : isUpdatingReport
+                      ? "Add to Report"
+                      : "Upload Report"}
                   </button>
                 </div>
               </div>
@@ -998,6 +837,41 @@ ${"=".repeat(50)}
           )}
         </div>
       </div>
+
+      {/* Completion Modal */}
+      {showCompletionModal && (
+        <div className="fixed inset-0 bg-[#1E1E1E40]   flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              Complete Lab Tests?
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Are all laboratory tests for this patient now completed? Selecting
+              "Yes" will mark the entire case as completed.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowCompletionModal(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => submitReport(false)}
+                className="px-4 py-2 bg-gray-300 text-white rounded-lg  transition-colors"
+              >
+                No, Still in progress
+              </button>
+              <button
+                onClick={() => submitReport(true)}
+                className="px-4 py-2 bg-primary text-white rounded-lg transition-colors"
+              >
+                Yes, Mark as Completed
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Report Preview Modal */}
       <ReportPreviewModal

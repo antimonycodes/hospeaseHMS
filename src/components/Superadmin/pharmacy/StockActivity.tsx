@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useInventoryStore } from "../../Inventory/overview/useInventoryStore";
 import Table from "../../../Shared/Table";
 import Tablehead from "../../ReusablepatientD/Tablehead";
@@ -40,6 +40,41 @@ interface Column<T> {
   label: string;
   render?: (value: any, record: T) => React.ReactNode;
 }
+
+// Search Component
+const SearchBar: React.FC<{
+  searchTerm: string;
+  onSearchChange: (term: string) => void;
+}> = ({ searchTerm, onSearchChange }) => {
+  return (
+    <div className="mb-4 mx-6">
+      <div className="relative max-w-md">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <svg
+            className="h-5 w-5 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </div>
+        <input
+          type="text"
+          placeholder="Search by item name or sold to..."
+          value={searchTerm}
+          onChange={(e) => onSearchChange(e.target.value)}
+          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+        />
+      </div>
+    </div>
+  );
+};
 
 // Daily Stats Card Component
 interface DailyStatsCardProps {
@@ -308,23 +343,53 @@ const StockActivity = () => {
       isLoading: boolean;
     };
 
-  const [selectedDate, setSelectedDate] = React.useState<string>("");
+  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   useEffect(() => {
     getStockActivity();
   }, [getStockActivity]);
 
+  // Extract activities from the nested structure
+  const activities = stockActivities?.data || [];
+
+  // Filter activities based on search term and selected date
+  const filteredActivities = useMemo(() => {
+    let filtered = activities;
+
+    // Filter by search term (item name or sold to)
+    if (searchTerm) {
+      filtered = filtered.filter((activity) => {
+        const itemName =
+          activity.attributes.stock_request?.requests?.service_item_name || "";
+        const soldTo = activity.attributes.patient || "";
+
+        return (
+          itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          soldTo.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      });
+    }
+
+    // Filter by selected date
+    if (selectedDate) {
+      filtered = filtered.filter((activity) => {
+        return activity.attributes.created_at === selectedDate;
+      });
+    }
+
+    return filtered;
+  }, [activities, searchTerm, selectedDate]);
+
   // Debug logging to see what data is being received
   console.log("Loading state:", isLoading);
   console.log("Stock activities:", stockActivities);
-
-  // Extract activities from the nested structure
-  const activities = stockActivities?.data || [];
   console.log("Extracted activities:", activities);
+  console.log("Filtered activities:", filteredActivities);
 
   return (
     <div className=" bg-white">
-      {/* Stats Cards Section */}
+      {/* Search and Filter Section */}
       {!isLoading && activities.length > 0 && (
         <div className="mb-6">
           <DateSelector
@@ -333,11 +398,14 @@ const StockActivity = () => {
             onDateChange={setSelectedDate}
           />
           <DailyStatsCard
-            stockActivities={activities}
+            stockActivities={filteredActivities}
             selectedDate={selectedDate || undefined}
           />
         </div>
       )}
+
+      <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+
       <Tablehead tableTitle="" showButton={false} />
 
       <div className="w-full bg-white rounded-b-[8px] shadow-table">
@@ -347,9 +415,13 @@ const StockActivity = () => {
           <p className="p-4 text-center text-gray-500">
             No pharmacy sales activity found
           </p>
+        ) : filteredActivities.length === 0 && (searchTerm || selectedDate) ? (
+          <p className="p-4 text-center text-gray-500">
+            No results found for your search criteria
+          </p>
         ) : (
           <Table
-            data={activities}
+            data={filteredActivities}
             columns={columns}
             rowKey="id"
             loading={isLoading}

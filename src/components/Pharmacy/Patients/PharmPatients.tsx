@@ -7,29 +7,57 @@ import Tablehead from "../../ReusablepatientD/Tablehead";
 const PharmPatients = () => {
   const { getAllPatients, patients, isLoading, pagination } = usePatientStore();
   const [activeStatus, setActiveStatus] = useState("pending");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(
+    null
+  );
   const navigate = useNavigate();
   const baseEndpoint = "/pharmacy/patient/all";
 
   useEffect(() => {
-    getAllPatients("1", "10", baseEndpoint);
+    getAllPatients("1", "30", baseEndpoint);
   }, [getAllPatients]);
 
-  // Handle empty patients array
-  // if (!patients || patients.length === 0) {
-  //   return (
-  //     <div className="mt-2">
-  //       <Tablehead
-  //         tableTitle="Patients"
-  //         showSearchBar={true}
-  //         showControls={true}
-  //         tableCount={0}
-  //       />
-  //       <div className="w-full bg-white p-6 text-center">
-  //         {isLoading ? "Loading patients..." : "No patients found"}
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  // Handle search with debouncing
+  useEffect(() => {
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+
+    const timeout = setTimeout(() => {
+      handleSearch();
+    }, 500); // 500ms debounce
+
+    setSearchTimeout(timeout);
+
+    return () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+    };
+  }, [searchQuery]);
+
+  const handleSearch = () => {
+    let endpoint = baseEndpoint;
+
+    if (searchQuery.trim()) {
+      const separator = endpoint.includes("?") ? "&" : "?";
+      endpoint += `${separator}search=${encodeURIComponent(
+        searchQuery.trim()
+      )}`;
+    }
+
+    getAllPatients("1", "20", endpoint);
+  };
+
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
+    getAllPatients("1", "20", baseEndpoint);
+  };
 
   const transformedPatients = patients.map((item) => {
     const attr = item.attributes;
@@ -134,8 +162,17 @@ const PharmPatients = () => {
   ];
 
   const handlePageChange = (page: number) => {
-    // Use the stored baseEndpoint for consistency when changing pages
-    getAllPatients(page.toString(), "10", baseEndpoint);
+    let endpoint = baseEndpoint;
+
+    // Add search query if it exists
+    if (searchQuery.trim()) {
+      const separator = endpoint.includes("?") ? "&" : "?";
+      endpoint += `${separator}search=${encodeURIComponent(
+        searchQuery.trim()
+      )}`;
+    }
+
+    getAllPatients(page.toString(), "20", endpoint);
   };
 
   return (
@@ -143,10 +180,95 @@ const PharmPatients = () => {
       {/*  Table Header */}
       <Tablehead
         tableTitle="Patients"
-        showSearchBar={true}
-        showControls={true}
+        showSearchBar={false}
+        showControls={false}
         tableCount={patients.length}
       />
+
+      {/* Custom Search Bar */}
+      <div className="w-full bg-white px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center gap-4">
+          <div className="flex-1 max-w-md">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg
+                  className="w-4 h-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+              <input
+                type="text"
+                placeholder="Search patients by name or ID"
+                value={searchQuery}
+                onChange={handleSearchInputChange}
+                className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none text-sm"
+              />
+              {searchQuery && (
+                <button
+                  onClick={clearSearch}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Search Results Info */}
+          {searchQuery && (
+            <div className="text-sm text-gray-500">
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  Searching...
+                </span>
+              ) : (
+                <span>
+                  {patients.length} result{patients.length !== 1 ? "s" : ""} for
+                  "{searchQuery}"
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
       {/*  Tabs */}
       <div className="w-full bg-white flex space-x-2 md:space-x-6 px-6">
         {statuses.map((status) => (
