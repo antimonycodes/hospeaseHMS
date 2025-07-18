@@ -226,7 +226,7 @@ export const useReportStore = create<ReportStore>((set, get) => ({
     set({ isLoading: true });
     try {
       const response = await api.get(
-        `/medical-report/case-report/${id}?perPage=${perPage}&page=${page}`
+        `/medical-report/case-report/${id}?page=${page}&per_page=${perPage}`
       );
       if (response.status === 200) {
         set({ allReports: response.data.data.data });

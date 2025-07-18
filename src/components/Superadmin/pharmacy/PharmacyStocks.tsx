@@ -4,7 +4,7 @@ import Tablehead from "../../ReusablepatientD/Tablehead";
 import Loader from "../../../Shared/Loader";
 import { useInventoryStore } from "../../Inventory/overview/useInventoryStore";
 import { useGlobalStore } from "../../../store/super-admin/useGlobal";
-import { Search, ChevronUp, ChevronDown } from "lucide-react";
+import { Search, ChevronUp, ChevronDown, Package } from "lucide-react";
 import toast from "react-hot-toast";
 
 export type RequestData = {
@@ -402,6 +402,24 @@ const PharmacyStocks = () => {
     setSelectedItems(new Set());
   };
 
+  // Helper function to get quantity display with appropriate styling
+  const getQuantityDisplay = (quantity: string | number) => {
+    const qty = typeof quantity === "string" ? parseInt(quantity) : quantity;
+    const isLowStock = qty < 10;
+
+    return (
+      <span
+        className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+          isLowStock
+            ? "bg-[#FBE1E1] text-[#F83E41] border border-red-200"
+            : "bg-[#CCFFE7] text-[#009952] border border-primary"
+        }`}
+      >
+        <Package className="w-3 h-3" />
+        {qty}
+      </span>
+    );
+  };
   const columns = [
     {
       key: "select" as keyof RequestData,
@@ -455,7 +473,7 @@ const PharmacyStocks = () => {
       ),
       render: (_, request) => (
         <span className="text-[#667085] text-sm">
-          {request.attributes.quantity}
+          {getQuantityDisplay(request.attributes.quantity)}
         </span>
       ),
     },
@@ -509,7 +527,9 @@ const PharmacyStocks = () => {
       label: "",
       render: (_, request) => (
         <button
-          className="px-3 py-1 bg-primary text-white rounded disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`px-3 py-1 ${
+            request.attributes.quantity >= 10 ? "bg-primary" : "bg-red-600"
+          } text-white rounded disabled:opacity-50 disabled:cursor-not-allowed`}
           onClick={() => handleRequestMore(request)}
           disabled={isLoading || isProcessing}
         >

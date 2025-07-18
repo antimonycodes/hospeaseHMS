@@ -223,7 +223,7 @@ const PharPatientDetails = () => {
 
         // Then, respond to the case report to mark it as completed
         const caseResponse = await respondToReport(caseId, {
-          note: generatePrescriptionSummary(),
+          note: "",
           status: "completed",
           file: null,
         });
