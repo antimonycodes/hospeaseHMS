@@ -79,7 +79,7 @@ const LabPatientDetails = () => {
       const reports = singleReport;
       const labReport = reports.find(
         (report: any) =>
-          report.attributes.department.name === "Laboratory" &&
+          report?.attributes?.department?.name === "Laboratory" &&
           report.attributes.role === "laboratory" &&
           report.attributes.file
       );

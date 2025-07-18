@@ -289,12 +289,12 @@ const AddRequestModal: React.FC<AddRequestModalProps> = ({
   }));
 
   const selectedBulkItemsCount = bulkItems.filter(
-    (item) => item.selected
+    (item) => item?.selected
   ).length;
 
   // Filter bulk items based on search term
   const filteredBulkItems = bulkItems.filter((item) =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+    item?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Create stock options with quantity display for single request

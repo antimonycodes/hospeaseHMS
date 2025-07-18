@@ -291,7 +291,10 @@ const FrontdeskPatientDetails = () => {
         setSelectedLabTests([]);
         setItemSearch("");
         setLabTestSearch("");
-        toast.success("Report sent successfully");
+        // toast.success("Report sent successfully");
+        getFdeskPatientById(id ?? "").catch((error) => {
+          console.error("Error fetching patient:", error);
+        });
       }
     } catch (error) {
       // Error handling is done in the toast already

@@ -37,7 +37,7 @@ export const InfoRow = ({
 type MergedDataItem = {
   date: string;
   reports: any[];
-  notes: any[];
+  // notes: any[];
   isExpanded: boolean;
 };
 
@@ -116,12 +116,12 @@ const LabMedicalTimeline: React.FC<LabMedicalTimelineProps> = ({
         const labReports = filterLabReports(allReports);
 
         const groupedReports = groupByDate(labReports);
-        const groupedNotes = groupByDate(allNotes); // Assuming all notes are relevant
+        // const groupedNotes = groupByDate(allNotes); // Assuming all notes are relevant
 
         const allDates = Array.from(
           new Set([
             ...Object.keys(groupedReports),
-            ...Object.keys(groupedNotes),
+            // ...Object.keys(groupedNotes),
           ])
         );
 
@@ -129,7 +129,7 @@ const LabMedicalTimeline: React.FC<LabMedicalTimelineProps> = ({
           .map((date) => ({
             date,
             reports: groupedReports[date] || [],
-            notes: groupedNotes[date] || [],
+            // notes: groupedNotes[date] || [],
             isExpanded: true, // Set initially expanded
           }))
           .sort(
@@ -228,7 +228,7 @@ const LabMedicalTimeline: React.FC<LabMedicalTimelineProps> = ({
               </div>
               <div className="flex items-center justify-between sm:justify-end gap-2">
                 <span className="text-xs bg-[#CFFFE9] text-[#009952] px-2 py-1 rounded-full whitespace-nowrap">
-                  {day.reports.length + day.notes.length} entries
+                  {day.reports.length} entries
                 </span>
                 <div className="flex gap-1">
                   <button
@@ -281,7 +281,7 @@ const LabMedicalTimeline: React.FC<LabMedicalTimelineProps> = ({
               <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
                 {/* Timeline items with vertical connector */}
                 <div className="relative timeline-items">
-                  {[...day.reports, ...day.notes]
+                  {[...day.reports]
                     .sort(
                       (a, b) =>
                         new Date(b.attributes.created_at).getTime() -
@@ -289,8 +289,7 @@ const LabMedicalTimeline: React.FC<LabMedicalTimelineProps> = ({
                     )
                     .map((item, itemIdx) => {
                       const isReport = "case_report_id" in item;
-                      const isLast =
-                        itemIdx === [...day.reports, ...day.notes].length - 1;
+                      const isLast = itemIdx === [...day.reports].length - 1;
 
                       return (
                         <div

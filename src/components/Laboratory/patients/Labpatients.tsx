@@ -26,7 +26,7 @@ const Labpatients = () => {
         usePatientStore.setState({ patients: fetchedPatients });
       });
     } else {
-      getAllPatients("1", "10", baseEndpoint);
+      getAllPatients("1", "1000", baseEndpoint);
     }
   }, [getAllPatients, searchPatients, searchQuery]);
 

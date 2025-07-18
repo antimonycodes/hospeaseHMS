@@ -15,7 +15,7 @@ const PharmPatients = () => {
   const baseEndpoint = "/pharmacy/patient/all";
 
   useEffect(() => {
-    getAllPatients("1", "30", baseEndpoint);
+    getAllPatients("1", "1000", baseEndpoint);
   }, [getAllPatients]);
 
   // Handle search with debouncing
@@ -47,7 +47,7 @@ const PharmPatients = () => {
       )}`;
     }
 
-    getAllPatients("1", "20", endpoint);
+    getAllPatients("1", "1000", endpoint);
   };
 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,7 +56,7 @@ const PharmPatients = () => {
 
   const clearSearch = () => {
     setSearchQuery("");
-    getAllPatients("1", "20", baseEndpoint);
+    getAllPatients("1", "1000", baseEndpoint);
   };
 
   const transformedPatients = patients.map((item) => {

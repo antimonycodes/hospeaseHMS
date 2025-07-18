@@ -58,7 +58,7 @@ export const PharmacyItemsList = ({ report }: { report: any }) => {
 type MergedDataItem = {
   date: string;
   reports: any[];
-  notes: any[];
+  // notes: any[];
   isExpanded: boolean;
 };
 
@@ -140,12 +140,12 @@ const PharmacyMedicalTimeline: React.FC<PharmacyMedicalTimelineProps> = ({
         const pharmacyReports = filterPharmacyReports(allReports);
 
         const groupedReports = groupByDate(pharmacyReports);
-        const groupedNotes = groupByDate(allNotes); // Assuming all notes are relevant
+        // const groupedNotes = groupByDate(allNotes); // Assuming all notes are relevant
 
         const allDates = Array.from(
           new Set([
             ...Object.keys(groupedReports),
-            ...Object.keys(groupedNotes),
+            // ...Object.keys(groupedNotes),
           ])
         );
 
@@ -153,7 +153,7 @@ const PharmacyMedicalTimeline: React.FC<PharmacyMedicalTimelineProps> = ({
           .map((date) => ({
             date,
             reports: groupedReports[date] || [],
-            notes: groupedNotes[date] || [],
+            // notes: groupedNotes[date] || [],
             isExpanded: true, // Set initially expanded
           }))
           .sort(
@@ -249,7 +249,7 @@ const PharmacyMedicalTimeline: React.FC<PharmacyMedicalTimelineProps> = ({
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs bg-[#CFFFE9] text-[#009952] px-2 py-1 rounded-full">
-                  {day.reports.length + day.notes.length} entries
+                  {day.reports.length} entries
                 </span>
                 {/* <div className="flex gap-1">
                   <button
@@ -302,7 +302,7 @@ const PharmacyMedicalTimeline: React.FC<PharmacyMedicalTimelineProps> = ({
               <div className="p-4 space-y-4">
                 {/* Timeline items with vertical connector */}
                 <div className="relative timeline-items">
-                  {[...day.reports, ...day.notes]
+                  {[...day.reports]
                     .sort(
                       (a, b) =>
                         new Date(b.attributes.created_at).getTime() -
@@ -316,8 +316,7 @@ const PharmacyMedicalTimeline: React.FC<PharmacyMedicalTimelineProps> = ({
                           className="timeline-item relative pl-8 pb-4 mb-4"
                         >
                           {/* Vertical line */}
-                          {itemIdx !==
-                            [...day.reports, ...day.notes].length - 1 && (
+                          {itemIdx !== [...day.reports].length - 1 && (
                             <div className="absolute left-3 top-6 bottom-0 w-0.5 bg-gray-200"></div>
                           )}
 

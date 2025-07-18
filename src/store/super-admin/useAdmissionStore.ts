@@ -307,10 +307,11 @@ export const useAdmissionStore = create<AdmissionStore>((set, get) => ({
     }
   },
 
-  allAdmission: async () => {
+  allAdmission: async (page = "1", perPage = "1000") => {
     set({ isLoading: true });
     try {
-      const response = await api.get("/medical-report/admission/all-records");
+      let endpoint = `/medical-report/admission/all-records?page=${page}&per_page=${perPage}`;
+      const response = await api(endpoint);
       if (isSuccessfulResponse(response)) {
         set({ admissionList: response.data.data.data });
       }

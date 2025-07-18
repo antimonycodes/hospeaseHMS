@@ -334,7 +334,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
 
   // Fetch a single patient by ID
   getPatientById: async (id) => {
-    set({ isLoading: true });
+    set({ isLoading: true, selectedPatient: null });
     try {
       const response = await api.get(`/admin/patient/fetch/${id}`);
       console.log(response.data.data);
@@ -350,7 +350,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   },
 
   getPharPatientById: async (id) => {
-    set({ isLoading: true });
+    set({ isLoading: true, selectedPatient: null });
     try {
       const response = await api.get(`/pharmacy/patient/all/${id}`);
       console.log(response.data.data);
@@ -365,7 +365,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
     }
   },
   getMedPatientById: async (id: any) => {
-    set({ isLoading: true });
+    set({ isLoading: true, selectedPatient: null });
     try {
       const response = await api.get(`/medical-director/patient/${id}`);
       console.log("API Response:", response.data); // Log full response
@@ -384,7 +384,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
     }
   },
   getFdeskPatientById: async (id) => {
-    set({ isLoading: true });
+    set({ isLoading: true, selectedPatient: null });
     try {
       const response = await api.get(`/front-desk/patient/fetch/${id}`);
       console.log(response.data.data);
@@ -399,7 +399,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
     }
   },
   getLabPatientById: async (id) => {
-    set({ isLoading: true });
+    set({ isLoading: true, selectedPatient: null });
     try {
       const response = await api.get(`/laboratory/patient/all/${id}`);
       console.log(response.data.data);
@@ -415,7 +415,7 @@ export const usePatientStore = create<PatientStore>((set, get) => ({
   },
 
   getPatientByIdDoc: async (id) => {
-    set({ isLoading: true });
+    set({ isLoading: true, selectedPatient: null });
     try {
       const response = await api.get(`/doctor/patient/${id}`);
       console.log(response.data.data);
